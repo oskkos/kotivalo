@@ -92,7 +92,7 @@ Vitest projects are chosen by file name (`vitest.config.ts`):
 | `*.test.tsx`       | `component` | jsdom, with Testing Library and jest-dom matchers              |
 | `*.server.test.ts` | `workers`   | workerd via Miniflare, with the bindings from `wrangler.jsonc` |
 
-- Tests sit next to the code they test. In `src/routes/`, prefix test files with `-` (e.g. `-index.test.tsx`) so TanStack Router doesn't treat them as routes.
+- Tests sit next to the code they test, also in `src/routes/`: `vite.config.ts` sets `routeFileIgnorePattern` so TanStack Router ignores `*.test.*` files.
 - Workers tests import the modules they test directly; the app's real entry only exists after a build, so the pool uses `src/test/worker-entry.ts`. Tests may import `cloudflare:test` and `env` from `cloudflare:workers`; app code may not.
 - Test files are exempt from the no-hard-coded-text rule.
 

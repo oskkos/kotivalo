@@ -7,7 +7,10 @@ export default defineConfig({
   resolve: { tsconfigPaths: true },
   plugins: [
     cloudflare({ viteEnvironment: { name: 'ssr' } }),
-    tanstackStart(),
+    tanstackStart({
+      // Keep test files next to routes without making them routes.
+      router: { routeFileIgnorePattern: '\\.test\\.' },
+    }),
     viteReact(),
   ],
 })
