@@ -11,7 +11,7 @@
   "compatibility_flags": ["nodejs_compat"],
   "main": "@tanstack/react-start/server-entry",
   "observability": {
-    "enabled": true
+    "enabled": true,
   },
-  "upload_source_maps": true
+  "upload_source_maps": true,
 }
