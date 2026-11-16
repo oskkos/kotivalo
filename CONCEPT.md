@@ -117,6 +117,7 @@ Each flat stores whether the housing company recognises the financing charge (ra
 
 **Implementation principles**
 
+- **Cloudflare is encapsulated.** Everything Cloudflare-specific (bindings, D1/R2/Email APIs, Cron Triggers) lives in one platform module (`src/server/platform/`), which gives the rest of the app a per-request context: the Drizzle database, a file storage interface and the email function. Changing hosts then means rewriting that module and the deploy configuration, not the domain logic, UI or tests. An ESLint import rule enforces the boundary. Workers' web-standard APIs (`fetch`, `Request`, Web Crypto) help here, since code written for them runs almost anywhere. The biggest real lock-in is D1's own limits (no interactive transactions, 10 GB per database), handled inside the platform module.
 - **Language is chosen per user** and stored on the user record. Before sign-in it comes from a cookie or the browser language, defaulting to Finnish. In the signed-in app the language is not part of the URL.
 - **No hard-coded text.** All UI copy, error messages and emails (sign-in links, invitations, reminders) come from translations, in the recipient's language.
 - **Formatting follows the language** via `Intl` (`fi-FI`, `sv-FI`, `en-FI`): currency is always euro, dates and numbers in Finnish style (`1 234,56 €`, `12.11.2026`).

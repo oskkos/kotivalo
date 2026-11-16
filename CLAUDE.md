@@ -37,6 +37,17 @@ Constraints that are easy to get wrong:
 - R2 files are private and are served only through the Worker, after an access check. D1 stores only the key and metadata.
 - Email sending goes through a single function so the provider can be swapped.
 
+### Cloudflare stays inside `src/server/platform/`
+
+Switching hosts should mean rewriting `src/server/platform/` and the deploy config, not the domain logic, UI or tests.
+
+- Only `src/server/platform/` may import `cloudflare:*`, read bindings (`env.DB`, R2, email) or call D1/R2/Email-specific APIs (`env.DB.prepare`, D1 `batch`, R2 object methods).
+- It builds a **per-request context** (`db`, `storage`, `mailer`, `auth`) that the rest of the app receives; nothing else reaches for `env`.
+- The rest of the app depends on portable interfaces: the Drizzle `db` instance, a `FileStorage` interface (`put` / `get` / `delete`), `sendEmail()`.
+- D1's lack of interactive transactions is handled by one helper in `platform/`, not by calling `batch` from features.
+- Scheduled jobs (Cron Triggers): a thin `scheduled` handler in `platform/` that calls a pure function.
+- Enforced by ESLint `no-restricted-imports` (#2). Don't add a repository layer on top of Drizzle for portability; Drizzle is the abstraction.
+
 ## Domain rules that shape the code
 
 - **Everything is time-bound.** Rent, charges, financing-charge treatment, ownership shares and tenancies are validity periods (`valid_from` / `valid_to`). Never overwrite them.
