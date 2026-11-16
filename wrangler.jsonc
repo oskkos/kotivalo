@@ -1,0 +1,17 @@
+/**
+ * Wrangler configuration: https://developers.cloudflare.com/workers/wrangler/configuration/
+ * After changing bindings or the compatibility date, run `pnpm cf-typegen`.
+ */
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "kotivalo",
+  "compatibility_date": "2026-11-13",
+  // Required by TanStack Start (AsyncLocalStorage etc.). It is a partial
+  // polyfill, not Node: still avoid Node-specific dependencies.
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "@tanstack/react-start/server-entry",
+  "observability": {
+    "enabled": true
+  },
+  "upload_source_maps": true
+}
