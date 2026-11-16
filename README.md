@@ -12,6 +12,8 @@ Requires Node 24+ and pnpm (`corepack enable` picks up the pinned version).
 pnpm install
 pnpm dev        # http://localhost:3000
 pnpm typecheck
+pnpm lint
+pnpm test
 pnpm build
 pnpm preview    # serve the built Worker locally
 ```
