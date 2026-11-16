@@ -10,7 +10,7 @@ Kotivalo ("Valoa vuokranantajan arkeen", roughly "light for a landlord's everyda
 
 ## Current state
 
-The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page. Lint, tests, CI, database, i18n and auth are not set up yet; they are tracked as GitHub issues in milestone *M0 Foundation*. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
+The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page, ESLint and Prettier. Tests, CI, database, i18n and auth are not set up yet; they are tracked as GitHub issues in milestone _M0 Foundation_. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
 
 ## Commands
 
@@ -20,6 +20,8 @@ Package manager is **pnpm** (pinned in `package.json` via `packageManager`; enab
 - `pnpm build`: production build into `dist/`
 - `pnpm preview`: build, then serve the built Worker locally
 - `pnpm typecheck`: `tsc --noEmit`
+- `pnpm lint` / `pnpm lint:fix`: ESLint (typed rules, React, TanStack Router, import boundaries, no hard-coded UI text)
+- `pnpm format` / `pnpm format:check`: Prettier (no semicolons, single quotes, trailing commas)
 - `pnpm cf-typegen`: regenerate `worker-configuration.d.ts` after changing `wrangler.jsonc` (bindings, compatibility date)
 - `pnpm deploy`: build and deploy with Wrangler (needs Cloudflare credentials; environments are not set up yet)
 
@@ -32,6 +34,7 @@ Generated files that are committed: `src/routeTree.gen.ts` (TanStack Router, reg
 TanStack Start (React, SSR, server functions) · MUI · Paraglide JS (i18n) · Cloudflare Workers + D1 (via Drizzle) + R2 · Better Auth · Cloudflare Email Service · Vitest + Testing Library · `@cloudflare/vitest-plugin` (Miniflare) · Playwright.
 
 Constraints that are easy to get wrong:
+
 - **Workers is not Node.** Avoid Node-specific dependencies.
 - D1 and R2 are bindings (`env.DB`, etc.) that exist only while a request is being handled, so Better Auth is created **per request**.
 - R2 files are private and are served only through the Worker, after an access check. D1 stores only the key and metadata.
@@ -46,7 +49,7 @@ Switching hosts should mean rewriting `src/server/platform/` and the deploy conf
 - The rest of the app depends on portable interfaces: the Drizzle `db` instance, a `FileStorage` interface (`put` / `get` / `delete`), `sendEmail()`.
 - D1's lack of interactive transactions is handled by one helper in `platform/`, not by calling `batch` from features.
 - Scheduled jobs (Cron Triggers): a thin `scheduled` handler in `platform/` that calls a pure function.
-- Enforced by ESLint `no-restricted-imports` (#2).
+- Enforced by ESLint `no-restricted-imports` in `eslint.config.js`.
 
 ## Code structure
 
@@ -60,6 +63,7 @@ src/
     functions.ts                    # createServerFn endpoints used by the UI
     *.tsx                           # components for this capability
   server/platform/        # Cloudflare adapters and the per-request context
+  server/db/              # Drizzle schema
   lib/                    # pure helpers: formatting, domain calculations
 ```
 
@@ -71,36 +75,36 @@ src/
 - All database access goes through repositories: `features/<capability>/<entity>.repository.server.ts`. Routes, server functions and components never import Drizzle.
 - A repository is a factory function that takes `db` and returns its methods: `propertyRepository(db).findForUser(userId, on)`. No interface/implementation split (`PropertyRepository` + `DrizzlePropertyRepository`): tests run against local D1 in Miniflare, so there is nothing to mock.
 - Repositories are aggregate-oriented, not one per table: a property is usually read together with its ownership periods and recurring amounts.
-- `drizzle-orm` may be imported only in repositories, the schema and `server/platform/` (ESLint rule, #2). Changing the ORM then touches only those files.
+- `drizzle-orm` may be imported only in repositories, the schema (`server/db/`) and `server/platform/` (ESLint rule in `eslint.config.js`). Changing the ORM then touches only those files.
 - No database-specific SQL (`sql` templates with SQLite functions such as `strftime` or JSON functions) outside a clearly named helper. Together with integer cents, ISO date strings and integer basis points, this keeps a later SQLite → PostgreSQL move to rewriting the schema and regenerating migrations.
 
 ## Domain glossary
 
 Code, database and test names use these English terms. The English UI copy may use friendlier words; that is decided in the translations, not here.
 
-| Finnish | Code | Notes |
-|---|---|---|
-| asunto | `property` | One rental unit; also covers a house. Table `properties` |
-| omistaja, omistusosuus | owner, `share` | Share in basis points (5000 = 50 %), per `ownership_periods` row |
-| pääsy, jakaminen | `access` | Per property, by invitation. Table `property_access` |
-| vuokrasuhde | `tenancy` | |
-| vuokralainen | `tenant` | |
-| irtisanominen | `notice` | `noticeDate`, `noticeGivenBy` |
-| vakuus, vakuuden palautus | `deposit`, `depositReturn` | |
-| vuokra | `rent` | |
-| hoitovastike | `maintenanceCharge` | |
-| rahoitusvastike | `financingCharge` | |
-| tulouttaa / rahastoida | `incomeRecognised` / `capitalised` | Financing charge treatment, a validity period |
-| toistuva summa | `recurringAmount` | Rent and charges over time |
-| kirjaus (tulo / meno) | `transaction` (`income` / `expense`) | Not to be confused with a database transaction |
-| kuitti | `receipt` | |
-| liite | `attachment` | E.g. a tenancy contract |
-| lainan korot | `loanInterest` | Per owner and year |
-| hankintameno | `acquisitionCost` | Capitalised financing charges add to it |
-| vuosiyhteenveto | `yearSummary` | Computed, never stored |
-| voimassaolojakso | validity period | `validFrom` / `validTo`, columns `valid_from` / `valid_to` |
-| taloyhtiö | `housingCompany` | |
-| kuolinpesä | `estate` | |
+| Finnish                   | Code                                 | Notes                                                            |
+| ------------------------- | ------------------------------------ | ---------------------------------------------------------------- |
+| asunto                    | `property`                           | One rental unit; also covers a house. Table `properties`         |
+| omistaja, omistusosuus    | owner, `share`                       | Share in basis points (5000 = 50 %), per `ownership_periods` row |
+| pääsy, jakaminen          | `access`                             | Per property, by invitation. Table `property_access`             |
+| vuokrasuhde               | `tenancy`                            |                                                                  |
+| vuokralainen              | `tenant`                             |                                                                  |
+| irtisanominen             | `notice`                             | `noticeDate`, `noticeGivenBy`                                    |
+| vakuus, vakuuden palautus | `deposit`, `depositReturn`           |                                                                  |
+| vuokra                    | `rent`                               |                                                                  |
+| hoitovastike              | `maintenanceCharge`                  |                                                                  |
+| rahoitusvastike           | `financingCharge`                    |                                                                  |
+| tulouttaa / rahastoida    | `incomeRecognised` / `capitalised`   | Financing charge treatment, a validity period                    |
+| toistuva summa            | `recurringAmount`                    | Rent and charges over time                                       |
+| kirjaus (tulo / meno)     | `transaction` (`income` / `expense`) | Not to be confused with a database transaction                   |
+| kuitti                    | `receipt`                            |                                                                  |
+| liite                     | `attachment`                         | E.g. a tenancy contract                                          |
+| lainan korot              | `loanInterest`                       | Per owner and year                                               |
+| hankintameno              | `acquisitionCost`                    | Capitalised financing charges add to it                          |
+| vuosiyhteenveto           | `yearSummary`                        | Computed, never stored                                           |
+| voimassaolojakso          | validity period                      | `validFrom` / `validTo`, columns `valid_from` / `valid_to`       |
+| taloyhtiö                 | `housingCompany`                     |                                                                  |
+| kuolinpesä                | `estate`                             |                                                                  |
 
 ## Domain rules that shape the code
 
@@ -113,7 +117,7 @@ Code, database and test names use these English terms. The English UI copy may u
 ## i18n
 
 - Finnish (primary), Swedish and English from day one. Write the Finnish copy first. Translations live in `fi.json`, `sv.json` and `en.json` (Paraglide).
-- **No hard-coded text**: all UI copy, errors and emails come from messages, in the recipient's language. The language is stored per user and is not part of the URL in the signed-in app.
+- **No hard-coded text**: all UI copy, errors and emails come from messages, in the recipient's language. ESLint flags JSX text, string literals in JSX and user-facing attributes (`title`, `aria-label`, `alt`, `placeholder`, …) in `.tsx` files. Strings that are never translated (the brand name) go in `UNTRANSLATED` in `eslint.config.js`. The language is stored per user and is not part of the URL in the signed-in app.
 - Formatting uses `Intl` with `fi-FI`, `sv-FI` and `en-FI`. Format inside a sentence in the Paraglide message, and format standalone values through a single helper module (`formatMoney(cents)`, `formatDate(iso)`).
 
 ## Specs and tests (OpenSpec)

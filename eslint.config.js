@@ -1,0 +1,123 @@
+// @ts-check
+import js from '@eslint/js'
+import { defineConfig, globalIgnores } from 'eslint/config'
+import tseslint from 'typescript-eslint'
+import eslintReact from '@eslint-react/eslint-plugin'
+import reactHooks from 'eslint-plugin-react-hooks'
+import pluginRouter from '@tanstack/eslint-plugin-router'
+import prettier from 'eslint-config-prettier'
+import globals from 'globals'
+
+// Brand name and other strings that are never translated.
+const UNTRANSLATED = ['kotivalo', 'Kotivalo']
+const untranslatedRe = `/^\\s*(${UNTRANSLATED.join('|')})?\\s*$/`
+
+// "No hard-coded text" (CLAUDE.md, i18n): all UI copy comes from Paraglide
+// messages. eslint-plugin-react's jsx-no-literals does not support ESLint 10,
+// so the rule is expressed with selectors.
+const noHardCodedText = [
+  {
+    selector: `JSXText:not([value=${untranslatedRe}])`,
+    message: 'No hard-coded UI text: use a Paraglide message (m.key()).',
+  },
+  {
+    selector: `JSXExpressionContainer > Literal[raw=/^['"]/]:not([value=${untranslatedRe}])`,
+    message: 'No hard-coded UI text: use a Paraglide message (m.key()).',
+  },
+  {
+    selector: 'JSXExpressionContainer > TemplateLiteral[expressions.length=0]',
+    message: 'No hard-coded UI text: use a Paraglide message (m.key()).',
+  },
+  {
+    selector: `JSXAttribute[name.name=/^(aria-label|aria-description|title|alt|placeholder|label|helperText)$/] > Literal:not([value=${untranslatedRe}])`,
+    message:
+      'No hard-coded text in user-facing attributes: use a Paraglide message (m.key()).',
+  },
+]
+
+// Boundaries (CLAUDE.md, "Cloudflare stays inside src/server/platform/" and
+// "Repositories"). Each pattern group is allowed only in the listed files.
+const cloudflareOnlyInPlatform = {
+  group: ['cloudflare:*'],
+  message:
+    'Cloudflare APIs and bindings are allowed only in src/server/platform/. Use the per-request context.',
+}
+const drizzleOnlyInRepositories = {
+  group: ['drizzle-orm', 'drizzle-orm/*'],
+  message:
+    'Drizzle is allowed only in *.repository.server.ts, src/server/db/ (schema) and src/server/platform/. Use a repository.',
+}
+const PLATFORM = ['src/server/platform/**']
+const DRIZZLE_ALLOWED = [
+  ...PLATFORM,
+  'src/server/db/**',
+  'src/**/*.repository.server.ts',
+]
+
+export default defineConfig([
+  globalIgnores([
+    'dist/',
+    '.*/', // dot directories: .wrangler, .tanstack, editor and tool state
+    'src/routeTree.gen.ts',
+    'worker-configuration.d.ts',
+  ]),
+
+  js.configs.recommended,
+  tseslint.configs.strictTypeChecked,
+  tseslint.configs.stylisticTypeChecked,
+  {
+    languageOptions: {
+      parserOptions: {
+        projectService: { allowDefaultProject: ['*.js'] },
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+  },
+
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    extends: [
+      eslintReact.configs['recommended-type-checked'],
+      reactHooks.configs.flat['recommended-latest'],
+      pluginRouter.configs['flat/recommended'],
+    ],
+    languageOptions: { globals: globals.browser },
+  },
+
+  {
+    files: ['src/**/*.tsx'],
+    rules: { 'no-restricted-syntax': ['error', ...noHardCodedText] },
+  },
+
+  // Import boundaries: one block per allowed area, because a later
+  // no-restricted-imports entry replaces an earlier one for the same file.
+  {
+    files: ['src/**/*.{ts,tsx}'],
+    ignores: DRIZZLE_ALLOWED,
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        { patterns: [cloudflareOnlyInPlatform, drizzleOnlyInRepositories] },
+      ],
+    },
+  },
+  {
+    files: DRIZZLE_ALLOWED,
+    ignores: PLATFORM,
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        { patterns: [cloudflareOnlyInPlatform] },
+      ],
+    },
+  },
+
+  {
+    files: ['*.js'],
+    extends: [tseslint.configs.disableTypeChecked],
+    languageOptions: { globals: globals.node },
+  },
+
+  // Last: turn off rules that conflict with Prettier.
+  prettier,
+])
