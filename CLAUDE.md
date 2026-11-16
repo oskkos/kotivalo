@@ -46,7 +46,61 @@ Switching hosts should mean rewriting `src/server/platform/` and the deploy conf
 - The rest of the app depends on portable interfaces: the Drizzle `db` instance, a `FileStorage` interface (`put` / `get` / `delete`), `sendEmail()`.
 - D1's lack of interactive transactions is handled by one helper in `platform/`, not by calling `batch` from features.
 - Scheduled jobs (Cron Triggers): a thin `scheduled` handler in `platform/` that calls a pure function.
-- Enforced by ESLint `no-restricted-imports` (#2). Don't add a repository layer on top of Drizzle for portability; Drizzle is the abstraction.
+- Enforced by ESLint `no-restricted-imports` (#2).
+
+## Code structure
+
+TanStack Start only fixes `src/routes/` (file-based routing). The rest is ours:
+
+```
+src/
+  routes/                 # TanStack file routes; thin, call into features
+  features/<capability>/  # one folder per capability, matching the OpenSpec spec
+    <entity>.repository.server.ts   # data access (Drizzle)
+    functions.ts                    # createServerFn endpoints used by the UI
+    *.tsx                           # components for this capability
+  server/platform/        # Cloudflare adapters and the per-request context
+  lib/                    # pure helpers: formatting, domain calculations
+```
+
+- Files named `*.server.*` are server-only: TanStack Start's import protection keeps them out of the client bundle. Database and platform code uses this suffix.
+- Domain calculations (shares, periods, notice, deposits, year summary) are pure functions in `lib/` or the feature folder, with no database access, so they can be unit-tested without fixtures.
+
+### Repositories
+
+- All database access goes through repositories: `features/<capability>/<entity>.repository.server.ts`. Routes, server functions and components never import Drizzle.
+- A repository is a factory function that takes `db` and returns its methods: `propertyRepository(db).findForUser(userId, on)`. No interface/implementation split (`PropertyRepository` + `DrizzlePropertyRepository`): tests run against local D1 in Miniflare, so there is nothing to mock.
+- Repositories are aggregate-oriented, not one per table: a property is usually read together with its ownership periods and recurring amounts.
+- `drizzle-orm` may be imported only in repositories, the schema and `server/platform/` (ESLint rule, #2). Changing the ORM then touches only those files.
+- No database-specific SQL (`sql` templates with SQLite functions such as `strftime` or JSON functions) outside a clearly named helper. Together with integer cents, ISO date strings and integer basis points, this keeps a later SQLite → PostgreSQL move to rewriting the schema and regenerating migrations.
+
+## Domain glossary
+
+Code, database and test names use these English terms. The English UI copy may use friendlier words; that is decided in the translations, not here.
+
+| Finnish | Code | Notes |
+|---|---|---|
+| asunto | `property` | One rental unit; also covers a house. Table `properties` |
+| omistaja, omistusosuus | owner, `share` | Share in basis points (5000 = 50 %), per `ownership_periods` row |
+| pääsy, jakaminen | `access` | Per property, by invitation. Table `property_access` |
+| vuokrasuhde | `tenancy` | |
+| vuokralainen | `tenant` | |
+| irtisanominen | `notice` | `noticeDate`, `noticeGivenBy` |
+| vakuus, vakuuden palautus | `deposit`, `depositReturn` | |
+| vuokra | `rent` | |
+| hoitovastike | `maintenanceCharge` | |
+| rahoitusvastike | `financingCharge` | |
+| tulouttaa / rahastoida | `incomeRecognised` / `capitalised` | Financing charge treatment, a validity period |
+| toistuva summa | `recurringAmount` | Rent and charges over time |
+| kirjaus (tulo / meno) | `transaction` (`income` / `expense`) | Not to be confused with a database transaction |
+| kuitti | `receipt` | |
+| liite | `attachment` | E.g. a tenancy contract |
+| lainan korot | `loanInterest` | Per owner and year |
+| hankintameno | `acquisitionCost` | Capitalised financing charges add to it |
+| vuosiyhteenveto | `yearSummary` | Computed, never stored |
+| voimassaolojakso | validity period | `validFrom` / `validTo`, columns `valid_from` / `valid_to` |
+| taloyhtiö | `housingCompany` | |
+| kuolinpesä | `estate` | |
 
 ## Domain rules that shape the code
 
