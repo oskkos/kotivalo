@@ -4,7 +4,7 @@ export const Route = createFileRoute('/')({ component: Home })
 
 // Placeholder until the real screens land. Shows only the brand name, so
 // there is no copy to translate yet.
-function Home() {
+export function Home() {
   return (
     <main>
       <h1>kotivalo</h1>

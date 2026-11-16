@@ -10,7 +10,7 @@ Kotivalo ("Valoa vuokranantajan arkeen", roughly "light for a landlord's everyda
 
 ## Current state
 
-The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page, ESLint and Prettier. Tests, CI, database, i18n and auth are not set up yet; they are tracked as GitHub issues in milestone _M0 Foundation_. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
+The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page, ESLint, Prettier and Vitest. Playwright, CI, database, i18n and auth are not set up yet; they are tracked as GitHub issues in milestone _M0 Foundation_. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
 
 ## Commands
 
@@ -21,6 +21,10 @@ Package manager is **pnpm** (pinned in `package.json` via `packageManager`; enab
 - `pnpm preview`: build, then serve the built Worker locally
 - `pnpm typecheck`: `tsc --noEmit`
 - `pnpm lint` / `pnpm lint:fix`: ESLint (typed rules, React, TanStack Router, import boundaries, no hard-coded UI text)
+- `pnpm test`: all Vitest projects once; `pnpm test:watch` for watch mode
+  - one file: `pnpm test src/router.test.ts`
+  - one test by name: `pnpm test -t "registers the home route"`
+  - one project: `pnpm test --project unit` (or `component`, `workers`)
 - `pnpm format` / `pnpm format:check`: Prettier (no semicolons, single quotes, trailing commas)
 - `pnpm cf-typegen`: regenerate `worker-configuration.d.ts` after changing `wrangler.jsonc` (bindings, compatibility date)
 - `pnpm deploy`: build and deploy with Wrangler (needs Cloudflare credentials; environments are not set up yet)
@@ -77,6 +81,20 @@ src/
 - Repositories are aggregate-oriented, not one per table: a property is usually read together with its ownership periods and recurring amounts.
 - `drizzle-orm` may be imported only in repositories, the schema (`server/db/`) and `server/platform/` (ESLint rule in `eslint.config.js`). Changing the ORM then touches only those files.
 - No database-specific SQL (`sql` templates with SQLite functions such as `strftime` or JSON functions) outside a clearly named helper. Together with integer cents, ISO date strings and integer basis points, this keeps a later SQLite → PostgreSQL move to rewriting the schema and regenerating migrations.
+
+### Tests
+
+Vitest projects are chosen by file name (`vitest.config.ts`):
+
+| File               | Project     | Runs in                                                        |
+| ------------------ | ----------- | -------------------------------------------------------------- |
+| `*.test.ts`        | `unit`      | Node. Pure functions: domain calculations, formatting          |
+| `*.test.tsx`       | `component` | jsdom, with Testing Library and jest-dom matchers              |
+| `*.server.test.ts` | `workers`   | workerd via Miniflare, with the bindings from `wrangler.jsonc` |
+
+- Tests sit next to the code they test. In `src/routes/`, prefix test files with `-` (e.g. `-index.test.tsx`) so TanStack Router doesn't treat them as routes.
+- Workers tests import the modules they test directly; the app's real entry only exists after a build, so the pool uses `src/test/worker-entry.ts`. Tests may import `cloudflare:test` and `env` from `cloudflare:workers`; app code may not.
+- Test files are exempt from the no-hard-coded-text rule.
 
 ## Domain glossary
 

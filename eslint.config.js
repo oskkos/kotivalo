@@ -7,6 +7,7 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import pluginRouter from '@tanstack/eslint-plugin-router'
 import prettier from 'eslint-config-prettier'
 import globals from 'globals'
+import vitest from '@vitest/eslint-plugin'
 
 // Brand name and other strings that are never translated.
 const UNTRANSLATED = ['kotivalo', 'Kotivalo']
@@ -47,7 +48,14 @@ const drizzleOnlyInRepositories = {
   message:
     'Drizzle is allowed only in *.repository.server.ts, src/server/db/ (schema) and src/server/platform/. Use a repository.',
 }
+// Tests may use cloudflare:test (SELF, helpers) and the env from
+// cloudflare:workers to reach bindings directly.
+const cloudflareOnlyInPlatformExceptTests = {
+  ...cloudflareOnlyInPlatform,
+  group: ['cloudflare:*', '!cloudflare:test', '!cloudflare:workers'],
+}
 const PLATFORM = ['src/server/platform/**']
+const TESTS = ['src/**/*.test.{ts,tsx}', 'src/test/**']
 const DRIZZLE_ALLOWED = [
   ...PLATFORM,
   'src/server/db/**',
@@ -86,6 +94,7 @@ export default defineConfig([
 
   {
     files: ['src/**/*.tsx'],
+    ignores: TESTS,
     rules: { 'no-restricted-syntax': ['error', ...noHardCodedText] },
   },
 
@@ -110,6 +119,27 @@ export default defineConfig([
         { patterns: [cloudflareOnlyInPlatform] },
       ],
     },
+  },
+
+  {
+    files: TESTS,
+    ignores: PLATFORM,
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            cloudflareOnlyInPlatformExceptTests,
+            drizzleOnlyInRepositories,
+          ],
+        },
+      ],
+    },
+  },
+
+  {
+    files: TESTS,
+    extends: [vitest.configs.recommended],
   },
 
   {
