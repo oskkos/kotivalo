@@ -21,6 +21,15 @@
       "migrations_dir": "migrations",
     },
   ],
+  // Private file storage for receipts and attachments. Only
+  // src/server/platform/ reads this binding; files are served through the
+  // Worker after an access check. The bucket is created per environment (#14).
+  "r2_buckets": [
+    {
+      "binding": "FILES",
+      "bucket_name": "kotivalo-files",
+    },
+  ],
   // Email (src/server/platform/mailer.server.ts). "capture" keeps messages in
   // memory and logs them, so local development and tests never call Resend.
   // Deployed environments set "resend", a verified sender domain in
