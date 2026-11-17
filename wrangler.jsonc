@@ -21,6 +21,15 @@
       "migrations_dir": "migrations",
     },
   ],
+  // Email (src/server/platform/mailer.server.ts). "capture" keeps messages in
+  // memory and logs them, so local development and tests never call Resend.
+  // Deployed environments set "resend", a verified sender domain in
+  // EMAIL_FROM and the RESEND_API_KEY secret (#14). Locally the key goes in
+  // .dev.vars (see .dev.vars.example).
+  "vars": {
+    "EMAIL_TRANSPORT": "capture",
+    "EMAIL_FROM": "Kotivalo <noreply@example.com>",
+  },
   "observability": {
     "enabled": true,
   },

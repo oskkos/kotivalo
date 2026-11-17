@@ -1,4 +1,5 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "app_tagline": "Light for a landlord's everyday work"
+  "app_tagline": "Light for a landlord's everyday work",
+  "email_action_fallback": "If the button doesn't work, copy this address into your browser:"
 }
