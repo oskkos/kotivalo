@@ -1,4 +1,5 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "app_tagline": "Ljus i hyresvärdens vardag"
+  "app_tagline": "Ljus i hyresvärdens vardag",
+  "email_action_fallback": "Om knappen inte fungerar, kopiera den här adressen till din webbläsare:"
 }

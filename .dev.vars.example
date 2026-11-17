@@ -1,0 +1,9 @@
+# Local secrets for `pnpm dev` and `pnpm preview`. Copy to .dev.vars (not
+# committed) and fill in only what you need.
+
+# Resend API key. Used only when EMAIL_TRANSPORT is "resend"; the default
+# "capture" transport logs emails instead of sending them. To try real
+# sending locally, also override EMAIL_TRANSPORT and EMAIL_FROM here.
+# RESEND_API_KEY=re_...
+# EMAIL_TRANSPORT=resend
+# EMAIL_FROM=Kotivalo <noreply@your-verified-domain>

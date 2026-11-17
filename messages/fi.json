@@ -1,4 +1,5 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "app_tagline": "Valoa vuokranantajan arkeen"
+  "app_tagline": "Valoa vuokranantajan arkeen",
+  "email_action_fallback": "Jos painike ei toimi, kopioi tämä osoite selaimeesi:"
 }
