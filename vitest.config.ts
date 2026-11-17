@@ -1,6 +1,6 @@
 import { defineConfig } from 'vitest/config'
 import viteReact from '@vitejs/plugin-react'
-import { cloudflareTest } from '@cloudflare/vitest-plugin'
+import { cloudflareTest, readD1Migrations } from '@cloudflare/vitest-plugin'
 
 // Three projects, chosen by file name:
 //   *.test.ts         unit: pure functions, in Node
@@ -10,6 +10,10 @@ import { cloudflareTest } from '@cloudflare/vitest-plugin'
 //
 // The app's vite.config.ts is not reused: its Cloudflare and TanStack Start
 // plugins build the app, they don't belong in a test run.
+// The D1 migrations, read in Node and applied inside the Workers runtime by
+// src/test/apply-migrations.server.ts before each Workers test file.
+const d1Migrations = await readD1Migrations('./migrations')
+
 export default defineConfig({
   resolve: { tsconfigPaths: true },
   test: {
@@ -44,6 +48,8 @@ export default defineConfig({
         test: {
           name: 'workers',
           include: ['src/**/*.server.test.ts'],
+          setupFiles: ['./src/test/apply-migrations.server.ts'],
+          provide: { d1Migrations },
         },
       },
     ],

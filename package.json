@@ -21,6 +21,8 @@
     "check:traceability": "node scripts/check-traceability.ts",
     "deploy": "pnpm run build && wrangler deploy",
     "cf-typegen": "wrangler types",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate:local": "wrangler d1 migrations apply DB --local",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
@@ -30,6 +32,7 @@
   "dependencies": {
     "@tanstack/react-router": "1.170.46",
     "@tanstack/react-start": "1.169.5",
+    "drizzle-orm": "^0.45.4",
     "react": "^19.2.0",
     "react-dom": "^19.2.0"
   },
@@ -51,6 +54,7 @@
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/eslint-plugin": "^1.6.28",
+    "drizzle-kit": "^0.31.11",
     "eslint": "^10.15.0",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-playwright": "^2.12.2",

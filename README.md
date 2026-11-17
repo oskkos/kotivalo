@@ -15,6 +15,7 @@ pnpm typecheck
 pnpm lint
 pnpm test
 pnpm test:e2e   # Playwright; first run: pnpm exec playwright install chromium
+pnpm db:migrate:local   # apply database migrations to the local D1
 pnpm build
 pnpm preview    # serve the built Worker locally
 ```
