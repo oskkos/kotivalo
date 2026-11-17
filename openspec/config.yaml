@@ -9,6 +9,13 @@ schema: spec-driven
 #     We use conventional commits
 #     Domain: e-commerce platform
 
+rules:
+  specs:
+    - Name each requirement uniquely across all specs; tests match it by name with test.describe('<Requirement>').
+    - Every scenario gets a test named test('<Scenario>') inside that describe (Vitest or Playwright).
+    - Every requirement gets a Playwright test, unless it can't be tested in a browser. Then record why on its own line in the requirement text, `**No Playwright test:** <reason>`, and cover its scenarios with Vitest.
+    - Avoid " > " in requirement and scenario names.
+
 # Per-artifact rules (optional)
 # Add custom rules for specific artifacts.
 # Example:
