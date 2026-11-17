@@ -8,6 +8,7 @@ import pluginRouter from '@tanstack/eslint-plugin-router'
 import prettier from 'eslint-config-prettier'
 import globals from 'globals'
 import vitest from '@vitest/eslint-plugin'
+import playwright from 'eslint-plugin-playwright'
 
 // Brand name and other strings that are never translated.
 const UNTRANSLATED = ['kotivalo', 'Kotivalo']
@@ -65,6 +66,9 @@ const DRIZZLE_ALLOWED = [
 export default defineConfig([
   globalIgnores([
     'dist/',
+    'test-results/',
+    'playwright-report/',
+    'blob-report/',
     '.*/', // dot directories: .wrangler, .tanstack, editor and tool state
     'src/routeTree.gen.ts',
     'worker-configuration.d.ts',
@@ -140,6 +144,11 @@ export default defineConfig([
   {
     files: TESTS,
     extends: [vitest.configs.recommended],
+  },
+
+  {
+    files: ['e2e/**/*.ts'],
+    extends: [playwright.configs['flat/recommended']],
   },
 
   {

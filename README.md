@@ -14,6 +14,7 @@ pnpm dev        # http://localhost:3000
 pnpm typecheck
 pnpm lint
 pnpm test
+pnpm test:e2e   # Playwright; first run: pnpm exec playwright install chromium
 pnpm build
 pnpm preview    # serve the built Worker locally
 ```
