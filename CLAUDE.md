@@ -40,20 +40,21 @@ Generated files that are committed: `src/routeTree.gen.ts` (TanStack Router, reg
 
 ## Stack (planned, per CONCEPT.md §5)
 
-TanStack Start (React, SSR, server functions) · MUI · Paraglide JS (i18n) · Cloudflare Workers + D1 (via Drizzle) + R2 · Better Auth · Cloudflare Email Service · Vitest + Testing Library · `@cloudflare/vitest-plugin` (Miniflare) · Playwright.
+TanStack Start (React, SSR, server functions) · MUI · Paraglide JS (i18n) · Cloudflare Workers + D1 (via Drizzle) + R2 · Better Auth · Resend (email) · Vitest + Testing Library · `@cloudflare/vitest-plugin` (Miniflare) · Playwright.
 
 Constraints that are easy to get wrong:
 
 - **Workers is not Node.** Avoid Node-specific dependencies.
+- **Free plans first.** Stay on Cloudflare's Workers Free plan and free tiers (D1, R2, Resend) at first. Raise it before choosing anything that needs Workers Paid.
 - D1 and R2 are bindings (`env.DB`, etc.) that exist only while a request is being handled, so Better Auth is created **per request**.
 - R2 files are private and are served only through the Worker, after an access check. D1 stores only the key and metadata.
-- Email sending goes through a single function so the provider can be swapped.
+- Email sending goes through a single function so the provider can be swapped. The provider is Resend, called over its HTTPS API; the API key is a Worker secret (`.dev.vars` locally), so it is read in `platform/`.
 
 ### Cloudflare stays inside `src/server/platform/`
 
 Switching hosts should mean rewriting `src/server/platform/` and the deploy config, not the domain logic, UI or tests.
 
-- Only `src/server/platform/` may import `cloudflare:*`, read bindings (`env.DB`, R2, email) or call D1/R2/Email-specific APIs (`env.DB.prepare`, D1 `batch`, R2 object methods).
+- Only `src/server/platform/` may import `cloudflare:*`, read bindings and secrets (`env.DB`, R2, the Resend API key) or call D1/R2-specific APIs (`env.DB.prepare`, D1 `batch`, R2 object methods).
 - It builds a **per-request context** (`db`, `storage`, `mailer`, `auth`) that the rest of the app receives; nothing else reaches for `env`.
 - The rest of the app depends on portable interfaces: the Drizzle `db` instance, a `FileStorage` interface (`put` / `get` / `delete`), `sendEmail()`.
 - D1's lack of interactive transactions is handled by one helper in `platform/`, not by calling `batch` from features.
