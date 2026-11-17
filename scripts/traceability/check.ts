@@ -60,7 +60,9 @@ export function check(
     }
     seen.set(r.name, r.capability)
 
-    if (r.scenarios.length === 0) problem(r, 'requirement has no scenarios')
+    if (r.scenarios.length === 0) {
+      problem(r, 'requirement has no scenarios')
+    }
     for (const scenario of r.scenarios) {
       if (!tests.some((t) => covers(t, r.name, scenario))) {
         problem(

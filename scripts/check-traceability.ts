@@ -26,7 +26,9 @@ const SPECS = join(ROOT, 'openspec/specs')
 const CHANGES = join(ROOT, 'openspec/changes')
 
 function capabilities(dir: string): string[] {
-  if (!existsSync(dir)) return []
+  if (!existsSync(dir)) {
+    return []
+  }
   return readdirSync(dir, { withFileTypes: true })
     .filter((d) => d.isDirectory() && existsSync(join(dir, d.name, 'spec.md')))
     .map((d) => d.name)
@@ -111,16 +113,22 @@ function playwrightTests(): TestCase[] {
   const walk = (suite: PlaywrightSuite, path: string[]) => {
     for (const spec of suite.specs ?? []) {
       // test.skip() and test.fixme() are listed with expectedStatus "skipped".
-      if (spec.tests.every((t) => t.expectedStatus === 'skipped')) continue
+      if (spec.tests.every((t) => t.expectedStatus === 'skipped')) {
+        continue
+      }
       tests.push({
         runner: 'playwright',
         titlePath: [...path, spec.title],
         file: join('e2e', spec.file),
       })
     }
-    for (const child of suite.suites ?? []) walk(child, [...path, child.title])
+    for (const child of suite.suites ?? []) {
+      walk(child, [...path, child.title])
+    }
   }
-  for (const file of report.suites) walk(file, [])
+  for (const file of report.suites) {
+    walk(file, [])
+  }
   return tests
 }
 

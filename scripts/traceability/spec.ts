@@ -41,14 +41,18 @@ function parseRequirements(lines: string[], capability: string): Requirement[] {
       requirements.push(current)
       continue
     }
-    if (!current) continue
+    if (!current) {
+      continue
+    }
     const scenario = SCENARIO.exec(line)
     if (scenario) {
       current.scenarios.push(scenario[1])
       continue
     }
     const reason = NO_PLAYWRIGHT.exec(line.trim())
-    if (reason) current.noPlaywrightReason = reason[1]
+    if (reason) {
+      current.noPlaywrightReason = reason[1]
+    }
   }
   return requirements
 }
@@ -87,9 +91,12 @@ export function parseDelta(markdown: string, capability: string): Delta {
   let from: string | undefined
   for (const line of block('RENAMED')) {
     const match = RENAME.exec(line)
-    if (!match) continue
-    if (match[1] === 'FROM') from = match[2]
-    else if (from !== undefined) {
+    if (!match) {
+      continue
+    }
+    if (match[1] === 'FROM') {
+      from = match[2]
+    } else if (from !== undefined) {
       renamed.push({ from, to: match[2] })
       from = undefined
     }
