@@ -10,7 +10,7 @@ Kotivalo ("Valoa vuokranantajan arkeen", roughly "light for a landlord's everyda
 
 ## Current state
 
-The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page, ESLint, Prettier, Vitest, Playwright, CI, commitlint, Git hooks, a D1 database with Drizzle (no tables yet) i18n with Paraglide (fi / sv / en, no language switcher yet), the MUI theme and email sending (Resend, not yet configured for a deployed environment). File storage and auth are not set up yet; they are tracked as GitHub issues in milestone _M0 Foundation_. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
+The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page, ESLint, Prettier, Vitest, Playwright, CI, commitlint, Git hooks, a D1 database with Drizzle (no tables yet) i18n with Paraglide (fi / sv / en, no language switcher yet), the MUI theme, email sending (Resend, not yet configured for a deployed environment) and R2 file storage. Auth is not set up yet; they are tracked as GitHub issues in milestone _M0 Foundation_. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
 
 ## Commands
 
@@ -51,6 +51,9 @@ Constraints that are easy to get wrong:
 - **Free plans first.** Stay on Cloudflare's Workers Free plan and free tiers (D1, R2, Resend) at first. Raise it before choosing anything that needs Workers Paid.
 - D1 and R2 are bindings (`env.DB`, etc.) that exist only while a request is being handled, so Better Auth is created **per request**.
 - R2 files are private and are served only through the Worker, after an access check. D1 stores only the key and metadata.
+  - The context's `storage` is a `FileStorage` (`src/server/files/storage.ts`, R2 in `platform/storage.server.ts`, binding `FILES`). Keys come from `newFileKey('receipts' | 'attachments')`, never from file names.
+  - Check every upload with `checkUpload(bytes)` (`src/server/files/upload.ts`): JPEG, PNG, WebP or PDF, recognised by the first bytes, up to 10 MB. Images are resized in the browser before upload; the Worker does not process them.
+  - Serve a file with `fileResponse()` (`src/server/files/response.ts`) after the access check: it sets the type, a safe `Content-Disposition`, `no-store`, `nosniff` and a sandboxing CSP.
 - Email goes through one function, `sendEmail(message)` from the request context, so the provider can be swapped:
   - Build the message with `renderEmail()` (`src/server/email/layout.ts`): heading, paragraphs and an optional button, as HTML and plain text, escaped. Feature templates pass their own Paraglide messages rendered with `{ locale }` for the recipient, not the current request's language.
   - Providers are in `platform/mailer.server.ts`, chosen by `EMAIL_TRANSPORT` in `wrangler.jsonc`: `capture` (default; keeps messages in memory and logs them, so local development, tests and CI never call Resend) or `resend` (HTTPS API; needs `EMAIL_FROM` on a verified domain and the `RESEND_API_KEY` secret, `.dev.vars` locally).
@@ -81,6 +84,8 @@ src/
     functions.ts                    # createServerFn endpoints used by the UI
     *.tsx                           # components for this capability
   server/platform/        # Cloudflare adapters and the per-request context
+  server/email/           # sendEmail types and the email layout
+  server/files/           # FileStorage, upload checks, file responses
   server/db/              # Drizzle schema (schema.ts) and column helpers (columns.ts)
   lib/                    # pure helpers: formatting, domain calculations
 ```
