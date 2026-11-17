@@ -166,4 +166,9 @@ export default defineConfig([
 
   // Last: turn off rules that conflict with Prettier.
   prettier,
+
+  // Braces around every if/else/loop body, so Prettier puts the body on its
+  // own line. eslint-config-prettier turns curly off, but "all" is safe with
+  // Prettier, so it is enabled after it.
+  { rules: { curly: ['error', 'all'] } },
 ])
