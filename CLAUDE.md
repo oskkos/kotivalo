@@ -10,7 +10,7 @@ Kotivalo ("Valoa vuokranantajan arkeen", roughly "light for a landlord's everyda
 
 ## Current state
 
-The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page, ESLint, Prettier and Vitest. Playwright, CI, database, i18n and auth are not set up yet; they are tracked as GitHub issues in milestone _M0 Foundation_. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
+The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page, ESLint, Prettier, Vitest and Playwright. CI, database, i18n and auth are not set up yet; they are tracked as GitHub issues in milestone _M0 Foundation_. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
 
 ## Commands
 
@@ -25,6 +25,10 @@ Package manager is **pnpm** (pinned in `package.json` via `packageManager`; enab
   - one file: `pnpm test src/router.test.ts`
   - one test by name: `pnpm test -t "registers the home route"`
   - one project: `pnpm test --project unit` (or `component`, `workers`)
+- `pnpm test:e2e`: Playwright tests in `e2e/` (builds the app and serves it with `vite preview` on port 4173, or reuses a server already running there); `pnpm test:e2e:ui` for the UI mode
+  - one file: `pnpm test:e2e e2e/home.spec.ts`
+  - one test by name: `pnpm test:e2e -g "shows the app name"`
+  - first time on a machine: `pnpm exec playwright install chromium`
 - `pnpm format` / `pnpm format:check`: Prettier (no semicolons, single quotes, trailing commas)
 - `pnpm cf-typegen`: regenerate `worker-configuration.d.ts` after changing `wrangler.jsonc` (bindings, compatibility date)
 - `pnpm deploy`: build and deploy with Wrangler (needs Cloudflare credentials; environments are not set up yet)
@@ -95,6 +99,7 @@ Vitest projects are chosen by file name (`vitest.config.ts`):
 - Tests sit next to the code they test, also in `src/routes/`: `vite.config.ts` sets `routeFileIgnorePattern` so TanStack Router ignores `*.test.*` files.
 - Workers tests import the modules they test directly; the app's real entry only exists after a build, so the pool uses `src/test/worker-entry.ts`. Tests may import `cloudflare:test` and `env` from `cloudflare:workers`; app code may not.
 - Test files are exempt from the no-hard-coded-text rule.
+- Playwright tests live in `e2e/*.spec.ts` and run against the built Worker (`vite preview`, local bindings from `wrangler.jsonc`). The only project is `mobile`: Chromium at 390 × 844, the size the UI is designed for.
 
 ## Domain glossary
 

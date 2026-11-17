@@ -4,3 +4,6 @@ worker-configuration.d.ts
 # Dot directories (tool and editor state) and OpenSpec-generated files
 .*/
 openspec/
+test-results/
+playwright-report/
+blob-report/
