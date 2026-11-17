@@ -29,6 +29,7 @@ Package manager is **pnpm** (pinned in `package.json` via `packageManager`; enab
   - one file: `pnpm test:e2e e2e/home.spec.ts`
   - one test by name: `pnpm test:e2e -g "shows the app name"`
   - first time on a machine: `pnpm exec playwright install chromium`
+- `pnpm check:traceability`: checks that every OpenSpec scenario has a test and every requirement has a Playwright test or a recorded reason (see "Specs and tests")
 - `pnpm format` / `pnpm format:check`: Prettier (no semicolons, single quotes, trailing commas)
 - `pnpm cf-typegen`: regenerate `worker-configuration.d.ts` after changing `wrangler.jsonc` (bindings, compatibility date)
 - `pnpm deploy`: build and deploy with Wrangler (needs Cloudflare credentials; environments are not set up yet)
@@ -148,10 +149,13 @@ Code, database and test names use these English terms. The English UI copy may u
 - Requirements live in OpenSpec, one spec per capability. Changes are made as OpenSpec change proposals, and specs are updated in the same change as the code.
 - **Every scenario needs a passing test. Every requirement needs a Playwright test**, unless it can't be tested in a browser. Then Vitest covers it, and the reason is recorded with the requirement.
 - Test names trace to the spec: `test.describe('<Requirement>')` with one `test('<Scenario>')` per scenario. Use the same naming in Vitest. CI blocks merges when this mapping is incomplete.
+- A requirement that can't be tested in a browser records the reason on its own line in the requirement text: `**No Playwright test:** <reason>`. Its scenarios still need Vitest tests.
+- `pnpm check:traceability` (`scripts/check-traceability.ts`) enforces this. It reads `openspec/specs/` with the delta specs of active changes in `openspec/changes/` applied, and lists tests with `vitest list` and `playwright test --list` without running them. Skipped and todo tests don't count. The scenario test can be in Vitest or Playwright, nested describes are fine, and tests without a spec counterpart (harness and smoke tests) are allowed.
+- Requirement names must be unique across all specs, because tests are matched by name. Avoid `>` in requirement and scenario names: Vitest joins titles with it.
 
 ## Git and CI
 
 - `develop` is the main branch and the PR target. The `protect-develop` ruleset allows changes only through PRs, rebase merges only.
-- CI (`.github/workflows/ci.yml`) runs on every PR to `develop` and on pushes to it. Jobs: `lint` (ESLint and Prettier), `typecheck`, `test` (all Vitest projects) and `e2e` (Playwright). All four are required status checks, and the branch must be up to date with `develop` before merging. Renaming a job means updating the ruleset.
+- CI (`.github/workflows/ci.yml`) runs on every PR to `develop` and on pushes to it. Jobs: `lint` (ESLint and Prettier), `typecheck`, `test` (all Vitest projects), `traceability` (spec-to-test check) and `e2e` (Playwright). All five are required status checks, and the branch must be up to date with `develop` before merging. Renaming a job means updating the ruleset.
 - Shared job setup (pnpm, Node, install) is in `.github/actions/setup`. Actions are pinned to commit SHAs with the version in a comment.
 - When e2e fails, the Playwright report and traces are uploaded as the `playwright-report` artifact.

@@ -44,6 +44,15 @@ jobs:
       - uses: ./.github/actions/setup
       - run: pnpm test
 
+  traceability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      # Lists tests without running them, so no browsers are needed.
+      - run: pnpm check:traceability
+
   e2e:
     runs-on: ubuntu-latest
     timeout-minutes: 20
