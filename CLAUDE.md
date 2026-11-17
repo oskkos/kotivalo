@@ -10,7 +10,7 @@ Kotivalo ("Valoa vuokranantajan arkeen", roughly "light for a landlord's everyda
 
 ## Current state
 
-The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page, ESLint, Prettier, Vitest, Playwright and CI. Database, i18n and auth are not set up yet; they are tracked as GitHub issues in milestone _M0 Foundation_. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
+The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page, ESLint, Prettier, Vitest, Playwright, CI, commitlint and Git hooks. Database, i18n and auth are not set up yet; they are tracked as GitHub issues in milestone _M0 Foundation_. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
 
 ## Commands
 
@@ -157,6 +157,12 @@ Code, database and test names use these English terms. The English UI copy may u
 ## Git and CI
 
 - `develop` is the main branch and the PR target. The `protect-develop` ruleset allows changes only through PRs, rebase merges only.
-- CI (`.github/workflows/ci.yml`) runs on every PR to `develop` and on pushes to it. Jobs: `lint` (ESLint and Prettier), `typecheck`, `test` (all Vitest projects), `traceability` (spec-to-test check) and `e2e` (Playwright). All five are required status checks, and the branch must be up to date with `develop` before merging. Renaming a job means updating the ruleset.
+- Commit messages follow Conventional Commits (`commitlint.config.js`). Rebase merges land every commit as-is, so each commit in a PR must pass, not just the PR title.
+- Git hooks (Lefthook, `lefthook.yml`) are installed by `pnpm install` through the `prepare` script:
+  - `commit-msg`: commitlint
+  - `pre-commit`: ESLint `--fix` and Prettier on staged files only (about 3 s, mostly typed ESLint startup)
+  - `pre-push`: `pnpm typecheck` and the Vitest `unit` project
+  - `--no-verify` skips them; CI stays the authority. Under WSL, hooks run only with the Linux-side Git and Node: a Windows-side Git client (Git for Windows, an IDE using it) can't run them and either skips or fails.
+- CI (`.github/workflows/ci.yml`) runs on every PR to `develop` and on pushes to it. Jobs: `commitlint` (every commit in the PR; PRs only), `lint` (ESLint and Prettier), `typecheck`, `test` (all Vitest projects), `traceability` (spec-to-test check) and `e2e` (Playwright). All six are required status checks, and the branch must be up to date with `develop` before merging. Renaming a job means updating the ruleset.
 - Shared job setup (pnpm, Node, install) is in `.github/actions/setup`. Actions are pinned to commit SHAs with the version in a comment.
 - When e2e fails, the Playwright report and traces are uploaded as the `playwright-report` artifact.

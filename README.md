@@ -19,7 +19,9 @@ pnpm build
 pnpm preview    # serve the built Worker locally
 ```
 
-The app runs on Cloudflare Workers (TanStack Start + the Cloudflare Vite plugin). Under WSL, run Git and Node from the Linux side.
+The app runs on Cloudflare Workers (TanStack Start + the Cloudflare Vite plugin). Under WSL, run Git and Node from the Linux side: the Git hooks (Lefthook, installed by `pnpm install`) need them.
+
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org), checked by commitlint in a `commit-msg` hook and in CI.
 
 ## License
 
