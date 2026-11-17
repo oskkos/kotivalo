@@ -16,3 +16,7 @@ dist
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# Paraglide (generated from messages/ and project.inlang/)
+/src/paraglide/
+/project.inlang/cache/
