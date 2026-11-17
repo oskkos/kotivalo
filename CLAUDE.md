@@ -10,7 +10,7 @@ Kotivalo ("Valoa vuokranantajan arkeen", roughly "light for a landlord's everyda
 
 ## Current state
 
-The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page, ESLint, Prettier, Vitest and Playwright. CI, database, i18n and auth are not set up yet; they are tracked as GitHub issues in milestone _M0 Foundation_. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
+The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page, ESLint, Prettier, Vitest, Playwright and CI. Database, i18n and auth are not set up yet; they are tracked as GitHub issues in milestone _M0 Foundation_. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
 
 ## Commands
 
@@ -149,6 +149,9 @@ Code, database and test names use these English terms. The English UI copy may u
 - **Every scenario needs a passing test. Every requirement needs a Playwright test**, unless it can't be tested in a browser. Then Vitest covers it, and the reason is recorded with the requirement.
 - Test names trace to the spec: `test.describe('<Requirement>')` with one `test('<Scenario>')` per scenario. Use the same naming in Vitest. CI blocks merges when this mapping is incomplete.
 
-## Git
+## Git and CI
 
-- `develop` is the main branch and the PR target.
+- `develop` is the main branch and the PR target. The `protect-develop` ruleset allows changes only through PRs, rebase merges only.
+- CI (`.github/workflows/ci.yml`) runs on every PR to `develop` and on pushes to it. Jobs: `lint` (ESLint and Prettier), `typecheck`, `test` (all Vitest projects) and `e2e` (Playwright). All four are required status checks, and the branch must be up to date with `develop` before merging. Renaming a job means updating the ruleset.
+- Shared job setup (pnpm, Node, install) is in `.github/actions/setup`. Actions are pinned to commit SHAs with the version in a comment.
+- When e2e fails, the Playwright report and traces are uploaded as the `playwright-report` artifact.
