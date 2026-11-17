@@ -1,27 +1,52 @@
 schema: spec-driven
 
-# Project context (optional)
-# This is shown to AI when creating artifacts.
-# Add your tech stack, conventions, style guides, domain knowledge, etc.
-# Example:
-#   context: |
-#     Tech stack: TypeScript, React, Node.js
-#     We use conventional commits
-#     Domain: e-commerce platform
+# Shown to AI when creating artifacts. Keep it short: CONCEPT.md (product,
+# domain rules, data model draft) and CLAUDE.md (stack, structure, conventions)
+# are the sources of truth; read them instead of copying them here.
+context: |
+  Kotivalo: a mobile-first app (390 × 844) for Finnish private landlords with
+  1–10 rental flats, often co-owned. Tracks flats, tenancies, income, expenses
+  and receipts, and produces each owner's tax figures (form 7H).
+  Read CONCEPT.md and CLAUDE.md before writing a proposal. Where the UI design
+  canvas and CONCEPT.md disagree, CONCEPT.md wins; raise the gap.
+
+  Stack: TanStack Start (React, SSR, server functions) on Cloudflare Workers
+  (free plans first), D1 via Drizzle, R2, Better Auth, Resend, MUI, Paraglide JS.
+  Cloudflare APIs, bindings and secrets stay in src/server/platform/; features
+  get db, storage and mailer from getRequestContext().
+
+  Domain rules:
+  - Everything is time-bound: rent, charges, financing-charge treatment,
+    ownership shares and tenancies are validity periods (valid_from /
+    valid_to). Never overwrite them; add a new period.
+  - Money is integer cents, dates are ISO YYYY-MM-DD, ownership shares are
+    integer basis points summing to exactly 10000 (0 = visibility only).
+  - Access and ownership are per flat; there is no household. Former owners
+    keep read access to their own ownership period.
+  - The year summary is computed from transactions and periods, never stored.
+    Calculations are pure functions with Vitest coverage.
+  - Use the code terms from the CLAUDE.md glossary (property, tenancy, share,
+    recurringAmount, transaction, …).
+
+  i18n: Finnish first, Swedish and English from day one. No hard-coded UI
+  text, errors or emails; everything comes from Paraglide messages in the
+  recipient's language.
 
 rules:
+  proposal:
+    - List the tables the change adds or alters. Tables land in the change of the feature that needs them, with their migration and repository.
+    - Name the UI screens touched and point to the matching Design canvas screen, or say there is none.
   specs:
     - Name each requirement uniquely across all specs; tests match it by name with test.describe('<Requirement>').
     - Every scenario gets a test named test('<Scenario>') inside that describe (Vitest or Playwright).
     - Every requirement gets a Playwright test, unless it can't be tested in a browser. Then record why on its own line in the requirement text, `**No Playwright test:** <reason>`, and cover its scenarios with Vitest.
     - Avoid " > " in requirement and scenario names.
-
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always include a "Non-goals" section
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+    - Write scenarios with concrete values (cents, ISO dates, basis points) and cover period boundaries and mid-year changes where they apply.
+    - Cover who may see or change the data (owner, co-owner, former owner, invited user) when access matters.
+  design:
+    - Columns use the helpers in src/server/db/columns.ts: id(), cents(), basisPoints(), isoDate(), validity(). No database-specific SQL outside a clearly named helper.
+    - Data access goes through an aggregate-oriented repository (features/<capability>/<entity>.repository.server.ts); multi-statement writes use atomically(db, [statements]).
+    - Domain calculations are pure functions in lib/ or the feature folder, with no database access.
+  tasks:
+    - Include the schema change, `pnpm db:generate` and the committed migration, the repository with Workers tests, and the Finnish, Swedish and English messages.
+    - End with `pnpm check:traceability` and the full test suite passing.

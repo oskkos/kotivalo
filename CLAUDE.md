@@ -158,6 +158,7 @@ Code, database and test names use these English terms. The English UI copy may u
 - A requirement that can't be tested in a browser records the reason on its own line in the requirement text: `**No Playwright test:** <reason>`. Its scenarios still need Vitest tests.
 - `pnpm check:traceability` (`scripts/check-traceability.ts`) enforces this. It reads `openspec/specs/` with the delta specs of active changes in `openspec/changes/` applied, and lists tests with `vitest list` and `playwright test --list` without running them. Skipped and todo tests don't count. The scenario test can be in Vitest or Playwright, nested describes are fine, and tests without a spec counterpart (harness and smoke tests) are allowed.
 - Requirement names must be unique across all specs, because tests are matched by name. Avoid `>` in requirement and scenario names: Vitest joins titles with it.
+- `openspec/config.yaml` gives OpenSpec a short project context and per-artifact rules (proposal, specs, design, tasks). It summarises this file and CONCEPT.md, so update it when the rules here change.
 
 ## Git and CI
 
