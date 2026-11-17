@@ -19,6 +19,21 @@ permissions:
 # Job names are the required status checks in the protect-develop ruleset.
 # Renaming a job means updating the ruleset too.
 jobs:
+  # Every commit lands as-is (rebase merges), so check each one in the PR.
+  commitlint:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - uses: ./.github/actions/setup
+      - run: pnpm exec commitlint --from "$BASE" --to "$HEAD" --verbose
+        env:
+          BASE: ${{ github.event.pull_request.base.sha }}
+          HEAD: ${{ github.event.pull_request.head.sha }}
+
   lint:
     runs-on: ubuntu-latest
     timeout-minutes: 10
