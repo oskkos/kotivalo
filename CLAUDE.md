@@ -10,7 +10,7 @@ Kotivalo ("Valoa vuokranantajan arkeen", roughly "light for a landlord's everyda
 
 ## Current state
 
-The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page, ESLint, Prettier, Vitest, Playwright, CI, commitlint, Git hooks, a D1 database with Drizzle (no tables yet) and i18n with Paraglide (fi / sv / en, no language switcher yet). File storage, the MUI theme, email and auth are not set up yet; they are tracked as GitHub issues in milestone _M0 Foundation_. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
+The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page, ESLint, Prettier, Vitest, Playwright, CI, commitlint, Git hooks, a D1 database with Drizzle (no tables yet) i18n with Paraglide (fi / sv / en, no language switcher yet) and the MUI theme. File storage, email and auth are not set up yet; they are tracked as GitHub issues in milestone _M0 Foundation_. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
 
 ## Commands
 
@@ -108,6 +108,14 @@ Vitest projects are chosen by file name (`vitest.config.ts`):
 - Workers tests run against a local D1 with every migration in `migrations/` applied (`src/test/apply-migrations.server.ts`). Repository tests use it as is: there is nothing to mock.
 - Test files are exempt from the no-hard-coded-text rule.
 - Playwright tests live in `e2e/*.spec.ts` and run against the built Worker (`vite preview`, local bindings from `wrangler.jsonc`). The only project is `mobile`: Chromium at 390 × 844, the size the UI is designed for.
+
+## UI and theme
+
+- MUI with Emotion. The theme is in `src/theme/theme.ts`, built from the design canvas; `src/theme/tokens.ts` holds the colors, radii and shadows. Style components through the theme (palette, typography variants, `components` overrides); reach for a token only where the theme has no slot. No hard-coded hex values in components.
+- Palette: `primary` plum, `secondary` lavender, `accent` yellow (custom; `color="accent"` on Button, Fab and Chip), `background.default` cream. Typography: Nunito Variable, weights 700 (body), 800 (labels, buttons), 900 (headings, amounts).
+- Text contrast at least 4.5:1 and touch targets at least 44 px (`TOUCH_TARGET`); `src/theme/theme.test.ts` checks the color pairs. Add a pair there when a new text color or surface comes in.
+- `__root.tsx` picks the theme for the request's language with `themeFor(getLocale())`, so MUI's own component text is localised (`fiFI`, `svSE`, `enUS`). Date pickers (`@mui/x-date-pickers`) are not installed yet; when the first date input needs one, localise it the same way.
+- Nunito is self-hosted from `@fontsource-variable/nunito` (no Google Fonts request).
 
 ## Domain glossary
 
