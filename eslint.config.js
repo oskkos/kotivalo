@@ -56,7 +56,7 @@ const cloudflareOnlyInPlatformExceptTests = {
   group: ['cloudflare:*', '!cloudflare:test', '!cloudflare:workers'],
 }
 const PLATFORM = ['src/server/platform/**']
-const TESTS = ['src/**/*.test.{ts,tsx}', 'src/test/**']
+const TESTS = ['src/**/*.test.{ts,tsx}', 'src/test/**', 'scripts/**/*.test.ts']
 const DRIZZLE_ALLOWED = [
   ...PLATFORM,
   'src/server/db/**',
@@ -149,6 +149,11 @@ export default defineConfig([
   {
     files: ['e2e/**/*.ts'],
     extends: [playwright.configs['flat/recommended']],
+  },
+
+  {
+    files: ['scripts/**/*.ts'],
+    languageOptions: { globals: globals.node },
   },
 
   {
