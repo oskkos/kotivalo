@@ -125,9 +125,11 @@ export default defineConfig([
     },
   },
 
+  // Tests inside the Drizzle-allowed areas (schema, platform) keep that
+  // area's rules from the blocks above.
   {
     files: TESTS,
-    ignores: PLATFORM,
+    ignores: DRIZZLE_ALLOWED,
     rules: {
       'no-restricted-imports': [
         'error',
