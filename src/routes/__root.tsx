@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+import { getLocale } from '#/paraglide/runtime.js'
 
 export const Route = createRootRoute({
   head: () => ({
@@ -12,10 +13,9 @@ export const Route = createRootRoute({
   shellComponent: RootDocument,
 })
 
-// lang is fixed to Finnish until i18n (#10) sets it per user.
 function RootDocument({ children }: { children: ReactNode }) {
   return (
-    <html lang="fi">
+    <html lang={getLocale()}>
       <head>
         <HeadContent />
       </head>

@@ -121,9 +121,9 @@ Each flat stores whether the housing company recognises the financing charge (ra
 - **Data access goes through repositories**, one per aggregate in each feature folder; nothing else imports the ORM. Changing the ORM then touches only the repositories, and avoiding database-specific SQL keeps a move from SQLite to PostgreSQL to a schema rewrite. Code uses English domain terms from the glossary in `CLAUDE.md`; a flat (_asunto_) is a `property` in code, matching the `properties` table.
 - **Language is chosen per user** and stored on the user record. Before sign-in it comes from a cookie or the browser language, defaulting to Finnish. In the signed-in app the language is not part of the URL.
 - **No hard-coded text.** All UI copy, error messages and emails (sign-in links, invitations, reminders) come from translations, in the recipient's language.
-- **Formatting follows the language** via `Intl` (`fi-FI`, `sv-FI`, `en-FI`): currency is always euro, dates and numbers in Finnish style (`1 234,56 €`, `12.11.2026`).
-  - **Inside a sentence**, formatting is done in the Paraglide message: `number` (numbers, currency), `datetime`, `plural` (e.g. "1 flat / 3 flats") and `relativetime` ("10 days ago").
-  - **Standalone values** (amounts in tables and cards, dates in lists) go through one helper module, e.g. `formatMoney(cents)` and `formatDate(iso)`. It reads the language from Paraglide (`getLocale()`) and converts cents to euros.
+- **Formatting follows the language as used in Finland** via `Intl` (`fi-FI`, `sv-FI`, `en-FI`). Currency is always euro. Finnish and Swedish give `1 234,56 €` and `12.11.2026`; English gives `€1,234.56` and `12/11/2026`. `en-FI` works the same in Node, on Workers and in Chromium.
+  - **Amounts and dates** go through one helper module, `formatMoney(cents)` and `formatDate(iso)`, which reads the language from Paraglide (`getLocale()`) and converts cents to euros. Inside a sentence, the formatted value is passed to the message as a parameter: Paraglide's own `number` and `datetime` formatters use the bare language (`sv`, `en`), which gives Swedish ISO dates and US dates.
+  - **Inside a sentence**, Paraglide handles `plural` (e.g. "1 flat / 3 flats") and `relativetime` ("10 days ago").
   - No separate library is needed for formatting. For date arithmetic (validity periods, notice periods), something like date-fns can be used.
 - Amounts are stored as **integers in cents**.
 - Dates in ISO format (`YYYY-MM-DD`). Validity periods as `valid_from` / `valid_to`.
@@ -173,7 +173,7 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 - [ ] The ownership change form in the sketch supports only two owners; it needs to become a free list.
 - [ ] Bank connection and the Kotivalo Plus subscription are suggestions, not decisions. Pricing is open.
 - [ ] Swedish and English translations: who translates, and a glossary for tax terms. Swedish tax terms should come from the Tax Administration's Swedish-language guidance and forms.
-- [ ] Confirm `en-FI` locale support in browsers and on Workers. Fallback: `en` with Finnish formatting set by hand.
+- [x] ~~Confirm `en-FI` locale support in browsers and on Workers.~~ Supported in Node, workerd and Chromium. English uses the `en-FI` format (`€1,234.56`, `05/03/2026`), not Finnish style.
 - [ ] Language selection has no screen. The language is stored per user, but the Account sketch has no language setting.
 - [ ] Loan interest has no input screen. The year summary shows it and the data model has `loan_interest`, but no sketch collects it.
 - [ ] Logging the deposit return later has no screen. End tenancy says to log it after the final inspection, but nothing shows where.

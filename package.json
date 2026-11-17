@@ -27,7 +27,8 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "prepare": "lefthook install"
+    "i18n:compile": "paraglide-js compile --silent",
+    "prepare": "lefthook install && pnpm run i18n:compile"
   },
   "dependencies": {
     "@tanstack/react-router": "1.170.46",
@@ -43,6 +44,7 @@
     "@commitlint/config-conventional": "^21.2.4",
     "@eslint-react/eslint-plugin": "^5.30.2",
     "@eslint/js": "^10.0.1",
+    "@inlang/paraglide-js": "3.2.2",
     "@playwright/test": "^1.65.1",
     "@tanstack/eslint-plugin-router": "^1.162.0",
     "@testing-library/dom": "^10.4.2",

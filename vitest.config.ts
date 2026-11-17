@@ -1,6 +1,7 @@
 import { defineConfig } from 'vitest/config'
 import viteReact from '@vitejs/plugin-react'
 import { cloudflareTest, readD1Migrations } from '@cloudflare/vitest-plugin'
+import { paraglideVitePlugin } from '@inlang/paraglide-js'
 
 // Three projects, chosen by file name:
 //   *.test.ts         unit: pure functions, in Node
@@ -9,13 +10,15 @@ import { cloudflareTest, readD1Migrations } from '@cloudflare/vitest-plugin'
 //                     with the bindings from wrangler.jsonc
 //
 // The app's vite.config.ts is not reused: its Cloudflare and TanStack Start
-// plugins build the app, they don't belong in a test run.
+// plugins build the app, they don't belong in a test run. Paraglide is added
+// so tests always see the current messages.
 // The D1 migrations, read in Node and applied inside the Workers runtime by
 // src/test/apply-migrations.server.ts before each Workers test file.
 const d1Migrations = await readD1Migrations('./migrations')
 
 export default defineConfig({
   resolve: { tsconfigPaths: true },
+  plugins: [paraglideVitePlugin({ project: './project.inlang' })],
   test: {
     projects: [
       {
