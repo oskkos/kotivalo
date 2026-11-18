@@ -77,7 +77,7 @@ describe('Client log endpoint', () => {
       deps,
     )
     expect(JSON.stringify(lines)).not.toContain('mikko@esimerkki.fi')
-    expect(lines[0]).toMatchObject({ note: 'sent to [email]' })
+    expect(lines[0]).toMatchObject({ client_note: 'sent to [email]' })
   })
 
   test.each([
@@ -96,6 +96,41 @@ describe('Client log endpoint', () => {
     const { deps, lines } = setup()
     expect((await send(post(body), deps)).status).toBe(400)
     expect(lines).toEqual([])
+  })
+
+  test("can't pose as the server: its fields are prefixed and context wins", async () => {
+    const { deps, lines } = setup()
+    await send(
+      post({
+        traceId: TRACE,
+        events: [
+          {
+            level: 'info',
+            event: 'app.x',
+            fields: { userId: 'admin', traceId: 'forged', source: 'server' },
+          },
+        ],
+      }),
+      deps,
+    )
+    expect(lines[0]).toMatchObject({
+      userId: 'user-1',
+      traceId: TRACE,
+      source: 'client',
+      client_userId: 'admin',
+      client_traceId: 'forged',
+      client_source: 'server',
+    })
+  })
+
+  test('refuses a stated Content-Length over 16 KB without reading', async () => {
+    const { deps } = setup()
+    const request = new Request('http://localhost/api/log', {
+      method: 'POST',
+      headers: { 'content-length': '1000000' },
+      body: '{}',
+    })
+    expect((await send(request, deps)).status).toBe(413)
   })
 
   test('refuses a body over 16 KB with 413', async () => {

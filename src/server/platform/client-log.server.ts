@@ -59,6 +59,43 @@ export interface ClientLogDeps {
   userId: () => Promise<string | undefined>
 }
 
+/**
+ * The body as text, or undefined once it passes `maxBytes`: a stated
+ * Content-Length over the limit is refused unread, and a longer body is
+ * cancelled as soon as it passes it.
+ */
+async function readAtMost(
+  request: Request,
+  maxBytes: number,
+): Promise<string | undefined> {
+  const stated = Number(request.headers.get('content-length') ?? 0)
+  if (stated > maxBytes || request.body === null) {
+    return stated > maxBytes ? undefined : ''
+  }
+  const reader = request.body.getReader()
+  const chunks: Uint8Array[] = []
+  let size = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) {
+      break
+    }
+    size += value.byteLength
+    if (size > maxBytes) {
+      await reader.cancel()
+      return undefined
+    }
+    chunks.push(value)
+  }
+  const bytes = new Uint8Array(size)
+  let offset = 0
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset)
+    offset += chunk.byteLength
+  }
+  return new TextDecoder().decode(bytes)
+}
+
 export async function clientLogResponse(
   request: Request,
   deps: ClientLogDeps,
@@ -73,8 +110,8 @@ export async function clientLogResponse(
   if (!limit.allowed) {
     return new Response(null, { status: 429 })
   }
-  const body = await request.text()
-  if (body.length > CLIENT_LOG_LIMITS.maxBytes) {
+  const body = await readAtMost(request, CLIENT_LOG_LIMITS.maxBytes)
+  if (body === undefined) {
     return new Response(null, { status: 413 })
   }
   let json: unknown
@@ -97,8 +134,17 @@ export async function clientLogResponse(
     ...(userId === undefined ? {} : { userId }),
   })
   for (const e of parsed.data.events) {
+    // The browser's own fields are prefixed, so they can't pose as the
+    // server's (source, path, error*); trace, user and version come from the
+    // log context and win anyway.
+    const clientFields = Object.fromEntries(
+      Object.entries(e.fields ?? {}).map(([key, value]) => [
+        `client_${key}`,
+        value,
+      ]),
+    )
     const fields: LogFields = {
-      ...e.fields,
+      ...clientFields,
       source: 'client',
       clientTime: e.time,
       path: e.path,

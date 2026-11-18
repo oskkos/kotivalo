@@ -52,7 +52,9 @@ export function createLogger(
         `Log event "${String(event)}" is not <capability>.<event>`,
       )
     }
-    const all = { ...options.base, ...context(), ...fields }
+    // The version and the request's context (trace, user) win over the
+    // call's fields, so no caller, nor a browser via /api/log, can forge them.
+    const all = { ...fields, ...context(), ...options.base }
     const defined = Object.entries(all).filter(
       ([, value]) => value !== undefined,
     )
