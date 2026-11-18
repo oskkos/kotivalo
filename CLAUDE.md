@@ -86,7 +86,7 @@ Switching hosts should mean rewriting `src/server/platform/` and the deploy conf
   - Errors are sent at once, other lines in batches, and the buffer is flushed with `sendBeacon` when the page is hidden.
   - Uncaught errors, unhandled rejections and render errors (the root route's `errorComponent`) are logged automatically.
   - The Worker receives them at `POST /api/log` (`platform/client-log.server.ts`) and writes them with `source: "client"`, the page's trace id and the signed-in user's id, taken from the session and never from the request body.
-  - The endpoint allows 30 requests a minute per IP address, 16 KB and 20 events per request, well-formed event names only, and replaces anything that looks like an email address.
+  - The endpoint allows 30 requests a minute per IP address, 16 KB (read with a cap, not whole) and 20 events per request, well-formed event names only, and replaces anything that looks like an email address. The browser's own fields are written with a `client_` prefix, and the logger lets the version and the request's context (trace, user) win over any call's fields, so neither a browser nor a caller can forge them.
   - ESLint forbids `console` in all app code.
 - **Tracing** (W3C trace context, `src/lib/trace.ts`):
   - The browser keeps one trace id per page load and sends it as `traceparent` with every server function call (`src/start.ts`, a global function middleware).

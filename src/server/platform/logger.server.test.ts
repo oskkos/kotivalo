@@ -43,6 +43,23 @@ describe('Logger', () => {
     expect(lines[0]?.errorStack).toContain('TypeError: boom')
   })
 
+  test("a call's fields can't replace the version or the request's context", () => {
+    const lines: LogLine[] = []
+    const log = createLogger({
+      base: { versionId: 'v1' },
+      context: () => ({ traceId: 't1', userId: 'u1' }),
+      write: (_level, line) => {
+        lines.push(line)
+      },
+    })
+    log.info('app.x', { versionId: 'v0', traceId: 'forged', userId: 'admin' })
+    expect(lines[0]).toMatchObject({
+      versionId: 'v1',
+      traceId: 't1',
+      userId: 'u1',
+    })
+  })
+
   test('keeps the level and event even if a field tries to replace them', () => {
     const { log, lines } = capture()
     log.warn('authentication.limit_reached', { level: 'info', event: 'x' })
