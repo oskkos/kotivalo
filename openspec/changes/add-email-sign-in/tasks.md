@@ -41,12 +41,12 @@
 
 `feat(forms): validate with Zod and show reasons through Paraglide`
 
-- [ ] 5.1 Add `zod` and `@tanstack/react-form` with exact versions
-- [ ] 5.2 Write `src/lib/reasons.ts`: the `Reason` union and a static `reasonMessage()` to Paraglide messages; `messages.test.ts` covers the new keys
-- [ ] 5.3 Write `features/authentication/schemas.ts` (email: trimmed, lowercased; code: 6 digits) with reason codes as errors, and unit tests
-- [ ] 5.4 Write `src/components/form/TextField.tsx`, which connects TanStack Form to MUI `TextField` (error via `reasonMessage`, `aria-invalid`, `aria-describedby`, disabled while submitting), with component tests
-- [ ] 5.5 Add the error colours from the canvas to tokens and `palette.error`, and their contrast pairs to `theme.test.ts`
-- [ ] 5.6 Document the pattern in CLAUDE.md (Zod schemas in the feature, reason codes, TanStack Form, `TextField`)
+- [x] 5.1 Add `zod` and `@tanstack/react-form` with exact versions
+- [x] 5.2 Write `src/lib/reasons.ts`: the `Reason` union and a static `reasonMessage()` to Paraglide messages; `messages.test.ts` covers the new keys
+- [x] 5.3 Write `features/authentication/schemas.ts` (email: trimmed, lowercased; code: 6 digits) with reason codes as errors, and unit tests
+- [x] 5.4 Write `src/components/form/TextField.tsx`, which connects TanStack Form to MUI `TextField` (error via `reasonMessage`, `aria-invalid`, `aria-describedby`, disabled while submitting), with component tests
+- [x] 5.5 Add the error colours from the canvas to tokens and `palette.error`, and their contrast pairs to `theme.test.ts`
+- [x] 5.6 Document the pattern in CLAUDE.md (Zod schemas in the feature, reason codes, TanStack Form, `TextField`)
 
 ## 6. Sign-in server functions
 

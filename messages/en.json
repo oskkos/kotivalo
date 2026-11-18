@@ -6,5 +6,20 @@
   "sign_in_email_heading": "Your sign-in code",
   "sign_in_email_intro": "Sign in to Kotivalo by entering this code in the app:",
   "sign_in_email_validity": "The code is valid for {minutes} minutes.",
-  "sign_in_email_ignore": "If you didn't ask for a code, you can ignore this email. No one can get into your account without the code."
+  "sign_in_email_ignore": "If you didn't ask for a code, you can ignore this email. No one can get into your account without the code.",
+  "reason_email_invalid": "Check the email address, for example name@example.com.",
+  "reason_code_invalid": "Enter the 6-digit code.",
+  "reason_code_wrong": "The code isn't right. Check the code and try again.",
+  "reason_code_expired_title": "The code has expired",
+  "reason_code_expired": "Ask for a new code below.",
+  "reason_code_attempts_used_title": "Too many wrong attempts",
+  "reason_code_attempts_used": "Ask for a new code and try again.",
+  "reason_limit_reached_title": "Too many attempts",
+  "reason_limit_reached": "Wait a moment and then try again.",
+  "reason_email_quota_title": "Codes can't be sent right now",
+  "reason_email_quota": "Today's sending limit is used up. Try again tomorrow.",
+  "reason_email_busy_title": "Sending is busy",
+  "reason_email_busy": "Try again in a moment.",
+  "reason_email_failed_title": "Sending failed",
+  "reason_email_failed": "The code couldn't be sent. Try again."
 }

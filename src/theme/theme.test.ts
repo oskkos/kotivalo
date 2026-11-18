@@ -23,6 +23,10 @@ const textPairs: [string, string, string][] = [
   ['cream on plum', colors.cream, colors.plum],
   ['muted text on plum', colors.onPlumMuted, colors.plum],
   ['yellow on plum', colors.yellow, colors.plum],
+  ['error text on cream', colors.error, colors.cream],
+  ['error text on white', colors.error, colors.white],
+  ['text on the error alert', colors.plum, colors.errorSurface],
+  ['white on error', colors.white, colors.error],
 ]
 
 describe('Theme colors', () => {
@@ -36,6 +40,7 @@ describe('Theme colors', () => {
     expect(palette.accent.main).toBe(colors.yellow)
     expect(palette.background.default).toBe(colors.cream)
     expect(palette.secondary.main).toBe(colors.lavender)
+    expect(palette.error.main).toBe(colors.error)
   })
 })
 
