@@ -38,9 +38,14 @@
   // Deployed environments set "resend", a verified sender domain in
   // EMAIL_FROM and the RESEND_API_KEY secret. Locally the key goes in
   // .dev.vars (see .dev.vars.example).
+  //
+  // BETTER_AUTH_SECRET signs session cookies (platform/auth.server.ts). This
+  // value is for local development and tests only and is public; production
+  // has its own secret: wrangler secret put BETTER_AUTH_SECRET --env production
   "vars": {
     "EMAIL_TRANSPORT": "capture",
     "EMAIL_FROM": "Kotivalo <noreply@example.com>",
+    "BETTER_AUTH_SECRET": "local-development-only-not-a-secret-0123456789",
   },
   "observability": {
     "enabled": true,
@@ -49,8 +54,8 @@
   "env": {
     // Deployed from develop by CI (.github/workflows/ci.yml, job "deploy").
     // D1 and R2 are in the EU jurisdiction: data is stored and processed
-    // only in the EU. Secrets (wrangler secret put --env production):
-    // RESEND_API_KEY.
+    // only in the EU. Secrets (wrangler secret put <NAME> --env production):
+    // RESEND_API_KEY and BETTER_AUTH_SECRET.
     "production": {
       "name": "kotivalo",
       // No per-version preview URLs: they would be public and use the
@@ -73,7 +78,6 @@
       ],
       // Sends through Resend from a domain verified there (EU region). The
       // sender domain is temporary until Kotivalo has its own domain.
-      // RESEND_API_KEY is a secret: wrangler secret put RESEND_API_KEY --env production
       "vars": {
         "EMAIL_TRANSPORT": "resend",
         "EMAIL_FROM": "Kotivalo <noreply@k6.fi>",

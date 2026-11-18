@@ -10,7 +10,7 @@ Kotivalo ("Valoa vuokranantajan arkeen", roughly "light for a landlord's everyda
 
 ## Current state
 
-The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page, ESLint, Prettier, Vitest, Playwright, CI, commitlint, Git hooks, a D1 database with Drizzle (no tables yet), i18n with Paraglide (fi / sv / en, no language switcher yet), the MUI theme, email sending (Resend), R2 file storage and a production deploy from `develop`. Auth is not set up yet; it is tracked as a GitHub issue in milestone _M0 Foundation_. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
+The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page, ESLint, Prettier, Vitest, Playwright, CI, commitlint, Git hooks, a D1 database with Drizzle (Better Auth's tables so far), i18n with Paraglide (fi / sv / en, no language switcher yet), the MUI theme, email sending (Resend), R2 file storage and a production deploy from `develop`. Auth is not set up yet; it is tracked as a GitHub issue in milestone _M0 Foundation_. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
 
 ## Commands
 
@@ -99,7 +99,7 @@ src/
 - All database access goes through repositories: `features/<capability>/<entity>.repository.server.ts`. Routes, server functions and components never import Drizzle.
 - A repository is a factory function that takes `db` and returns its methods: `propertyRepository(db).findForUser(userId, on)`. No interface/implementation split (`PropertyRepository` + `DrizzlePropertyRepository`): tests run against local D1 in Miniflare, so there is nothing to mock.
 - Repositories are aggregate-oriented, not one per table: a property is usually read together with its ownership periods and recurring amounts.
-- Tables land with the OpenSpec change of the feature that needs them, with their migration and repository. Build columns with the helpers in `src/server/db/columns.ts`: `id()` (UUID text), `cents()`, `basisPoints()`, `isoDate()`, `validity()` (`valid_from` / `valid_to`).
+- Tables land with the OpenSpec change of the feature that needs them, with their migration and repository. Build columns with the helpers in `src/server/db/columns.ts`: `id()` (UUID text), `cents()`, `basisPoints()`, `isoDate()`, `validity()` (`valid_from` / `valid_to`), `instant()` (a point in time as epoch milliseconds, e.g. an expiry; not for calendar dates).
 - `drizzle-orm` may be imported only in repositories, the schema (`server/db/`) and `server/platform/` (ESLint rule in `eslint.config.js`). Changing the ORM then touches only those files.
 - No database-specific SQL (`sql` templates with SQLite functions such as `strftime` or JSON functions) outside a clearly named helper. Together with integer cents, ISO date strings and integer basis points, this keeps a later SQLite → PostgreSQL move to rewriting the schema and regenerating migrations.
 

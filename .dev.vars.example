@@ -7,3 +7,7 @@
 # RESEND_API_KEY=re_...
 # EMAIL_TRANSPORT=resend
 # EMAIL_FROM=Kotivalo <noreply@your-verified-domain>
+
+# Better Auth's secret. wrangler.jsonc has a public development value, so this
+# is needed only to test with a different one.
+# BETTER_AUTH_SECRET=...
