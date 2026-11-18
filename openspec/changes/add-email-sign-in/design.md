@@ -93,7 +93,7 @@ Better Auth's rate limiter runs only on its HTTP handler, which isn't mounted, a
 
 ### 5. Sessions and signed-in routes
 - **Lifetime:** `session.expiresIn` is 30 days and `updateAge` is 1 day. A landlord opens the app now and then, so a short session would mean an email code most times.
-- **Cookie cache:** `session.cookieCache` (5 minutes) keeps most page loads from reading D1. The cached data includes the user's `locale`.
+- **No cookie cache:** Better Auth's `session.cookieCache` would save a D1 read per check, but a cached session keeps working until the cache expires, also after signing out. That breaks "A signed-out session cookie no longer works". Each session check is one D1 read, far below the free plan's 5 million reads a day.
 - **Routes:**
   - A pathless layout route `src/routes/_authed.tsx` runs a `getSession` server function in `beforeLoad` and redirects to `/sign-in` without a session.
   - The home page moves under it, to `src/routes/_authed/index.tsx`.
@@ -113,7 +113,7 @@ Better Auth's rate limiter runs only on its HTTP handler, which isn't mounted, a
 - **Code input:** the code field is a single `inputMode="numeric"`, `autoComplete="one-time-code"` input, so iOS and Android can fill the code from the email. It submits automatically when the sixth digit is entered.
 
 ### 7. The user's language
-At sign-in, the `verifyCode` server function sets the `kotivalo_locale` cookie to the user's stored `locale`. The existing `cookie` strategy then serves the signed-in app in that language on any device. The `_authed` layout resets the cookie if it ever differs from the session's `locale`.
+At sign-in, the `verifyCode` server function sets the `kotivalo_locale` cookie to the user's stored `locale`. The existing `cookie` strategy then serves the signed-in app in that language on any device. The `_authed` layout resets the cookie if it ever differs from the stored `locale`.
 
 - *Alternative:* a Paraglide custom server strategy (`custom-user`) that reads the session in `src/server.ts` on every request. This is rejected for now. It adds a session lookup to every request, including assets and sign-in, to cover only a cookie removed while the session lives. In that case the next authed navigation restores the cookie. This deviates from the wording of #13; revisit it when a language switcher lands.
 
@@ -153,7 +153,6 @@ The canvas copy is the Finnish source for the messages.
 - [The `x-test-client-ip` override is a bypass if `capture` were ever enabled in production] → The production config test, and `capture` sends no real email, so nothing in production would work anyway.
 - [Bundle size: Zod and TanStack Form in the client] → Check the client bundle after the sign-in route lands. Switch the client to `zod/mini` if Zod dominates.
 - [Better Auth version churn (1.x minor releases are frequent)] → Pin the exact version. Upgrades are deliberate PRs.
-- [The cookie-cached session may be up to 5 minutes stale after sign-out on another device] → Acceptable. Sign-out on the same device clears the cookie.
 
 ## Migration Plan
 

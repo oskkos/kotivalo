@@ -23,7 +23,7 @@
 - [x] 3.2 Write `src/server/platform/auth.server.ts` with `createAuth()`:
   - Drizzle adapter (`sqlite`), UUID ids, `emailOTP` (6 digits, 600 s, 5 attempts, hashed, rotate)
   - `tanstackStartCookies()`
-  - sessions of 30 days with `updateAge` of 1 day and a 5-minute cookie cache
+  - sessions of 30 days with `updateAge` of 1 day (no cookie cache: see design decision 5)
   - `user.locale` as an additional field filled by a create hook
 - [x] 3.3 Add `auth` to `getRequestContext()`; `baseURL` from the request origin, `secret` from `BETTER_AUTH_SECRET`
 - [x] 3.4 Add `isCapturing(env)` to `platform/mailer.server.ts` and read the client IP (`cf-connecting-ip`, or `x-test-client-ip` only when capturing)
@@ -52,17 +52,17 @@
 
 `feat(auth): add the sign-in server functions`
 
-- [ ] 6.1 `requestCode({ email })`:
+- [x] 6.1 `requestCode({ email })`:
   - Zod-validated
   - consumes the IP and address limits
   - resolves the email locale (stored, else the request's)
   - calls `sendVerificationOTP`
   - returns `{ ok }` or a reason (`limit_reached`, `email_quota`, `email_busy`, `email_failed`)
-- [ ] 6.2 `verifyCode({ email, code })`: signs in or creates the account, sets `kotivalo_locale` from the user's `locale`, and maps the Better Auth errors to `code_wrong`, `code_expired` or `code_attempts_used`
-- [ ] 6.3 `getSession()` and `signOut()`
-- [ ] 6.4 The test inbox server route (`/api/test/inbox?to=`), returning 404 unless capturing
-- [ ] 6.5 A unit test that parses `wrangler.jsonc` and asserts `env.production.vars.EMAIL_TRANSPORT` is `resend`
-- [ ] 6.6 Workers tests for every scenario in:
+- [x] 6.2 `verifyCode({ email, code })`: signs in or creates the account, sets `kotivalo_locale` from the user's `locale`, and maps the Better Auth errors to `code_wrong`, `code_expired` or `code_attempts_used`
+- [x] 6.3 `getSession()` and `signOut()`
+- [x] 6.4 The test inbox server route (`/api/test/inbox?to=`), returning 404 unless capturing
+- [x] 6.5 A unit test that parses `wrangler.jsonc` and asserts `env.production.vars.EMAIL_TRANSPORT` is `resend`
+- [x] 6.6 Workers tests for every scenario in:
   - "Sign in with an emailed code"
   - "Rejecting wrong and expired codes" (expiry by moving the stored expiry)
   - "Limiting code requests"
@@ -70,7 +70,7 @@
   - "Staying signed in"
   - "The user's language is stored on the account"
   - "Test inbox for end-to-end tests"
-- [ ] 6.7 Document `auth` in the context, the server-function-only rule (no `/api/auth` handler), the limits, the test inbox and the new secret in CLAUDE.md
+- [x] 6.7 Document `auth` in the context, the server-function-only rule (no `/api/auth` handler), the limits, the test inbox and the new secret in CLAUDE.md
 
 ## 7. Sign-in page
 

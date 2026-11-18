@@ -67,10 +67,12 @@ export function createAuth(options: AuthOptions): Auth {
     // Our own limits in D1 (platform/limits.server.ts) apply in the server
     // functions; Better Auth's limiter covers only its HTTP handler.
     rateLimit: { enabled: false },
+    // No cookie cache: a cached session would keep working for its lifetime
+    // after signing out (spec: "A signed-out session cookie no longer
+    // works"). Each check is one D1 read.
     session: {
       expiresIn: 30 * DAY,
       updateAge: DAY,
-      cookieCache: { enabled: true, maxAge: 5 * 60 },
     },
     user: {
       additionalFields: {
