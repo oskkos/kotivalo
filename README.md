@@ -24,7 +24,7 @@ The app runs on Cloudflare Workers (TanStack Start + the Cloudflare Vite plugin)
 
 Every push to `develop` deploys to production on Cloudflare once CI passes.
 
-Emails are not sent locally: they are printed in the dev server's log. To send real email through Resend, copy `.dev.vars.example` to `.dev.vars` and fill it in.
+Emails are not sent locally: they are printed in the dev server's log, so a sign-in code at http://localhost:3000/sign-in can be read there (or from `/api/test/inbox?to=<address>`). To send real email through Resend, copy `.dev.vars.example` to `.dev.vars` and fill it in.
 
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org), checked by commitlint in a `commit-msg` hook and in CI.
 
