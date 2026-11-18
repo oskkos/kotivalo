@@ -11,6 +11,8 @@ import {
   type EmailMessage,
   type SendEmail,
 } from '#/server/email/email'
+import type { Logger } from '#/server/log/log'
+import { currentLogContext } from './log-context.server'
 
 const RESEND_URL = 'https://api.resend.com/emails'
 
@@ -37,6 +39,7 @@ export function createResendSender(options: {
   apiKey: string
   from: string
   fetch?: typeof fetch
+  log?: Logger
 }): SendEmail {
   // Called through a closure: Workers throws "Illegal invocation" when the
   // global fetch is called detached from its receiver.
@@ -55,6 +58,7 @@ export function createResendSender(options: {
       headers['Idempotency-Key'] = message.idempotencyKey
     }
 
+    const { traceId } = currentLogContext()
     let response: Response
     try {
       response = await doFetch(RESEND_URL, {
@@ -66,12 +70,21 @@ export function createResendSender(options: {
           subject: message.subject,
           text: message.text,
           html: message.html,
+          // Resend's dashboard then shows which request sent the email.
+          ...(typeof traceId === 'string'
+            ? { tags: [{ name: 'trace_id', value: traceId }] }
+            : {}),
         }),
       })
     } catch (cause) {
       throw new EmailError('unavailable', 'Could not reach Resend', { cause })
     }
     if (response.ok) {
+      const { id } = (await response.json().catch(() => ({}))) as {
+        id?: string
+      }
+      // Links the trace to the email in Resend; no address is logged.
+      options.log?.info('email.sent', { provider: 'resend', emailId: id })
       return
     }
 
@@ -133,7 +146,7 @@ export function isCapturing(env: Pick<MailerEnv, 'EMAIL_TRANSPORT'>): boolean {
 }
 
 /** The sender for this environment. Misconfiguration fails loudly. */
-export function createSendEmail(env: MailerEnv): SendEmail {
+export function createSendEmail(env: MailerEnv, log?: Logger): SendEmail {
   switch (env.EMAIL_TRANSPORT) {
     case 'resend': {
       if (!env.RESEND_API_KEY) {
@@ -144,6 +157,7 @@ export function createSendEmail(env: MailerEnv): SendEmail {
       return createResendSender({
         apiKey: env.RESEND_API_KEY,
         from: env.EMAIL_FROM,
+        ...(log === undefined ? {} : { log }),
       })
     }
     case 'capture':

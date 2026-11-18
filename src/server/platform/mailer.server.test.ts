@@ -1,6 +1,8 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { EmailError, type EmailMessage } from '#/server/email/email'
 import { getRequestContext } from './context.server'
+import { runWithLogContext } from './log-context.server'
+import { createCaptureLogger } from './logger.server'
 import {
   capturedEmails,
   createCaptureSender,
@@ -49,6 +51,32 @@ describe('Resend sender', () => {
       text: 'Body',
       html: '<p>Body</p>',
     })
+  })
+
+  test('tags the email with the trace and logs its id', async () => {
+    const fetch = resendResponding(200, { id: 'email-1' })
+    const { log, lines } = createCaptureLogger()
+    const send = createResendSender({
+      apiKey: 'k',
+      from: 'f@example.com',
+      fetch,
+      log,
+    })
+
+    await runWithLogContext({ traceId: 'trace-1' }, () => send(message))
+
+    const body = JSON.parse(fetch.mock.calls[0]?.[1]?.body as string) as {
+      tags?: unknown
+    }
+    expect(body.tags).toEqual([{ name: 'trace_id', value: 'trace-1' }])
+    expect(lines).toEqual([
+      expect.objectContaining({
+        event: 'email.sent',
+        emailId: 'email-1',
+        traceId: 'trace-1',
+      }),
+    ])
+    expect(JSON.stringify(lines)).not.toContain('owner@example.com')
   })
 
   test('sends no Idempotency-Key header without a key', async () => {

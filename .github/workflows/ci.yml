@@ -122,4 +122,5 @@ jobs:
       # must therefore keep the running version working (add, don't rename
       # or drop in the same deploy).
       - run: pnpm db:migrate:production
-      - run: pnpm run deploy
+      # The commit as the version tag: log lines carry it (CF_VERSION_METADATA).
+      - run: pnpm run deploy --tag "${{ github.sha }}"

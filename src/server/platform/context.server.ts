@@ -6,9 +6,9 @@ import type { FileStorage } from '#/server/files/storage'
 import type { Logger } from '#/server/log/log'
 import { createAuth } from './auth.server'
 import { createDb, type Db } from './db.server'
-import { createLogger } from './logger.server'
 import { createSendEmail, isCapturing } from './mailer.server'
 import { createR2Storage } from './storage.server'
+import { createRequestLogger } from './version.server'
 
 /** What server code receives instead of Cloudflare bindings. */
 export interface RequestContext {
@@ -34,12 +34,13 @@ export interface RequestContext {
  */
 export function getRequestContext(): RequestContext {
   const db = createDb(env.DB)
+  const log = createRequestLogger()
   let auth: Auth | undefined
   return {
     db,
-    sendEmail: createSendEmail(env),
+    sendEmail: createSendEmail(env, log),
     storage: createR2Storage(env.FILES),
-    log: createLogger(),
+    log,
     get auth() {
       auth ??= createAuth({
         db,

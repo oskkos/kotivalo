@@ -47,9 +47,14 @@
     "EMAIL_FROM": "Kotivalo <noreply@example.com>",
     "BETTER_AUTH_SECRET": "local-development-only-not-a-secret-0123456789",
   },
+  // Workers Logs and automatic tracing (D1, fetch). Free plan: 200,000
+  // events a day, kept 3 days; every request is traced while that suffices.
   "observability": {
     "enabled": true,
+    "traces": { "enabled": true, "head_sampling_rate": 1 },
   },
+  // The deployed version (id and tag = git commit) on every log line.
+  "version_metadata": { "binding": "CF_VERSION_METADATA" },
   "upload_source_maps": true,
   "env": {
     // Deployed from develop by CI (.github/workflows/ci.yml, job "deploy").
@@ -69,6 +74,7 @@
           "migrations_dir": "migrations",
         },
       ],
+      "version_metadata": { "binding": "CF_VERSION_METADATA" },
       "r2_buckets": [
         {
           "binding": "FILES",
