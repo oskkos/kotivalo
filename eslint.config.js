@@ -50,6 +50,11 @@ const drizzleOnlyInRepositories = {
   message:
     'Drizzle is allowed only in *.repository.server.ts, src/server/db/ (schema) and src/server/platform/. Use a repository.',
 }
+const betterAuthOnlyInPlatform = {
+  group: ['better-auth', 'better-auth/*'],
+  message:
+    "Better Auth is allowed only in src/server/platform/. Use the context's auth (src/server/auth/auth.ts).",
+}
 // Tests may use cloudflare:test (SELF, helpers) and the env from
 // cloudflare:workers to reach bindings directly.
 const cloudflareOnlyInPlatformExceptTests = {
@@ -120,7 +125,13 @@ export default defineConfig([
     rules: {
       'no-restricted-imports': [
         'error',
-        { patterns: [cloudflareOnlyInPlatform, drizzleOnlyInRepositories] },
+        {
+          patterns: [
+            cloudflareOnlyInPlatform,
+            drizzleOnlyInRepositories,
+            betterAuthOnlyInPlatform,
+          ],
+        },
       ],
     },
   },
@@ -130,7 +141,7 @@ export default defineConfig([
     rules: {
       'no-restricted-imports': [
         'error',
-        { patterns: [cloudflareOnlyInPlatform] },
+        { patterns: [cloudflareOnlyInPlatform, betterAuthOnlyInPlatform] },
       ],
     },
   },
@@ -147,6 +158,7 @@ export default defineConfig([
           patterns: [
             cloudflareOnlyInPlatformExceptTests,
             drizzleOnlyInRepositories,
+            betterAuthOnlyInPlatform,
           ],
         },
       ],

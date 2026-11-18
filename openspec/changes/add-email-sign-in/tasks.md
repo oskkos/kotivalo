@@ -19,15 +19,15 @@
 
 `feat(platform): create Better Auth per request`
 
-- [ ] 3.1 First verify that an `EmailError` thrown in `sendVerificationOTP` reaches the `auth.api.sendVerificationOTP` caller; if Better Auth swallows it, apply the design's fallback
-- [ ] 3.2 Write `src/server/platform/auth.server.ts` with `createAuth()`:
+- [x] 3.1 First verify that an `EmailError` thrown in `sendVerificationOTP` reaches the `auth.api.sendVerificationOTP` caller; if Better Auth swallows it, apply the design's fallback
+- [x] 3.2 Write `src/server/platform/auth.server.ts` with `createAuth()`:
   - Drizzle adapter (`sqlite`), UUID ids, `emailOTP` (6 digits, 600 s, 5 attempts, hashed, rotate)
   - `tanstackStartCookies()`
   - sessions of 30 days with `updateAge` of 1 day and a 5-minute cookie cache
   - `user.locale` as an additional field filled by a create hook
-- [ ] 3.3 Add `auth` to `getRequestContext()`; `baseURL` from the request origin, `secret` from `BETTER_AUTH_SECRET`
-- [ ] 3.4 Add `isCapturing(env)` to `platform/mailer.server.ts` and read the client IP (`cf-connecting-ip`, or `x-test-client-ip` only when capturing)
-- [ ] 3.5 Workers tests through `auth.api`: a code signs in and creates the user with a locale; a session is returned and can be signed out
+- [x] 3.3 Add `auth` to `getRequestContext()`; `baseURL` from the request origin, `secret` from `BETTER_AUTH_SECRET`
+- [x] 3.4 Add `isCapturing(env)` to `platform/mailer.server.ts` and read the client IP (`cf-connecting-ip`, or `x-test-client-ip` only when capturing)
+- [x] 3.5 Workers tests through `auth.api`: a code signs in and creates the user with a locale; a session is returned and can be signed out
 
 ## 4. Sign-in code email
 
