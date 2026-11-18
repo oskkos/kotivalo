@@ -69,6 +69,7 @@ Switching hosts should mean rewriting `src/server/platform/` and the deploy conf
 - It builds a **per-request context** (`db`, `storage`, `mailer`, `auth`) that the rest of the app receives; nothing else reaches for `env`.
 - The rest of the app depends on portable interfaces: the Drizzle `db` instance, a `FileStorage` interface (`put` / `get` / `delete`), `sendEmail()`.
 - D1's lack of interactive transactions is handled by one helper in `platform/`, `atomically(db, [statements])`, not by calling `batch` or `db.transaction()` from features. Build all statements first; there are no reads between the writes.
+- Abuse limits (requests per IP address, per email address, …) use `consumeLimit(db, key, { windowSeconds, max })` from `platform/limits.server.ts`: a counter per key in D1, because Worker isolates share no memory. Hash personal data such as email addresses before using them in a key.
 - Server code gets the context from `getRequestContext()` (`platform/context.server.ts`), per request, never at module scope.
 - Scheduled jobs (Cron Triggers): a thin `scheduled` handler in `platform/` that calls a pure function.
 - Enforced by ESLint `no-restricted-imports` in `eslint.config.js`.
