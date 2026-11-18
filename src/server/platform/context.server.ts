@@ -3,8 +3,10 @@ import { getRequest } from '@tanstack/react-start/server'
 import type { Auth } from '#/server/auth/auth'
 import type { SendEmail } from '#/server/email/email'
 import type { FileStorage } from '#/server/files/storage'
+import type { Logger } from '#/server/log/log'
 import { createAuth } from './auth.server'
 import { createDb, type Db } from './db.server'
+import { createLogger } from './logger.server'
 import { createSendEmail, isCapturing } from './mailer.server'
 import { createR2Storage } from './storage.server'
 
@@ -15,6 +17,8 @@ export interface RequestContext {
   sendEmail: SendEmail
   /** Private files; see src/server/files/storage.ts. */
   storage: FileStorage
+  /** Structured logs; see src/server/log/log.ts. */
+  log: Logger
   /**
    * Sign-in and sessions for the current request; see
    * src/server/auth/auth.ts. Created on first use.
@@ -35,6 +39,7 @@ export function getRequestContext(): RequestContext {
     db,
     sendEmail: createSendEmail(env),
     storage: createR2Storage(env.FILES),
+    log: createLogger(),
     get auth() {
       auth ??= createAuth({
         db,

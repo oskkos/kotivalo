@@ -6,11 +6,13 @@ import type { Locale } from '#/paraglide/runtime.js'
 import type { Auth } from '#/server/auth/auth'
 import type { LimitRule } from '#/server/platform/limits.server'
 import { EmailError, type SendEmail } from '#/server/email/email'
+import type { Logger } from '#/server/log/log'
 import { signInCodeEmail } from './sign-in-email'
 
 export interface SignInDeps {
   auth: Auth
   sendEmail: SendEmail
+  log: Logger
   /** Counts a request against a key; see platform/limits.server.ts. */
   consumeLimit: (key: string, rule: LimitRule) => Promise<{ allowed: boolean }>
   clientIp: string
@@ -57,9 +59,11 @@ export async function requestCode(
 ): Promise<RequestCodeResult> {
   const { perIp, perEmail } = CODE_REQUEST_LIMITS
   if (!(await deps.consumeLimit(`otp-ip:${deps.clientIp}`, perIp)).allowed) {
+    deps.log.warn('authentication.limit_reached', { limit: 'ip' })
     return { ok: false, reason: 'limit_reached' }
   }
   if (!(await deps.consumeLimit(await emailKey(email), perEmail)).allowed) {
+    deps.log.warn('authentication.limit_reached', { limit: 'email' })
     return { ok: false, reason: 'limit_reached' }
   }
 
@@ -69,11 +73,16 @@ export async function requestCode(
     await deps.sendEmail(signInCodeEmail({ to: email, code, locale }))
   } catch (error) {
     if (error instanceof EmailError) {
-      console.error(`Sign-in code email failed: ${error.message}`)
+      deps.log.error(
+        'authentication.code_email_failed',
+        { failure: error.failure },
+        error,
+      )
       return { ok: false, reason: EMAIL_REASONS[error.failure] }
     }
     throw error
   }
+  deps.log.info('authentication.code_requested', { locale })
   return { ok: true }
 }
 
@@ -87,7 +96,10 @@ export async function verifyCode(
   code: string,
 ): Promise<VerifyCodeResult> {
   const result = await deps.auth.signInWithCode(email, code, deps.requestLocale)
-  return result.ok
-    ? { ok: true, locale: result.user.locale }
-    : { ok: false, reason: result.failure }
+  if (!result.ok) {
+    deps.log.info('authentication.sign_in_refused', { reason: result.failure })
+    return { ok: false, reason: result.failure }
+  }
+  deps.log.info('authentication.signed_in', { userId: result.user.id })
+  return { ok: true, locale: result.user.locale }
 }

@@ -1,10 +1,14 @@
 import { env } from 'cloudflare:workers'
-import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { beforeEach, describe, expect, test } from 'vitest'
 import { reasonText } from '#/lib/reasons'
 import { EmailError, type SendEmail } from '#/server/email/email'
 import { rateLimit, session, user, verification } from '#/server/db/schema'
 import { createDb } from '#/server/platform/db.server'
 import { consumeLimit } from '#/server/platform/limits.server'
+import {
+  createCaptureLogger,
+  type LogLine,
+} from '#/server/platform/logger.server'
 import {
   capturedEmails,
   createCaptureSender,
@@ -15,6 +19,8 @@ import { emailSchema } from './schemas'
 import { requestCode, verifyCode, type SignInDeps } from './sign-in.server'
 
 const db = createDb(env.DB)
+/** Log lines of the current test. */
+let logLines: LogLine[] = []
 const DAY_MS = 24 * 60 * 60 * 1000
 
 /** Time for the limits, moved by the tests. */
@@ -27,9 +33,12 @@ function deps(
   browser: TestBrowser,
   overrides: Partial<SignInDeps> = {},
 ): SignInDeps {
+  const capture = createCaptureLogger()
+  logLines = capture.lines
   return {
     auth: browser.auth,
     sendEmail: createCaptureSender({ log: false }),
+    log: capture.log,
     consumeLimit: (key, rule) => consumeLimit(db, key, rule, now),
     clientIp: '203.0.113.1',
     requestLocale: 'fi',
@@ -224,6 +233,11 @@ describe('Limiting code requests', () => {
       { ok: false, reason: 'limit_reached' },
     ])
     expect(capturedEmails.all()).toHaveLength(3)
+    expect(logLines.at(-1)).toMatchObject({
+      level: 'warn',
+      event: 'authentication.limit_reached',
+      limit: 'ip',
+    })
   })
 
   test('A sixth code for one address within an hour is refused', async () => {
@@ -259,10 +273,6 @@ describe('Telling the user when the code email cannot be sent', () => {
     () =>
       Promise.reject(new EmailError(failure, 'test'))
 
-  beforeEach(() => {
-    vi.spyOn(console, 'error').mockImplementation(() => undefined)
-  })
-
   test('The email quota is used up', async () => {
     const result = await requestCode(
       deps(testBrowser(db), { sendEmail: failingSender('quota') }),
@@ -270,6 +280,15 @@ describe('Telling the user when the code email cannot be sent', () => {
     )
     expect(result).toEqual({ ok: false, reason: 'email_quota' })
     expect(reasonText('email_quota').text).toContain('huomenna')
+    // Logged for alerting, without the address.
+    expect(logLines).toContainEqual(
+      expect.objectContaining({
+        level: 'error',
+        event: 'authentication.code_email_failed',
+        failure: 'quota',
+      }),
+    )
+    expect(JSON.stringify(logLines)).not.toContain('uusi@example.com')
   })
 
   test('Sending is briefly limited', async () => {

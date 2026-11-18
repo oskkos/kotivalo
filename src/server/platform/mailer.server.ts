@@ -98,6 +98,9 @@ export function createCaptureSender(
       assertValidMessage(message)
       captured.push(message)
       if (options.log ?? true) {
+        // Local development only: shows the email, sign-in code included, in
+        // the dev server's log. Never structured or shipped.
+        // eslint-disable-next-line no-console
         console.info(
           `[email] To: ${message.to}\nSubject: ${message.subject}\n\n${message.text}`,
         )

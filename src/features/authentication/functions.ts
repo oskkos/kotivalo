@@ -19,6 +19,7 @@ function signInDeps(): SignInDeps {
   return {
     auth: context.auth,
     sendEmail: context.sendEmail,
+    log: context.log,
     consumeLimit: (key, rule) => consumeLimit(context.db, key, rule),
     clientIp: context.clientIp(),
     requestLocale: getLocale(),
