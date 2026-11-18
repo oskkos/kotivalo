@@ -3,6 +3,13 @@
 // context; Better Auth behind it lives in src/server/platform/auth.server.ts.
 import type { Locale } from '#/paraglide/runtime.js'
 
+/** Sign-in code rules (spec: "Rejecting wrong and expired codes"). */
+export const SIGN_IN_CODE = {
+  length: 6,
+  validSeconds: 10 * 60,
+  attempts: 5,
+} as const
+
 export interface AuthUser {
   id: string
   email: string

@@ -1,4 +1,4 @@
-// The shared email layout: one heading, a few paragraphs and an optional
+// The shared email layout: one heading, paragraphs and codes, and an optional
 // button, as HTML and plain text, in the recipient's language. Feature
 // templates (sign-in link, invitation, reminder) fill it with their own
 // Paraglide messages, rendered with { locale } for the recipient.
@@ -7,12 +7,18 @@ import type { Locale } from '#/paraglide/runtime.js'
 import { colors, radii } from '#/theme/tokens'
 import type { EmailMessage } from './email'
 
+/**
+ * One block of the body: a paragraph, or a code the reader types or copies
+ * (e.g. a sign-in code), shown large and on its own line.
+ */
+export type EmailBlock = string | { code: string }
+
 export interface EmailContent {
   to: string
   locale: Locale
   subject: string
   heading: string
-  paragraphs: string[]
+  paragraphs: EmailBlock[]
   /** A button with a link, e.g. "Sign in". The URL is also shown as text. */
   action?: { label: string; url: string }
   idempotencyKey?: string
@@ -47,7 +53,9 @@ export function renderEmail(content: EmailContent): EmailMessage {
 
   const text = [
     content.heading,
-    ...content.paragraphs,
+    ...content.paragraphs.map((block) =>
+      typeof block === 'string' ? block : block.code,
+    ),
     ...(action ? [`${action.label}: ${action.url}`] : []),
     '—',
     footer,
@@ -55,6 +63,10 @@ export function renderEmail(content: EmailContent): EmailMessage {
 
   const paragraph = (value: string) =>
     `<p style="margin:0 0 16px;font-size:16px;line-height:1.5">${escapeHtml(value)}</p>`
+  const block = (value: EmailBlock) =>
+    typeof value === 'string'
+      ? paragraph(value)
+      : `<p style="margin:0 0 16px;padding:16px 0;background:${colors.cream};border:2px solid ${colors.inputBorder};border-radius:${String(radii.tile)}px;text-align:center;font-family:ui-monospace,'SF Mono',Menlo,Consolas,monospace;font-size:40px;font-weight:700;letter-spacing:8px">${escapeHtml(value.code)}</p>`
   const button = action
     ? `<p style="margin:24px 0"><a href="${escapeHtml(action.url)}" style="display:inline-block;padding:14px 24px;border-radius:${String(radii.pill)}px;background:${colors.plum};color:${colors.cream};font-weight:800;text-decoration:none">${escapeHtml(action.label)}</a></p>` +
       paragraph(m.email_action_fallback({}, { locale })) +
@@ -67,7 +79,7 @@ export function renderEmail(content: EmailContent): EmailMessage {
 <body style="margin:0;padding:24px 16px;background:${colors.cream};color:${colors.plum};font-family:'Segoe UI',system-ui,-apple-system,sans-serif">
 <div style="max-width:480px;margin:0 auto;padding:24px;background:${colors.white};border-radius:${String(radii.card)}px">
 <h1 style="margin:0 0 16px;font-size:24px;line-height:1.2">${escapeHtml(content.heading)}</h1>
-${content.paragraphs.map(paragraph).join('\n')}
+${content.paragraphs.map(block).join('\n')}
 ${button}
 <p style="margin:24px 0 0;font-size:13px;color:${colors.plumMuted}">${escapeHtml(footer)}</p>
 </div>

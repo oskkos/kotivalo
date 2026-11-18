@@ -1,5 +1,10 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
   "app_tagline": "Valoa vuokranantajan arkeen",
-  "email_action_fallback": "Jos painike ei toimi, kopioi tämä osoite selaimeesi:"
+  "email_action_fallback": "Jos painike ei toimi, kopioi tämä osoite selaimeesi:",
+  "sign_in_email_subject": "{code} on Kotivalo-kirjautumiskoodisi",
+  "sign_in_email_heading": "Kirjautumiskoodisi",
+  "sign_in_email_intro": "Kirjaudu Kotivaloon syöttämällä tämä koodi sovellukseen:",
+  "sign_in_email_validity": "Koodi on voimassa {minutes} minuuttia.",
+  "sign_in_email_ignore": "Jos et pyytänyt koodia, voit jättää viestin huomiotta. Kukaan ei pääse tilillesi ilman koodia."
 }

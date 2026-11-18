@@ -33,9 +33,9 @@
 
 `feat(email): add the sign-in code email`
 
-- [ ] 4.1 Add an optional `code` block to `renderEmail()` (large monospaced in HTML, its own line in text), with tests including escaping
-- [ ] 4.2 Write the sign-in code email template in `src/features/authentication/` from the `SignInCodeEmail` canvas board: the code in the subject, the 10-minute validity, the ignore line; rendered in the given locale, with tests
-- [ ] 4.3 Add the Finnish messages from the canvas, then Swedish and English
+- [x] 4.1 Add an optional `code` block to `renderEmail()` (large monospaced in HTML, its own line in text), with tests including escaping
+- [x] 4.2 Write the sign-in code email template in `src/features/authentication/` from the `SignInCodeEmail` canvas board: the code in the subject, the 10-minute validity, the ignore line; rendered in the given locale, with tests
+- [x] 4.3 Add the Finnish messages from the canvas, then Swedish and English
 
 ## 5. Validation and form pattern
 

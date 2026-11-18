@@ -1,5 +1,10 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
   "app_tagline": "Ljus i hyresvärdens vardag",
-  "email_action_fallback": "Om knappen inte fungerar, kopiera den här adressen till din webbläsare:"
+  "email_action_fallback": "Om knappen inte fungerar, kopiera den här adressen till din webbläsare:",
+  "sign_in_email_subject": "{code} är din inloggningskod för Kotivalo",
+  "sign_in_email_heading": "Din inloggningskod",
+  "sign_in_email_intro": "Logga in på Kotivalo genom att ange den här koden i appen:",
+  "sign_in_email_validity": "Koden gäller i {minutes} minuter.",
+  "sign_in_email_ignore": "Om du inte bad om en kod kan du ignorera det här meddelandet. Ingen kommer åt ditt konto utan koden."
 }
