@@ -19,6 +19,19 @@ describe('Test database', () => {
     ).first<{ count: number }>()
     expect(applied?.count).toBe(inject('d1Migrations').length)
   })
+
+  test('has the authentication tables', async () => {
+    const { results } = await env.DB.prepare(
+      "SELECT name FROM sqlite_master WHERE type = 'table' AND name IN ('user', 'session', 'account', 'verification', 'rate_limit') ORDER BY name",
+    ).all<{ name: string }>()
+    expect(results.map((r) => r.name)).toEqual([
+      'account',
+      'rate_limit',
+      'session',
+      'user',
+      'verification',
+    ])
+  })
 })
 
 describe('Request context', () => {
