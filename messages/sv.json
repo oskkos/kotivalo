@@ -47,5 +47,6 @@
   "home_signed_in_as": "Inloggad som {email}",
   "sign_out": "Logga ut",
   "reason_unexpected_title": "Något gick fel",
-  "reason_unexpected": "Försök igen om en stund."
+  "reason_unexpected": "Försök igen om en stund.",
+  "error_reference": "Felkod: {reference}"
 }

@@ -47,5 +47,6 @@
   "home_signed_in_as": "Kirjautuneena: {email}",
   "sign_out": "Kirjaudu ulos",
   "reason_unexpected_title": "Jokin meni pieleen",
-  "reason_unexpected": "Yritä uudelleen hetken kuluttua."
+  "reason_unexpected": "Yritä uudelleen hetken kuluttua.",
+  "error_reference": "Virhetunnus: {reference}"
 }

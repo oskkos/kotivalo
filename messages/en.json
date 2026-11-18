@@ -47,5 +47,6 @@
   "home_signed_in_as": "Signed in as {email}",
   "sign_out": "Sign out",
   "reason_unexpected_title": "Something went wrong",
-  "reason_unexpected": "Try again in a moment."
+  "reason_unexpected": "Try again in a moment.",
+  "error_reference": "Error reference: {reference}"
 }

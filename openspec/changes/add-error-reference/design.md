@@ -14,7 +14,7 @@
 ## Decisions
 
 1. **The reference is the first 8 hex characters of the page's trace id.** That is short enough to read out, and with only the day's logs to search (3 days' retention), collisions don't matter. No new id is needed, and the browser already has it before the request fails, also when the server never answered.
-2. **`ReasonAlert` takes an optional `reference`.** It shows one secondary line, "Virhetunnus: 4bf92f35", in a monospaced font so it is easy to read out. Only the `unexpected` reason passes it.
+2. **`ReasonAlert` adds the reference for the `unexpected` reason itself.** It shows one secondary line, "Virhetunnus: 4bf92f35", in a monospaced font so it is easy to read out. Every place that shows `unexpected` gets it without passing anything: the sign-in steps and the root error view (`ErrorView`).
 3. **Logging stays as it is.** The browser's `clientLog.error()` already sends the failure with the trace id. The reference is derived from the same id, so the two can't drift apart.
 
 ## Risks / Trade-offs
