@@ -22,6 +22,8 @@ pnpm preview    # serve the built Worker locally
 
 The app runs on Cloudflare Workers (TanStack Start + the Cloudflare Vite plugin). Under WSL, run Git and Node from the Linux side: the Git hooks (Lefthook, installed by `pnpm install`) need them.
 
+Every push to `develop` deploys to production on Cloudflare once CI passes.
+
 Emails are not sent locally: they are printed in the dev server's log. To send real email through Resend, copy `.dev.vars.example` to `.dev.vars` and fill it in.
 
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org), checked by commitlint in a `commit-msg` hook and in CI.
