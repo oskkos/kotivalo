@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography'
 import { useEffect, useState } from 'react'
 import { Logo } from '#/components/Logo'
 import { ReasonAlert } from '#/components/ReasonAlert'
+import { clientLog } from '#/lib/client-log'
 import type { AlertReason, FieldReason } from '#/lib/reasons'
 import { m } from '#/paraglide/messages.js'
 import { SIGN_IN_CODE } from '#/server/auth/auth'
@@ -109,7 +110,7 @@ export function CodeStep(props: Props) {
         setAlert(result.reason as AlertReason)
       }
     } catch (error) {
-      console.error(error)
+      clientLog.error('authentication.verify_failed', {}, error)
       setAlert('unexpected')
     } finally {
       setBusy(undefined)
@@ -129,7 +130,7 @@ export function CodeStep(props: Props) {
         setAlert(result.reason)
       }
     } catch (error) {
-      console.error(error)
+      clientLog.error('authentication.resend_failed', {}, error)
       setAlert('unexpected')
     } finally {
       setBusy(undefined)

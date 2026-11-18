@@ -1,9 +1,17 @@
-import type { ReactNode } from 'react'
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
+import { useEffect, type ReactNode } from 'react'
+import {
+  HeadContent,
+  Scripts,
+  createRootRoute,
+  type ErrorComponentProps,
+} from '@tanstack/react-router'
+import Box from '@mui/material/Box'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
 import nunitoCss from '@fontsource-variable/nunito/wght.css?url'
 import { getLocale } from '#/paraglide/runtime.js'
+import { ReasonAlert } from '#/components/ReasonAlert'
+import { clientLog, installClientLogging } from '#/lib/client-log'
 import { colors } from '#/theme/tokens'
 import { themeFor } from '#/theme/theme'
 
@@ -22,10 +30,26 @@ export const Route = createRootRoute({
     links: [{ rel: 'stylesheet', href: nunitoCss }],
   }),
   shellComponent: RootDocument,
+  errorComponent: RootError,
 })
+
+/** A page failed to render or load: log it and say so. */
+function RootError({ error }: ErrorComponentProps) {
+  useEffect(() => {
+    clientLog.error('app.render_error', {}, error)
+  }, [error])
+  return (
+    <Box component="main" sx={{ px: 2.5, py: 7 }}>
+      <ReasonAlert reason="unexpected" />
+    </Box>
+  )
+}
 
 function RootDocument({ children }: { children: ReactNode }) {
   const locale = getLocale()
+  useEffect(() => {
+    installClientLogging()
+  }, [])
   return (
     <html lang={locale}>
       <head>

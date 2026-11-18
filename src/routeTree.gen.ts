@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
+import { Route as ApiLogRouteImport } from './routes/api/log'
 import { Route as ApiTestInboxRouteImport } from './routes/api/test/inbox'
 
 const AuthedRoute = AuthedRouteImport.update({
@@ -28,6 +29,11 @@ const AuthedIndexRoute = AuthedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthedRoute,
 } as any)
+const ApiLogRoute = ApiLogRouteImport.update({
+  id: '/api/log',
+  path: '/api/log',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTestInboxRoute = ApiTestInboxRouteImport.update({
   id: '/api/test/inbox',
   path: '/api/test/inbox',
@@ -37,10 +43,12 @@ const ApiTestInboxRoute = ApiTestInboxRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
   '/sign-in': typeof SignInRoute
+  '/api/log': typeof ApiLogRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
 }
 export interface FileRoutesByTo {
   '/sign-in': typeof SignInRoute
+  '/api/log': typeof ApiLogRoute
   '/': typeof AuthedIndexRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
 }
@@ -48,20 +56,28 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authed': typeof AuthedRouteWithChildren
   '/sign-in': typeof SignInRoute
+  '/api/log': typeof ApiLogRoute
   '/_authed/': typeof AuthedIndexRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sign-in' | '/api/test/inbox'
+  fullPaths: '/' | '/sign-in' | '/api/log' | '/api/test/inbox'
   fileRoutesByTo: FileRoutesByTo
-  to: '/sign-in' | '/' | '/api/test/inbox'
-  id: '__root__' | '/_authed' | '/sign-in' | '/_authed/' | '/api/test/inbox'
+  to: '/sign-in' | '/api/log' | '/' | '/api/test/inbox'
+  id:
+    | '__root__'
+    | '/_authed'
+    | '/sign-in'
+    | '/api/log'
+    | '/_authed/'
+    | '/api/test/inbox'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   AuthedRoute: typeof AuthedRouteWithChildren
   SignInRoute: typeof SignInRoute
+  ApiLogRoute: typeof ApiLogRoute
   ApiTestInboxRoute: typeof ApiTestInboxRoute
 }
 
@@ -88,6 +104,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/api/log': {
+      id: '/api/log'
+      path: '/api/log'
+      fullPath: '/api/log'
+      preLoaderRoute: typeof ApiLogRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/test/inbox': {
       id: '/api/test/inbox'
       path: '/api/test/inbox'
@@ -112,6 +135,7 @@ const AuthedRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   AuthedRoute: AuthedRouteWithChildren,
   SignInRoute: SignInRoute,
+  ApiLogRoute: ApiLogRoute,
   ApiTestInboxRoute: ApiTestInboxRoute,
 }
 export const routeTree = rootRouteImport
