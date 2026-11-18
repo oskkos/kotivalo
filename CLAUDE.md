@@ -82,6 +82,12 @@ Switching hosts should mean rewriting `src/server/platform/` and the deploy conf
   - ESLint forbids `console` in server code; the capture mailer's local email printout is the one exception.
   - Tests use `createCaptureLogger()` and assert on the lines.
   - **Every line of a request carries** `traceId`, `versionId` and `commit` (the deployed git commit, `wrangler deploy --tag`), and `userId` once the session is known. The `userId` is added by `auth.getSession()` and sign-in through `addLogContext()` (`platform/log-context.server.ts`, AsyncLocalStorage), so code never passes these fields itself.
+- **Logging in the browser** uses `clientLog` from `src/lib/client-log.ts` (same event names and no-personal-data rule).
+  - Errors are sent at once, other lines in batches, and the buffer is flushed with `sendBeacon` when the page is hidden.
+  - Uncaught errors, unhandled rejections and render errors (the root route's `errorComponent`) are logged automatically.
+  - The Worker receives them at `POST /api/log` (`platform/client-log.server.ts`) and writes them with `source: "client"`, the page's trace id and the signed-in user's id, taken from the session and never from the request body.
+  - The endpoint allows 30 requests a minute per IP address, 16 KB and 20 events per request, well-formed event names only, and replaces anything that looks like an email address.
+  - ESLint forbids `console` in all app code.
 - **Tracing** (W3C trace context, `src/lib/trace.ts`):
   - The browser keeps one trace id per page load and sends it as `traceparent` with every server function call (`src/start.ts`, a global function middleware).
   - The server (`platform/request.server.ts`, wrapped around the app in `src/server.ts`) continues that trace or starts one, logs 5xx responses and uncaught errors, and returns the id as `x-trace-id`.

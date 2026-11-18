@@ -132,10 +132,11 @@ export default defineConfig([
     rules: { 'paraglide/no-dynamic-message-access': 'error' },
   },
 
-  // Server code logs through the context's Logger (src/server/log/log.ts),
-  // so every line is structured and free of personal data.
+  // Logs go through the context's Logger on the server (src/server/log/log.ts)
+  // and clientLog in the browser (src/lib/client-log.ts), so every line is
+  // structured, free of personal data and kept.
   {
-    files: ['src/server.ts', 'src/server/**/*.ts', 'src/**/*.server.ts'],
+    files: ['src/**/*.{ts,tsx}'],
     ignores: [...TESTS, 'src/server/platform/logger.server.ts'],
     rules: { 'no-console': 'error' },
   },

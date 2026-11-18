@@ -9,6 +9,7 @@ import { LanguageMenu } from '#/components/LanguageMenu'
 import { Logo, LogoMark } from '#/components/Logo'
 import { ReasonAlert } from '#/components/ReasonAlert'
 import { TextField } from '#/components/form/TextField'
+import { clientLog } from '#/lib/client-log'
 import type { AlertReason } from '#/lib/reasons'
 import { m } from '#/paraglide/messages.js'
 import { colors } from '#/theme/tokens'
@@ -37,7 +38,7 @@ export function EmailStep({ defaultEmail, onSent }: Props) {
           setAlert(result.reason)
         }
       } catch (error) {
-        console.error(error)
+        clientLog.error('authentication.code_request_failed', {}, error)
         setAlert('unexpected')
       }
     },

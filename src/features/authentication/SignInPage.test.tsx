@@ -1,11 +1,13 @@
 import { act, render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import { clientLog } from '#/lib/client-log'
 import { requestSignInCode, verifySignInCode } from './functions'
 import { SignInPage } from './SignInPage'
 
 // The server functions are replaced: these tests drive the page's states.
 // jsdom's browser language is English, so the page is in English.
+vi.mock('#/lib/client-log', () => ({ clientLog: { error: vi.fn() } }))
 vi.mock('./functions', () => ({
   requestSignInCode: vi.fn(),
   verifySignInCode: vi.fn(),
@@ -132,10 +134,6 @@ describe('Sign-in page', () => {
 })
 
 describe('Sign-in page when a request fails unexpectedly', () => {
-  beforeEach(() => {
-    vi.spyOn(console, 'error').mockImplementation(() => undefined)
-  })
-
   test('the email step shows an alert', async () => {
     requestCode.mockRejectedValue(new Error('network down'))
     const { user } = setup()
@@ -149,6 +147,11 @@ describe('Sign-in page when a request fails unexpectedly', () => {
       'Something went wrong',
     )
     expect(screen.getByRole('button', { name: 'Send code' })).toBeEnabled()
+    expect(clientLog.error).toHaveBeenCalledWith(
+      'authentication.code_request_failed',
+      {},
+      expect.any(Error),
+    )
   })
 
   test('the code step shows an alert', async () => {
