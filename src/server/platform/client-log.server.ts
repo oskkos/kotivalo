@@ -54,7 +54,7 @@ export interface ClientLogDeps {
   consumeLimit: (
     key: string,
     rule: { windowSeconds: number; max: number },
-  ) => Promise<{ allowed: boolean }>
+  ) => Promise<{ allowed: boolean; count: number }>
   /** The signed-in user's id, from the session cookie; never from the body. */
   userId: () => Promise<string | undefined>
 }
@@ -108,21 +108,30 @@ export async function clientLogResponse(
     CLIENT_LOG_LIMITS.perIp,
   )
   if (!limit.allowed) {
+    // Once per window, so a flood can't use up the log quota.
+    if (limit.count === CLIENT_LOG_LIMITS.perIp.max + 1) {
+      deps.log.warn('app.client_log_refused', { reason: 'limit' })
+    }
     return new Response(null, { status: 429 })
+  }
+  // Below the rate limit, so these lines are bounded per IP address too.
+  const refuse = (status: 400 | 413, reason: string) => {
+    deps.log.warn('app.client_log_refused', { reason })
+    return new Response(null, { status })
   }
   const body = await readAtMost(request, CLIENT_LOG_LIMITS.maxBytes)
   if (body === undefined) {
-    return new Response(null, { status: 413 })
+    return refuse(413, 'too_large')
   }
   let json: unknown
   try {
     json = JSON.parse(body)
   } catch {
-    return new Response(null, { status: 400 })
+    return refuse(400, 'not_json')
   }
   const parsed = batchSchema.safeParse(json)
   if (!parsed.success) {
-    return new Response(null, { status: 400 })
+    return refuse(400, 'invalid')
   }
 
   const userId = await deps.userId()

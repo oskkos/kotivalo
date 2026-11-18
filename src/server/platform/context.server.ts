@@ -47,6 +47,7 @@ export function getRequestContext(): RequestContext {
         secret: requireSecret(env.BETTER_AUTH_SECRET),
         baseURL: new URL(getRequest().url).origin,
         headers: () => getRequest().headers,
+        log,
       })
       return auth
     },

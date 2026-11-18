@@ -2,6 +2,7 @@
 // whose cookies persist between calls, like a browser's cookie jar.
 import type { Auth } from '#/server/auth/auth'
 import { createAuth } from '#/server/platform/auth.server'
+import type { Logger } from '#/server/log/log'
 import type { Db } from '#/server/platform/db.server'
 
 export interface TestBrowser {
@@ -10,12 +11,13 @@ export interface TestBrowser {
   jar: Map<string, string>
 }
 
-export function testBrowser(db: Db): TestBrowser {
+export function testBrowser(db: Db, log?: Logger): TestBrowser {
   const jar = new Map<string, string>()
   const auth = createAuth({
     db,
     secret: 'test-secret-that-is-at-least-32-characters-long',
     baseURL: 'http://localhost:3000',
+    ...(log === undefined ? {} : { log }),
     headers: () =>
       new Headers(
         jar.size === 0

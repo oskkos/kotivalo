@@ -17,7 +17,7 @@ function setup(overrides: Partial<ClientLogDeps> = {}) {
   const deps: ClientLogDeps = {
     log,
     clientIp: '203.0.113.1',
-    consumeLimit: () => Promise.resolve({ allowed: true }),
+    consumeLimit: () => Promise.resolve({ allowed: true, count: 1 }),
     userId: () => Promise.resolve('user-1'),
     ...overrides,
   }
@@ -95,7 +95,13 @@ describe('Client log endpoint', () => {
   ])('refuses %s with 400', async (_name, body) => {
     const { deps, lines } = setup()
     expect((await send(post(body), deps)).status).toBe(400)
-    expect(lines).toEqual([])
+    // Only the refusal itself is logged, none of the batch.
+    expect(lines).toEqual([
+      expect.objectContaining({
+        level: 'warn',
+        event: 'app.client_log_refused',
+      }),
+    ])
   })
 
   test("can't pose as the server: its fields are prefixed and context wins", async () => {
@@ -143,16 +149,27 @@ describe('Client log endpoint', () => {
     expect((await send(post(big), deps)).status).toBe(413)
   })
 
-  test('refuses requests over the rate limit with 429', async () => {
-    const { deps, lines } = setup({
-      consumeLimit: () => Promise.resolve({ allowed: false }),
-    })
-    const response = await send(
-      post({ events: [{ level: 'info', event: 'app.x' }] }),
-      deps,
-    )
-    expect(response.status).toBe(429)
-    expect(lines).toEqual([])
+  test('refuses requests over the rate limit with 429, logging the first', async () => {
+    const refused = async (count: number) => {
+      const { deps, lines } = setup({
+        consumeLimit: () => Promise.resolve({ allowed: false, count }),
+      })
+      const response = await send(
+        post({ events: [{ level: 'info', event: 'app.x' }] }),
+        deps,
+      )
+      expect(response.status).toBe(429)
+      return lines
+    }
+    // The first refusal in the window (limit 30) is logged, later ones not.
+    expect(await refused(31)).toEqual([
+      expect.objectContaining({
+        level: 'warn',
+        event: 'app.client_log_refused',
+        reason: 'limit',
+      }),
+    ])
+    expect(await refused(32)).toEqual([])
   })
 })
 

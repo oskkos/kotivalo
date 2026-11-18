@@ -19,6 +19,12 @@ export interface LogLine extends LogFields {
 
 type Write = (level: LogLevel, line: LogLine) => void
 
+const LEVELS: readonly LogLevel[] = ['debug', 'info', 'warn', 'error']
+
+export function isLogLevel(value: unknown): value is LogLevel {
+  return LEVELS.includes(value as LogLevel)
+}
+
 const writeToConsole: Write = (level, line) => {
   const json = JSON.stringify(line)
   if (level === 'error') {
@@ -38,6 +44,8 @@ export function createLogger(
     base?: LogFields
     /** The current request's fields (trace id, user id). */
     context?: () => LogFields
+    /** Lines below this level are dropped; LOG_LEVEL in wrangler.jsonc. */
+    minLevel?: LogLevel
     write?: Write
     now?: () => Date
   } = {},
@@ -45,8 +53,12 @@ export function createLogger(
   const write = options.write ?? writeToConsole
   const now = options.now ?? (() => new Date())
   const context = options.context ?? currentLogContext
+  const threshold = LEVELS.indexOf(options.minLevel ?? 'debug')
 
   const log = (level: LogLevel, event: LogEvent, fields: LogFields = {}) => {
+    if (LEVELS.indexOf(level) < threshold) {
+      return
+    }
     if (!isLogEvent(event)) {
       throw new Error(
         `Log event "${String(event)}" is not <capability>.<event>`,

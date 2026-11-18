@@ -50,4 +50,5 @@ rules:
   tasks:
     - Each `## N.` group is one commit, ordered schema and migration, platform and server code, shared patterns, server functions with Workers tests, UI with Playwright tests, turning the behaviour on, archive. Every group passes all checks on its own and stays under about 500 changed lines (not counting migrations, lockfiles, generated files). A dependency and its docs land in the group that first uses them.
     - Include the schema change, `pnpm db:generate` and the committed migration, the repository with Workers tests, and the Finnish, Swedish and English messages.
+    - Log each data change at info once it succeeded (`<capability>.<what_happened>`, ids not values) and each failure at its level, with tests asserting the events (CLAUDE.md, Logging).
     - End with `pnpm check:traceability` and the full test suite passing, then a last task to archive the change (`openspec archive <change>`) as the PR's last commit; only archived specs block the traceability check.

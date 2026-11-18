@@ -46,6 +46,8 @@
     "EMAIL_TRANSPORT": "capture",
     "EMAIL_FROM": "Kotivalo <noreply@example.com>",
     "BETTER_AUTH_SECRET": "local-development-only-not-a-secret-0123456789",
+    // The lowest log level written (src/server/log/log.ts).
+    "LOG_LEVEL": "debug",
   },
   // Workers Logs and automatic tracing (D1, fetch). Free plan: 200,000
   // events a day, kept 3 days; every request is traced while that suffices.
@@ -87,6 +89,8 @@
       "vars": {
         "EMAIL_TRANSPORT": "resend",
         "EMAIL_FROM": "Kotivalo <noreply@k6.fi>",
+        // Debug lines would use up the free plan's daily log events.
+        "LOG_LEVEL": "info",
       },
     },
   },
