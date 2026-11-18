@@ -99,3 +99,27 @@ jobs:
             playwright-report/
             test-results/
           retention-days: 14
+
+  # Production deploy after every push to develop, once all checks pass.
+  # Not a required status check: it doesn't run on pull requests.
+  deploy:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/develop'
+    needs: [lint, typecheck, test, traceability, e2e]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment: production
+    # One deploy at a time, in push order; a running deploy is never cancelled.
+    concurrency:
+      group: deploy-production
+      cancel-in-progress: false
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: ./.github/actions/setup
+      # Migrations first: the new code may need the new schema. Migrations
+      # must therefore keep the running version working (add, don't rename
+      # or drop in the same deploy).
+      - run: pnpm db:migrate:production
+      - run: pnpm run deploy
