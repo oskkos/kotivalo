@@ -187,6 +187,23 @@ Code, database and test names use these English terms. The English UI copy may u
 
   Every commit passes CI on its own.
 
+- **Commits within a change:**
+  - Each `## N.` group in `tasks.md` is one commit, so the commit plan is reviewed with the proposal.
+  - Every commit passes all CI checks on its own, and everything it adds is tested in that commit.
+  - Order:
+    1. schema and migration
+    2. platform and server code
+    3. shared patterns (components, helpers)
+    4. server functions with Workers tests
+    5. UI with Playwright tests
+    6. turning the behaviour on (protected routes, navigation)
+    7. the archive commit
+
+    Nothing that already works breaks between commits: a change that would break an existing test lands together with or after what replaces it.
+
+  - A dependency lands in the commit that first uses it. Docs (CLAUDE.md, README) change in the commit that changes what they describe.
+  - Size: one commit is reviewable in one sitting, roughly under 500 changed lines, not counting migrations, lockfiles or generated files. Split a bigger group.
+  - Workflow: propose each commit's summary and message, commit when the user says so, and push each commit to the change's draft PR, so CI runs on every commit and not only the last.
 - **Before implementing a change** (`/opsx:apply`), check `git status`. If the change's artifacts (`openspec/changes/<change>/`) are not committed yet, commit them first as the proposal commit, after the user has reviewed them, so the implementation starts from the agreed version.
 - Requirement names must be unique across all specs, because tests are matched by name. Avoid `>` in requirement and scenario names: Vitest joins titles with it.
 - `openspec/config.yaml` gives OpenSpec a short project context and per-artifact rules (proposal, specs, design, tasks). It summarises this file and CONCEPT.md, so update it when the rules here change.
