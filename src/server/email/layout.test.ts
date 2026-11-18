@@ -84,3 +84,33 @@ describe('renderEmail', () => {
     })
   })
 })
+
+describe('renderEmail codes', () => {
+  const withCode: EmailContent = {
+    to: 'owner@example.com',
+    locale: 'fi',
+    subject: '482913 on Kotivalo-kirjautumiskoodisi',
+    heading: 'Kirjautumiskoodisi',
+    paragraphs: ['Syötä tämä koodi:', { code: '482913' }, 'Voimassa 10 min.'],
+  }
+
+  test('puts the code on its own line in the text, between the paragraphs', () => {
+    expect(renderEmail(withCode).text).toContain(
+      'Syötä tämä koodi:\n\n482913\n\nVoimassa 10 min.',
+    )
+  })
+
+  test('shows the code large in the HTML', () => {
+    const { html } = renderEmail(withCode)
+    expect(html).toMatch(/font-size:40px[^>]*>482913<\/p>/)
+  })
+
+  test('escapes the code', () => {
+    const { html } = renderEmail({
+      ...withCode,
+      paragraphs: [{ code: '<b>1</b>' }],
+    })
+    expect(html).toContain('&lt;b&gt;1&lt;/b&gt;')
+    expect(html).not.toContain('<b>1</b>')
+  })
+})

@@ -10,23 +10,17 @@ import { emailOTP } from 'better-auth/plugins/email-otp'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
 import { eq } from 'drizzle-orm'
 import { baseLocale, isLocale, type Locale } from '#/paraglide/runtime.js'
-import type {
-  Auth,
-  AuthUser,
-  SignInFailure,
-  SignInResult,
+import {
+  SIGN_IN_CODE,
+  type Auth,
+  type AuthUser,
+  type SignInFailure,
+  type SignInResult,
 } from '#/server/auth/auth'
 import { account, session, user, verification } from '#/server/db/schema'
 import type { Db } from './db.server'
 
 const DAY = 24 * 60 * 60
-
-/** Sign-in code rules (spec: "Rejecting wrong and expired codes"). */
-export const SIGN_IN_CODE = {
-  length: 6,
-  validSeconds: 10 * 60,
-  attempts: 5,
-} as const
 
 export interface AuthOptions {
   db: Db

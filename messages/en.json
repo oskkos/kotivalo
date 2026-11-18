@@ -1,5 +1,10 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
   "app_tagline": "Light for a landlord's everyday work",
-  "email_action_fallback": "If the button doesn't work, copy this address into your browser:"
+  "email_action_fallback": "If the button doesn't work, copy this address into your browser:",
+  "sign_in_email_subject": "{code} is your Kotivalo sign-in code",
+  "sign_in_email_heading": "Your sign-in code",
+  "sign_in_email_intro": "Sign in to Kotivalo by entering this code in the app:",
+  "sign_in_email_validity": "The code is valid for {minutes} minutes.",
+  "sign_in_email_ignore": "If you didn't ask for a code, you can ignore this email. No one can get into your account without the code."
 }
