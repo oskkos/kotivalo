@@ -132,6 +132,14 @@ export default defineConfig([
     rules: { 'paraglide/no-dynamic-message-access': 'error' },
   },
 
+  // Server code logs through the context's Logger (src/server/log/log.ts),
+  // so every line is structured and free of personal data.
+  {
+    files: ['src/server.ts', 'src/server/**/*.ts', 'src/**/*.server.ts'],
+    ignores: [...TESTS, 'src/server/platform/logger.server.ts'],
+    rules: { 'no-console': 'error' },
+  },
+
   // Import boundaries: one block per allowed area, because a later
   // no-restricted-imports entry replaces an earlier one for the same file.
   {
