@@ -15,4 +15,4 @@
 
 `docs(openspec): archive error reference`
 
-- [ ] 2.1 Run `openspec archive add-error-reference` and check that `pnpm check:traceability` passes with the spec in `openspec/specs/`
+- [x] 2.1 Run `openspec archive add-error-reference` and check that `pnpm check:traceability` passes with the spec in `openspec/specs/`
