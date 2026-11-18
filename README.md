@@ -28,6 +28,20 @@ Emails are not sent locally: they are printed in the dev server's log, so a sign
 
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org), checked by commitlint in a `commit-msg` hook and in CI.
 
+## Production logs and errors
+
+The Worker writes structured JSON log lines (`src/server/log/log.ts`), and the browser's errors and logs reach the same logs (`POST /api/log`). Every line of a request carries `traceId`, `versionId`, `commit` and, once signed in, `userId`. Lines carry no email addresses or other personal data.
+
+In the Cloudflare dashboard, open **Workers & Pages → kotivalo**:
+
+- **Observability → Logs / Traces:** search by field, e.g. `traceId`, `event` (`authentication.code_email_failed`) or `userId`.
+  - When a user reports an error, they see a reference such as `Virhetunnus: 4bf92f35`, the first 8 characters of the trace id. Search for lines whose `traceId` starts with it.
+  - `source: client` marks lines from the browser.
+- **Issues:** uncaught exceptions, 5xx responses and every `error`-level line, grouped. Set up a notification for new issues there (email or webhook). It covers unexpected errors and email failures (`authentication.code_email_failed`, including the Resend quota).
+- **Limits on the free plan:** 200,000 log and trace events a day, kept for 3 days. From 1 December 2026 Cloudflare's Observability pricing applies; check the free allowance then.
+
+Refused requests (`authentication.limit_reached`) are `warn` lines: look for them in the logs when abuse is suspected. Resend's own dashboard shows each email, tagged with `trace_id`.
+
 ## License
 
 [MIT](LICENSE)

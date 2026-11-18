@@ -77,7 +77,8 @@ Switching hosts should mean rewriting `src/server/platform/` and the deploy conf
 - **The test inbox** `GET /api/test/inbox?to=<address>` (`platform/test-inbox.server.ts`) returns the captured emails for an address, so Playwright can read sign-in codes. It responds 404 unless `EMAIL_TRANSPORT` is `capture`, and `src/wrangler-config.test.ts` checks that production uses `resend`. While capturing, an `x-test-client-ip` header sets the client IP for the limits, so each test gets its own.
 - **Logging** goes through the context's `log` (`Logger` in `src/server/log/log.ts`; JSON lines through `platform/logger.server.ts`, which Workers Logs indexes field by field).
   - Event names are `<capability>.<what_happened>` in snake_case (`authentication.code_requested`), so a line maps to its spec.
-  - Levels: `info` for what happened, `warn` for refused or unusual requests (limits), `error` for failures someone should look at. Pass an error as the third argument of `log.error()`.
+  - Levels: `info` for what happened, `warn` for refused or unusual requests (limits), `error` for failures someone should look at. Every `error` line becomes a Cloudflare Workers Issue and so an alert, so don't use `error` for expected outcomes. Pass an error as the third argument of `log.error()`.
+  - How to read the logs in production: README, "Production logs and errors".
   - **No personal data in logs:** no email addresses, codes, tokens, names or amounts. Log ids (the user id) or nothing.
   - ESLint forbids `console` in server code; the capture mailer's local email printout is the one exception.
   - Tests use `createCaptureLogger()` and assert on the lines.
