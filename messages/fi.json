@@ -6,5 +6,20 @@
   "sign_in_email_heading": "Kirjautumiskoodisi",
   "sign_in_email_intro": "Kirjaudu Kotivaloon syöttämällä tämä koodi sovellukseen:",
   "sign_in_email_validity": "Koodi on voimassa {minutes} minuuttia.",
-  "sign_in_email_ignore": "Jos et pyytänyt koodia, voit jättää viestin huomiotta. Kukaan ei pääse tilillesi ilman koodia."
+  "sign_in_email_ignore": "Jos et pyytänyt koodia, voit jättää viestin huomiotta. Kukaan ei pääse tilillesi ilman koodia.",
+  "reason_email_invalid": "Tarkista sähköpostiosoite, esimerkiksi nimi@esimerkki.fi.",
+  "reason_code_invalid": "Syötä 6-numeroinen koodi.",
+  "reason_code_wrong": "Koodi ei ole oikein. Tarkista koodi ja yritä uudelleen.",
+  "reason_code_expired_title": "Koodi on vanhentunut",
+  "reason_code_expired": "Pyydä uusi koodi alta.",
+  "reason_code_attempts_used_title": "Liian monta väärää yritystä",
+  "reason_code_attempts_used": "Pyydä uusi koodi ja yritä uudelleen.",
+  "reason_limit_reached_title": "Liian monta yritystä",
+  "reason_limit_reached": "Odota hetki ja yritä sitten uudelleen.",
+  "reason_email_quota_title": "Koodeja ei voi lähettää juuri nyt",
+  "reason_email_quota": "Päivän lähetysmäärä on täynnä. Kokeile uudelleen huomenna.",
+  "reason_email_busy_title": "Lähetys on ruuhkautunut",
+  "reason_email_busy": "Yritä uudelleen hetken kuluttua.",
+  "reason_email_failed_title": "Lähetys epäonnistui",
+  "reason_email_failed": "Koodin lähettäminen ei onnistunut. Yritä uudelleen."
 }

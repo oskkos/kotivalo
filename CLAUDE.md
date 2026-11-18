@@ -90,6 +90,8 @@ src/
   server/email/           # sendEmail types and the email layout
   server/files/           # FileStorage, upload checks, file responses
   server/db/              # Drizzle schema (schema.ts) and column helpers (columns.ts)
+  server/auth/            # the Auth interface (Better Auth is behind it in platform/)
+  components/             # shared UI components, e.g. form/TextField.tsx
   lib/                    # pure helpers: formatting, domain calculations
 ```
 
@@ -129,6 +131,20 @@ Vitest projects are chosen by file name (`vitest.config.ts`):
 - Text contrast at least 4.5:1 and touch targets at least 44 px (`TOUCH_TARGET`); `src/theme/theme.test.ts` checks the color pairs. Add a pair there when a new text color or surface comes in.
 - `__root.tsx` picks the theme for the request's language with `themeFor(getLocale())`, so MUI's own component text is localised (`fiFI`, `svSE`, `enUS`). Date pickers (`@mui/x-date-pickers`) are not installed yet; when the first date input needs one, localise it the same way.
 - Nunito is self-hosted from `@fontsource-variable/nunito` (no Google Fonts request).
+
+## Forms and validation
+
+- **Zod schemas** live in the feature (`features/<capability>/schemas.ts`). The form and the server function's `inputValidator` use the same schema.
+- **Errors are reason codes, not text:** `z.email({ error: 'email_invalid' })`. Zod's default English messages never reach the UI.
+  - Codes are listed in `src/lib/reasons.ts`:
+    - `FieldReason`: shown under the field
+    - `AlertReason`: shown as an `Alert` with a title
+  - `reasonText(reason)` turns a code into Paraglide messages (`reason_<code>`, plus `reason_<code>_title` for alerts).
+  - Add a code there and its messages in every language; `messages.test.ts` checks them.
+- **Server functions** return `{ ok: true, … } | { ok: false, reason }` for expected failures and throw only on bugs.
+- **Forms use TanStack Form.**
+  - Bind text inputs with `TextField` from `src/components/form/TextField.tsx`. It shows the field's reason under it once the user has left the field or submitted, sets `aria-invalid` and the description, and disables the field while the form submits.
+  - Pass a server's field-level reason as `reason`.
 
 ## Domain glossary
 

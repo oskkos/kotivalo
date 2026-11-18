@@ -6,5 +6,20 @@
   "sign_in_email_heading": "Din inloggningskod",
   "sign_in_email_intro": "Logga in på Kotivalo genom att ange den här koden i appen:",
   "sign_in_email_validity": "Koden gäller i {minutes} minuter.",
-  "sign_in_email_ignore": "Om du inte bad om en kod kan du ignorera det här meddelandet. Ingen kommer åt ditt konto utan koden."
+  "sign_in_email_ignore": "Om du inte bad om en kod kan du ignorera det här meddelandet. Ingen kommer åt ditt konto utan koden.",
+  "reason_email_invalid": "Kontrollera e-postadressen, till exempel namn@exempel.fi.",
+  "reason_code_invalid": "Ange den 6-siffriga koden.",
+  "reason_code_wrong": "Koden är inte rätt. Kontrollera koden och försök igen.",
+  "reason_code_expired_title": "Koden har gått ut",
+  "reason_code_expired": "Be om en ny kod nedan.",
+  "reason_code_attempts_used_title": "För många felaktiga försök",
+  "reason_code_attempts_used": "Be om en ny kod och försök igen.",
+  "reason_limit_reached_title": "För många försök",
+  "reason_limit_reached": "Vänta en stund och försök sedan igen.",
+  "reason_email_quota_title": "Koder kan inte skickas just nu",
+  "reason_email_quota": "Dagens utskicksgräns är nådd. Försök igen i morgon.",
+  "reason_email_busy_title": "Utskicket är överbelastat",
+  "reason_email_busy": "Försök igen om en stund.",
+  "reason_email_failed_title": "Utskicket misslyckades",
+  "reason_email_failed": "Koden kunde inte skickas. Försök igen."
 }

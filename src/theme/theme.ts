@@ -49,6 +49,14 @@ const base = createTheme({
       },
       name: 'accent',
     }),
+    error: augmentColor({
+      color: {
+        main: colors.error,
+        light: colors.errorSurface,
+        contrastText: colors.white,
+      },
+      name: 'error',
+    }),
     text: {
       primary: colors.plum,
       secondary: colors.plumMuted,
@@ -224,6 +232,36 @@ const base = createTheme({
         // Full opacity: MUI's default 0.42 would drop below 4.5:1. MUI still
         // hides the placeholder (opacity 0 !important) under a resting label.
         input: { '&::placeholder': { color: colors.placeholder, opacity: 1 } },
+      },
+    },
+    // Field errors under the field (bold, error red); service errors as an
+    // Alert with a tinted surface, plum text and a red icon.
+    MuiFormHelperText: {
+      styleOverrides: { root: { fontSize: 13, fontWeight: 800 } },
+    },
+    MuiAlert: {
+      styleOverrides: {
+        root: {
+          borderRadius: radii.input,
+          fontSize: 13,
+          fontWeight: 700,
+          variants: [
+            {
+              props: { severity: 'error', variant: 'standard' },
+              style: {
+                backgroundColor: colors.errorSurface,
+                border: `1.5px solid ${colors.errorBorder}`,
+                color: colors.plum,
+                '& .MuiAlert-icon': { color: colors.error },
+              },
+            },
+          ],
+        },
+      },
+    },
+    MuiAlertTitle: {
+      styleOverrides: {
+        root: { fontSize: 14, fontWeight: 900, marginBottom: 2 },
       },
     },
     MuiInputLabel: {

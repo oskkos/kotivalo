@@ -16,6 +16,12 @@ export const colors = {
   placeholder: '#7A6B8A',
   onPlumMuted: '#E9DDF2', // secondary text on plum
 
+  // Errors (Design canvas: SignInErrors). Always with an icon and text, never
+  // colour alone.
+  error: '#B42318', // error text and icons
+  errorSurface: '#FBE9E7', // error alerts
+  errorBorder: '#E7B4AE',
+
   // Surfaces and tints
   white: '#FFFFFF',
   yellowTint: '#FFF0CC', // paid chips, hints
