@@ -15,6 +15,7 @@ test.describe('Sign in with an emailed code', () => {
     const email = uniqueEmail('uusi')
     await signIn(page, email)
     await expect(page).toHaveURL('/')
+    await expect(page.getByText(`Kirjautuneena: ${email}`)).toBeVisible()
   })
 
   test('An existing user signs in to the same account', async ({

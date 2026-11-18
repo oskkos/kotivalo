@@ -1,6 +1,11 @@
 import { expect, test } from '@playwright/test'
+import { signIn, uniqueEmail } from './support/sign-in'
 
 test.describe('Home page', () => {
+  test.beforeEach(async ({ page }) => {
+    await signIn(page, uniqueEmail('koti'))
+  })
+
   test('shows the app name', async ({ page }) => {
     await page.goto('/')
 

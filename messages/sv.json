@@ -43,5 +43,7 @@
   "sign_in_resend": "Skicka en ny kod",
   "sign_in_resend_wait": "Du kan be om en ny kod om {time}.",
   "sign_in_change_email": "Byt e-postadress",
-  "sign_in_spam_hint": "Fick du ingen kod? Kontrollera skräpposten."
+  "sign_in_spam_hint": "Fick du ingen kod? Kontrollera skräpposten.",
+  "home_signed_in_as": "Inloggad som {email}",
+  "sign_out": "Logga ut"
 }
