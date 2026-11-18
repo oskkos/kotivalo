@@ -44,7 +44,7 @@ rules:
     - Write scenarios with concrete values (cents, ISO dates, basis points) and cover period boundaries and mid-year changes where they apply.
     - Cover who may see or change the data (owner, co-owner, former owner, invited user) when access matters.
   design:
-    - Columns use the helpers in src/server/db/columns.ts: id(), cents(), basisPoints(), isoDate(), validity(). No database-specific SQL outside a clearly named helper.
+    - "Columns use the helpers in src/server/db/columns.ts: id(), cents(), basisPoints(), isoDate(), validity(). No database-specific SQL outside a clearly named helper."
     - Data access goes through an aggregate-oriented repository (features/<capability>/<entity>.repository.server.ts); multi-statement writes use atomically(db, [statements]).
     - Domain calculations are pure functions in lib/ or the feature folder, with no database access.
   tasks:
