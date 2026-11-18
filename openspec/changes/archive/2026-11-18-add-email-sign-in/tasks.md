@@ -111,6 +111,6 @@ The page is public in this commit; the home page stays public until group 8.
 
 `docs(openspec): archive email sign-in`
 
-- [ ] 9.1 Open a follow-up issue for passkeys after the domain move, noting that the `/api/auth` handler and client then need the limits too
-- [ ] 9.2 The user sets the production `BETTER_AUTH_SECRET` in their own terminal before merging
-- [ ] 9.3 Run `openspec archive add-email-sign-in` and check that `pnpm check:traceability` passes with the specs in `openspec/specs/`
+- [x] 9.1 Open a follow-up issue for passkeys after the domain move, noting that the `/api/auth` handler and client then need the limits too
+- [x] 9.2 The user sets the production `BETTER_AUTH_SECRET` in their own terminal before merging
+- [x] 9.3 Run `openspec archive add-email-sign-in` and check that `pnpm check:traceability` passes with the specs in `openspec/specs/`
