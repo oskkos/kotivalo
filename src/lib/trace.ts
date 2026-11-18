@@ -40,3 +40,11 @@ export function browserTraceId(): string | undefined {
   pageTraceId ??= newTraceId()
   return pageTraceId
 }
+
+/**
+ * A short reference for an unexpected error, shown to the user: the first 8
+ * characters of the page's trace id, which find the failure in the logs.
+ */
+export function errorReference(): string | undefined {
+  return browserTraceId()?.slice(0, 8)
+}

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { newTraceId, traceIdFrom, traceparent } from './trace'
+import { errorReference, newTraceId, traceIdFrom, traceparent } from './trace'
 
 describe('trace context', () => {
   test('reads the trace id from a traceparent header', () => {
@@ -22,5 +22,11 @@ describe('trace context', () => {
     const id = newTraceId()
     expect(id).toMatch(/^[0-9a-f]{32}$/)
     expect(traceIdFrom(traceparent(id))).toBe(id)
+  })
+})
+
+describe('errorReference', () => {
+  test('is undefined outside the browser', () => {
+    expect(errorReference()).toBeUndefined()
   })
 })

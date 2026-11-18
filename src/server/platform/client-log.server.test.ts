@@ -155,3 +155,27 @@ describe('Client log endpoint', () => {
     expect(lines).toEqual([])
   })
 })
+
+describe('Showing a reference with an unexpected error', () => {
+  test('The reference finds the failure in the logs', async () => {
+    const { deps, lines } = setup()
+    await send(
+      post({
+        traceId: TRACE,
+        events: [
+          { level: 'error', event: 'authentication.code_request_failed' },
+        ],
+      }),
+      deps,
+    )
+    // The alert shows the first 8 characters of the page's trace id.
+    const reference = TRACE.slice(0, 8)
+    expect(reference).toBe('4bf92f35')
+    const found = lines.filter((line) =>
+      String(line.traceId).startsWith(reference),
+    )
+    expect(found).toEqual([
+      expect.objectContaining({ event: 'authentication.code_request_failed' }),
+    ])
+  })
+})

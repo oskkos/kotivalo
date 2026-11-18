@@ -104,3 +104,35 @@ test.describe('Choosing the language before sign-in', () => {
     expect(cookies.find((c) => c.name === 'kotivalo_locale')?.value).toBe('sv')
   })
 })
+
+test.describe('Showing a reference with an unexpected error', () => {
+  test('A failed request shows a reference', async ({ page }) => {
+    let traceId: string | undefined
+    // The server function that sends the code fails.
+    await page.route('**/_serverFn/**', async (route) => {
+      if (route.request().method() !== 'POST') {
+        await route.continue()
+        return
+      }
+      // Playwright types headers as always present; this one may not be.
+      const header = route.request().headers().traceparent as string | undefined
+      traceId = header?.split('-')[1]
+      await route.fulfill({ status: 500, body: 'Internal Server Error' })
+    })
+    await page.goto('/sign-in')
+    await page
+      .getByRole('textbox', { name: 'Sähköposti' })
+      .fill(uniqueEmail('virhe'))
+    await page.getByRole('button', { name: 'Lähetä koodi' }).click()
+
+    const alert = page.getByRole('alert')
+    await expect(alert).toContainText('Jokin meni pieleen')
+    expect(traceId).toMatch(/^[0-9a-f]{32}$/)
+    await expect(alert).toContainText(
+      `Virhetunnus: ${String(traceId?.slice(0, 8))}`,
+    )
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Kirjaudu Kotivaloon' }),
+    ).toBeVisible()
+  })
+})
