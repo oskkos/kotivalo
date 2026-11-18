@@ -81,6 +81,12 @@ Switching hosts should mean rewriting `src/server/platform/` and the deploy conf
   - **No personal data in logs:** no email addresses, codes, tokens, names or amounts. Log ids (the user id) or nothing.
   - ESLint forbids `console` in server code; the capture mailer's local email printout is the one exception.
   - Tests use `createCaptureLogger()` and assert on the lines.
+  - **Every line of a request carries** `traceId`, `versionId` and `commit` (the deployed git commit, `wrangler deploy --tag`), and `userId` once the session is known. The `userId` is added by `auth.getSession()` and sign-in through `addLogContext()` (`platform/log-context.server.ts`, AsyncLocalStorage), so code never passes these fields itself.
+- **Tracing** (W3C trace context, `src/lib/trace.ts`):
+  - The browser keeps one trace id per page load and sends it as `traceparent` with every server function call (`src/start.ts`, a global function middleware).
+  - The server (`platform/request.server.ts`, wrapped around the app in `src/server.ts`) continues that trace or starts one, logs 5xx responses and uncaught errors, and returns the id as `x-trace-id`.
+  - Resend emails are tagged `trace_id`, and `email.sent` logs Resend's email id.
+  - Cloudflare's automatic tracing (D1, `fetch`) is on in `wrangler.jsonc` (`observability.traces`). Free plan: 200,000 log and trace events a day, kept 3 days.
 - Abuse limits (requests per IP address, per email address, …) use `consumeLimit(db, key, { windowSeconds, max })` from `platform/limits.server.ts`: a counter per key in D1, because Worker isolates share no memory. Hash personal data such as email addresses before using them in a key.
 - Server code gets the context from `getRequestContext()` (`platform/context.server.ts`), per request, never at module scope.
 - Scheduled jobs (Cron Triggers): a thin `scheduled` handler in `platform/` that calls a pure function.

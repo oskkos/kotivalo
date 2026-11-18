@@ -9,6 +9,7 @@ import {
   type LogLevel,
   type Logger,
 } from '#/server/log/log'
+import { currentLogContext } from './log-context.server'
 
 export interface LogLine extends LogFields {
   level: LogLevel
@@ -35,12 +36,15 @@ export function createLogger(
   options: {
     /** Fields on every line, e.g. the Worker version. */
     base?: LogFields
+    /** The current request's fields (trace id, user id). */
+    context?: () => LogFields
     write?: Write
     now?: () => Date
   } = {},
 ): Logger {
   const write = options.write ?? writeToConsole
   const now = options.now ?? (() => new Date())
+  const context = options.context ?? currentLogContext
 
   const log = (level: LogLevel, event: LogEvent, fields: LogFields = {}) => {
     if (!isLogEvent(event)) {
@@ -48,7 +52,8 @@ export function createLogger(
         `Log event "${String(event)}" is not <capability>.<event>`,
       )
     }
-    const defined = Object.entries({ ...options.base, ...fields }).filter(
+    const all = { ...options.base, ...context(), ...fields }
+    const defined = Object.entries(all).filter(
       ([, value]) => value !== undefined,
     )
     write(level, {

@@ -19,6 +19,7 @@ import {
 } from '#/server/auth/auth'
 import { account, session, user, verification } from '#/server/db/schema'
 import type { Db } from './db.server'
+import { addLogContext } from './log-context.server'
 
 const DAY = 24 * 60 * 60
 
@@ -138,6 +139,7 @@ export function createAuth(options: AuthOptions): Auth {
           returnHeaders: true,
         })
         options.onResponseHeaders?.(headers)
+        addLogContext({ userId: response.user.id })
         return { ok: true, user: toUser(response.user) }
       } catch (error) {
         const failure = isAPIError(error)
@@ -159,6 +161,8 @@ export function createAuth(options: AuthOptions): Auth {
       if (!response) {
         return null
       }
+      // Every later line of this request names the user.
+      addLogContext({ userId: response.user.id })
       return {
         user: toUser(response.user),
         expiresAt: response.session.expiresAt,

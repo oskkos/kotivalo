@@ -100,6 +100,7 @@ export async function verifyCode(
     deps.log.info('authentication.sign_in_refused', { reason: result.failure })
     return { ok: false, reason: result.failure }
   }
-  deps.log.info('authentication.signed_in', { userId: result.user.id })
+  // The user id is on the line through the log context.
+  deps.log.info('authentication.signed_in')
   return { ok: true, locale: result.user.locale }
 }
