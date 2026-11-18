@@ -68,6 +68,11 @@ export const getSignedInUser = createServerFn({ method: 'GET' }).handler(
   },
 )
 
-export const signOut = createServerFn({ method: 'POST' }).handler(() =>
-  getRequestContext().auth.signOut(),
-)
+export const signOut = createServerFn({ method: 'POST' }).handler(async () => {
+  const { auth, log } = getRequestContext()
+  // Reading the session first puts the user id on the line.
+  if (await auth.getSession()) {
+    await auth.signOut()
+    log.info('authentication.signed_out')
+  }
+})

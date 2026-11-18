@@ -79,6 +79,8 @@ Switching hosts should mean rewriting `src/server/platform/` and the deploy conf
   - Event names are `<capability>.<what_happened>` in snake_case (`authentication.code_requested`), so a line maps to its spec.
   - Levels: `info` for what happened, `warn` for refused or unusual requests (limits), `error` for failures someone should look at. Every `error` line becomes a Cloudflare Workers Issue and so an alert, so don't use `error` for expected outcomes. Pass an error as the third argument of `log.error()`.
   - How to read the logs in production: README, "Production logs and errors".
+  - **What every feature logs:** each data change at `info` once it succeeded (`property.created`, `tenancy.ended`), with ids, not values, and each failure at its level. Don't log reads, page views or session checks.
+  - `LOG_LEVEL` in `wrangler.jsonc` drops lines below it: `debug` locally, `info` in production, because each line counts against the free plan's daily log events. Add `debug` lines only while investigating something.
   - **No personal data in logs:** no email addresses, codes, tokens, names or amounts. Log ids (the user id) or nothing.
   - ESLint forbids `console` in server code; the capture mailer's local email printout is the one exception.
   - Tests use `createCaptureLogger()` and assert on the lines.

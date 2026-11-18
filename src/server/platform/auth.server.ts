@@ -18,6 +18,7 @@ import {
   type SignInResult,
 } from '#/server/auth/auth'
 import { account, session, user, verification } from '#/server/db/schema'
+import type { Logger } from '#/server/log/log'
 import type { Db } from './db.server'
 import { addLogContext } from './log-context.server'
 
@@ -31,6 +32,8 @@ export interface AuthOptions {
   baseURL: string
   /** The current request's headers (cookies, client IP). */
   headers: () => Headers
+  /** Logs account creation; see src/server/log/log.ts. */
+  log?: Logger
   /**
    * Receives Better Auth's response headers (Set-Cookie). In the app the
    * TanStack Start cookie plugin already forwards them; tests use this to
@@ -90,6 +93,13 @@ export function createAuth(options: AuthOptions): Auth {
         create: {
           before: (newUser) =>
             Promise.resolve({ data: { ...newUser, locale: newUserLocale } }),
+          after: (created) => {
+            options.log?.info('authentication.account_created', {
+              userId: created.id,
+              locale: newUserLocale,
+            })
+            return Promise.resolve()
+          },
         },
       },
     },

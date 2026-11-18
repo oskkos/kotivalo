@@ -14,6 +14,8 @@ export interface LimitRule {
 
 export interface LimitResult {
   allowed: boolean
+  /** Requests counted in the current window, this one included. */
+  count: number
   /** Seconds until the window resets; 0 when allowed. */
   retryAfterSeconds: number
 }
@@ -51,11 +53,12 @@ export async function consumeLimit(
     throw new Error('consumeLimit: the upsert returned no row')
   }
   if (row.count <= rule.max) {
-    return { allowed: true, retryAfterSeconds: 0 }
+    return { allowed: true, count: row.count, retryAfterSeconds: 0 }
   }
   const resetsAt = row.windowStart.getTime() + windowMs
   return {
     allowed: false,
+    count: row.count,
     retryAfterSeconds: Math.max(
       1,
       Math.ceil((resetsAt - now.getTime()) / 1000),

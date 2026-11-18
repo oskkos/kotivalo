@@ -3,6 +3,7 @@ import { eq } from 'drizzle-orm'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { session, user, verification } from '#/server/db/schema'
 import { testBrowser } from '#/test/auth-browser.server'
+import { createCaptureLogger } from './logger.server'
 import { createDb } from './db.server'
 
 const db = createDb(env.DB)
@@ -50,6 +51,26 @@ describe('Better Auth on D1', () => {
     expect(result.ok && result.user.locale).toBe('en')
     expect(await db.select().from(user)).toHaveLength(1)
     expect(await second.findLocale('Omistaja@example.com')).toBe('en')
+  })
+
+  test('logs a new account once, not later sign-ins', async () => {
+    const { log, lines } = createCaptureLogger()
+    for (let i = 0; i < 2; i++) {
+      const { auth } = testBrowser(db, log)
+      await auth.signInWithCode(
+        'uusi@example.com',
+        await auth.createSignInCode('uusi@example.com'),
+        'sv',
+      )
+    }
+    const created = lines.filter(
+      (l) => l.event === 'authentication.account_created',
+    )
+    expect(created).toEqual([
+      expect.objectContaining({ level: 'info', locale: 'sv' }),
+    ])
+    expect(created[0]?.userId).toMatch(/^[0-9a-f-]{36}$/)
+    expect(JSON.stringify(lines)).not.toContain('uusi@example.com')
   })
 
   test('a wrong code does not sign in', async () => {

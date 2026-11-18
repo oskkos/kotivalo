@@ -60,6 +60,20 @@ describe('Logger', () => {
     })
   })
 
+  test('drops lines below the minimum level', () => {
+    const lines: LogLine[] = []
+    const log = createLogger({
+      minLevel: 'info',
+      write: (_level, line) => {
+        lines.push(line)
+      },
+    })
+    log.debug('app.detail')
+    log.info('app.happened')
+    log.error('app.failed')
+    expect(lines.map((l) => l.event)).toEqual(['app.happened', 'app.failed'])
+  })
+
   test('keeps the level and event even if a field tries to replace them', () => {
     const { log, lines } = capture()
     log.warn('authentication.limit_reached', { level: 'info', event: 'x' })

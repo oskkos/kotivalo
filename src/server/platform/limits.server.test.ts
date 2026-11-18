@@ -28,6 +28,7 @@ describe('consumeLimit', () => {
     }
     expect(await consumeLimit(db, 'ip:1', rule, at(45))).toEqual({
       allowed: false,
+      count: 4,
       retryAfterSeconds: 15,
     })
   })
