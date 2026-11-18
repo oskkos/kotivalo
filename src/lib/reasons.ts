@@ -15,6 +15,8 @@ export type AlertReason =
   | 'email_quota'
   | 'email_busy'
   | 'email_failed'
+  /** A request failed in a way the app doesn't expect (network, server error). */
+  | 'unexpected'
 
 export type Reason = FieldReason | AlertReason
 
@@ -53,6 +55,10 @@ const texts: Record<Reason, () => ReasonText> = {
   email_failed: () => ({
     title: m.reason_email_failed_title(),
     text: m.reason_email_failed(),
+  }),
+  unexpected: () => ({
+    title: m.reason_unexpected_title(),
+    text: m.reason_unexpected(),
   }),
 }
 

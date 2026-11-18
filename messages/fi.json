@@ -45,5 +45,7 @@
   "sign_in_change_email": "Vaihda sähköpostiosoite",
   "sign_in_spam_hint": "Etkö saanut koodia? Tarkista roskaposti.",
   "home_signed_in_as": "Kirjautuneena: {email}",
-  "sign_out": "Kirjaudu ulos"
+  "sign_out": "Kirjaudu ulos",
+  "reason_unexpected_title": "Jokin meni pieleen",
+  "reason_unexpected": "Yritä uudelleen hetken kuluttua."
 }

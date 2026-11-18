@@ -4,13 +4,9 @@
 import type { AlertReason, FieldReason } from '#/lib/reasons'
 import type { Locale } from '#/paraglide/runtime.js'
 import type { Auth } from '#/server/auth/auth'
+import type { LimitRule } from '#/server/platform/limits.server'
 import { EmailError, type SendEmail } from '#/server/email/email'
 import { signInCodeEmail } from './sign-in-email'
-
-export interface LimitRule {
-  windowSeconds: number
-  max: number
-}
 
 export interface SignInDeps {
   auth: Auth
