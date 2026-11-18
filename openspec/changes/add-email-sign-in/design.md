@@ -27,28 +27,37 @@ The app is on `kotivalo.o-kosonen.workers.dev` until it has its own domain. That
 
 ## Decisions
 
-### 1. Better Auth created per request in `platform/`, used only through server functions
-`src/server/platform/auth.server.ts` exports `createAuth({ db, sendEmail, secret, baseURL })`. `getRequestContext()` adds `auth`. The instance uses:
+### 1. Better Auth behind an `Auth` interface, created per request in `platform/`, used only through server functions
+`src/server/auth/auth.ts` defines a small `Auth` interface, in the same way as `sendEmail()` (#12) and `FileStorage`:
+- `createSignInCode`
+- `signInWithCode`
+- `getSession`
+- `signOut`
+- `findLocale`
+
+`src/server/platform/auth.server.ts` implements it with Better Auth:
 - the Drizzle adapter (`provider: 'sqlite'`) with our schema
 - `emailOTP`
 - `tanstackStartCookies()`
 
-The app calls `auth.api.*` from TanStack Start server functions in `src/features/authentication/functions.ts`. **Better Auth's HTTP handler (`/api/auth/*`) is not mounted.**
+`getRequestContext()` creates it on first use as `auth`. ESLint allows `better-auth` imports only in `platform/`, so the library stays swappable, and Better Auth's error codes are mapped there to our own `SignInFailure`.
 
+TanStack Start server functions in `src/features/authentication/functions.ts` call `auth`. **Better Auth's HTTP handler (`/api/auth/*`) is not mounted.**
 - *Why not mounting it:* every Better Auth endpoint would be reachable directly, including `/email-otp/send-verification-otp`. That would bypass our per-address limit (decision 4) and our error handling. Server functions give one validated entry point per action.
 - *Alternative:* mount the handler and use `better-auth/react`'s client. This is rejected for now. Passkeys will need the client and the handler, and then the limits must cover the handler too. That is noted for the passkeys issue.
 - `baseURL` is the request's origin. That is enough while no endpoint is served over HTTP, and it works unchanged on localhost, preview and `workers.dev`.
 - `secret` comes from `BETTER_AUTH_SECRET`:
   - top-level `vars`: a clearly marked development value for local runs and tests
   - production: a Worker secret (`wrangler secret put`), because `env.production` inherits no vars
+- **Workers tests:** `@tanstack/react-start/server` needs the app's build-time entries, so the Workers test project aliases it to a stub (`src/test/tanstack-start-server.ts`). Tests create `Auth` with `createAuth()` and carry cookies through `onResponseHeaders`.
 
 ### 2. Email codes with `emailOTP`
 - **Code:** 6 digits, valid 10 minutes (`expiresIn: 600`), 5 attempts (`allowedAttempts: 5`).
 - **Storage and reissue:** codes are stored hashed (`storeOTP: 'hashed'`). A new request replaces the old code (`resendStrategy: 'rotate'`). Sign-up stays enabled, so signing in with a new address creates the account.
-- **Sending:** `sendVerificationOTP` renders the email with `renderEmail()` and **awaits** `sendEmail()`.
-  - Better Auth recommends not awaiting, to hide whether an account exists. Here every address gets a code whether or not it has an account, so timing reveals nothing.
-  - Awaiting lets an `EmailError` reach the server function, which maps it to a reason (decision 6).
-  - If Better Auth swallows errors thrown in `sendVerificationOTP`, the fallback is to remember the failure in a per-request variable and check it after the call. Verify this first (tasks 3.x).
+- **Sending:** Better Auth's own sending (`sendVerificationOTP` through `runInBackgroundOrAwait`) catches and only logs a failed send, and the endpoint still answers success. Verified in 1.7.25. So `createSignInCode` uses the server-only `createVerificationOTP`, which stores the hashed code and returns it, and the server function sends the email itself with `sendEmail()`, where an `EmailError` reaches it (decision 6).
+  - Better Auth checks the newest code for an address, and a successful sign-in deletes all of that address's codes, so a new code replaces the previous one.
+  - Every address gets a code whether or not it has an account, so awaiting the send reveals nothing through timing.
+  - `sendVerificationOTP` is configured to throw. It runs only through Better Auth's HTTP handler, which is not mounted.
 - **Email language:** the stored `locale` for an existing user, otherwise `getLocale()` of the request.
 - **Email layout:** `renderEmail()` gets an optional `code` that it shows large and easy to copy in HTML, and on its own line in the text part.
 - **Address normalisation:** the Zod schema trims and lowercases the address before Better Auth sees it.
@@ -138,7 +147,7 @@ The canvas copy is the Finnish source for the messages.
 
 ## Risks / Trade-offs
 
-- [`sendVerificationOTP` errors may be caught inside Better Auth] → Verify first. Fallback in decision 2.
+- [Better Auth internals change: newest-code lookup, `createVerificationOTP` being server-only] → Workers tests cover a new code replacing the old one and every sign-in path. The version is pinned.
 - [D1 adapter differences, e.g. Date handling, `returning`] → Workers tests exercise sign-in end to end against Miniflare D1 before the UI is built.
 - [Rate-limit rows grow with distinct IPs and addresses] → One small row each. Add a Cron Trigger cleanup if it ever matters.
 - [The `x-test-client-ip` override is a bypass if `capture` were ever enabled in production] → The production config test, and `capture` sends no real email, so nothing in production would work anyway.

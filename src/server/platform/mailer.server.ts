@@ -121,6 +121,14 @@ export interface MailerEnv {
   RESEND_API_KEY?: string
 }
 
+/**
+ * True when emails are kept in memory instead of sent: local runs and tests.
+ * Test-only helpers (the test inbox, x-test-client-ip) are open only then.
+ */
+export function isCapturing(env: Pick<MailerEnv, 'EMAIL_TRANSPORT'>): boolean {
+  return env.EMAIL_TRANSPORT === 'capture'
+}
+
 /** The sender for this environment. Misconfiguration fails loudly. */
 export function createSendEmail(env: MailerEnv): SendEmail {
   switch (env.EMAIL_TRANSPORT) {

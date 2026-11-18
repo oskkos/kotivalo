@@ -1,0 +1,128 @@
+import { env } from 'cloudflare:workers'
+import { eq } from 'drizzle-orm'
+import { beforeEach, describe, expect, test } from 'vitest'
+import { session, user, verification } from '#/server/db/schema'
+import { createAuth } from './auth.server'
+import { createDb } from './db.server'
+
+const db = createDb(env.DB)
+
+/** A browser's cookie jar: keeps what Set-Cookie sets, drops what it clears. */
+function browser() {
+  const jar = new Map<string, string>()
+  const auth = createAuth({
+    db,
+    secret: 'test-secret-that-is-at-least-32-characters-long',
+    baseURL: 'http://localhost:3000',
+    headers: () =>
+      new Headers(
+        jar.size === 0
+          ? {}
+          : {
+              cookie: [...jar].map(([k, v]) => `${k}=${v}`).join('; '),
+            },
+      ),
+    onResponseHeaders: (headers) => {
+      for (const cookie of headers.getSetCookie()) {
+        const [pair = '', ...attributes] = cookie.split(';')
+        const [name = '', ...value] = pair.trim().split('=')
+        const cleared = attributes.some((a) => /^\s*max-age=0\s*$/i.test(a))
+        if (cleared || value.join('=') === '') {
+          jar.delete(name)
+        } else {
+          jar.set(name, value.join('='))
+        }
+      }
+    },
+  })
+  return { auth, jar }
+}
+
+beforeEach(async () => {
+  await db.delete(session)
+  await db.delete(verification)
+  await db.delete(user)
+})
+
+describe('Better Auth on D1', () => {
+  test('a code signs in a new address and creates the account in its language', async () => {
+    const { auth } = browser()
+    const code = await auth.createSignInCode('Uusi@Example.com')
+    expect(code).toMatch(/^\d{6}$/)
+
+    const result = await auth.signInWithCode('uusi@example.com', code, 'sv')
+
+    const rows = await db.select().from(user)
+    expect(rows).toHaveLength(1)
+    const row = rows.at(0)
+    expect(row).toMatchObject({ email: 'uusi@example.com', locale: 'sv' })
+    expect(row?.id).toMatch(/^[0-9a-f-]{36}$/)
+    expect(result).toEqual({
+      ok: true,
+      user: { id: row?.id, email: 'uusi@example.com', locale: 'sv' },
+    })
+  })
+
+  test('an existing account keeps its language', async () => {
+    const first = browser().auth
+    await first.signInWithCode(
+      'omistaja@example.com',
+      await first.createSignInCode('omistaja@example.com'),
+      'en',
+    )
+    const second = browser().auth
+    const result = await second.signInWithCode(
+      'omistaja@example.com',
+      await second.createSignInCode('omistaja@example.com'),
+      'fi',
+    )
+    expect(result.ok && result.user.locale).toBe('en')
+    expect(await db.select().from(user)).toHaveLength(1)
+    expect(await second.findLocale('Omistaja@example.com')).toBe('en')
+  })
+
+  test('a wrong code does not sign in', async () => {
+    const { auth } = browser()
+    const code = await auth.createSignInCode('uusi@example.com')
+    const wrong = code === '000000' ? '111111' : '000000'
+    expect(await auth.signInWithCode('uusi@example.com', wrong, 'fi')).toEqual({
+      ok: false,
+      failure: 'code_wrong',
+    })
+    expect(await db.select().from(user)).toHaveLength(0)
+  })
+
+  test('the session lasts until signing out', async () => {
+    const { auth, jar } = browser()
+    await auth.signInWithCode(
+      'uusi@example.com',
+      await auth.createSignInCode('uusi@example.com'),
+      'fi',
+    )
+    expect(jar.size).toBeGreaterThan(0)
+
+    const current = await auth.getSession()
+    if (!current) {
+      throw new Error('expected a session')
+    }
+    expect(current.user.email).toBe('uusi@example.com')
+    const days = (current.expiresAt.getTime() - Date.now()) / 86_400_000
+    expect(days).toBeCloseTo(30, 0)
+
+    await auth.signOut()
+    expect(await auth.getSession()).toBeNull()
+    const rows = await db
+      .select()
+      .from(session)
+      .where(eq(session.userId, current.user.id))
+    expect(rows).toHaveLength(0)
+  })
+
+  test('without a session cookie there is no session', async () => {
+    expect(await browser().auth.getSession()).toBeNull()
+  })
+
+  test('findLocale is null for an address without an account', async () => {
+    expect(await browser().auth.findLocale('ei@example.com')).toBeNull()
+  })
+})

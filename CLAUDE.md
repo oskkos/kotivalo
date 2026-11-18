@@ -69,6 +69,7 @@ Switching hosts should mean rewriting `src/server/platform/` and the deploy conf
 - It builds a **per-request context** (`db`, `storage`, `mailer`, `auth`) that the rest of the app receives; nothing else reaches for `env`.
 - The rest of the app depends on portable interfaces: the Drizzle `db` instance, a `FileStorage` interface (`put` / `get` / `delete`), `sendEmail()`.
 - D1's lack of interactive transactions is handled by one helper in `platform/`, `atomically(db, [statements])`, not by calling `batch` or `db.transaction()` from features. Build all statements first; there are no reads between the writes.
+- Signing in goes through the context's `auth` (`Auth` in `src/server/auth/auth.ts`). Better Auth implements it in `platform/auth.server.ts` and may be imported only there (ESLint). Its HTTP handler is not mounted; server functions call `auth` and apply the limits.
 - Abuse limits (requests per IP address, per email address, …) use `consumeLimit(db, key, { windowSeconds, max })` from `platform/limits.server.ts`: a counter per key in D1, because Worker isolates share no memory. Hash personal data such as email addresses before using them in a key.
 - Server code gets the context from `getRequestContext()` (`platform/context.server.ts`), per request, never at module scope.
 - Scheduled jobs (Cron Triggers): a thin `scheduled` handler in `platform/` that calls a pure function.
@@ -116,6 +117,7 @@ Vitest projects are chosen by file name (`vitest.config.ts`):
 
 - Tests sit next to the code they test, also in `src/routes/`: `vite.config.ts` sets `routeFileIgnorePattern` so TanStack Router ignores `*.test.*` files.
 - Workers tests import the modules they test directly; the app's real entry only exists after a build, so the pool uses `src/test/worker-entry.ts`. Tests may import `cloudflare:test` and `env` from `cloudflare:workers`; app code may not.
+- `@tanstack/react-start/server` works only in a build, so the Workers project aliases it to `src/test/tanstack-start-server.ts`: set the current request with `setTestRequest()` and read cookies with `testCookies()`.
 - Workers tests run against a local D1 with every migration in `migrations/` applied (`src/test/apply-migrations.server.ts`). Repository tests use it as is: there is nothing to mock.
 - Test files are exempt from the no-hard-coded-text rule.
 - Playwright tests live in `e2e/*.spec.ts` and run against the built Worker (`vite preview`, local bindings from `wrangler.jsonc`). The only project is `mobile`: Chromium at 390 × 844, the size the UI is designed for.

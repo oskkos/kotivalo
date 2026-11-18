@@ -1,3 +1,4 @@
+import { fileURLToPath } from 'node:url'
 import { defineConfig } from 'vitest/config'
 import viteReact from '@vitejs/plugin-react'
 import { cloudflareTest, readD1Migrations } from '@cloudflare/vitest-plugin'
@@ -48,6 +49,14 @@ export default defineConfig({
             wrangler: { configPath: './wrangler.jsonc' },
           }),
         ],
+        resolve: {
+          alias: {
+            // Needs build-time entries; see the stub.
+            '@tanstack/react-start/server': fileURLToPath(
+              new URL('./src/test/tanstack-start-server.ts', import.meta.url),
+            ),
+          },
+        },
         test: {
           name: 'workers',
           include: ['src/**/*.server.test.ts'],
