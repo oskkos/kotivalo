@@ -29,11 +29,16 @@ export function EmailStep({ defaultEmail, onSent }: Props) {
     onSubmit: async ({ value }) => {
       setAlert(undefined)
       const email = emailSchema.parse(value.email)
-      const result = await requestSignInCode({ data: { email } })
-      if (result.ok) {
-        onSent(email)
-      } else {
-        setAlert(result.reason)
+      try {
+        const result = await requestSignInCode({ data: { email } })
+        if (result.ok) {
+          onSent(email)
+        } else {
+          setAlert(result.reason)
+        }
+      } catch (error) {
+        console.error(error)
+        setAlert('unexpected')
       }
     },
   })

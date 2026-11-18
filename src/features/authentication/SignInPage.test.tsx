@@ -131,6 +131,40 @@ describe('Sign-in page', () => {
   })
 })
 
+describe('Sign-in page when a request fails unexpectedly', () => {
+  beforeEach(() => {
+    vi.spyOn(console, 'error').mockImplementation(() => undefined)
+  })
+
+  test('the email step shows an alert', async () => {
+    requestCode.mockRejectedValue(new Error('network down'))
+    const { user } = setup()
+    await user.type(
+      screen.getByRole('textbox', { name: 'Email' }),
+      'uusi@example.com',
+    )
+    await user.click(screen.getByRole('button', { name: 'Send code' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Something went wrong',
+    )
+    expect(screen.getByRole('button', { name: 'Send code' })).toBeEnabled()
+  })
+
+  test('the code step shows an alert', async () => {
+    verifyCode.mockRejectedValue(new Error('server error'))
+    const { user, onSignedIn } = setup()
+    await toCodeStep(user)
+
+    await user.type(screen.getByLabelText('Sign-in code'), '482913')
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Something went wrong',
+    )
+    expect(onSignedIn).not.toHaveBeenCalled()
+  })
+})
+
 describe('Requesting a new code', () => {
   test('A new code can be requested after 30 seconds', async () => {
     const { user } = setup()

@@ -54,6 +54,9 @@ function MailIcon() {
 function SentTo({ email }: { email: string }) {
   const text = m.sign_in_code_sent({ email })
   const at = text.indexOf(email)
+  if (at === -1) {
+    return text
+  }
   return (
     <>
       {text.slice(0, at)}
@@ -105,6 +108,9 @@ export function CodeStep(props: Props) {
       } else {
         setAlert(result.reason as AlertReason)
       }
+    } catch (error) {
+      console.error(error)
+      setAlert('unexpected')
     } finally {
       setBusy(undefined)
     }
@@ -122,6 +128,9 @@ export function CodeStep(props: Props) {
       } else {
         setAlert(result.reason)
       }
+    } catch (error) {
+      console.error(error)
+      setAlert('unexpected')
     } finally {
       setBusy(undefined)
     }
