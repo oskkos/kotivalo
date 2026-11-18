@@ -10,7 +10,7 @@ Kotivalo ("Valoa vuokranantajan arkeen", roughly "light for a landlord's everyda
 
 ## Current state
 
-The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page, ESLint, Prettier, Vitest, Playwright, CI, commitlint, Git hooks, a D1 database with Drizzle (Better Auth's tables so far), i18n with Paraglide (fi / sv / en, no language switcher yet), the MUI theme, email sending (Resend), R2 file storage and a production deploy from `develop`. Auth is not set up yet; it is tracked as a GitHub issue in milestone _M0 Foundation_. Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
+The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page behind sign-in, ESLint, Prettier, Vitest, Playwright, CI, commitlint, Git hooks, a D1 database with Drizzle (Better Auth's tables so far), i18n with Paraglide (fi / sv / en; a language menu on the sign-in page only), the MUI theme, email sending (Resend), R2 file storage, a production deploy from `develop`, and sign-in with an emailed one-time code (Better Auth; passkeys come later). Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
 
 ## Commands
 
@@ -103,6 +103,11 @@ src/
 - Files named `*.server.*` are server-only: TanStack Start's import protection keeps them out of the client bundle. Database and platform code uses this suffix.
 - Domain calculations (shares, periods, notice, deposits, year summary) are pure functions in `lib/` or the feature folder, with no database access, so they can be unit-tested without fixtures.
 
+### Signed-in pages
+
+- Pages that need a signed-in user go under the pathless layout `src/routes/_authed.tsx`, e.g. `src/routes/_authed/flats.tsx`. Its `beforeLoad` checks the session with `getSignedInUser()` and redirects to `/sign-in`; the page reads the user with `Route.useRouteContext()`.
+- Server functions that change data check the session themselves (`getRequestContext().auth.getSession()`): the layout protects pages, not endpoints.
+
 ### Repositories
 
 - All database access goes through repositories: `features/<capability>/<entity>.repository.server.ts`. Routes, server functions and components never import Drizzle.
@@ -191,7 +196,7 @@ Code, database and test names use these English terms. The English UI copy may u
 
 - Finnish (primary), Swedish and English from day one. Write the Finnish copy first. Translations live in `messages/fi.json`, `sv.json` and `en.json` (Paraglide; project in `project.inlang/`, compiler options in `project.inlang/paraglide.config.ts`). Use them as `m.key()` from `#/paraglide/messages.js`; message keys are static (ESLint `paraglide/no-dynamic-message-access`). Paraglide silently falls back to Finnish for a message missing in another language, so `src/messages.test.ts` checks that every language has the same keys and variables and no empty messages.
 - **No hard-coded text**: all UI copy, errors and emails come from messages, in the recipient's language. ESLint flags JSX text, string literals in JSX and user-facing attributes (`title`, `aria-label`, `alt`, `placeholder`, …) in `.tsx` files. Strings that are never translated (the brand name) go in `UNTRANSLATED` in `eslint.config.js`.
-- **Language resolution**: the server entry `src/server.ts` wraps TanStack Start in Paraglide's middleware, so `getLocale()` and messages follow the request during SSR. Before sign-in the language comes from the `kotivalo_locale` cookie, then the browser language, then Finnish. Signed-in users get the language stored on their user record (added with auth). The language is not part of the URL.
+- **Language resolution**: the server entry `src/server.ts` wraps TanStack Start in Paraglide's middleware, so `getLocale()` and messages follow the request during SSR. Before sign-in the language comes from the `kotivalo_locale` cookie, then the browser language, then Finnish. Signed-in users get the language stored on their account (`user.locale`): signing in sets the cookie to it, and the signed-in layout puts it back if it drifts. The language is not part of the URL.
 - **Formatting** uses each language as used in Finland: `fi-FI`, `sv-FI`, `en-FI` (`1 234,56 €` and `5.3.2026` in Finnish and Swedish, `€1,234.56` and `05/03/2026` in English). Format amounts and dates with `formatMoney(cents)` and `formatDate(iso)` in `src/lib/format.ts`, also when they appear inside a message: pass the formatted string as a parameter. Don't use Paraglide's `number` or `datetime` formatters in messages, because they format with the bare language (`sv` gives Swedish ISO dates, `en` gives US dates). `plural` in messages is fine.
 
 ## Specs and tests (OpenSpec)

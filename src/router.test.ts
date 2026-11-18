@@ -6,12 +6,13 @@ import { getRouter } from './router'
 vi.mock('#/features/authentication/functions', () => ({}))
 
 describe('Router', () => {
-  test('registers the home route', () => {
-    const router = getRouter()
-    expect(router.routesById).toHaveProperty('/')
+  test('registers the home and sign-in pages', () => {
+    const { routesByPath } = getRouter()
+    expect(routesByPath).toHaveProperty('/')
+    expect(routesByPath).toHaveProperty('/sign-in')
   })
 
-  test('registers the sign-in route', () => {
-    expect(getRouter().routesById).toHaveProperty('/sign-in')
+  test('puts the home page behind the signed-in layout', () => {
+    expect(getRouter().routesById).toHaveProperty('/_authed/')
   })
 })

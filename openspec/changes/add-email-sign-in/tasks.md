@@ -98,14 +98,14 @@ The page is public in this commit; the home page stays public until group 8.
 
 `feat(auth): require sign-in for the app and add sign-out`
 
-- [ ] 8.1 Add the `_authed` layout route with the session check and redirect, and move the home page under it; the home page shows the email and a sign-out button; `/sign-in` redirects to `/` when signed in
-- [ ] 8.2 Update the existing home e2e test, which assumed `/` is public
-- [ ] 8.3 Playwright tests:
+- [x] 8.1 Add the `_authed` layout route with the session check and redirect, and move the home page under it; the home page shows the email and a sign-out button; `/sign-in` redirects to `/` when signed in
+- [x] 8.2 Update the existing home e2e test, which assumed `/` is public
+- [x] 8.3 Playwright tests:
   - "Pages for signed-in users only"
   - "Signing out"
   - "The user's language is stored on the account"
-- [ ] 8.4 Update CLAUDE.md's current state: auth is done
-- [ ] 8.5 `pnpm check:traceability` shows no pending gaps, and typecheck, lint, format, all Vitest projects and Playwright pass
+- [x] 8.4 Update CLAUDE.md's current state: auth is done
+- [x] 8.5 `pnpm check:traceability` shows no pending gaps, and typecheck, lint, format, all Vitest projects and Playwright pass
 
 ## 9. Archive
 
