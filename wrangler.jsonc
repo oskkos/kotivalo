@@ -53,6 +53,9 @@
     // RESEND_API_KEY.
     "production": {
       "name": "kotivalo",
+      // No per-version preview URLs: they would be public and use the
+      // production database, bucket and email.
+      "preview_urls": false,
       "d1_databases": [
         {
           "binding": "DB",
