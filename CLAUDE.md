@@ -69,7 +69,12 @@ Switching hosts should mean rewriting `src/server/platform/` and the deploy conf
 - It builds a **per-request context** (`db`, `storage`, `mailer`, `auth`) that the rest of the app receives; nothing else reaches for `env`.
 - The rest of the app depends on portable interfaces: the Drizzle `db` instance, a `FileStorage` interface (`put` / `get` / `delete`), `sendEmail()`.
 - D1's lack of interactive transactions is handled by one helper in `platform/`, `atomically(db, [statements])`, not by calling `batch` or `db.transaction()` from features. Build all statements first; there are no reads between the writes.
-- Signing in goes through the context's `auth` (`Auth` in `src/server/auth/auth.ts`). Better Auth implements it in `platform/auth.server.ts` and may be imported only there (ESLint). Its HTTP handler is not mounted; server functions call `auth` and apply the limits.
+- **Signing in** goes through the context's `auth` (`Auth` in `src/server/auth/auth.ts`).
+  - Better Auth implements it in `platform/auth.server.ts` and may be imported only there (ESLint).
+  - Its HTTP handler (`/api/auth/*`) is not mounted. The server functions in `features/authentication/functions.ts` call `auth` and apply the limits: code requests 3 per minute per IP address and 5 per hour per email address (`CODE_REQUEST_LIMITS`).
+  - Better Auth's own code email swallows send errors, so the server function creates the code with `createSignInCode()` and emails it itself.
+  - Secret: `BETTER_AUTH_SECRET`. The top-level `vars` hold a public development value; production has its own Worker secret.
+- **The test inbox** `GET /api/test/inbox?to=<address>` (`platform/test-inbox.server.ts`) returns the captured emails for an address, so Playwright can read sign-in codes. It responds 404 unless `EMAIL_TRANSPORT` is `capture`, and `src/wrangler-config.test.ts` checks that production uses `resend`. While capturing, an `x-test-client-ip` header sets the client IP for the limits, so each test gets its own.
 - Abuse limits (requests per IP address, per email address, …) use `consumeLimit(db, key, { windowSeconds, max })` from `platform/limits.server.ts`: a counter per key in D1, because Worker isolates share no memory. Hash personal data such as email addresses before using them in a key.
 - Server code gets the context from `getRequestContext()` (`platform/context.server.ts`), per request, never at module scope.
 - Scheduled jobs (Cron Triggers): a thin `scheduled` handler in `platform/` that calls a pure function.

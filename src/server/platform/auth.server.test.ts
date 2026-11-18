@@ -2,41 +2,12 @@ import { env } from 'cloudflare:workers'
 import { eq } from 'drizzle-orm'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { session, user, verification } from '#/server/db/schema'
-import { createAuth } from './auth.server'
+import { testBrowser } from '#/test/auth-browser.server'
 import { createDb } from './db.server'
 
 const db = createDb(env.DB)
 
-/** A browser's cookie jar: keeps what Set-Cookie sets, drops what it clears. */
-function browser() {
-  const jar = new Map<string, string>()
-  const auth = createAuth({
-    db,
-    secret: 'test-secret-that-is-at-least-32-characters-long',
-    baseURL: 'http://localhost:3000',
-    headers: () =>
-      new Headers(
-        jar.size === 0
-          ? {}
-          : {
-              cookie: [...jar].map(([k, v]) => `${k}=${v}`).join('; '),
-            },
-      ),
-    onResponseHeaders: (headers) => {
-      for (const cookie of headers.getSetCookie()) {
-        const [pair = '', ...attributes] = cookie.split(';')
-        const [name = '', ...value] = pair.trim().split('=')
-        const cleared = attributes.some((a) => /^\s*max-age=0\s*$/i.test(a))
-        if (cleared || value.join('=') === '') {
-          jar.delete(name)
-        } else {
-          jar.set(name, value.join('='))
-        }
-      }
-    },
-  })
-  return { auth, jar }
-}
+const browser = () => testBrowser(db)
 
 beforeEach(async () => {
   await db.delete(session)
