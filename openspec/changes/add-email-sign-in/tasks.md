@@ -78,21 +78,21 @@
 
 The page is public in this commit; the home page stays public until group 8.
 
-- [ ] 7.1 Write `src/routes/sign-in.tsx` from `SignInEmail`: logo and tagline, language menu, email form, loading state, field error and alerts
-- [ ] 7.2 Write the code step from `SignInCode`:
+- [x] 7.1 Write `src/routes/sign-in.tsx` from `SignInEmail`: logo and tagline, language menu, email form, loading state, field error and alerts
+- [x] 7.2 Write the code step from `SignInCode`:
   - six boxes over one OTP input, submitting on the sixth digit
   - wrong-code error and expired / attempts alerts
   - the 30 s resend countdown, enabled at once after expiry
   - change address, spam hint
-- [ ] 7.3 Component tests for "Requesting a new code" (fake timers) and the error states
-- [ ] 7.4 A Playwright helper `signIn(page, email)` that reads the code from the test inbox, with a unique address and `x-test-client-ip` per test
-- [ ] 7.5 Playwright tests:
+- [x] 7.3 Component tests for "Requesting a new code" (fake timers) and the error states
+- [x] 7.4 A Playwright helper `signIn(page, email)` that reads the code from the test inbox, with a unique address and `x-test-client-ip` per test
+- [x] 7.5 Playwright tests:
   - "Sign in with an emailed code"
   - "Rejecting wrong and expired codes" (the wrong code)
   - "Requesting a new code"
   - "Choosing the language before sign-in"
-- [ ] 7.6 Take screenshots of every canvas state at 390 × 844, compare them with the canvas, and have the user review them before the commit
-- [ ] 7.7 Update README (the local sign-in code appears in the dev server log) and CONCEPT.md §6 (the sign-in screen is no longer missing)
+- [x] 7.6 Take screenshots of every canvas state at 390 × 844, compare them with the canvas, and have the user review them before the commit
+- [x] 7.7 Update README (the local sign-in code appears in the dev server log) and CONCEPT.md §6 (the sign-in screen is no longer missing)
 
 ## 8. Signed-in app and sign-out
 

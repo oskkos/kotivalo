@@ -27,8 +27,10 @@ export default defineConfig({
       },
     },
   ],
+  // Migrations first: the local D1 database (.wrangler/state) starts empty in
+  // CI and on a fresh checkout.
   webServer: {
-    command: `pnpm run build && pnpm exec vite preview --port ${String(PORT)} --strictPort`,
+    command: `pnpm db:migrate:local && pnpm run build && pnpm exec vite preview --port ${String(PORT)} --strictPort`,
     url: baseURL,
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

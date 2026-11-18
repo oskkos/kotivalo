@@ -178,7 +178,7 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 - [ ] Language selection has no screen. The language is stored per user, but the Account sketch has no language setting.
 - [ ] Loan interest has no input screen. The year summary shows it and the data model has `loan_interest`, but no sketch collects it.
 - [ ] Logging the deposit return later has no screen. End tenancy says to log it after the final inspection, but nothing shows where.
-- [ ] Missing screens: sign-in (email link / one-time code, passkey), accepting a flat invitation, and the first-run empty state with no flats.
+- [ ] Missing screens: accepting a flat invitation, and the first-run empty state with no flats. The sign-in screens (email and one-time code) are on the Design canvas; a passkey option comes with its own issue.
 - [ ] The former owner's read-only view of their ownership period is not sketched.
 - [ ] Expense details shows _Payee_ (Saaja) and _Deductible_ (Vähennyskelpoinen), but `transactions` has neither field. Add them to the data model or drop them from the screen.
 
