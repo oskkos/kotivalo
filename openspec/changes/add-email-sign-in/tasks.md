@@ -2,18 +2,18 @@
 
 `feat(db): add the Better Auth tables as the first migration`
 
-- [ ] 1.1 Add `better-auth` with an exact version
-- [ ] 1.2 Add `BETTER_AUTH_SECRET` to the top-level `vars` in `wrangler.jsonc` as a marked development value, document the production secret in a comment, update `.dev.vars.example`, run `pnpm cf-typegen`
-- [ ] 1.3 Add the `instant(name)` column helper (epoch milliseconds) to `src/server/db/columns.ts`, with a unit test
-- [ ] 1.4 Add `user` (with `locale`), `session`, `account`, `verification` and `rate_limit` to `src/server/db/schema.ts`, with field names matching Better Auth's models
-- [ ] 1.5 Run `pnpm db:generate`, review the SQL and commit the migration; a Workers test checks that the tables exist after the migrations are applied, and `pnpm db:migrate:local` applies it
+- [x] 1.1 Add `better-auth` with an exact version
+- [x] 1.2 Add `BETTER_AUTH_SECRET` to the top-level `vars` in `wrangler.jsonc` as a marked development value, document the production secret in a comment, update `.dev.vars.example`, run `pnpm cf-typegen`
+- [x] 1.3 Add the `instant(name)` column helper (epoch milliseconds) to `src/server/db/columns.ts`, with a unit test
+- [x] 1.4 Add `user` (with `locale`), `session`, `account`, `verification` and `rate_limit` to `src/server/db/schema.ts`, with field names matching Better Auth's models
+- [x] 1.5 Run `pnpm db:generate`, review the SQL and commit the migration; a Workers test checks that the tables exist after the migrations are applied, and `pnpm db:migrate:local` applies it
 
 ## 2. Request limits
 
 `feat(platform): limit requests with a D1 counter`
 
-- [ ] 2.1 Write `consumeLimit(db, key, rule)` in `src/server/platform/limits.server.ts` as one upsert statement
-- [ ] 2.2 Workers tests: within the window, at the limit, and after the window resets
+- [x] 2.1 Write `consumeLimit(db, key, rule)` in `src/server/platform/limits.server.ts` as one upsert statement
+- [x] 2.2 Workers tests: within the window, at the limit, and after the window resets
 
 ## 3. Better Auth per request
 
