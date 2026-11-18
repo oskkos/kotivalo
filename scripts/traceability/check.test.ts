@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { check, type TestCase } from './check.ts'
+import { check, pendingProblems, type TestCase } from './check.ts'
 import type { Requirement } from './spec.ts'
 
 const requirement = (
@@ -131,5 +131,29 @@ describe('check', () => {
     expect(
       messages([], [vitest('Router', 'registers the home route')]),
     ).toEqual([])
+  })
+})
+
+describe('pendingProblems', () => {
+  const p = (requirement: string, message: string) => ({
+    capability: 'property',
+    requirement,
+    message,
+  })
+
+  test('keeps only problems that active changes add', () => {
+    const main = [p('Add a flat', 'no Playwright test')]
+    const withChanges = [
+      p('Add a flat', 'no Playwright test'),
+      p('Sign in', 'scenario "New address" has no test'),
+    ]
+    expect(pendingProblems(main, withChanges)).toEqual([
+      p('Sign in', 'scenario "New address" has no test'),
+    ])
+  })
+
+  test('is empty when the changes add no problems', () => {
+    const main = [p('Add a flat', 'no Playwright test')]
+    expect(pendingProblems(main, main)).toEqual([])
   })
 })

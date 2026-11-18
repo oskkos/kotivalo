@@ -89,3 +89,19 @@ export function check(
   }
   return problems
 }
+
+const key = (p: Problem) =>
+  `${p.capability}\u0000${p.requirement}\u0000${p.message}`
+
+/**
+ * Problems that come only from active changes: in `withChanges` (main specs
+ * with the changes' deltas applied) but not in `main`. They don't block until
+ * the change is archived into the main specs.
+ */
+export function pendingProblems(
+  main: Problem[],
+  withChanges: Problem[],
+): Problem[] {
+  const blocking = new Set(main.map(key))
+  return withChanges.filter((p) => !blocking.has(key(p)))
+}

@@ -49,4 +49,4 @@ rules:
     - Domain calculations are pure functions in lib/ or the feature folder, with no database access.
   tasks:
     - Include the schema change, `pnpm db:generate` and the committed migration, the repository with Workers tests, and the Finnish, Swedish and English messages.
-    - End with `pnpm check:traceability` and the full test suite passing.
+    - End with `pnpm check:traceability` and the full test suite passing, then a last task to archive the change (`openspec archive <change>`) as the PR's last commit; only archived specs block the traceability check.

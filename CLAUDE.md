@@ -29,7 +29,7 @@ Package manager is **pnpm** (pinned in `package.json` via `packageManager`; enab
   - one file: `pnpm test:e2e e2e/home.spec.ts`
   - one test by name: `pnpm test:e2e -g "shows the app name"`
   - first time on a machine: `pnpm exec playwright install chromium`
-- `pnpm check:traceability`: checks that every OpenSpec scenario has a test and every requirement has a Playwright test or a recorded reason (see "Specs and tests")
+- `pnpm check:traceability`: checks that every OpenSpec scenario in the main specs has a test and every requirement has a Playwright test or a recorded reason; active changes are reported as pending (see "Specs and tests")
 - `pnpm format` / `pnpm format:check`: Prettier (no semicolons, single quotes, trailing commas)
 - `pnpm db:generate`: generate a SQL migration in `migrations/` from changes to `src/server/db/schema.ts` (drizzle-kit). Commit it; never edit an applied migration
 - `pnpm db:migrate:local`: apply migrations to the local D1 database (`.wrangler/state`, shared with `pnpm dev`). Vitest Workers tests apply them to their own database automatically
@@ -176,7 +176,18 @@ Code, database and test names use these English terms. The English UI copy may u
 - **Every scenario needs a passing test. Every requirement needs a Playwright test**, unless it can't be tested in a browser. Then Vitest covers it, and the reason is recorded with the requirement.
 - Test names trace to the spec: `test.describe('<Requirement>')` with one `test('<Scenario>')` per scenario. Use the same naming in Vitest. CI blocks merges when this mapping is incomplete.
 - A requirement that can't be tested in a browser records the reason on its own line in the requirement text: `**No Playwright test:** <reason>`. Its scenarios still need Vitest tests.
-- `pnpm check:traceability` (`scripts/check-traceability.ts`) enforces this. It reads `openspec/specs/` with the delta specs of active changes in `openspec/changes/` applied, and lists tests with `vitest list` and `playwright test --list` without running them. Skipped and todo tests don't count. The scenario test can be in Vitest or Playwright, nested describes are fine, and tests without a spec counterpart (harness and smoke tests) are allowed.
+- `pnpm check:traceability` (`scripts/check-traceability.ts`) enforces this. It lists tests with `vitest list` and `playwright test --list` without running them. Skipped and todo tests don't count. The scenario test can be in Vitest or Playwright, nested describes are fine, and tests without a spec counterpart (harness and smoke tests) are allowed.
+  - The main specs (`openspec/specs/`) block.
+  - Active changes in `openspec/changes/` are checked with their delta specs applied, but their gaps are only reported as pending.
+  - A change whose `tasks.md` is fully checked but not archived blocks.
+- **One PR per change, in this commit order:**
+  1. The proposal, alone, once the user has reviewed it: `docs(openspec): propose <change>`.
+  2. The implementation commits.
+  3. `openspec archive <change>` as the last commit (`docs(openspec): archive <change>`). This moves the specs into `openspec/specs/`, where the check blocks.
+
+  Every commit passes CI on its own.
+
+- **Before implementing a change** (`/opsx:apply`), check `git status`. If the change's artifacts (`openspec/changes/<change>/`) are not committed yet, commit them first as the proposal commit, after the user has reviewed them, so the implementation starts from the agreed version.
 - Requirement names must be unique across all specs, because tests are matched by name. Avoid `>` in requirement and scenario names: Vitest joins titles with it.
 - `openspec/config.yaml` gives OpenSpec a short project context and per-artifact rules (proposal, specs, design, tasks). It summarises this file and CONCEPT.md, so update it when the rules here change.
 
