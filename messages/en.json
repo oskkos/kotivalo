@@ -48,5 +48,8 @@
   "sign_out": "Sign out",
   "reason_unexpected_title": "Something went wrong",
   "reason_unexpected": "Try again in a moment.",
-  "error_reference": "Error reference: {reference}"
+  "error_reference": "Error reference: {reference}",
+  "offline_title": "No connection",
+  "offline_body": "Kotivalo needs a network connection. Check your connection and try again.",
+  "offline_retry": "Try again"
 }

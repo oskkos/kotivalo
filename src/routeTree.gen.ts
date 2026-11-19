@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AuthedRouteImport } from './routes/_authed'
+import { Route as OfflineRouteImport } from './routes/offline'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
 import { Route as ApiLogRouteImport } from './routes/api/log'
@@ -17,6 +18,11 @@ import { Route as ApiTestInboxRouteImport } from './routes/api/test/inbox'
 
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OfflineRoute = OfflineRouteImport.update({
+  id: '/offline',
+  path: '/offline',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignInRoute = SignInRouteImport.update({
@@ -42,11 +48,13 @@ const ApiTestInboxRoute = ApiTestInboxRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
+  '/offline': typeof OfflineRoute
   '/sign-in': typeof SignInRoute
   '/api/log': typeof ApiLogRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
 }
 export interface FileRoutesByTo {
+  '/offline': typeof OfflineRoute
   '/sign-in': typeof SignInRoute
   '/api/log': typeof ApiLogRoute
   '/': typeof AuthedIndexRoute
@@ -55,6 +63,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_authed': typeof AuthedRouteWithChildren
+  '/offline': typeof OfflineRoute
   '/sign-in': typeof SignInRoute
   '/api/log': typeof ApiLogRoute
   '/_authed/': typeof AuthedIndexRoute
@@ -62,12 +71,13 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/sign-in' | '/api/log' | '/api/test/inbox'
+  fullPaths: '/' | '/offline' | '/sign-in' | '/api/log' | '/api/test/inbox'
   fileRoutesByTo: FileRoutesByTo
-  to: '/sign-in' | '/api/log' | '/' | '/api/test/inbox'
+  to: '/offline' | '/sign-in' | '/api/log' | '/' | '/api/test/inbox'
   id:
     | '__root__'
     | '/_authed'
+    | '/offline'
     | '/sign-in'
     | '/api/log'
     | '/_authed/'
@@ -76,6 +86,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   AuthedRoute: typeof AuthedRouteWithChildren
+  OfflineRoute: typeof OfflineRoute
   SignInRoute: typeof SignInRoute
   ApiLogRoute: typeof ApiLogRoute
   ApiTestInboxRoute: typeof ApiTestInboxRoute
@@ -88,6 +99,13 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/offline': {
+      id: '/offline'
+      path: '/offline'
+      fullPath: '/offline'
+      preLoaderRoute: typeof OfflineRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/sign-in': {
@@ -134,6 +152,7 @@ const AuthedRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   AuthedRoute: AuthedRouteWithChildren,
+  OfflineRoute: OfflineRoute,
   SignInRoute: SignInRoute,
   ApiLogRoute: ApiLogRoute,
   ApiTestInboxRoute: ApiTestInboxRoute,

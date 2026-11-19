@@ -29,6 +29,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "i18n:compile": "paraglide-js compile --silent",
+    "icons:generate": "node scripts/generate-icons.ts",
     "prepare": "lefthook install && pnpm run i18n:compile"
   },
   "dependencies": {

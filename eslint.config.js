@@ -211,6 +211,13 @@ export default defineConfig([
     languageOptions: { globals: globals.node },
   },
 
+  // The service worker is served as is from public/, without a build.
+  {
+    files: ['public/sw.js'],
+    extends: [tseslint.configs.disableTypeChecked],
+    languageOptions: { globals: globals.serviceworker },
+  },
+
   {
     files: ['*.js'],
     extends: [tseslint.configs.disableTypeChecked],

@@ -48,5 +48,8 @@
   "sign_out": "Kirjaudu ulos",
   "reason_unexpected_title": "Jokin meni pieleen",
   "reason_unexpected": "Yritä uudelleen hetken kuluttua.",
-  "error_reference": "Virhetunnus: {reference}"
+  "error_reference": "Virhetunnus: {reference}",
+  "offline_title": "Ei verkkoyhteyttä",
+  "offline_body": "Kotivalo tarvitsee verkkoyhteyden. Tarkista yhteys ja yritä uudelleen.",
+  "offline_retry": "Yritä uudelleen"
 }
