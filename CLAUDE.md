@@ -10,7 +10,7 @@ Kotivalo ("Valoa vuokranantajan arkeen", roughly "light for a landlord's everyda
 
 ## Current state
 
-The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page behind sign-in, ESLint, Prettier, Vitest, Playwright, CI, commitlint, Git hooks, a D1 database with Drizzle (Better Auth's tables so far), i18n with Paraglide (fi / sv / en; a language menu on the sign-in page only), the MUI theme, email sending (Resend), R2 file storage, a production deploy from `develop`, and sign-in with an emailed one-time code (Better Auth; passkeys come later). Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
+The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page behind sign-in, ESLint, Prettier, Vitest, Playwright, CI, commitlint, Git hooks, a D1 database with Drizzle (Better Auth's tables so far), i18n with Paraglide (fi / sv / en; a language menu on the sign-in page only), the MUI theme, email sending (Resend), R2 file storage, a production deploy from `develop`, an installable app (PWA) with an offline page, and sign-in with an emailed one-time code (Better Auth; passkeys come later). Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
 
 ## Commands
 
@@ -34,6 +34,7 @@ Package manager is **pnpm** (pinned in `package.json` via `packageManager`; enab
 - `pnpm db:generate`: generate a SQL migration in `migrations/` from changes to `src/server/db/schema.ts` (drizzle-kit). Commit it; never edit an applied migration
 - `pnpm db:migrate:local`: apply migrations to the local D1 database (`.wrangler/state`, shared with `pnpm dev`). Vitest Workers tests apply them to their own database automatically
 - `pnpm i18n:compile`: compile `messages/*.json` into `src/paraglide/` (typed message functions). Runs on `pnpm install`, and `dev`, `build` and Vitest recompile on their own; run it by hand only if `tsc` or ESLint can't find `#/paraglide/*`
+- `pnpm icons:generate`: redraw the app icons and favicon in `public/` from the logo mark and theme colours (Playwright's Chromium). Commit the output; run it only when the mark or colours change
 - `pnpm cf-typegen`: regenerate `worker-configuration.d.ts` after changing `wrangler.jsonc` (bindings, compatibility date)
 - `pnpm run deploy`: build for the `production` environment and deploy with Wrangler. CI does this after every push to `develop`; by hand it needs `wrangler login` or `CLOUDFLARE_API_TOKEN`
 - `pnpm db:migrate:production`: apply migrations to the production D1 database (CI runs it before each deploy)
@@ -98,6 +99,9 @@ Switching hosts should mean rewriting `src/server/platform/` and the deploy conf
   - Cloudflare's automatic tracing (D1, `fetch`) is on in `wrangler.jsonc` (`observability.traces`). Free plan: 200,000 log and trace events a day, kept 3 days.
 - Abuse limits (requests per IP address, per email address, …) use `consumeLimit(db, key, { windowSeconds, max })` from `platform/limits.server.ts`: a counter per key in D1, because Worker isolates share no memory. Hash personal data such as email addresses before using them in a key.
 - Server code gets the context from `getRequestContext()` (`platform/context.server.ts`), per request, never at module scope.
+- **Installable app (PWA):** `public/manifest.webmanifest` and the icons, linked from `__root.tsx`, and the service worker `public/sw.js`, plain JavaScript served without a build and registered only in a build (`src/lib/service-worker.ts`).
+  - The service worker caches only the build's hashed files (`/assets/*`) and the offline page (`/offline`, `src/server/pwa/offline-page.server.ts`, every language in one page, picked in the browser). It never caches pages, server function responses, `/api/*` or files, because they may hold a signed-in user's data. Keep it that way.
+  - Offline data and sync are not built; the app needs a connection.
 - Scheduled jobs (Cron Triggers): a thin `scheduled` handler in `platform/` that calls a pure function.
 - Enforced by ESLint `no-restricted-imports` in `eslint.config.js`.
 

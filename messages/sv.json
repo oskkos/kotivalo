@@ -48,5 +48,8 @@
   "sign_out": "Logga ut",
   "reason_unexpected_title": "Något gick fel",
   "reason_unexpected": "Försök igen om en stund.",
-  "error_reference": "Felkod: {reference}"
+  "error_reference": "Felkod: {reference}",
+  "offline_title": "Ingen nätverksanslutning",
+  "offline_body": "Kotivalo behöver en nätverksanslutning. Kontrollera anslutningen och försök igen.",
+  "offline_retry": "Försök igen"
 }
