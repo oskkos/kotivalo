@@ -98,5 +98,8 @@
   "property_add": "Lisää asunto",
   "properties_empty_title": "Lisää ensimmäinen asuntosi",
   "properties_empty_text": "Kotivalo kokoaa asunnon vuokrat, kulut ja verotiedot yhteen paikkaan. Aloita lisäämällä asunnon osoite ja koko.",
-  "property_card_details": "{city} · {rooms} {area}"
+  "property_card_details": "{city} · {rooms} {area}",
+  "not_found_title": "Sivua ei löydy",
+  "not_found_text": "Osoitteessa ei ole sivua. Tarkista osoite tai palaa etusivulle.",
+  "not_found_home": "Etusivulle"
 }

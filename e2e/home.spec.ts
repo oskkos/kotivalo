@@ -35,3 +35,19 @@ test.describe('Home page', () => {
     expect([...hosts]).toEqual([new URL(baseURL ?? '').origin])
   })
 })
+
+test.describe('Showing that a page was not found', () => {
+  test('An unknown address shows that the page was not found', async ({
+    page,
+  }) => {
+    const response = await page.goto('/no-such-page')
+
+    expect(response?.status()).toBe(404)
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Page not found' }),
+    ).toBeVisible()
+    await page.getByRole('link', { name: 'Go to the home page' }).click()
+    // A visitor who isn't signed in goes on to sign in.
+    await expect(page).toHaveURL(/\/sign-in$/)
+  })
+})

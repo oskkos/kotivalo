@@ -1,16 +1,8 @@
-import Button from '@mui/material/Button'
-import Stack from '@mui/material/Stack'
-import Typography from '@mui/material/Typography'
-import {
-  Link,
-  createFileRoute,
-  notFound,
-  useRouter,
-} from '@tanstack/react-router'
+import { createFileRoute, notFound, useRouter } from '@tanstack/react-router'
+import { NotFoundView } from '#/components/NotFoundView'
 import { getProperty, updateProperty } from '#/features/properties/functions'
 import { PropertyForm } from '#/features/properties/PropertyForm'
 import { formatTenths } from '#/lib/format'
-import { reasonText } from '#/lib/reasons'
 import { m } from '#/paraglide/messages.js'
 
 export const Route = createFileRoute('/_authed/properties/$propertyId/edit')({
@@ -49,19 +41,11 @@ function EditPropertyRoute() {
 
 /** The same for a flat that doesn't exist and one without access. */
 function PropertyNotFound() {
-  const { title, text } = reasonText('property_not_found')
   return (
-    <Stack component="main" sx={{ gap: 1, px: 2.5, py: 6 }}>
-      <Typography variant="h1">{title}</Typography>
-      <Typography color="text.secondary">{text}</Typography>
-      <Button
-        component={Link}
-        to="/"
-        variant="outlined"
-        sx={{ alignSelf: 'flex-start', mt: 2 }}
-      >
-        {m.property_back_to_list()}
-      </Button>
-    </Stack>
+    <NotFoundView
+      title={m.reason_property_not_found_title()}
+      text={m.reason_property_not_found()}
+      backLabel={m.property_back_to_list()}
+    />
   )
 }
