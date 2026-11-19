@@ -26,7 +26,9 @@ export type AlertReason =
   | 'email_failed'
   | 'property_not_found'
   | 'property_limit_reached'
-  /** A request failed in a way the app doesn't expect (network, server error). */
+  /** A request never reached the server: offline or cancelled. */
+  | 'network'
+  /** A request failed in a way the app doesn't expect (a server error). */
   | 'unexpected'
 
 export type Reason = FieldReason | AlertReason
@@ -80,6 +82,10 @@ const texts: Record<Reason, () => ReasonText> = {
   property_limit_reached: () => ({
     title: m.reason_property_limit_reached_title(),
     text: m.reason_property_limit_reached(),
+  }),
+  network: () => ({
+    title: m.reason_network_title(),
+    text: m.reason_network(),
   }),
   unexpected: () => ({
     title: m.reason_unexpected_title(),

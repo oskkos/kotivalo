@@ -86,3 +86,23 @@ describe('clientLog', () => {
     expect(first).toBe(second)
   })
 })
+
+describe('Telling the user when the connection fails', () => {
+  test('A connection failure is logged as a warning', () => {
+    clientLog.error(
+      'property.save_failed',
+      { step: 'save' },
+      new TypeError('Failed to fetch'),
+    )
+    // Warnings are batched: nothing goes out at once.
+    expect(fetchMock).not.toHaveBeenCalled()
+
+    flushClientLog()
+    expect(sentBodies().at(0)?.events[0]).toMatchObject({
+      level: 'warn',
+      event: 'property.save_failed',
+      fields: { step: 'save', network: true },
+      error: { name: 'TypeError', message: 'Failed to fetch' },
+    })
+  })
+})

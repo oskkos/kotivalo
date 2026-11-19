@@ -101,5 +101,7 @@
   "property_card_details": "{city} · {rooms} {area}",
   "not_found_title": "Sivua ei löydy",
   "not_found_text": "Osoitteessa ei ole sivua. Tarkista osoite tai palaa etusivulle.",
-  "not_found_home": "Etusivulle"
+  "not_found_home": "Etusivulle",
+  "reason_network_title": "Ei yhteyttä",
+  "reason_network": "Tarkista verkkoyhteys ja yritä uudelleen."
 }

@@ -17,12 +17,12 @@
 
 `fix(app): treat connection failures as warnings and say there is no connection`
 
-- [ ] 3.1 Write `isNetworkError(error)` in `src/lib/` with unit tests for Chromium, Firefox and Safari messages and an unrelated `TypeError`
-- [ ] 3.2 `clientLog.error` sends network errors at `warn` with `network: true`; unit tests
-- [ ] 3.3 Add the `network` alert reason with fi, sv and en messages; `ReasonAlert` shows no reference for it
-- [ ] 3.4 Use `network` in `ErrorView`, `EmailStep`, `CodeStep` and `PropertyForm` for network errors; component tests
-- [ ] 3.5 Playwright: the two connection scenarios (offline with `context.setOffline`)
-- [ ] 3.6 Update CLAUDE.md "Logging in the browser"
+- [x] 3.1 Write `isNetworkError(error)` in `src/lib/` with unit tests for Chromium, Firefox and Safari messages and an unrelated `TypeError`
+- [x] 3.2 `clientLog.error` sends network errors at `warn` with `network: true`; unit tests
+- [x] 3.3 Add the `network` alert reason with fi, sv and en messages; `ReasonAlert` shows no reference for it
+- [x] 3.4 Use `network` in `ErrorView`, `EmailStep`, `CodeStep` and `PropertyForm` for network errors; component tests
+- [x] 3.5 Playwright: the two connection scenarios (offline with `context.setOffline`)
+- [x] 3.6 Update CLAUDE.md "Logging in the browser"
 
 ## 4. Cross-site requests to server functions
 

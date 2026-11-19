@@ -20,3 +20,13 @@ describe('Showing a reference with an unexpected error', () => {
     expect(clientLog.error).toHaveBeenCalledWith('app.render_error', {}, error)
   })
 })
+
+describe('Telling the user when the connection fails', () => {
+  test('a page that failed to load without a connection says so, without a reference', () => {
+    render(<ErrorView error={new TypeError('Failed to fetch')} />)
+
+    const alert = screen.getByRole('alert')
+    expect(alert).toHaveTextContent('No connection')
+    expect(alert).not.toHaveTextContent('Error reference')
+  })
+})

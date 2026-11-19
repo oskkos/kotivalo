@@ -101,5 +101,7 @@
   "property_card_details": "{city} · {rooms} {area}",
   "not_found_title": "Page not found",
   "not_found_text": "There is no page at this address. Check the address or go back to the home page.",
-  "not_found_home": "Go to the home page"
+  "not_found_home": "Go to the home page",
+  "reason_network_title": "No connection",
+  "reason_network": "Check your network connection and try again."
 }
