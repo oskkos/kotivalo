@@ -36,4 +36,4 @@
 
 `docs(openspec): archive improve-error-handling`
 
-- [ ] 5.1 `openspec archive improve-error-handling`, write the specs' changes into place and run `pnpm check:traceability`
+- [x] 5.1 `openspec archive improve-error-handling`, write the specs' changes into place and run `pnpm check:traceability`
