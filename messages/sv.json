@@ -98,5 +98,8 @@
   "property_add": "Lägg till bostad",
   "properties_empty_title": "Lägg till din första bostad",
   "properties_empty_text": "Kotivalo samlar bostadens hyror, kostnader och skatteuppgifter på ett ställe. Börja med bostadens adress och storlek.",
-  "property_card_details": "{city} · {rooms} {area}"
+  "property_card_details": "{city} · {rooms} {area}",
+  "not_found_title": "Sidan hittades inte",
+  "not_found_text": "Det finns ingen sida på adressen. Kontrollera adressen eller gå tillbaka till startsidan.",
+  "not_found_home": "Till startsidan"
 }

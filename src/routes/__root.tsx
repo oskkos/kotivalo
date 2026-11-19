@@ -3,8 +3,10 @@ import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ThemeProvider } from '@mui/material/styles'
 import nunitoCss from '@fontsource-variable/nunito/wght.css?url'
+import { m } from '#/paraglide/messages.js'
 import { getLocale } from '#/paraglide/runtime.js'
 import { ErrorView } from '#/components/ErrorView'
+import { NotFoundView } from '#/components/NotFoundView'
 import { installClientLogging } from '#/lib/client-log'
 import { registerServiceWorker } from '#/lib/service-worker'
 import { colors } from '#/theme/tokens'
@@ -34,6 +36,15 @@ export const Route = createRootRoute({
   }),
   shellComponent: RootDocument,
   errorComponent: ErrorView,
+  // Every address that matches no page (spec: "Showing that a page was not
+  // found").
+  notFoundComponent: () => (
+    <NotFoundView
+      title={m.not_found_title()}
+      text={m.not_found_text()}
+      backLabel={m.not_found_home()}
+    />
+  ),
 })
 
 function RootDocument({ children }: { children: ReactNode }) {
