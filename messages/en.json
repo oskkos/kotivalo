@@ -51,5 +51,15 @@
   "error_reference": "Error reference: {reference}",
   "offline_title": "No connection",
   "offline_body": "Kotivalo needs a network connection. Check your connection and try again.",
-  "offline_retry": "Try again"
+  "offline_retry": "Try again",
+  "reason_text_too_long": "The text is too long. Use at most 100 characters.",
+  "reason_street_address_required": "Enter the street address.",
+  "reason_postcode_invalid": "A postcode has five digits, for example 33100.",
+  "reason_city_required": "Enter the city.",
+  "reason_room_count_required": "Choose the number of rooms.",
+  "reason_floor_area_invalid": "Enter the floor area in square metres, for example 48.5.",
+  "reason_property_not_found_title": "Flat not found",
+  "reason_property_not_found": "It may have been removed, or you don't have access to it.",
+  "reason_property_limit_reached_title": "You already have 100 flats",
+  "reason_property_limit_reached": "You can add at most 100 flats to Kotivalo."
 }

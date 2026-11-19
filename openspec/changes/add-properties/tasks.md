@@ -18,11 +18,11 @@
 
 `feat(properties): validate flat details and format floor areas`
 
-- [ ] 3.1 Write `parseDecimal(text, decimals)` in `src/lib/` (comma or point, spaces, too many decimals), with unit tests
-- [ ] 3.2 Add `formatArea(tenths, locale)` to `src/lib/format.ts` (`48,5 m²`, `49 m²`; `48.5 m²` in English), with unit tests in every locale
-- [ ] 3.3 Write `features/properties/schemas.ts` (design decision 3) with unit tests per reason
-- [ ] 3.4 Add the reason codes to `lib/reasons.ts` and their fi, sv and en messages
-- [ ] 3.5 Write `src/components/form/ChoiceField.tsx` (toggle buttons bound to TanStack Form, `aria-pressed`, the reason under the group, 44 px targets), with component tests; mention it in CLAUDE.md "Forms and validation"
+- [x] 3.1 Write `parseDecimal(text, decimals)` in `src/lib/` (comma or point, spaces, too many decimals), with unit tests
+- [x] 3.2 Add `formatArea(tenths, locale)` to `src/lib/format.ts` (`48,5 m²`, `49 m²`; `48.5 m²` in English), with unit tests in every locale
+- [x] 3.3 Write `features/properties/schemas.ts` (design decision 3) with unit tests per reason
+- [x] 3.4 Add the reason codes to `lib/reasons.ts` and their fi, sv and en messages
+- [x] 3.5 Write `src/components/form/ChoiceField.tsx` (toggle buttons bound to TanStack Form, `aria-pressed`, the reason under the group, 44 px targets), with component tests; mention it in CLAUDE.md "Forms and validation"
 
 ## 4. Property server functions
 

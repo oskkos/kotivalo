@@ -5,7 +5,16 @@
 import { m } from '#/paraglide/messages.js'
 
 /** Errors shown under the field they belong to. */
-export type FieldReason = 'email_invalid' | 'code_invalid' | 'code_wrong'
+export type FieldReason =
+  | 'email_invalid'
+  | 'code_invalid'
+  | 'code_wrong'
+  | 'text_too_long'
+  | 'street_address_required'
+  | 'postcode_invalid'
+  | 'city_required'
+  | 'room_count_required'
+  | 'floor_area_invalid'
 
 /** Errors about the whole action, shown as an alert with a title. */
 export type AlertReason =
@@ -15,6 +24,8 @@ export type AlertReason =
   | 'email_quota'
   | 'email_busy'
   | 'email_failed'
+  | 'property_not_found'
+  | 'property_limit_reached'
   /** A request failed in a way the app doesn't expect (network, server error). */
   | 'unexpected'
 
@@ -32,6 +43,12 @@ const texts: Record<Reason, () => ReasonText> = {
   email_invalid: () => ({ text: m.reason_email_invalid() }),
   code_invalid: () => ({ text: m.reason_code_invalid() }),
   code_wrong: () => ({ text: m.reason_code_wrong() }),
+  text_too_long: () => ({ text: m.reason_text_too_long() }),
+  street_address_required: () => ({ text: m.reason_street_address_required() }),
+  postcode_invalid: () => ({ text: m.reason_postcode_invalid() }),
+  city_required: () => ({ text: m.reason_city_required() }),
+  room_count_required: () => ({ text: m.reason_room_count_required() }),
+  floor_area_invalid: () => ({ text: m.reason_floor_area_invalid() }),
   code_expired: () => ({
     title: m.reason_code_expired_title(),
     text: m.reason_code_expired(),
@@ -55,6 +72,14 @@ const texts: Record<Reason, () => ReasonText> = {
   email_failed: () => ({
     title: m.reason_email_failed_title(),
     text: m.reason_email_failed(),
+  }),
+  property_not_found: () => ({
+    title: m.reason_property_not_found_title(),
+    text: m.reason_property_not_found(),
+  }),
+  property_limit_reached: () => ({
+    title: m.reason_property_limit_reached_title(),
+    text: m.reason_property_limit_reached(),
   }),
   unexpected: () => ({
     title: m.reason_unexpected_title(),

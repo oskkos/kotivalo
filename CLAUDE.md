@@ -179,7 +179,9 @@ Vitest projects are chosen by file name (`vitest.config.ts`):
 - **Server functions** return `{ ok: true, … } | { ok: false, reason }` for expected failures and throw only on bugs.
 - **Forms use TanStack Form.**
   - Bind text inputs with `TextField` from `src/components/form/TextField.tsx`. It shows the field's reason under it once the user has left the field or submitted, sets `aria-invalid` and the description, and disables the field while the form submits.
+  - Bind a choice among a few options (room count, contract type) with `ChoiceField` from `src/components/form/ChoiceField.tsx`: toggle buttons with `aria-pressed`, the reason under the group after submitting.
   - Pass a server's field-level reason as `reason`.
+  - Numbers people type go through `parseDecimal(text, decimals)` (`src/lib/decimal.ts`; `48,5` and `48.5`) in the schema, and are stored scaled to integers (`tenths()`, `cents()`).
 
 ## Domain glossary
 
@@ -222,7 +224,7 @@ Code, database and test names use these English terms. The English UI copy may u
 - Finnish (primary), Swedish and English from day one. Write the Finnish copy first. Translations live in `messages/fi.json`, `sv.json` and `en.json` (Paraglide; project in `project.inlang/`, compiler options in `project.inlang/paraglide.config.ts`). Use them as `m.key()` from `#/paraglide/messages.js`; message keys are static (ESLint `paraglide/no-dynamic-message-access`). Paraglide silently falls back to Finnish for a message missing in another language, so `src/messages.test.ts` checks that every language has the same keys and variables and no empty messages.
 - **No hard-coded text**: all UI copy, errors and emails come from messages, in the recipient's language. ESLint flags JSX text, string literals in JSX and user-facing attributes (`title`, `aria-label`, `alt`, `placeholder`, …) in `.tsx` files. Strings that are never translated (the brand name) go in `UNTRANSLATED` in `eslint.config.js`.
 - **Language resolution**: the server entry `src/server.ts` wraps TanStack Start in Paraglide's middleware, so `getLocale()` and messages follow the request during SSR. Before sign-in the language comes from the `kotivalo_locale` cookie, then the browser language, then Finnish. Signed-in users get the language stored on their account (`user.locale`): signing in sets the cookie to it, and the signed-in layout puts it back if it drifts. The language is not part of the URL.
-- **Formatting** uses each language as used in Finland: `fi-FI`, `sv-FI`, `en-FI` (`1 234,56 €` and `5.3.2026` in Finnish and Swedish, `€1,234.56` and `05/03/2026` in English). Format amounts and dates with `formatMoney(cents)` and `formatDate(iso)` in `src/lib/format.ts`, also when they appear inside a message: pass the formatted string as a parameter. Don't use Paraglide's `number` or `datetime` formatters in messages, because they format with the bare language (`sv` gives Swedish ISO dates, `en` gives US dates). `plural` in messages is fine.
+- **Formatting** uses each language as used in Finland: `fi-FI`, `sv-FI`, `en-FI` (`1 234,56 €` and `5.3.2026` in Finnish and Swedish, `€1,234.56` and `05/03/2026` in English). Format amounts, dates and floor areas with `formatMoney(cents)`, `formatDate(iso)` and `formatArea(tenths)` in `src/lib/format.ts`, also when they appear inside a message: pass the formatted string as a parameter. Don't use Paraglide's `number` or `datetime` formatters in messages, because they format with the bare language (`sv` gives Swedish ISO dates, `en` gives US dates). `plural` in messages is fine.
 
 ## Specs and tests (OpenSpec)
 
