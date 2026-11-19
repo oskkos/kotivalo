@@ -28,9 +28,9 @@
 
 `fix(platform): refuse cross-site server function calls`
 
-- [ ] 4.1 Add TanStack Start's `createCsrfMiddleware` for server functions to `src/start.ts` (`Sec-Fetch-Site` same-origin, then `Origin`, then `Referer`)
-- [ ] 4.2 Playwright: a server function call marked `Sec-Fetch-Site: cross-site` gets 403, a same-origin one doesn't
-- [ ] 4.3 Note it in CLAUDE.md next to the signed-in pages' rules
+- [x] 4.1 Add TanStack Start's `createCsrfMiddleware` for server functions to `src/start.ts` (`Sec-Fetch-Site` same-origin, then `Origin`, then `Referer`)
+- [x] 4.2 Playwright: a server function call marked `Sec-Fetch-Site: cross-site` gets 403, a same-origin one doesn't
+- [x] 4.3 Note it in CLAUDE.md next to the signed-in pages' rules
 
 ## 5. Archive
 

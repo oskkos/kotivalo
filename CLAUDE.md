@@ -133,6 +133,7 @@ src/
 
 - Pages that need a signed-in user go under the pathless layout `src/routes/_authed.tsx`, e.g. `src/routes/_authed/flats.tsx`. Its `beforeLoad` checks the session with `getSignedInUser()` and redirects to `/sign-in`; the page reads the user with `Route.useRouteContext()`.
 - Server functions that change data check the session themselves (`getRequestContext().auth.getSession()`): the layout protects pages, not endpoints.
+- Server functions accept same-origin calls only: `createCsrfMiddleware` in `src/start.ts` answers 403 to a call from another site (`Sec-Fetch-Site`, then `Origin`, then `Referer`). Server routes (`/api/*`) are not covered; each checks what it needs.
 
 ### Repositories
 
