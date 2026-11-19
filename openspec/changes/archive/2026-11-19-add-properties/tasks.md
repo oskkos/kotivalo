@@ -58,4 +58,4 @@
 
 `docs(openspec): archive add-properties`
 
-- [ ] 7.1 `openspec archive add-properties`, check the merged `properties` and `authentication` specs, and `pnpm check:traceability`
+- [x] 7.1 `openspec archive add-properties`, check the merged `properties` and `authentication` specs, and `pnpm check:traceability`

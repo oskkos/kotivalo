@@ -8,7 +8,7 @@ A user SHALL sign in by entering their email address and then the 6-digit code e
 
 #### Scenario: A new address creates an account and signs in
 - **WHEN** a visitor enters `uusi@example.com` on `/sign-in`, then the code from the email sent to that address
-- **THEN** an account exists for `uusi@example.com`, the visitor is signed in and lands on `/`, which shows `uusi@example.com`
+- **THEN** an account exists for `uusi@example.com`, the visitor is signed in and lands on `/`, the flats list, which is empty for the new account
 
 #### Scenario: An existing user signs in to the same account
 - **WHEN** the user with the account `omistaja@example.com` signs in again with a new code
