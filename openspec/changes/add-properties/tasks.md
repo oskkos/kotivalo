@@ -37,11 +37,11 @@
 
 `feat(properties): add the new flat and edit flat screens`
 
-- [ ] 5.1 Write `features/properties/PropertyForm.tsx` from the "Uusi asunto" board's address and flat sections, with component tests (prefilled values, field errors, saving state, a server reason as an alert)
-- [ ] 5.2 Add the routes `/_authed/properties/new` and `/_authed/properties/$propertyId/edit` (loader, `notFound()`, `notFoundComponent`)
-- [ ] 5.3 Add the fi messages from the canvas, then sv and en
-- [ ] 5.4 Playwright: "Adding a flat" (field errors) and "Editing a flat" (the form shows the current details), and "Another user's flat cannot be opened"
-- [ ] 5.5 Screenshots of the new and edit forms (fi, 390 × 844) for review before the commit
+- [x] 5.1 Write `features/properties/PropertyForm.tsx` from the "Uusi asunto" board's address and flat sections, with component tests (prefilled values, field errors, saving state, a server reason as an alert)
+- [x] 5.2 Add the routes `/_authed/properties/new` and `/_authed/properties/$propertyId/edit` (loader, `notFound()`, `notFoundComponent`)
+- [x] 5.3 Add the fi messages from the canvas, then sv and en
+- [x] 5.4 Playwright: the field errors of "Adding a flat", and the not-found page for a flat id that doesn't exist (scenarios that need a saved flat's id move to group 6, where the list leads to it)
+- [x] 5.5 Screenshots of the new and edit forms (fi, 390 × 844) for review before the commit
 
 ## 6. Flats list as the home page
 
@@ -50,7 +50,7 @@
 - [ ] 6.1 Write `features/properties/PropertyList.tsx` and `PropertyCard.tsx` from the "Asunnot" board (header with the logo and the add button, title and count, cards linking to the edit form), and the empty state; component tests
 - [ ] 6.2 Replace the placeholder home page at `/_authed/` with the list; move sign-out to the end of the list; remove `home_signed_in_as` and the placeholder's test
 - [ ] 6.3 Update the authentication e2e tests and the delta scenario "A new address creates an account and signs in" (lands on the empty flats list)
-- [ ] 6.4 Playwright: the remaining scenarios of "Adding a flat", "Editing a flat", "Listing flats", "First run without flats" and "Another user's flat is not listed"
+- [ ] 6.4 Playwright: the remaining scenarios of "Adding a flat", "Editing a flat", "Listing flats", "First run without flats" and "Flats are shown only to users with access"
 - [ ] 6.5 Screenshots of the list and the empty state (fi, 390 × 844) for review before the commit
 - [ ] 6.6 Update CLAUDE.md "Current state"; `pnpm check:traceability` and the full test suite pass
 

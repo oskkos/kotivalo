@@ -71,27 +71,29 @@ export function ChoiceField<T extends string | number>({
             <Button
               key={choice.value}
               type="button"
+              variant="outlined"
               aria-pressed={pressed}
               disabled={submitting}
               onClick={() => {
                 field.handleChange(choice.value)
                 field.handleBlur()
               }}
+              // The theme's outlined button, with the pressed one in plum.
               sx={{
+                minWidth: 0,
+                paddingInline: 1,
                 borderRadius: `${String(radii.input)}px`,
-                border: 1.5,
-                borderColor: pressed
-                  ? 'primary.main'
-                  : shown === undefined
-                    ? colors.inputBorder
-                    : 'error.main',
-                bgcolor: pressed ? 'primary.main' : 'background.paper',
-                color: pressed ? 'primary.contrastText' : 'text.primary',
                 fontSize: 14,
                 fontWeight: 800,
-                '&:hover': {
-                  bgcolor: pressed ? 'primary.main' : colors.sand,
-                },
+                ...(shown === undefined ? {} : { borderColor: 'error.main' }),
+                ...(pressed
+                  ? {
+                      bgcolor: 'primary.main',
+                      borderColor: 'primary.main',
+                      color: 'primary.contrastText',
+                      '&:hover': { bgcolor: 'primary.main' },
+                    }
+                  : { '&:hover': { bgcolor: colors.sand } }),
               }}
             >
               {choice.label}
@@ -100,7 +102,7 @@ export function ChoiceField<T extends string | number>({
         })}
       </Box>
       {shown !== undefined && (
-        <FormHelperText id={helperId} error>
+        <FormHelperText id={helperId} error sx={{ mx: '14px' }}>
           {reasonText(shown).text}
         </FormHelperText>
       )}

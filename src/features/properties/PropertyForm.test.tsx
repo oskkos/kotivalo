@@ -1,0 +1,134 @@
+import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { afterEach, describe, expect, test, vi } from 'vitest'
+import { EMPTY_PROPERTY, PropertyForm, type SaveResult } from './PropertyForm'
+import type { PropertyDetailsInput } from './schemas'
+
+// jsdom's browser language is English, so the form is in English.
+vi.mock('#/lib/client-log', () => ({ clientLog: { error: vi.fn() } }))
+
+function setup(
+  options: {
+    initial?: PropertyDetailsInput
+    save?: (details: PropertyDetailsInput) => Promise<SaveResult>
+  } = {},
+) {
+  const save = vi.fn(
+    options.save ?? (() => Promise.resolve<SaveResult>({ ok: true })),
+  )
+  const onSaved = vi.fn()
+  const onClose = vi.fn()
+  render(
+    <PropertyForm
+      title="New flat"
+      initial={options.initial ?? EMPTY_PROPERTY}
+      save={save}
+      onSaved={onSaved}
+      onClose={onClose}
+    />,
+  )
+  return { user: userEvent.setup(), save, onSaved, onClose }
+}
+
+const field = (name: string) => screen.getByRole('textbox', { name })
+const saveButton = () => screen.getByRole('button', { name: 'Save flat' })
+
+async function fillIn(user: ReturnType<typeof userEvent.setup>) {
+  await user.type(field('Street address'), 'Kuusikuja 3 B 12')
+  await user.type(field('Postcode'), '33100')
+  await user.type(field('City'), 'Tampere')
+  await user.click(screen.getByRole('button', { name: '2 rooms' }))
+  await user.type(field('Floor area (m²)'), '48,5')
+}
+
+afterEach(() => {
+  vi.clearAllMocks()
+})
+
+describe('PropertyForm', () => {
+  test('saves the details as typed', async () => {
+    const { user, save, onSaved } = setup()
+    await fillIn(user)
+    await user.click(saveButton())
+
+    expect(save).toHaveBeenCalledWith({
+      streetAddress: 'Kuusikuja 3 B 12',
+      postcode: '33100',
+      city: 'Tampere',
+      roomCount: 2,
+      floorArea: '48,5',
+    })
+    expect(onSaved).toHaveBeenCalledOnce()
+  })
+
+  test('shows every missing detail under its field and saves nothing', async () => {
+    const { user, save } = setup()
+    await user.click(saveButton())
+
+    expect(field('Street address')).toHaveAccessibleDescription(
+      'Enter the street address.',
+    )
+    expect(field('Postcode')).toHaveAccessibleDescription(
+      'A postcode has 5 digits.',
+    )
+    expect(field('City')).toHaveAccessibleDescription('Enter the city.')
+    expect(
+      screen.getByRole('group', { name: 'Rooms' }),
+    ).toHaveAccessibleDescription('Choose the number of rooms.')
+    expect(field('Floor area (m²)')).toHaveAccessibleDescription(
+      'Enter the floor area in square metres, for example 48.5.',
+    )
+    expect(save).not.toHaveBeenCalled()
+  })
+
+  test('opens with the given details', () => {
+    setup({
+      initial: {
+        streetAddress: 'Kuusikuja 3 B 12',
+        postcode: '33100',
+        city: 'Tampere',
+        roomCount: 2,
+        floorArea: '48,5',
+      },
+    })
+
+    expect(field('Street address')).toHaveValue('Kuusikuja 3 B 12')
+    expect(field('Floor area (m²)')).toHaveValue('48,5')
+    expect(screen.getByRole('button', { name: '2 rooms' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+  })
+
+  test('shows a refusal from the server as an alert', async () => {
+    const { user, onSaved } = setup({
+      save: () =>
+        Promise.resolve({ ok: false, reason: 'property_limit_reached' }),
+    })
+    await fillIn(user)
+    await user.click(saveButton())
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'You already have 100 flats',
+    )
+    expect(onSaved).not.toHaveBeenCalled()
+  })
+
+  test('shows an unexpected failure with a reference', async () => {
+    const { user } = setup({ save: () => Promise.reject(new Error('down')) })
+    await fillIn(user)
+    await user.click(saveButton())
+
+    expect(await screen.findByRole('alert')).toHaveTextContent(
+      'Something went wrong',
+    )
+  })
+
+  test('closes without saving', async () => {
+    const { user, save, onClose } = setup()
+    await user.click(screen.getByRole('button', { name: 'Close' }))
+
+    expect(onClose).toHaveBeenCalledOnce()
+    expect(save).not.toHaveBeenCalled()
+  })
+})
