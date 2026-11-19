@@ -10,9 +10,9 @@
 
 `feat(properties): add the property repository`
 
-- [ ] 2.1 Write `features/properties/property.repository.server.ts`: `create` (property and owner access with `atomically()`), `update` (access checked in the same statement), `findForUser`, `listForUser`, `countForUser`
-- [ ] 2.2 Write the pure `sortByStreetAddress(properties, locale)` with `Intl.Collator` (numeric), with unit tests (`Kuusikuja 3` before `Kuusikuja 12`, `Åkerv.`/`Äijälä` order in fi)
-- [ ] 2.3 Workers tests: create gives the creator `owner` access and no one else; list and find return only flats with access; update of a flat without access changes nothing and returns false; count
+- [x] 2.1 Write `features/properties/property.repository.server.ts`: `create` (property and owner access with `atomically()`), `update` (access checked in the same statement), `findForUser`, `listForUser`, `countForUser`
+- [x] 2.2 Write the pure `sortByStreetAddress(properties, locale)` with `Intl.Collator` (numeric), with unit tests (`Kuusikuja 3` before `Kuusikuja 12`, `Åkerv.`/`Äijälä` order in fi)
+- [x] 2.3 Workers tests: create gives the creator `owner` access and no one else; list and find return only flats with access; update of a flat without access changes nothing and returns false; count
 
 ## 3. Schemas, formatting and the choice field
 
