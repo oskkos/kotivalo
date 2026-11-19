@@ -28,10 +28,10 @@
 
 `feat(properties): add the property server functions`
 
-- [ ] 4.1 Write `features/properties/functions.ts`: `listProperties`, `getProperty`, `createProperty`, `updateProperty`, each checking the session, with the logic in a testable `*.server.ts` taking its dependencies like `sign-in.server.ts`
-- [ ] 4.2 The limit of 100 flats (`property_limit_reached`), `property_not_found` for a flat without access
-- [ ] 4.3 Log `property.created`, `property.updated` (info, `propertyId`) and `property.limit_reached` (warn)
-- [ ] 4.4 Workers tests for every scenario of "Flats are shown only to users with access" and "Limiting the number of flats", and that the log lines carry ids and no address
+- [x] 4.1 Write `features/properties/functions.ts`: `listProperties`, `getProperty`, `createProperty`, `updateProperty`, each checking the session, with the logic in a testable `*.server.ts` taking its dependencies like `sign-in.server.ts`
+- [x] 4.2 The limit of 100 flats (`property_limit_reached`), `property_not_found` for a flat without access
+- [x] 4.3 Log `property.created`, `property.updated` (info, `propertyId`) and `property.limit_reached` (warn)
+- [x] 4.4 Workers tests for every scenario of "Flats are shown only to users with access" and "Limiting the number of flats", and that the log lines carry ids and no address
 
 ## 5. New and edit flat screens
 
