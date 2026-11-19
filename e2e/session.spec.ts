@@ -57,4 +57,42 @@ test.describe("The user's language is stored on the account", () => {
     expect(cookies.find((c) => c.name === 'kotivalo_locale')?.value).toBe('sv')
     await other.close()
   })
+
+  test('A changed language cookie is put back', async ({
+    browser,
+    baseURL,
+  }) => {
+    // An account created in English.
+    const context = await browser.newContext({ locale: 'en-US' })
+    const page = await context.newPage()
+    const errors: string[] = []
+    page.on('console', (message) => {
+      if (message.type() === 'error') {
+        errors.push(message.text())
+      }
+    })
+    page.on('pageerror', (error) => errors.push(error.message))
+    await signIn(page, uniqueEmail('english'))
+    // Let that page finish hydrating before its cookie changes: TanStack
+    // Start removes window.$_TSR once the page is hydrated.
+    await page.waitForFunction(() => !('$_TSR' in window))
+
+    await context.addCookies([
+      { name: 'kotivalo_locale', value: 'fi', url: baseURL ?? '' },
+    ])
+    const response = await page.goto('/')
+
+    // Rendered in English by the server, not only after hydration.
+    expect(await response?.text()).toContain('<html lang="en"')
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Flats')
+    // Production builds name React's hydration errors by number (#418 etc.).
+    expect(
+      errors.filter((text) =>
+        /hydrat|react\.dev\/errors\/(418|419|422|423|425)/i.test(text),
+      ),
+    ).toEqual([])
+    const cookies = await context.cookies()
+    expect(cookies.find((c) => c.name === 'kotivalo_locale')?.value).toBe('en')
+    await context.close()
+  })
 })

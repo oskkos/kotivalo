@@ -9,9 +9,9 @@
 
 `fix(auth): reload in the account's language when the cookie drifts`
 
-- [ ] 2.1 `getSignedInUser()` returns `localeReset`; the `_authed` layout redirects to the same address with `reloadDocument` when it is true
-- [ ] 2.2 Playwright: "A changed language cookie is put back" (English from the first render, no hydration error in the console or the client log, cookie `en`)
-- [ ] 2.3 Update CLAUDE.md "Language resolution"
+- [x] 2.1 `getSignedInUser()` returns `localeReset`; the `_authed` layout redirects to the same address with `reloadDocument` when it is true
+- [x] 2.2 Playwright: "A changed language cookie is put back" (English from the first render, no hydration error in the console or the client log, cookie `en`)
+- [x] 2.3 Update CLAUDE.md "Language resolution"
 
 ## 3. Connection failures
 
