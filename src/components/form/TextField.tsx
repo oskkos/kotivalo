@@ -2,7 +2,8 @@
 // (src/lib/reasons.ts), shown as text in the user's language under the field.
 import MuiTextField, { type TextFieldProps } from '@mui/material/TextField'
 import { useSelector, type AnyFieldApi } from '@tanstack/react-form'
-import { isReason, reasonText, type Reason } from '#/lib/reasons'
+import { reasonText, type Reason } from '#/lib/reasons'
+import { firstReason } from './reason'
 
 type Props = Omit<
   TextFieldProps,
@@ -14,20 +15,6 @@ type Props = Omit<
    * `code_wrong`. Shown instead of the validators' error.
    */
   reason?: Reason | undefined
-}
-
-/** The first error as a reason code. Zod issues carry it as `message`. */
-function firstReason(errors: unknown[]): Reason | undefined {
-  for (const error of errors) {
-    const code =
-      typeof error === 'object' && error !== null && 'message' in error
-        ? error.message
-        : error
-    if (isReason(code)) {
-      return code
-    }
-  }
-  return undefined
 }
 
 export function TextField({ field, reason, disabled, ...props }: Props) {

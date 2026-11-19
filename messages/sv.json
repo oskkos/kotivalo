@@ -51,5 +51,15 @@
   "error_reference": "Felkod: {reference}",
   "offline_title": "Ingen nätverksanslutning",
   "offline_body": "Kotivalo behöver en nätverksanslutning. Kontrollera anslutningen och försök igen.",
-  "offline_retry": "Försök igen"
+  "offline_retry": "Försök igen",
+  "reason_text_too_long": "Texten är för lång. Högst 100 tecken.",
+  "reason_street_address_required": "Skriv gatuadressen.",
+  "reason_postcode_invalid": "Postnumret har fem siffror, till exempel 33100.",
+  "reason_city_required": "Skriv orten.",
+  "reason_room_count_required": "Välj antal rum.",
+  "reason_floor_area_invalid": "Skriv ytan i kvadratmeter, till exempel 48,5.",
+  "reason_property_not_found_title": "Bostaden hittades inte",
+  "reason_property_not_found": "Bostaden kan ha tagits bort, eller så har du inte tillgång till den.",
+  "reason_property_limit_reached_title": "Du har redan 100 bostäder",
+  "reason_property_limit_reached": "Du kan lägga till högst 100 bostäder i Kotivalo."
 }

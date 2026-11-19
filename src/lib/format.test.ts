@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
-import { dateCases, moneyCases } from './format.cases'
-import { formatDate, formatMoney } from './format'
+import { areaCases, dateCases, moneyCases } from './format.cases'
+import { formatArea, formatDate, formatMoney } from './format'
 
 describe('formatMoney', () => {
   test.each(moneyCases)('%s: %i cents is %s', (locale, cents, expected) => {
@@ -42,4 +42,17 @@ describe('formatDate', () => {
       expect(() => formatDate(iso, 'fi')).toThrow(RangeError)
     },
   )
+})
+
+describe('formatArea', () => {
+  test.each(areaCases)(
+    '%s: %i tenths of m² is %s',
+    (locale, tenths, expected) => {
+      expect(formatArea(tenths, locale)).toBe(expected)
+    },
+  )
+
+  test('rejects areas that are not integer tenths', () => {
+    expect(() => formatArea(48.5, 'fi')).toThrow(RangeError)
+  })
 })

@@ -22,3 +22,11 @@ export const dateCases: [Locale, string, string][] = [
   ['en', '2026-03-05', '05/03/2026'],
   ['fi', '2026-12-31', '31.12.2026'],
 ]
+
+export const areaCases: [Locale, number, string][] = [
+  ['fi', 485, `48,5${nbsp}m²`],
+  ['sv', 485, `48,5${nbsp}m²`],
+  ['en', 485, `48.5${nbsp}m²`],
+  ['fi', 490, `49${nbsp}m²`],
+  ['fi', 12005, `1200,5${nbsp}m²`],
+]

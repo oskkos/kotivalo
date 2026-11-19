@@ -37,3 +37,27 @@ export function formatDate(iso: string, locale: Locale = getLocale()) {
     timeZone: 'UTC',
   }).format(date)
 }
+
+// Plain numbers: ICU formats en-FI numbers the Finnish way ("48,5") but
+// en-FI money the English way ("€1,234.56"), so English uses en-GB here to
+// match the money format's decimal point.
+const NUMBER_LOCALES = {
+  ...INTL_LOCALES,
+  en: 'en-GB',
+} as const satisfies Record<Locale, string>
+
+/** A one-decimal quantity from integer tenths, e.g. 485 → "48,5" in Finnish. */
+export function formatTenths(tenths: number, locale: Locale = getLocale()) {
+  if (!Number.isSafeInteger(tenths)) {
+    throw new RangeError(`Expected integer tenths, got ${String(tenths)}`)
+  }
+  return new Intl.NumberFormat(NUMBER_LOCALES[locale], {
+    maximumFractionDigits: 1,
+    useGrouping: false,
+  }).format(tenths / 10)
+}
+
+/** A floor area from tenths of m², e.g. 485 → "48,5 m²" in Finnish. */
+export function formatArea(tenths: number, locale: Locale = getLocale()) {
+  return `${formatTenths(tenths, locale)}\u00a0m²`
+}
