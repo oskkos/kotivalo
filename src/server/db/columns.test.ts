@@ -1,11 +1,20 @@
 import { getTableConfig, sqliteTable } from 'drizzle-orm/sqlite-core'
 import { describe, expect, test } from 'vitest'
-import { basisPoints, cents, id, instant, isoDate, validity } from './columns'
+import {
+  basisPoints,
+  cents,
+  id,
+  instant,
+  isoDate,
+  tenths,
+  validity,
+} from './columns'
 
 const example = sqliteTable('example', {
   id: id(),
   amount: cents('amount').notNull(),
   share: basisPoints('share').notNull(),
+  area: tenths('area').notNull(),
   paidOn: isoDate('paid_on'),
   sentAt: instant('sent_at').notNull(),
   ...validity(),
@@ -19,11 +28,12 @@ const columns = Object.fromEntries(
 )
 
 describe('Column helpers', () => {
-  test('store money, shares and instants as integers and dates as text', () => {
+  test('store money, shares, tenths and instants as integers and dates as text', () => {
     expect(columns).toEqual({
       id: { type: 'text', notNull: true, primary: true },
       amount: { type: 'integer', notNull: true, primary: false },
       share: { type: 'integer', notNull: true, primary: false },
+      area: { type: 'integer', notNull: true, primary: false },
       paid_on: { type: 'text', notNull: false, primary: false },
       sent_at: { type: 'integer', notNull: true, primary: false },
       valid_from: { type: 'text', notNull: true, primary: false },

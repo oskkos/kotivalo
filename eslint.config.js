@@ -170,8 +170,24 @@ export default defineConfig([
     },
   },
 
-  // Tests inside the Drizzle-allowed areas (schema, platform) keep that
-  // area's rules from the blocks above.
+  // Schema tests may reach the test database directly, like other tests.
+  {
+    files: ['src/server/db/**/*.test.ts'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            cloudflareOnlyInPlatformExceptTests,
+            betterAuthOnlyInPlatform,
+          ],
+        },
+      ],
+    },
+  },
+
+  // Other tests inside the Drizzle-allowed areas (platform, repositories)
+  // keep that area's rules from the blocks above.
   {
     files: TESTS,
     ignores: DRIZZLE_ALLOWED,

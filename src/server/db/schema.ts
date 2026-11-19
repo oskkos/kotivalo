@@ -2,8 +2,14 @@
 // platform's Drizzle client see the same set. Tables land with the features
 // (OpenSpec changes) that need them; build columns with the helpers in
 // ./columns.ts.
-import { integer, sqliteTable, text, index } from 'drizzle-orm/sqlite-core'
-import { id, instant } from './columns'
+import {
+  index,
+  integer,
+  primaryKey,
+  sqliteTable,
+  text,
+} from 'drizzle-orm/sqlite-core'
+import { id, instant, tenths } from './columns'
 
 // Authentication (openspec: authentication). Better Auth's models: the
 // property names are Better Auth's field names, so its Drizzle adapter maps
@@ -86,3 +92,43 @@ export const rateLimit = sqliteTable('rate_limit', {
   count: integer('count').notNull(),
   windowStart: instant('window_start').notNull(),
 })
+
+// Flats (openspec: properties). A flat belongs to no one by itself: users
+// reach it through property_access, one row per user and flat.
+
+export const properties = sqliteTable('properties', {
+  id: id(),
+  /** E.g. "Kuusikuja 3 B 12". */
+  streetAddress: text('street_address').notNull(),
+  /** Five digits, as text: leading zeros. */
+  postcode: text('postcode').notNull(),
+  city: text('city').notNull(),
+  /** 1, 2, 3 or 4, where 4 means four rooms or more. */
+  roomCount: integer('room_count', { mode: 'number' }).notNull(),
+  /** In tenths of m²: 485 = 48,5 m². */
+  floorArea: tenths('floor_area').notNull(),
+  createdAt: instant('created_at').notNull(),
+  updatedAt: instant('updated_at').notNull(),
+})
+
+/** Roles a user can have on a flat. Invitations (#29) add more. */
+export const PROPERTY_ROLES = ['owner'] as const
+export type PropertyRole = (typeof PROPERTY_ROLES)[number]
+
+export const propertyAccess = sqliteTable(
+  'property_access',
+  {
+    propertyId: text('property_id')
+      .notNull()
+      .references(() => properties.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    role: text('role', { enum: PROPERTY_ROLES }).notNull(),
+    createdAt: instant('created_at').notNull(),
+  },
+  (t) => [
+    primaryKey({ columns: [t.propertyId, t.userId] }),
+    index('property_access_user_id_idx').on(t.userId),
+  ],
+)
