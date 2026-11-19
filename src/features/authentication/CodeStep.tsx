@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react'
 import { Logo } from '#/components/Logo'
 import { ReasonAlert } from '#/components/ReasonAlert'
 import { clientLog } from '#/lib/client-log'
+import { failureReason } from '#/lib/network-error'
 import type { AlertReason, FieldReason } from '#/lib/reasons'
 import { m } from '#/paraglide/messages.js'
 import { SIGN_IN_CODE } from '#/server/auth/auth'
@@ -111,7 +112,7 @@ export function CodeStep(props: Props) {
       }
     } catch (error) {
       clientLog.error('authentication.verify_failed', {}, error)
-      setAlert('unexpected')
+      setAlert(failureReason(error))
     } finally {
       setBusy(undefined)
     }
@@ -131,7 +132,7 @@ export function CodeStep(props: Props) {
       }
     } catch (error) {
       clientLog.error('authentication.resend_failed', {}, error)
-      setAlert('unexpected')
+      setAlert(failureReason(error))
     } finally {
       setBusy(undefined)
     }

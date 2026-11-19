@@ -12,6 +12,7 @@ import { ReasonAlert } from '#/components/ReasonAlert'
 import { ChoiceField } from '#/components/form/ChoiceField'
 import { TextField } from '#/components/form/TextField'
 import { clientLog } from '#/lib/client-log'
+import { failureReason } from '#/lib/network-error'
 import type { AlertReason } from '#/lib/reasons'
 import { m } from '#/paraglide/messages.js'
 import { colors } from '#/theme/tokens'
@@ -88,7 +89,7 @@ export function PropertyForm({
         }
       } catch (error) {
         clientLog.error('property.save_failed', {}, error)
-        setAlert('unexpected')
+        setAlert(failureReason(error))
       }
     },
   })

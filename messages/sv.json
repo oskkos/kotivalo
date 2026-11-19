@@ -101,5 +101,7 @@
   "property_card_details": "{city} · {rooms} {area}",
   "not_found_title": "Sidan hittades inte",
   "not_found_text": "Det finns ingen sida på adressen. Kontrollera adressen eller gå tillbaka till startsidan.",
-  "not_found_home": "Till startsidan"
+  "not_found_home": "Till startsidan",
+  "reason_network_title": "Ingen anslutning",
+  "reason_network": "Kontrollera nätverksanslutningen och försök igen."
 }

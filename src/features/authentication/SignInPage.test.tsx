@@ -154,6 +154,18 @@ describe('Sign-in page when a request fails unexpectedly', () => {
     )
   })
 
+  test('the email step says there is no connection', async () => {
+    requestCode.mockRejectedValue(new TypeError('Failed to fetch'))
+    const { user } = setup()
+    await user.type(
+      screen.getByRole('textbox', { name: 'Email' }),
+      'uusi@example.com',
+    )
+    await user.click(screen.getByRole('button', { name: 'Send code' }))
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('No connection')
+  })
+
   test('the code step shows an alert', async () => {
     verifyCode.mockRejectedValue(new Error('server error'))
     const { user, onSignedIn } = setup()

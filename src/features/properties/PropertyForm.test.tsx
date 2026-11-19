@@ -124,6 +124,18 @@ describe('PropertyForm', () => {
     )
   })
 
+  test('says there is no connection when the request never got through', async () => {
+    const { user } = setup({
+      save: () => Promise.reject(new TypeError('Failed to fetch')),
+    })
+    await fillIn(user)
+    await user.click(saveButton())
+
+    const alert = await screen.findByRole('alert')
+    expect(alert).toHaveTextContent('No connection')
+    expect(alert).not.toHaveTextContent('Error reference')
+  })
+
   test('closes without saving', async () => {
     const { user, save, onClose } = setup()
     await user.click(screen.getByRole('button', { name: 'Close' }))

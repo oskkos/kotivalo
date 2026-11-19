@@ -3,6 +3,7 @@
 // the same trace id (src/lib/trace.ts). Same rules as server logging: event
 // names are `<capability>.<what_happened>`, no personal data.
 
+import { isNetworkError } from './network-error'
 import { browserTraceId } from './trace'
 
 export type ClientLogLevel = 'info' | 'warn' | 'error'
@@ -96,8 +97,17 @@ export const clientLog = {
   warn: (event: string, fields?: ClientLogFields) => {
     add('warn', event, fields)
   },
+  /**
+   * A failure someone should look at. A connection failure (the request
+   * never reached the server) is sent as a warning with `network: true`
+   * instead, so it doesn't raise an alert.
+   */
   error: (event: string, fields?: ClientLogFields, error?: unknown) => {
-    add('error', event, fields, error)
+    if (isNetworkError(error)) {
+      add('warn', event, { ...fields, network: true }, error)
+    } else {
+      add('error', event, fields, error)
+    }
   },
 }
 
