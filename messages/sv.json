@@ -82,5 +82,21 @@
   "property_floor_area_placeholder": "T.ex. 48",
   "property_save": "Spara bostaden",
   "property_saving": "Sparar…",
-  "property_back_to_list": "Tillbaka till bostäderna"
+  "property_back_to_list": "Tillbaka till bostäderna",
+  "properties_title": "Bostäder",
+  "properties_page_title": "Bostäder – Kotivalo",
+  "properties_count": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} bostad",
+        "countPlural=other": "{count} bostäder"
+      }
+    }
+  ],
+  "property_add": "Lägg till bostad",
+  "properties_empty_title": "Lägg till din första bostad",
+  "properties_empty_text": "Kotivalo samlar bostadens hyror, kostnader och skatteuppgifter på ett ställe. Börja med bostadens adress och storlek.",
+  "property_card_details": "{city} · {rooms} {area}"
 }

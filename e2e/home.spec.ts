@@ -6,12 +6,13 @@ test.describe('Home page', () => {
     await signIn(page, uniqueEmail('koti'))
   })
 
-  test('shows the app name', async ({ page }) => {
+  test('shows the app name and the flats', async ({ page }) => {
     await page.goto('/')
 
     await expect(
-      page.getByRole('heading', { level: 1, name: 'kotivalo' }),
+      page.getByRole('banner').getByText('kotivalo', { exact: true }),
     ).toBeVisible()
+    await expect(page.getByRole('heading', { level: 1 })).toHaveText('Flats')
   })
 
   test('uses the self-hosted Nunito font', async ({ page, baseURL }) => {

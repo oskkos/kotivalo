@@ -82,5 +82,21 @@
   "property_floor_area_placeholder": "E.g. 48",
   "property_save": "Save flat",
   "property_saving": "Saving…",
-  "property_back_to_list": "Back to flats"
+  "property_back_to_list": "Back to flats",
+  "properties_title": "Flats",
+  "properties_page_title": "Flats – Kotivalo",
+  "properties_count": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} flat",
+        "countPlural=other": "{count} flats"
+      }
+    }
+  ],
+  "property_add": "Add flat",
+  "properties_empty_title": "Add your first flat",
+  "properties_empty_text": "Kotivalo keeps a flat's rent, costs and tax figures in one place. Start with the flat's address and size.",
+  "property_card_details": "{city} · {rooms} {area}"
 }

@@ -10,7 +10,7 @@ Kotivalo ("Valoa vuokranantajan arkeen", roughly "light for a landlord's everyda
 
 ## Current state
 
-The app is scaffolded (TanStack Start on Cloudflare Workers) with a placeholder home page behind sign-in, ESLint, Prettier, Vitest, Playwright, CI, commitlint, Git hooks, a D1 database with Drizzle (Better Auth's tables so far), i18n with Paraglide (fi / sv / en; a language menu on the sign-in page only), the MUI theme, email sending (Resend), R2 file storage, a production deploy from `develop`, an installable app (PWA) with an offline page, and sign-in with an emailed one-time code (Better Auth; passkeys come later). Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
+The app is scaffolded (TanStack Start on Cloudflare Workers) with the flats list as the home page behind sign-in (add, edit and list flats; `features/properties/`, the first repository and the pattern for the next features), ESLint, Prettier, Vitest, Playwright, CI, commitlint, Git hooks, a D1 database with Drizzle (Better Auth's tables so far), i18n with Paraglide (fi / sv / en; a language menu on the sign-in page only), the MUI theme, email sending (Resend), R2 file storage, a production deploy from `develop`, an installable app (PWA) with an offline page, and sign-in with an emailed one-time code (Better Auth; passkeys come later). Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
 
 ## Commands
 
