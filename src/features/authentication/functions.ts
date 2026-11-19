@@ -51,8 +51,9 @@ export const verifySignInCode = createServerFn({ method: 'POST' })
 
 /**
  * The signed-in user, or null. Also puts the language cookie back in step
- * with the account's language if it was changed or removed (design decision
- * 7); the next page load then uses it.
+ * with the account's language if it was changed or removed; `localeReset`
+ * then tells the layout to reload, because this request already resolved
+ * its language from the old cookie.
  */
 export const getSignedInUser = createServerFn({ method: 'GET' }).handler(
   async () => {
@@ -61,10 +62,11 @@ export const getSignedInUser = createServerFn({ method: 'GET' }).handler(
       return null
     }
     const { email, locale } = session.user
-    if (getLocale() !== locale) {
+    const localeReset = getLocale() !== locale
+    if (localeReset) {
       setLocaleCookie(locale)
     }
-    return { email, locale }
+    return { email, locale, localeReset }
   },
 )
 
