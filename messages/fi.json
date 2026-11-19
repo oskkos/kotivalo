@@ -82,5 +82,21 @@
   "property_floor_area_placeholder": "Esim. 48",
   "property_save": "Tallenna asunto",
   "property_saving": "Tallennetaan…",
-  "property_back_to_list": "Takaisin asuntoihin"
+  "property_back_to_list": "Takaisin asuntoihin",
+  "properties_title": "Asunnot",
+  "properties_page_title": "Asunnot – Kotivalo",
+  "properties_count": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} asunto",
+        "countPlural=other": "{count} asuntoa"
+      }
+    }
+  ],
+  "property_add": "Lisää asunto",
+  "properties_empty_title": "Lisää ensimmäinen asuntosi",
+  "properties_empty_text": "Kotivalo kokoaa asunnon vuokrat, kulut ja verotiedot yhteen paikkaan. Aloita lisäämällä asunnon osoite ja koko.",
+  "property_card_details": "{city} · {rooms} {area}"
 }

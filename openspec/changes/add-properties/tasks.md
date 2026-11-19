@@ -47,12 +47,12 @@
 
 `feat(properties): list flats on the home page`
 
-- [ ] 6.1 Write `features/properties/PropertyList.tsx` and `PropertyCard.tsx` from the "Asunnot" board (header with the logo and the add button, title and count, cards linking to the edit form), and the empty state; component tests
-- [ ] 6.2 Replace the placeholder home page at `/_authed/` with the list; move sign-out to the end of the list; remove `home_signed_in_as` and the placeholder's test
-- [ ] 6.3 Update the authentication e2e tests and the delta scenario "A new address creates an account and signs in" (lands on the empty flats list)
-- [ ] 6.4 Playwright: the remaining scenarios of "Adding a flat", "Editing a flat", "Listing flats", "First run without flats" and "Flats are shown only to users with access"
-- [ ] 6.5 Screenshots of the list and the empty state (fi, 390 × 844) for review before the commit
-- [ ] 6.6 Update CLAUDE.md "Current state"; `pnpm check:traceability` and the full test suite pass
+- [x] 6.1 Write `features/properties/PropertyList.tsx` and `PropertyCard.tsx` from the "Asunnot" board (header with the logo and the add button, title and count, cards linking to the edit form), and the empty state; component tests
+- [x] 6.2 Replace the placeholder home page at `/_authed/` with the list; move sign-out, with who is signed in, to the end of the list; remove the placeholder's test
+- [x] 6.3 Update the authentication e2e tests and the delta scenario "A new address creates an account and signs in" (lands on the empty flats list)
+- [x] 6.4 Playwright: the remaining scenarios of "Adding a flat", "Editing a flat", "Listing flats", "First run without flats" and "Flats are shown only to users with access"
+- [x] 6.5 Screenshots of the list and the empty state (fi, 390 × 844) for review before the commit
+- [x] 6.6 Update CLAUDE.md "Current state"; `pnpm check:traceability` and the full test suite pass
 
 ## 7. Archive
 

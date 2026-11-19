@@ -15,6 +15,10 @@ test.describe('Sign in with an emailed code', () => {
     const email = uniqueEmail('uusi')
     await signIn(page, email)
     await expect(page).toHaveURL('/')
+    // The flats list, empty for the new account.
+    await expect(
+      page.getByRole('heading', { name: 'Lisää ensimmäinen asuntosi' }),
+    ).toBeVisible()
     await expect(page.getByText(`Kirjautuneena: ${email}`)).toBeVisible()
   })
 
