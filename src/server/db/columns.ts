@@ -16,6 +16,12 @@ export const id = () =>
 /** Money in integer cents (`123456` = 1 234,56 €). */
 export const cents = (name: string) => integer(name, { mode: 'number' })
 
+/**
+ * A quantity with one decimal as integer tenths (`485` = 48,5), e.g. a floor
+ * area in m². Exact, like cents.
+ */
+export const tenths = (name: string) => integer(name, { mode: 'number' })
+
 /** A share in integer basis points (`5000` = 50.00 %); shares sum to 10000. */
 export const basisPoints = (name: string) => integer(name, { mode: 'number' })
 

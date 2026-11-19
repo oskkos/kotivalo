@@ -2,9 +2,9 @@
 
 `feat(db): add the properties and property_access tables`
 
-- [ ] 1.1 Add the `tenths(name)` column helper (a one-decimal quantity as integer tenths) to `src/server/db/columns.ts`
-- [ ] 1.2 Add `properties` and `property_access` to `src/server/db/schema.ts` as in design decision 1
-- [ ] 1.3 Run `pnpm db:generate`, review the SQL and commit the migration; a Workers test checks the tables, the primary key and the cascade from `user`
+- [x] 1.1 Add the `tenths(name)` column helper (a one-decimal quantity as integer tenths) to `src/server/db/columns.ts`
+- [x] 1.2 Add `properties` and `property_access` to `src/server/db/schema.ts` as in design decision 1
+- [x] 1.3 Run `pnpm db:generate`, review the SQL and commit the migration; a Workers test checks the tables, the primary key and the cascade from `user`
 
 ## 2. Property repository
 
