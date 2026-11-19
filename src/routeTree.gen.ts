@@ -14,7 +14,9 @@ import { Route as OfflineRouteImport } from './routes/offline'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
 import { Route as ApiLogRouteImport } from './routes/api/log'
+import { Route as AuthedPropertiesNewRouteImport } from './routes/_authed/properties/new'
 import { Route as ApiTestInboxRouteImport } from './routes/api/test/inbox'
+import { Route as AuthedPropertiesPropertyIdEditRouteImport } from './routes/_authed/properties/$propertyId/edit'
 
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
@@ -40,25 +42,40 @@ const ApiLogRoute = ApiLogRouteImport.update({
   path: '/api/log',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedPropertiesNewRoute = AuthedPropertiesNewRouteImport.update({
+  id: '/properties/new',
+  path: '/properties/new',
+  getParentRoute: () => AuthedRoute,
+} as any)
 const ApiTestInboxRoute = ApiTestInboxRouteImport.update({
   id: '/api/test/inbox',
   path: '/api/test/inbox',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthedPropertiesPropertyIdEditRoute =
+  AuthedPropertiesPropertyIdEditRouteImport.update({
+    id: '/properties/$propertyId/edit',
+    path: '/properties/$propertyId/edit',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
   '/offline': typeof OfflineRoute
   '/sign-in': typeof SignInRoute
   '/api/log': typeof ApiLogRoute
+  '/properties/new': typeof AuthedPropertiesNewRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
+  '/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
 }
 export interface FileRoutesByTo {
   '/offline': typeof OfflineRoute
   '/sign-in': typeof SignInRoute
   '/api/log': typeof ApiLogRoute
   '/': typeof AuthedIndexRoute
+  '/properties/new': typeof AuthedPropertiesNewRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
+  '/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -67,13 +84,29 @@ export interface FileRoutesById {
   '/sign-in': typeof SignInRoute
   '/api/log': typeof ApiLogRoute
   '/_authed/': typeof AuthedIndexRoute
+  '/_authed/properties/new': typeof AuthedPropertiesNewRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
+  '/_authed/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/offline' | '/sign-in' | '/api/log' | '/api/test/inbox'
+  fullPaths:
+    | '/'
+    | '/offline'
+    | '/sign-in'
+    | '/api/log'
+    | '/properties/new'
+    | '/api/test/inbox'
+    | '/properties/$propertyId/edit'
   fileRoutesByTo: FileRoutesByTo
-  to: '/offline' | '/sign-in' | '/api/log' | '/' | '/api/test/inbox'
+  to:
+    | '/offline'
+    | '/sign-in'
+    | '/api/log'
+    | '/'
+    | '/properties/new'
+    | '/api/test/inbox'
+    | '/properties/$propertyId/edit'
   id:
     | '__root__'
     | '/_authed'
@@ -81,7 +114,9 @@ export interface FileRouteTypes {
     | '/sign-in'
     | '/api/log'
     | '/_authed/'
+    | '/_authed/properties/new'
     | '/api/test/inbox'
+    | '/_authed/properties/$propertyId/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -129,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiLogRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/properties/new': {
+      id: '/_authed/properties/new'
+      path: '/properties/new'
+      fullPath: '/properties/new'
+      preLoaderRoute: typeof AuthedPropertiesNewRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/api/test/inbox': {
       id: '/api/test/inbox'
       path: '/api/test/inbox'
@@ -136,15 +178,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiTestInboxRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authed/properties/$propertyId/edit': {
+      id: '/_authed/properties/$propertyId/edit'
+      path: '/properties/$propertyId/edit'
+      fullPath: '/properties/$propertyId/edit'
+      preLoaderRoute: typeof AuthedPropertiesPropertyIdEditRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
 interface AuthedRouteChildren {
   AuthedIndexRoute: typeof AuthedIndexRoute
+  AuthedPropertiesNewRoute: typeof AuthedPropertiesNewRoute
+  AuthedPropertiesPropertyIdEditRoute: typeof AuthedPropertiesPropertyIdEditRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedIndexRoute: AuthedIndexRoute,
+  AuthedPropertiesNewRoute: AuthedPropertiesNewRoute,
+  AuthedPropertiesPropertyIdEditRoute: AuthedPropertiesPropertyIdEditRoute,
 }
 
 const AuthedRouteWithChildren =
