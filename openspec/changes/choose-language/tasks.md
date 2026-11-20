@@ -36,10 +36,10 @@
 
 `feat(properties): open the account page from the flats list header`
 
-- [ ] 5.1 Add the account button (the name's initial, `aria-label` "Account", 44 px, `accent`) to the `PropertyList` header; remove the footer and the `email` and `onSignOut` props; update `src/routes/_authed/index.tsx`
-- [ ] 5.2 Update `PropertyList` component tests; move the sign-out e2e test ("Signing out ends the session") to go through `/account`; Playwright for "Opening the account page from the flats list"
-- [ ] 5.3 Remove the messages that are no longer used (`home_signed_in_as` if unused); update CLAUDE.md ("Current state": the account page, the language menu also on the account page) and CONCEPT.md where it describes the Account screen
-- [ ] 5.4 `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm test:e2e` and `pnpm check:traceability` pass
+- [x] 5.1 Add the account button (the name's initial, `aria-label` "Account", 44 px, `accent`) to the `PropertyList` header; remove the footer and the `email` and `onSignOut` props; update `src/routes/_authed/index.tsx`
+- [x] 5.2 Update `PropertyList` component tests; move the sign-out e2e test ("Signing out ends the session") to go through `/account`; Playwright for "Opening the account page from the flats list"
+- [x] 5.3 Remove the messages that are no longer used (`home_signed_in_as` if unused); update CLAUDE.md ("Current state": the account page, the language menu also on the account page) and CONCEPT.md where it describes the Account screen
+- [x] 5.4 `pnpm typecheck`, `pnpm lint`, `pnpm test`, `pnpm test:e2e` and `pnpm check:traceability` pass
 
 ## 6. Archive
 

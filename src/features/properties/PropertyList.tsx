@@ -9,6 +9,7 @@ import Typography from '@mui/material/Typography'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { Logo, LogoMark } from '#/components/Logo'
+import { AccountAvatar } from '#/features/account/AccountAvatar'
 import { formatArea } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 import { colors, radii } from '#/theme/tokens'
@@ -20,11 +21,10 @@ interface Props {
   properties: readonly Property[]
   /** The current owners by flat id, for each card's ownership line. */
   owners?: Readonly<Record<string, readonly CardOwner[]>>
-  /** Shown above sign-out at the end of the page. */
-  email: string
+  /** The signed-in user's display name, for the account button. */
+  name: string
   /** Shown above the list or the empty state, e.g. flat invitations. */
   notices?: ReactNode
-  onSignOut: () => void
 }
 
 function PlusIcon() {
@@ -144,7 +144,7 @@ function EmptyState() {
   )
 }
 
-function Header(): ReactNode {
+function Header({ name }: { name: string }): ReactNode {
   return (
     <Stack
       component="header"
@@ -159,17 +159,27 @@ function Header(): ReactNode {
       }}
     >
       <Logo size={28} />
-      <IconButton
-        component={Link}
-        to="/properties/new"
-        aria-label={m.property_add()}
-        sx={{
-          border: `1.5px solid ${colors.inputBorder}`,
-          bgcolor: 'background.paper',
-        }}
-      >
-        <PlusIcon />
-      </IconButton>
+      <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
+        <IconButton
+          component={Link}
+          to="/properties/new"
+          aria-label={m.property_add()}
+          sx={{
+            border: `1.5px solid ${colors.inputBorder}`,
+            bgcolor: 'background.paper',
+          }}
+        >
+          <PlusIcon />
+        </IconButton>
+        <IconButton
+          component={Link}
+          to="/account"
+          aria-label={m.account_title()}
+          sx={{ p: 0 }}
+        >
+          <AccountAvatar name={name} size={44} />
+        </IconButton>
+      </Stack>
     </Stack>
   )
 }
@@ -177,16 +187,15 @@ function Header(): ReactNode {
 export function PropertyList({
   properties,
   owners = {},
-  email,
-  onSignOut,
+  name,
   notices,
 }: Props) {
   return (
     <Stack sx={{ minHeight: '100dvh' }}>
-      <Header />
+      <Header name={name} />
       <Stack
         component="main"
-        sx={{ flex: 1, gap: 1.75, px: 2.5, pt: 1, pb: 2 }}
+        sx={{ flex: 1, gap: 1.75, px: 2.5, pt: 1, pb: 4 }}
       >
         <Stack>
           <Typography variant="h1">{m.properties_title()}</Typography>
@@ -214,17 +223,6 @@ export function PropertyList({
             ))}
           </Stack>
         )}
-      </Stack>
-      <Stack
-        component="footer"
-        sx={{ alignItems: 'center', gap: 0.5, px: 2.5, pt: 2, pb: 4 }}
-      >
-        <Typography variant="caption" color="text.secondary">
-          {m.home_signed_in_as({ email })}
-        </Typography>
-        <Button variant="text" onClick={onSignOut}>
-          {m.sign_out()}
-        </Button>
       </Stack>
     </Stack>
   )

@@ -1,5 +1,4 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
-import { signOut } from '#/features/authentication/functions'
 import { listProperties } from '#/features/properties/functions'
 import { listCurrentOwners } from '#/features/ownership/functions'
 import type { CardOwner } from '#/features/properties/ownership-line'
@@ -33,18 +32,13 @@ function HomeRoute() {
     <PropertyList
       properties={properties}
       owners={owners}
-      email={user.email}
+      name={user.name}
       notices={
         <InvitationCards
           invitations={invitations}
           onAnswered={() => router.invalidate()}
         />
       }
-      onSignOut={() => {
-        void signOut().then(() => {
-          window.location.assign('/sign-in')
-        })
-      }}
     />
   )
 }

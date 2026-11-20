@@ -19,10 +19,15 @@ test.describe('The account page', () => {
     await expect(page).toHaveURL('/sign-in')
   })
 
-  test('shows the name and the address', async ({ page }) => {
+  test('Opening the account page from the flats list', async ({ page }) => {
     const email = uniqueEmail('tili')
     await signIn(page, email, 'Annika')
-    await openAccount(page)
+    await waitForHydration(page)
+
+    const account = page.getByRole('link', { name: 'Tili' })
+    await expect(account).toHaveText('A')
+    await account.click()
+    await expect(page).toHaveURL('/account')
 
     await expect(
       page.getByRole('heading', { level: 1, name: 'Tili' }),

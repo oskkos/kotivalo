@@ -44,7 +44,6 @@
   "sign_in_resend_wait": "You can ask for a new code in {time}.",
   "sign_in_change_email": "Change email address",
   "sign_in_spam_hint": "Didn't get a code? Check your spam folder.",
-  "home_signed_in_as": "Signed in as {email}",
   "sign_out": "Sign out",
   "reason_unexpected_title": "Something went wrong",
   "reason_unexpected": "Try again in a moment.",

@@ -23,6 +23,8 @@ test.describe('Signing out', () => {
   test('Signing out ends the session', async ({ page }) => {
     await signIn(page, uniqueEmail('ulos'))
 
+    await page.getByRole('link', { name: 'Tili' }).click()
+    await expect(page).toHaveURL('/account')
     await page.getByRole('button', { name: 'Kirjaudu ulos' }).click()
     await expect(page).toHaveURL('/sign-in')
 
@@ -52,7 +54,9 @@ test.describe("The user's language is stored on the account", () => {
     await signIn(otherPage, email)
 
     await expect(otherPage.locator('html')).toHaveAttribute('lang', 'sv')
-    await expect(otherPage.getByText(`Inloggad som ${email}`)).toBeVisible()
+    await expect(
+      otherPage.getByRole('heading', { level: 1, name: 'Bostäder' }),
+    ).toBeVisible()
     const cookies = await other.cookies()
     expect(cookies.find((c) => c.name === 'kotivalo_locale')?.value).toBe('sv')
     await other.close()

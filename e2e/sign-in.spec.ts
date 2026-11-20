@@ -24,7 +24,8 @@ test.describe('Sign in with an emailed code', () => {
     await expect(
       page.getByRole('heading', { name: 'Lisää ensimmäinen asuntosi' }),
     ).toBeVisible()
-    await expect(page.getByText(`Kirjautuneena: ${email}`)).toBeVisible()
+    await page.getByRole('link', { name: 'Tili' }).click()
+    await expect(page.getByText(email)).toBeVisible()
     // The name was stored: the name step isn't shown again.
     await page.goto('/welcome')
     await expect(page).toHaveURL('/')
@@ -195,6 +196,7 @@ test.describe('Showing a reference with an unexpected error', () => {
       await route.fulfill({ status: 500, body: 'Internal Server Error' })
     })
     await page.goto('/sign-in')
+    await waitForHydration(page)
     await page
       .getByRole('textbox', { name: 'Sähköposti' })
       .fill(uniqueEmail('virhe'))

@@ -15,6 +15,8 @@ export async function fillInFlat(
     ownedSince?: string
   },
 ) {
+  // Typing before hydration is lost when React takes over the form.
+  await waitForHydration(page)
   await page
     .getByRole('textbox', { name: 'Street address' })
     .fill(flat.streetAddress)
