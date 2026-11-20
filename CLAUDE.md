@@ -28,6 +28,7 @@ Package manager is **pnpm** (pinned in `package.json` via `packageManager`; enab
 - `pnpm test:e2e`: Playwright tests in `e2e/` (builds the app and serves it with `vite preview` on port 4173, or reuses a server already running there); `pnpm test:e2e:ui` for the UI mode
   - one file: `pnpm test:e2e e2e/home.spec.ts`
   - one test by name: `pnpm test:e2e -g "shows the app name"`
+  - e2e helpers are in `e2e/support/sign-in.ts`: `signIn(page, email, name?)` signs in and gives a name to a new account; `waitForHydration(page)` before submitting a form on a freshly loaded page, or the browser submits it without the app
   - first time on a machine: `pnpm exec playwright install chromium`
 - `pnpm check:traceability`: checks that every OpenSpec scenario in the main specs has a test and every requirement has a Playwright test or a recorded reason; active changes are reported as pending (see "Specs and tests")
 - `pnpm format` / `pnpm format:check`: Prettier (no semicolons, single quotes, trailing commas)
@@ -132,6 +133,7 @@ src/
 ### Signed-in pages
 
 - Pages that need a signed-in user go under the pathless layout `src/routes/_authed.tsx`, e.g. `src/routes/_authed/flats.tsx`. Its `beforeLoad` checks the session with `getSignedInUser()` and redirects to `/sign-in`; the page reads the user with `Route.useRouteContext()`.
+- A signed-in user without a display name is sent to `/welcome?redirect=<path>` from every page under `_authed` until they give one; the name is shown to the people they share flats with. `safeRedirect()` (`src/lib/redirect.ts`) keeps the return path inside the app.
 - Server functions that change data check the session themselves (`getRequestContext().auth.getSession()`): the layout protects pages, not endpoints.
 - Server functions accept same-origin calls only: `createCsrfMiddleware` in `src/start.ts` answers 403 to a call from another site (`Sec-Fetch-Site`, then `Origin`, then `Referer`). Server routes (`/api/*`) are not covered; each checks what it needs.
 

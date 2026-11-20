@@ -14,6 +14,8 @@ export type FieldReason =
   | 'postcode_invalid'
   | 'city_required'
   | 'room_count_required'
+  | 'name_required'
+  | 'name_too_long'
   | 'floor_area_invalid'
 
 /** Errors about the whole action, shown as an alert with a title. */
@@ -50,6 +52,8 @@ const texts: Record<Reason, () => ReasonText> = {
   postcode_invalid: () => ({ text: m.reason_postcode_invalid() }),
   city_required: () => ({ text: m.reason_city_required() }),
   room_count_required: () => ({ text: m.reason_room_count_required() }),
+  name_required: () => ({ text: m.reason_name_required() }),
+  name_too_long: () => ({ text: m.reason_name_too_long() }),
   floor_area_invalid: () => ({ text: m.reason_floor_area_invalid() }),
   code_expired: () => ({
     title: m.reason_code_expired_title(),

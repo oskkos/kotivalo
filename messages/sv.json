@@ -57,6 +57,8 @@
   "reason_postcode_invalid": "Postnumret har 5 siffror.",
   "reason_city_required": "Skriv orten.",
   "reason_room_count_required": "Välj antal rum.",
+  "reason_name_required": "Skriv ett namn.",
+  "reason_name_too_long": "Namnet är för långt. Högst 50 tecken.",
   "reason_floor_area_invalid": "Skriv ytan i kvadratmeter, till exempel 48,5.",
   "reason_property_not_found_title": "Bostaden hittades inte",
   "reason_property_not_found": "Bostaden kan ha tagits bort, eller så har du inte tillgång till den.",
@@ -103,5 +105,12 @@
   "not_found_text": "Det finns ingen sida på adressen. Kontrollera adressen eller gå tillbaka till startsidan.",
   "not_found_home": "Till startsidan",
   "reason_network_title": "Ingen anslutning",
-  "reason_network": "Kontrollera nätverksanslutningen och försök igen."
+  "reason_network": "Kontrollera nätverksanslutningen och försök igen.",
+  "welcome_page_title": "Välkommen – Kotivalo",
+  "welcome_title": "Välkommen!",
+  "welcome_question": "Vilket namn ska visas för dig?",
+  "welcome_hint": "Namnet syns för dem du delar bostäder med. Förnamnet räcker.",
+  "welcome_name_label": "Namn",
+  "welcome_continue": "Fortsätt",
+  "welcome_saving": "Sparar…"
 }

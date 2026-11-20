@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { codeSchema, emailSchema } from './schemas'
+import { codeSchema, displayNameSchema, emailSchema } from './schemas'
 
 const issue = (result: { error?: { issues: { message: string }[] } }) =>
   result.error?.issues[0]?.message
@@ -35,4 +35,21 @@ describe('codeSchema', () => {
       expect(issue(codeSchema.safeParse(value))).toBe('code_invalid')
     },
   )
+})
+
+describe('displayNameSchema', () => {
+  test('trims the name', () => {
+    expect(displayNameSchema.parse('  Annika ')).toBe('Annika')
+  })
+
+  test.each(['', '   ', 42])('rejects %j with name_required', (value) => {
+    expect(issue(displayNameSchema.safeParse(value))).toBe('name_required')
+  })
+
+  test('accepts 50 characters and rejects 51 with name_too_long', () => {
+    expect(displayNameSchema.parse('a'.repeat(50))).toHaveLength(50)
+    expect(issue(displayNameSchema.safeParse('a'.repeat(51)))).toBe(
+      'name_too_long',
+    )
+  })
 })

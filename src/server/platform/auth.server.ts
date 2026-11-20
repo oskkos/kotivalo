@@ -127,10 +127,12 @@ export function createAuth(options: AuthOptions): Auth {
   const toUser = (u: {
     id: string
     email: string
+    name: string
     locale?: unknown
   }): AuthUser => ({
     id: u.id,
     email: u.email,
+    name: u.name,
     locale: toLocale(u.locale),
   })
 

@@ -31,7 +31,12 @@ describe('Better Auth on D1', () => {
     expect(row?.id).toMatch(/^[0-9a-f-]{36}$/)
     expect(result).toEqual({
       ok: true,
-      user: { id: row?.id, email: 'uusi@example.com', locale: 'sv' },
+      user: {
+        id: row?.id,
+        email: 'uusi@example.com',
+        name: '',
+        locale: 'sv',
+      },
     })
   })
 

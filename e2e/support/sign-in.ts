@@ -59,6 +59,7 @@ export async function codeFor(
 /** Fills in the email step and waits for the code step. */
 export async function requestCode(page: Page, email: string): Promise<void> {
   await page.goto('/sign-in')
+  await waitForHydration(page)
   await page
     .getByRole('textbox', { name: /email|sähköposti|e-post/i })
     .fill(email)
@@ -70,8 +71,12 @@ export async function requestCode(page: Page, email: string): Promise<void> {
   )
 }
 
-/** Signs in as `email` (a new account the first time) and waits for `/`. */
-export async function signIn(page: Page, email: string): Promise<void> {
+/**
+ * Enters the emailed code for `email` (a new account the first time) and
+ * waits for the page after sign-in: `/`, or `/welcome` for an account
+ * without a name.
+ */
+export async function enterCode(page: Page, email: string): Promise<void> {
   await useOwnClientIp(page)
   const earlier = (await inbox(page.request, email)).length
   await requestCode(page, email)
@@ -79,5 +84,39 @@ export async function signIn(page: Page, email: string): Promise<void> {
   await page
     .getByLabel(/sign-in code|kirjautumiskoodi|inloggningskod/i)
     .fill(code)
+  await page.waitForURL(
+    (url) => url.pathname === '/' || url.pathname === '/welcome',
+  )
+}
+
+/**
+ * Waits until React has taken over the server-rendered page: TanStack Start
+ * removes window.$_TSR once hydrated. Before that a click submits the form
+ * the browser's way, without the app's handlers.
+ */
+export async function waitForHydration(page: Page): Promise<void> {
+  await page.waitForFunction(() => !('$_TSR' in window))
+}
+
+/** Fills in the name step on `/welcome`. */
+export async function giveName(page: Page, name: string): Promise<void> {
+  await waitForHydration(page)
+  await page.getByRole('textbox', { name: /^(name|nimi|namn)$/i }).fill(name)
+  await page.getByRole('button', { name: /continue|jatka|fortsätt/i }).click()
+}
+
+/**
+ * Signs in as `email` (a new account the first time, named `name`) and
+ * waits for `/`.
+ */
+export async function signIn(
+  page: Page,
+  email: string,
+  name = 'Testi',
+): Promise<void> {
+  await enterCode(page, email)
+  if (new URL(page.url()).pathname === '/welcome') {
+    await giveName(page, name)
+  }
   await page.waitForURL('/')
 }
