@@ -17,9 +17,9 @@
 
 `feat(ownership): record ownership periods`
 
-- [ ] 3.1 Write `features/ownership/ownership.repository.server.ts` (design decision 3): `history`, `current`, `currentForUser`, `change`, `undoLatest`, `correctFirstDate`, with the guards in the statements and roles rewritten in the same batch
-- [ ] 3.2 `propertyRepository.create` takes `ownedSince` and inserts the first period in its batch; `propertyDetailsInput` gets `ownedSince` (`parseFiDate`, not in the future) for new flats only
-- [ ] 3.3 Workers tests:
+- [x] 3.1 Write `features/ownership/ownership.repository.server.ts` (design decision 3): `history`, `current`, `currentForUser`, `change`, `undoLatest`, `correctFirstDate`, with the guards in the statements and roles rewritten in the same batch
+- [x] 3.2 `propertyRepository.create` takes `ownedSince` and inserts the first period in its batch; `propertyDetailsInput` gets `ownedSince` (`parseFiDate`, not in the future) for new flats only
+- [x] 3.3 Workers tests:
   - a change closes the previous period on the day before
   - undo reopens it and resets the roles
   - the first date correction

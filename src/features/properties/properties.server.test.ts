@@ -47,7 +47,12 @@ async function add(userId: string, details: PropertyDetails = kuusikuja) {
 }
 
 beforeEach(async () => {
-  await emptyTables('property_access', 'properties', 'user')
+  await emptyTables(
+    'ownership_periods',
+    'property_access',
+    'properties',
+    'user',
+  )
   await addTestUser('anna')
   await addTestUser('bertta')
 })
@@ -76,6 +81,45 @@ describe('Adding a flat', () => {
       }),
     ])
     expect(JSON.stringify(lines)).not.toContain('Kuusikuja')
+  })
+})
+
+describe('The first ownership period', () => {
+  const periods = async (id: string) =>
+    (
+      await env.DB.prepare(
+        'SELECT user_id, share, valid_from, valid_to FROM ownership_periods WHERE property_id = ?',
+      )
+        .bind(id)
+        .all()
+    ).results
+
+  test('Adding a flat records its owner from the given date', async () => {
+    const result = await createProperty(
+      depsFor('anna').deps,
+      kuusikuja,
+      '2022-06-12',
+    )
+    const id = result.ok ? result.id : ''
+
+    expect(await periods(id)).toEqual([
+      {
+        user_id: 'anna',
+        share: 10000,
+        valid_from: '2022-06-12',
+        valid_to: null,
+      },
+    ])
+  })
+
+  test('without a date the flat is owned from today in Finland', async () => {
+    const result = await createProperty(depsFor('anna').deps, kuusikuja)
+    const id = result.ok ? result.id : ''
+
+    // `now` is 19 November 2026 at noon UTC.
+    expect(await periods(id)).toEqual([
+      expect.objectContaining({ valid_from: '2026-11-19' }),
+    ])
   })
 })
 
@@ -150,7 +194,7 @@ describe('Limiting the number of flats', () => {
   test('The 101st flat is refused', async () => {
     const repository = propertyRepository(db)
     for (let i = 0; i < PROPERTY_LIMIT; i++) {
-      await repository.create('anna', kuusikuja, now)
+      await repository.create('anna', kuusikuja, now, '2022-06-12')
     }
     const { deps, lines } = depsFor('anna')
 

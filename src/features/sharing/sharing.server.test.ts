@@ -73,6 +73,7 @@ async function addFlat(street = 'Kuusikuja 3 B 12'): Promise<string> {
       floorArea: 485,
     },
     now,
+    '2022-06-12',
   )
   return id
 }
@@ -441,6 +442,7 @@ describe('Accepting a flat invitation', () => {
           floorArea: 300,
         },
         now,
+        '2022-06-12',
       )
     }
 

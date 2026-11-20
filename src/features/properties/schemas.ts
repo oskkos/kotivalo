@@ -1,6 +1,7 @@
 // Flat details, shared by the form and the server functions. Errors are
 // reason codes (src/lib/reasons.ts), never text.
 import { z } from 'zod'
+import { isoDateInFinland, parseFiDate } from '#/lib/dates'
 import { parseDecimal } from '#/lib/decimal'
 import type { FieldReason } from '#/lib/reasons'
 import type { RoomCount } from './property'
@@ -49,6 +50,36 @@ export const propertyDetailsInput = z.object({
 })
 
 export type PropertyDetailsInput = z.input<typeof propertyDetailsInput>
+
+/**
+ * A new flat also has the date its owner has owned it since, as typed
+ * ("12.6.2022"); missing means today (spec: "The first ownership period").
+ */
+export const newPropertyInput = propertyDetailsInput.extend({
+  ownedSince: z
+    .string(reason('date_invalid'))
+    .optional()
+    .transform((text, context) => {
+      if (text === undefined || text.trim() === '') {
+        return undefined
+      }
+      const date = parseFiDate(text)
+      if (date === undefined) {
+        context.addIssue({ code: 'custom', message: 'date_invalid' })
+        return z.NEVER
+      }
+      if (date > isoDateInFinland(new Date())) {
+        context.addIssue({
+          code: 'custom',
+          message: 'ownership_date_in_future',
+        })
+        return z.NEVER
+      }
+      return date
+    }),
+})
+
+export type NewPropertyInput = z.input<typeof newPropertyInput>
 
 export const propertyIdInput = z.object({ id: z.string().min(1).max(64) })
 

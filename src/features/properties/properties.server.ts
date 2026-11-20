@@ -1,5 +1,6 @@
 // Flats: the logic behind the server functions in functions.ts, with its
 // dependencies passed in so Workers tests can drive it (openspec: properties).
+import { isoDateInFinland, type IsoDate } from '#/lib/dates'
 import type { AlertReason } from '#/lib/reasons'
 import type { Logger } from '#/server/log/log'
 import {
@@ -46,9 +47,14 @@ export async function getProperty(
   return property ? { ok: true, property } : notFound
 }
 
+/**
+ * Adds a flat owned 100 % by the user from `ownedSince`, today in Finland
+ * when not given (spec: "The first ownership period").
+ */
 export async function createProperty(
   deps: PropertyDeps,
   details: PropertyDetails,
+  ownedSince?: IsoDate,
 ): Promise<Result<{ id: string }>> {
   // The count and the insert are separate statements, so two requests at
   // once can pass 100 by one; the limit bounds abuse, it is not a rule
@@ -57,7 +63,13 @@ export async function createProperty(
     deps.log.warn('property.limit_reached', { limit: PROPERTY_LIMIT })
     return { ok: false, reason: 'property_limit_reached' }
   }
-  const { id } = await deps.properties.create(deps.userId, details, deps.now())
+  const now = deps.now()
+  const { id } = await deps.properties.create(
+    deps.userId,
+    details,
+    now,
+    ownedSince ?? isoDateInFinland(now),
+  )
   deps.log.info('property.created', { propertyId: id })
   return { ok: true, id }
 }

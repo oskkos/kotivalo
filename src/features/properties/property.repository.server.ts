@@ -2,7 +2,12 @@
 // goes through the user's access row, so a flat without access looks the
 // same as one that doesn't exist.
 import { and, eq, inArray } from 'drizzle-orm'
-import { properties, propertyAccess } from '#/server/db/schema'
+import type { IsoDate } from '#/lib/dates'
+import {
+  ownershipPeriods,
+  properties,
+  propertyAccess,
+} from '#/server/db/schema'
 import { atomically, type Db } from '#/server/platform/db.server'
 import type { Property, PropertyDetails, RoomCount } from './property'
 
@@ -31,11 +36,15 @@ export function propertyRepository(db: Db) {
       .where(eq(propertyAccess.userId, userId))
 
   return {
-    /** Adds a flat with the user as its owner. */
+    /**
+     * Adds a flat with the user as its owner, owning 100 % from `ownedSince`
+     * (openspec: ownership, "The first ownership period").
+     */
     async create(
       userId: string,
       details: PropertyDetails,
       now: Date,
+      ownedSince: IsoDate,
     ): Promise<Property> {
       const id = crypto.randomUUID()
       await atomically(db, [
@@ -48,6 +57,15 @@ export function propertyRepository(db: Db) {
         db
           .insert(propertyAccess)
           .values({ propertyId: id, userId, role: 'owner', createdAt: now }),
+        db.insert(ownershipPeriods).values({
+          id: crypto.randomUUID(),
+          propertyId: id,
+          userId,
+          share: 10000,
+          validFrom: ownedSince,
+          validTo: null,
+          reason: null,
+        }),
       ])
       return { id, ...details }
     },
