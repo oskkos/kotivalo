@@ -71,3 +71,19 @@ export function formatTenths(tenths: number, locale: Locale = getLocale()) {
 export function formatArea(tenths: number, locale: Locale = getLocale()) {
   return `${formatTenths(tenths, locale)}\u00a0m²`
 }
+
+/**
+ * An ownership share from basis points, e.g. 5000 → "50 %" and 3333 →
+ * "33,33 %" in Finnish, "50%" in English.
+ */
+export function formatShare(basisPoints: number, locale: Locale = getLocale()) {
+  if (!Number.isSafeInteger(basisPoints)) {
+    throw new RangeError(
+      `Expected integer basis points, got ${String(basisPoints)}`,
+    )
+  }
+  return new Intl.NumberFormat(NUMBER_LOCALES[locale], {
+    style: 'percent',
+    maximumFractionDigits: 2,
+  }).format(basisPoints / 10000)
+}

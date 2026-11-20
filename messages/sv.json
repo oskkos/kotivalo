@@ -170,5 +170,16 @@
   "invitation_accept": "Godkänn",
   "invitation_decline": "Avböj",
   "invitation_accepted": "{address} finns nu på din lista.",
-  "invitation_declined": "Inbjudan avböjd."
+  "invitation_declined": "Inbjudan avböjd.",
+  "reason_date_invalid": "Skriv datumet som dd.mm.åååå, till exempel 12.6.2022.",
+  "reason_ownership_date_in_future": "Datumet kan inte vara i framtiden.",
+  "reason_ownership_date_too_early": "Ändringen måste börja efter att den nuvarande ägarperioden började.",
+  "reason_ownership_date_too_late": "Datumet måste vara före nästa ägarändring.",
+  "reason_ownership_share_invalid": "Skriv andelen i procent, till exempel 50 eller 33,33.",
+  "reason_ownership_shares_total": "Andelarna måste bli 100 % tillsammans.",
+  "reason_ownership_no_owner": "Minst en person måste ha en andel.",
+  "reason_ownership_nothing_to_undo_title": "Ingen ändring att ångra",
+  "reason_ownership_nothing_to_undo": "Bostaden har bara den första ägarperioden. Rätta vid behov dess startdatum.",
+  "reason_ownership_invalid_title": "Ägarfördelningen kan inte sparas",
+  "reason_ownership_invalid": "Fördelningen kan bara innehålla personer med tillgång till bostaden, var och en en gång. Ladda om sidan och försök igen."
 }

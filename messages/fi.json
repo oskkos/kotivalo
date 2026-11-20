@@ -170,5 +170,16 @@
   "invitation_accept": "Hyväksy",
   "invitation_decline": "Hylkää",
   "invitation_accepted": "{address} on nyt listallasi.",
-  "invitation_declined": "Kutsu hylätty."
+  "invitation_declined": "Kutsu hylätty.",
+  "reason_date_invalid": "Kirjoita päivä muodossa pp.kk.vvvv, esimerkiksi 12.6.2022.",
+  "reason_ownership_date_in_future": "Päivä ei voi olla tulevaisuudessa.",
+  "reason_ownership_date_too_early": "Muutoksen pitää alkaa nykyisen omistusjakson alun jälkeen.",
+  "reason_ownership_date_too_late": "Päivän pitää olla ennen seuraavaa omistusmuutosta.",
+  "reason_ownership_share_invalid": "Kirjoita osuus prosentteina, esimerkiksi 50 tai 33,33.",
+  "reason_ownership_shares_total": "Osuuksien summan pitää olla 100 %.",
+  "reason_ownership_no_owner": "Vähintään yhdellä pitää olla osuus.",
+  "reason_ownership_nothing_to_undo_title": "Ei peruttavaa muutosta",
+  "reason_ownership_nothing_to_undo": "Asunnolla on vain ensimmäinen omistusjakso. Korjaa sen alkupäivä tarvittaessa.",
+  "reason_ownership_invalid_title": "Omistusjakoa ei voi tallentaa",
+  "reason_ownership_invalid": "Jaossa voi olla vain ihmisiä, joilla on pääsy asuntoon, kukin kerran. Lataa sivu uudelleen ja yritä uudelleen."
 }
