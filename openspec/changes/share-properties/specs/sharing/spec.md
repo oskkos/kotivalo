@@ -1,11 +1,11 @@
 ## ADDED Requirements
 
 ### Requirement: Inviting a user to a flat
-A flat's owner SHALL be able to invite a person to the flat by email address on the flat's Sharing page. The invitation SHALL be emailed to that address in the recipient's language: the stored language of the account with that address, or the inviter's language when there is no account. The email SHALL name the inviter and ask the recipient to sign in to Kotivalo with that address, and SHALL NOT reveal whether the address has an account. Email addresses SHALL be compared case-insensitively. Inviting an address that already has access or already has a pending invitation to the flat SHALL be refused, and so SHALL inviting from a user who is not the flat's owner. If the email can't be sent, the invitation SHALL NOT be saved and the user SHALL see why, as when sending a sign-in code fails.
+A flat's owner SHALL be able to invite a person to the flat by email address on the flat's Sharing page. The invitation SHALL be emailed to that address in the recipient's language: the stored language of the account with that address, or the inviter's language when there is no account. The email SHALL name the inviter together with the inviter's verified email address and ask the recipient to sign in to Kotivalo with the invited address. Its subject SHALL NOT contain the inviter's name, which anyone can choose. The email SHALL NOT reveal whether the address has an account. Email addresses SHALL be compared case-insensitively. Inviting an address that already has access or already has a pending invitation to the flat SHALL be refused, and so SHALL inviting from a user who is not the flat's owner. If the email can't be sent, the invitation SHALL NOT be saved and the user SHALL see why, as when sending a sign-in code fails.
 
 #### Scenario: Inviting an address sends an invitation
 - **WHEN** Annika, the owner of `Kuusikuja 3 B 12`, invites `Jussi@Example.com`
-- **THEN** an email is sent to `jussi@example.com` that names Annika, and the Sharing page lists `jussi@example.com` as invited
+- **THEN** an email is sent to `jussi@example.com` with a subject that doesn't contain her name and a text that names "Annika (anna@example.com)", and the Sharing page lists `jussi@example.com` as invited
 
 #### Scenario: The invitation email is in the recipient's language
 - **WHEN** Annika, whose language is `fi`, invites `jussi@example.com`, whose account's language is `sv`

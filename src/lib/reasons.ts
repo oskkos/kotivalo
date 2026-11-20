@@ -16,6 +16,7 @@ export type FieldReason =
   | 'room_count_required'
   | 'name_required'
   | 'name_too_long'
+  | 'name_invalid'
   | 'invitation_already_member'
   | 'invitation_already_pending'
   | 'floor_area_invalid'
@@ -62,6 +63,7 @@ const texts: Record<Reason, () => ReasonText> = {
   room_count_required: () => ({ text: m.reason_room_count_required() }),
   name_required: () => ({ text: m.reason_name_required() }),
   name_too_long: () => ({ text: m.reason_name_too_long() }),
+  name_invalid: () => ({ text: m.reason_name_invalid() }),
   invitation_already_member: () => ({
     text: m.reason_invitation_already_member(),
   }),
