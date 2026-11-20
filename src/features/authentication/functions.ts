@@ -11,8 +11,10 @@ import {
 } from '#/paraglide/runtime.js'
 import { getRequestContext } from '#/server/platform/context.server'
 import { consumeLimit } from '#/server/platform/limits.server'
-import { requestCodeInput, verifyCodeInput } from './schemas'
+import { setDisplayName as setName } from './display-name.server'
+import { displayNameInput, requestCodeInput, verifyCodeInput } from './schemas'
 import { requestCode, verifyCode, type SignInDeps } from './sign-in.server'
+import { userRepository } from './user.repository.server'
 
 function signInDeps(): SignInDeps {
   const context = getRequestContext()
@@ -61,14 +63,33 @@ export const getSignedInUser = createServerFn({ method: 'GET' }).handler(
     if (!session) {
       return null
     }
-    const { email, locale } = session.user
+    const { email, name, locale } = session.user
     const localeReset = getLocale() !== locale
     if (localeReset) {
       setLocaleCookie(locale)
     }
-    return { email, locale, localeReset }
+    return { email, name, locale, localeReset }
   },
 )
+
+export const setDisplayName = createServerFn({ method: 'POST' })
+  .validator(displayNameInput)
+  .handler(async ({ data }) => {
+    const context = getRequestContext()
+    const session = await context.auth.getSession()
+    if (!session) {
+      throw new Error('Not signed in')
+    }
+    return setName(
+      {
+        userId: session.user.id,
+        users: userRepository(context.db),
+        log: context.log,
+        now: () => new Date(),
+      },
+      data.name,
+    )
+  })
 
 export const signOut = createServerFn({ method: 'POST' }).handler(async () => {
   const { auth, log } = getRequestContext()

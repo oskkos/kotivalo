@@ -57,6 +57,8 @@
   "reason_postcode_invalid": "Postinumerossa on 5 numeroa.",
   "reason_city_required": "Kirjoita kaupunki.",
   "reason_room_count_required": "Valitse huoneluku.",
+  "reason_name_required": "Kirjoita nimi.",
+  "reason_name_too_long": "Nimi on liian pitkä. Enintään 50 merkkiä.",
   "reason_floor_area_invalid": "Kirjoita pinta-ala neliömetreinä, esimerkiksi 48,5.",
   "reason_property_not_found_title": "Asuntoa ei löydy",
   "reason_property_not_found": "Asunto on voitu poistaa, tai sinulla ei ole siihen pääsyä.",
@@ -103,5 +105,12 @@
   "not_found_text": "Osoitteessa ei ole sivua. Tarkista osoite tai palaa etusivulle.",
   "not_found_home": "Etusivulle",
   "reason_network_title": "Ei yhteyttä",
-  "reason_network": "Tarkista verkkoyhteys ja yritä uudelleen."
+  "reason_network": "Tarkista verkkoyhteys ja yritä uudelleen.",
+  "welcome_page_title": "Tervetuloa – Kotivalo",
+  "welcome_title": "Tervetuloa!",
+  "welcome_question": "Millä nimellä sinut näytetään?",
+  "welcome_hint": "Nimi näkyy niille, joiden kanssa jaat asuntoja. Etunimi riittää.",
+  "welcome_name_label": "Nimi",
+  "welcome_continue": "Jatka",
+  "welcome_saving": "Tallennetaan…"
 }

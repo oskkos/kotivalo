@@ -57,6 +57,8 @@
   "reason_postcode_invalid": "A postcode has 5 digits.",
   "reason_city_required": "Enter the city.",
   "reason_room_count_required": "Choose the number of rooms.",
+  "reason_name_required": "Enter a name.",
+  "reason_name_too_long": "The name is too long. Use at most 50 characters.",
   "reason_floor_area_invalid": "Enter the floor area in square metres, for example 48.5.",
   "reason_property_not_found_title": "Flat not found",
   "reason_property_not_found": "It may have been removed, or you don't have access to it.",
@@ -103,5 +105,12 @@
   "not_found_text": "There is no page at this address. Check the address or go back to the home page.",
   "not_found_home": "Go to the home page",
   "reason_network_title": "No connection",
-  "reason_network": "Check your network connection and try again."
+  "reason_network": "Check your network connection and try again.",
+  "welcome_page_title": "Welcome – Kotivalo",
+  "welcome_title": "Welcome!",
+  "welcome_question": "What name should we show for you?",
+  "welcome_hint": "Your name is shown to the people you share flats with. Your first name is enough.",
+  "welcome_name_label": "Name",
+  "welcome_continue": "Continue",
+  "welcome_saving": "Saving…"
 }

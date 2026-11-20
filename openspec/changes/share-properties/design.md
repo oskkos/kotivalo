@@ -107,7 +107,7 @@ property_invitations
 ### 6. Display name
 
 - `features/authentication/`:
-  - a `displayNameInput` schema: trimmed, 1–50 characters; reasons `name_required` and `text_too_long`
+  - a `displayNameInput` schema: trimmed, 1–50 characters; reasons `name_required` and `name_too_long` (the shared `text_too_long` says 100 characters)
   - a `setDisplayName` server function that updates `user.name` through a small `user.repository.server.ts` and logs `authentication.name_set`
 - `getSignedInUser` also returns `name`. The `_authed` layout's `beforeLoad` redirects to `/welcome?redirect=<href>` when it is empty, and `/welcome` redirects to `/` when it isn't. Only same-origin paths are accepted for `redirect`, so it can't send the user elsewhere.
 - `/welcome` is a single-field page built from the sign-in pages' layout: logo, "Tervetuloa!", "Millä nimellä sinut näytetään?", the name field and "Jatka".
@@ -132,7 +132,7 @@ The Design canvas row "Jakaminen ja kutsut" has every screen below: `Welcome`, `
 
 ### 8. Reasons
 
-- New field reasons: `name_required`, `invitation_already_member`, `invitation_already_pending`
+- New field reasons: `name_required`, `name_too_long`, `invitation_already_member`, `invitation_already_pending`
 - New alert reasons: `invitation_not_found`, `invitation_limit_reached`, `invitation_daily_limit_reached`, `sharing_owner_only`
 - **Email failures:** the sign-in reasons' texts talk about codes ("Koodeja ei voi lähettää juuri nyt"). Invitations therefore map `EmailError` to their own `invitation_email_quota`, `invitation_email_busy` and `invitation_email_failed`.
 

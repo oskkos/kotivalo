@@ -24,3 +24,12 @@ export const verifyCodeInput = z.object({
   email: emailSchema,
   code: codeSchema,
 })
+
+/** The name shown to the people a user shares flats with. */
+export const displayNameSchema = z
+  .string(reason('name_required'))
+  .trim()
+  .min(1, reason('name_required'))
+  .max(50, reason('name_too_long'))
+
+export const displayNameInput = z.object({ name: displayNameSchema })

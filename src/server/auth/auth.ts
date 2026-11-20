@@ -13,6 +13,8 @@ export const SIGN_IN_CODE = {
 export interface AuthUser {
   id: string
   email: string
+  /** The display name; empty until the user has given one. */
+  name: string
   /** The language stored on the account. */
   locale: Locale
 }

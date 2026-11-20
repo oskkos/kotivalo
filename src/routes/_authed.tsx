@@ -15,6 +15,11 @@ export const Route = createFileRoute('/_authed')({
     if (user.localeReset) {
       throw redirect({ href: location.href, reloadDocument: true })
     }
+    // A user without a name gives one before anything else (spec: "Asking
+    // for a display name"), then comes back here.
+    if (user.name === '' && location.pathname !== '/welcome') {
+      throw redirect({ to: '/welcome', search: { redirect: location.href } })
+    }
     return { user }
   },
   component: Outlet,

@@ -2,12 +2,12 @@
 
 `feat(auth): ask for a display name after the first sign-in`
 
-- [ ] 1.1 Write `displayNameInput` in `features/authentication/schemas.ts` (trimmed, 1–50; `name_required`, `text_too_long`), with unit tests; add `name_required` to `lib/reasons.ts` with fi, sv and en messages
-- [ ] 1.2 Write `features/authentication/user.repository.server.ts` (`setName`) and the `setDisplayName` server function (session check, logs `authentication.name_set` with no name), with Workers tests
-- [ ] 1.3 `getSignedInUser` returns `name`; the `_authed` layout redirects to `/welcome?redirect=<path>` when it is empty; `/welcome` redirects to `/` when it isn't; only same-origin paths are accepted for `redirect` (unit test)
-- [ ] 1.4 Write the `/welcome` page (logo, heading, name field, continue) from the sign-in pages' layout, with component tests; fi, sv and en messages
-- [ ] 1.5 Update the e2e sign-in helper to enter a name for new accounts; Playwright for "Asking for a display name" and the modified "A new address creates an account and signs in"
-- [ ] 1.6 Screenshot of `/welcome` (fi, 390 × 844) for review before the commit
+- [x] 1.1 Write `displayNameInput` in `features/authentication/schemas.ts` (trimmed, 1–50; `name_required`, `name_too_long`), with unit tests; add both to `lib/reasons.ts` with fi, sv and en messages
+- [x] 1.2 Write `features/authentication/user.repository.server.ts` (`setName`) and the `setDisplayName` server function (session check, logs `authentication.name_set` with no name), with Workers tests
+- [x] 1.3 `getSignedInUser` returns `name`; the `_authed` layout redirects to `/welcome?redirect=<path>` when it is empty; `/welcome` redirects to `/` when it isn't; only same-origin paths are accepted for `redirect` (unit test)
+- [x] 1.4 Write the `/welcome` page (logo, heading, name field, continue) from the sign-in pages' layout, with component tests; fi, sv and en messages
+- [x] 1.5 Update the e2e sign-in helper to enter a name for new accounts, and wait for hydration before submitting a form; Playwright for "Asking for a display name" and the modified "A new address creates an account and signs in"
+- [x] 1.6 Screenshot of `/welcome` (fi, 390 × 844) for review before the commit
 
 ## 2. Invitations table and sharing repository
 
