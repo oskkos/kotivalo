@@ -37,6 +37,8 @@ interface Props {
   save: (details: PropertyDetailsInput) => Promise<SaveResult>
   onSaved: () => void
   onClose: () => void
+  /** An icon button at the right of the header, e.g. to Sharing. */
+  headerAction?: ReactNode
 }
 
 function CloseIcon() {
@@ -73,6 +75,7 @@ export function PropertyForm({
   save,
   onSaved,
   onClose,
+  headerAction,
 }: Props) {
   const [alert, setAlert] = useState<AlertReason>()
   const form = useForm({
@@ -125,6 +128,7 @@ export function PropertyForm({
         >
           {title}
         </Typography>
+        {headerAction}
       </Box>
       <Stack
         component="main"

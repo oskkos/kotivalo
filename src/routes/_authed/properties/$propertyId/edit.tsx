@@ -1,4 +1,10 @@
-import { createFileRoute, notFound, useRouter } from '@tanstack/react-router'
+import IconButton from '@mui/material/IconButton'
+import {
+  createFileRoute,
+  createLink,
+  notFound,
+  useRouter,
+} from '@tanstack/react-router'
 import { NotFoundView } from '#/components/NotFoundView'
 import { getProperty, updateProperty } from '#/features/properties/functions'
 import { PropertyForm } from '#/features/properties/PropertyForm'
@@ -35,7 +41,38 @@ function EditPropertyRoute() {
         void router.invalidate().then(toList)
       }}
       onClose={toList}
+      headerAction={
+        <IconLink
+          to="/properties/$propertyId/sharing"
+          params={{ propertyId: id }}
+          aria-label={m.sharing_title()}
+        >
+          <PeopleIcon />
+        </IconLink>
+      }
     />
+  )
+}
+
+const IconLink = createLink(IconButton)
+
+function PeopleIcon() {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="9" cy="8" r="3.5" />
+      <path d="M2.5 20 a6.5 6.5 0 0 1 13 0" />
+      <path d="M16 4.6 a3.5 3.5 0 0 1 0 6.8 M18 14 a6.5 6.5 0 0 1 3.5 6" />
+    </svg>
   )
 }
 

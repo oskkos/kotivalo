@@ -18,6 +18,7 @@ import { Route as ApiLogRouteImport } from './routes/api/log'
 import { Route as AuthedPropertiesNewRouteImport } from './routes/_authed/properties/new'
 import { Route as ApiTestInboxRouteImport } from './routes/api/test/inbox'
 import { Route as AuthedPropertiesPropertyIdEditRouteImport } from './routes/_authed/properties/$propertyId/edit'
+import { Route as AuthedPropertiesPropertyIdSharingRouteImport } from './routes/_authed/properties/$propertyId/sharing'
 
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
@@ -64,6 +65,12 @@ const AuthedPropertiesPropertyIdEditRoute =
     path: '/properties/$propertyId/edit',
     getParentRoute: () => AuthedRoute,
   } as any)
+const AuthedPropertiesPropertyIdSharingRoute =
+  AuthedPropertiesPropertyIdSharingRouteImport.update({
+    id: '/properties/$propertyId/sharing',
+    path: '/properties/$propertyId/sharing',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/properties/new': typeof AuthedPropertiesNewRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
   '/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
+  '/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
 }
 export interface FileRoutesByTo {
   '/offline': typeof OfflineRoute
@@ -84,6 +92,7 @@ export interface FileRoutesByTo {
   '/properties/new': typeof AuthedPropertiesNewRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
   '/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
+  '/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -96,6 +105,7 @@ export interface FileRoutesById {
   '/_authed/properties/new': typeof AuthedPropertiesNewRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
   '/_authed/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
+  '/_authed/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -108,6 +118,7 @@ export interface FileRouteTypes {
     | '/properties/new'
     | '/api/test/inbox'
     | '/properties/$propertyId/edit'
+    | '/properties/$propertyId/sharing'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/offline'
@@ -118,6 +129,7 @@ export interface FileRouteTypes {
     | '/properties/new'
     | '/api/test/inbox'
     | '/properties/$propertyId/edit'
+    | '/properties/$propertyId/sharing'
   id:
     | '__root__'
     | '/_authed'
@@ -129,6 +141,7 @@ export interface FileRouteTypes {
     | '/_authed/properties/new'
     | '/api/test/inbox'
     | '/_authed/properties/$propertyId/edit'
+    | '/_authed/properties/$propertyId/sharing'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -204,6 +217,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedPropertiesPropertyIdEditRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/properties/$propertyId/sharing': {
+      id: '/_authed/properties/$propertyId/sharing'
+      path: '/properties/$propertyId/sharing'
+      fullPath: '/properties/$propertyId/sharing'
+      preLoaderRoute: typeof AuthedPropertiesPropertyIdSharingRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
@@ -212,6 +232,7 @@ interface AuthedRouteChildren {
   AuthedIndexRoute: typeof AuthedIndexRoute
   AuthedPropertiesNewRoute: typeof AuthedPropertiesNewRoute
   AuthedPropertiesPropertyIdEditRoute: typeof AuthedPropertiesPropertyIdEditRoute
+  AuthedPropertiesPropertyIdSharingRoute: typeof AuthedPropertiesPropertyIdSharingRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
@@ -219,6 +240,8 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedIndexRoute: AuthedIndexRoute,
   AuthedPropertiesNewRoute: AuthedPropertiesNewRoute,
   AuthedPropertiesPropertyIdEditRoute: AuthedPropertiesPropertyIdEditRoute,
+  AuthedPropertiesPropertyIdSharingRoute:
+    AuthedPropertiesPropertyIdSharingRoute,
 }
 
 const AuthedRouteWithChildren =
