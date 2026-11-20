@@ -101,13 +101,14 @@ property_invitations
 
 `features/sharing/invitation-email.ts` builds the email with `renderEmail()`: a heading, "{inviter} shared a flat with you in Kotivalo. Sign in with {email} to see and accept the invitation.", and a button to the app's address.
 
+- **The inviter is named with their verified address, and not in the subject.** Anyone can sign up and choose any name, so a name like "You won 500 €, see scam.example" would turn invitations into phishing sent from our domain. The subject is fixed ("Sinut on kutsuttu asuntoon Kotivalossa"), the text says "{name} ({email}) jakoi sinulle asunnon…", and display names can't contain `@ / : < >` (`name_invalid`). A domain-like name ("scam.example") still passes, since names need dots ("A. Virtanen"); the fixed subject, the shown address and the limit of 20 invitations a day bound what remains.
 - **The flat's address is not in the email.** It is shown after sign-in. That keeps the data sent to Resend (stored in the US) to the inviter's name and the recipient's address.
 - **Language:** the stored language of the account with that address, else the inviter's. The recipient's language is looked up in the same query that checks "already a member", so an existing account doesn't take a different code path (no timing or wording difference).
 
 ### 6. Display name
 
 - `features/authentication/`:
-  - a `displayNameInput` schema: trimmed, 1–50 characters; reasons `name_required` and `name_too_long` (the shared `text_too_long` says 100 characters)
+  - a `displayNameInput` schema: trimmed, 1–50 characters, none of `@ / : < >`; reasons `name_required`, `name_too_long` and `name_invalid` (the shared `text_too_long` says 100 characters)
   - a `setDisplayName` server function that updates `user.name` through a small `user.repository.server.ts` and logs `authentication.name_set`
 - `getSignedInUser` also returns `name`. The `_authed` layout's `beforeLoad` redirects to `/welcome?redirect=<href>` when it is empty, and `/welcome` redirects to `/` when it isn't. Only same-origin paths are accepted for `redirect`, so it can't send the user elsewhere.
 - `/welcome` is a single-field page built from the sign-in pages' layout: logo, "Tervetuloa!", "Millä nimellä sinut näytetään?", the name field and "Jatka".
@@ -132,7 +133,7 @@ The Design canvas row "Jakaminen ja kutsut" has every screen below: `Welcome`, `
 
 ### 8. Reasons
 
-- New field reasons: `name_required`, `name_too_long`, `invitation_already_member`, `invitation_already_pending`
+- New field reasons: `name_required`, `name_too_long`, `name_invalid`, `invitation_already_member`, `invitation_already_pending`
 - New alert reasons: `invitation_not_found`, `invitation_limit_reached`, `invitation_daily_limit_reached`, `sharing_owner_only`
 - **Email failures:** the sign-in reasons' texts talk about codes ("Koodeja ei voi lähettää juuri nyt"). Invitations therefore map `EmailError` to their own `invitation_email_quota` and `invitation_email_failed`; `email_busy` ("try again in a moment") fits both and is reused.
 

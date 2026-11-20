@@ -118,7 +118,8 @@ describe('Inviting a user to a flat', () => {
 
     expect(result.ok).toBe(true)
     const email = emailsTo('jussi@example.com').at(0)
-    expect(email?.subject).toBe('Annika jakoi sinulle asunnon Kotivalossa')
+    expect(email?.subject).toBe('Sinut on kutsuttu asuntoon Kotivalossa')
+    expect(email?.text).toContain('Annika (anna@example.com)')
     expect(email?.text).toContain('https://kotivalo.example')
     const view = await getSharing(deps('anna'), flat)
     expect(view.ok && view.invitations).toEqual([
@@ -133,7 +134,7 @@ describe('Inviting a user to a flat', () => {
     await invite('anna', flat, 'jussi@example.com')
 
     expect(emailsTo('jussi@example.com')[0]?.subject).toBe(
-      'Annika har delat en bostad med dig i Kotivalo',
+      'Du har bjudits in till en bostad i Kotivalo',
     )
   })
 
@@ -145,7 +146,7 @@ describe('Inviting a user to a flat', () => {
     )
 
     expect(emailsTo('uusi@example.com')[0]?.subject).toBe(
-      'Annika shared a flat with you in Kotivalo',
+      "You're invited to a flat in Kotivalo",
     )
   })
 

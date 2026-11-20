@@ -25,11 +25,16 @@ export const verifyCodeInput = z.object({
   code: codeSchema,
 })
 
-/** The name shown to the people a user shares flats with. */
+/**
+ * The name shown to the people a user shares flats with, also in invitation
+ * emails. No characters of addresses and links, so a name can't pose as an
+ * address or carry a link into an email that Kotivalo sends.
+ */
 export const displayNameSchema = z
   .string(reason('name_required'))
   .trim()
   .min(1, reason('name_required'))
   .max(50, reason('name_too_long'))
+  .regex(/^[^@/:<>]*$/, reason('name_invalid'))
 
 export const displayNameInput = z.object({ name: displayNameSchema })

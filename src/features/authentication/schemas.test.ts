@@ -53,3 +53,17 @@ describe('displayNameSchema', () => {
     )
   })
 })
+
+describe('Asking for a display name', () => {
+  test('A name with an address or a link is not saved', () => {
+    for (const value of [
+      'anna@example.com',
+      'https://huijaus.fi',
+      'Anna <b>',
+      'a/b',
+    ]) {
+      expect(issue(displayNameSchema.safeParse(value))).toBe('name_invalid')
+    }
+    expect(displayNameSchema.parse('A. Virtanen')).toBe('A. Virtanen')
+  })
+})

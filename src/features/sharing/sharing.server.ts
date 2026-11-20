@@ -155,6 +155,7 @@ export async function inviteToProperty(
       invitationEmail({
         to: email,
         inviterName: deps.user.name || deps.user.email,
+        inviterEmail: deps.user.email,
         appUrl: deps.appUrl,
         locale: recipient.locale ?? deps.locale,
         invitationId: id,

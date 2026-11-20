@@ -12,6 +12,11 @@ export const INVITATION_VALID_DAYS = 30
 export function invitationEmail(options: {
   to: string
   inviterName: string
+  /**
+   * The inviter's verified address, shown next to the name so the reader
+   * can tell who sent it: anyone can choose any name.
+   */
+  inviterEmail: string
   /** Where "Open Kotivalo" leads: the app's origin. */
   appUrl: string
   locale: Locale
@@ -22,10 +27,14 @@ export function invitationEmail(options: {
   return renderEmail({
     to,
     locale,
-    subject: m.invitation_email_subject({ inviter }, { locale }),
+    // No name in the subject: it is the line a phishing attempt would use.
+    subject: m.invitation_email_subject({}, { locale }),
     heading: m.invitation_email_heading({}, { locale }),
     paragraphs: [
-      m.invitation_email_intro({ inviter }, { locale }),
+      m.invitation_email_intro(
+        { inviter, inviterEmail: options.inviterEmail },
+        { locale },
+      ),
       m.invitation_email_sign_in({ email: to }, { locale }),
       m.invitation_email_validity({ days: INVITATION_VALID_DAYS }, { locale }),
       m.invitation_email_ignore({}, { locale }),

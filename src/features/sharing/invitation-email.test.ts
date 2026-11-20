@@ -4,6 +4,7 @@ import { invitationEmail } from './invitation-email'
 const options = {
   to: 'jussi@example.com',
   inviterName: 'Annika',
+  inviterEmail: 'anna@example.com',
   appUrl: 'https://kotivalo.example',
   invitationId: 'i1',
 } as const
@@ -13,7 +14,10 @@ describe('invitationEmail', () => {
     const email = invitationEmail({ ...options, locale: 'fi' })
 
     expect(email.to).toBe('jussi@example.com')
-    expect(email.subject).toBe('Annika jakoi sinulle asunnon Kotivalossa')
+    expect(email.subject).toBe('Sinut on kutsuttu asuntoon Kotivalossa')
+    expect(email.text).toContain(
+      'Annika (anna@example.com) jakoi sinulle asunnon Kotivalossa',
+    )
     expect(email.text).toContain(
       'Kirjaudu osoitteella jussi@example.com, niin näet kutsun',
     )
@@ -34,8 +38,8 @@ describe('invitationEmail', () => {
   })
 
   test.each([
-    ['sv', 'Annika har delat en bostad med dig i Kotivalo', 'Öppna Kotivalo'],
-    ['en', 'Annika shared a flat with you in Kotivalo', 'Open Kotivalo'],
+    ['sv', 'Du har bjudits in till en bostad i Kotivalo', 'Öppna Kotivalo'],
+    ['en', "You're invited to a flat in Kotivalo", 'Open Kotivalo'],
   ] as const)('is written in %s', (locale, subject, action) => {
     const email = invitationEmail({ ...options, locale })
     expect(email.subject).toBe(subject)

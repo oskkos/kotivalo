@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Asking for a display name
-A signed-in user without a display name SHALL be asked for one before any other page: every page for signed-in users SHALL redirect them to `/welcome`. The name SHALL be 1–50 characters after trimming. After saving, the user SHALL land on the page they were going to, or on `/`. A user who has a name and opens `/welcome` SHALL be redirected to `/`. The name is shown to the people a flat is shared with.
+A signed-in user without a display name SHALL be asked for one before any other page: every page for signed-in users SHALL redirect them to `/welcome`. The name SHALL be 1–50 characters after trimming and SHALL NOT contain `@`, `/`, `:`, `<` or `>`, so it can't pose as an email address or carry a link into the invitation emails Kotivalo sends. After saving, the user SHALL land on the page they were going to, or on `/`. A user who has a name and opens `/welcome` SHALL be redirected to `/`. The name is shown to the people a flat is shared with.
 
 #### Scenario: A user without a name is asked for one
 - **WHEN** a signed-in user without a name opens `/properties/new`
@@ -10,6 +10,10 @@ A signed-in user without a display name SHALL be asked for one before any other 
 #### Scenario: An empty name is not saved
 - **WHEN** a user enters only spaces as their name and saves
 - **THEN** the name field shows that a name is required, and they stay on `/welcome`
+
+#### Scenario: A name with an address or a link is not saved
+- **WHEN** a user enters `anna@example.com` or `https://huijaus.fi` as their name
+- **THEN** it is refused with the reason `name_invalid`, and no name is stored
 
 #### Scenario: A user with a name is not asked again
 - **WHEN** the user named `Annika` opens `/welcome`
