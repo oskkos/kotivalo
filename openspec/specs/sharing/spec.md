@@ -1,7 +1,7 @@
 # sharing Specification
 
 ## Purpose
-Sharing a flat, one flat at a time: the owner invites a person by email, the invitee accepts or declines after signing in with that address, and the owner can cancel invitations and remove members, who can also leave. Roles are `owner` (who added the flat) and `member`; invitation limits protect the email quota. Ownership shares as validity periods build on it (#29, `track-ownership`).
+Sharing a flat, one flat at a time: the owner invites a person by email, the invitee accepts or declines after signing in with that address, and the owner can cancel invitations and remove members, who can also leave. Owners are the people with a current ownership share above 0 % (openspec: ownership); everyone else with access is a member. Invitation limits protect the email quota.
 ## Requirements
 ### Requirement: Inviting a user to a flat
 A flat's owner SHALL be able to invite a person to the flat by email address on the flat's Sharing page. The invitation SHALL be emailed to that address in the recipient's language: the stored language of the account with that address, or the inviter's language when there is no account. The email SHALL name the inviter together with the inviter's verified email address and ask the recipient to sign in to Kotivalo with the invited address. Its subject SHALL NOT contain the inviter's name, which anyone can choose. The email SHALL NOT reveal whether the address has an account. Email addresses SHALL be compared case-insensitively. Inviting an address that already has access or already has a pending invitation to the flat SHALL be refused, and so SHALL inviting from a user who is not the flat's owner. If the email can't be sent, the invitation SHALL NOT be saved and the user SHALL see why, as when sending a sign-in code fails.
@@ -60,10 +60,10 @@ A flat's owner SHALL be able to cancel a pending invitation on the Sharing page.
 - **THEN** it is refused with the reason `invitation_not_found`, and Jussi has no access to the flat
 
 ### Requirement: Listing who has access to a flat
-Every user with access to a flat SHALL be able to open its Sharing page from the flat's edit form. The page SHALL list the users with access by name, the user themselves as "You", each with their role (owner or member), and the pending invitations by email address. A user without access SHALL see that the flat was not found, as for any flat they can't access.
+Every user with access to a flat SHALL be able to open its Ownership and sharing page from the flat's edit form. The page SHALL list the users with access by name, the user themselves as "You", each with their role (owner or member), and the pending invitations by email address. A flat MAY have several owners: everyone with a current ownership share above 0 % (see "Roles follow the current shares"). A user without access SHALL see that the flat was not found, as for any flat they can't access.
 
 #### Scenario: The Sharing page lists people and invitations
-- **WHEN** Annika (owner) has shared `Kuusikuja 3 B 12` with Jussi (member) and invited `liisa@example.com`, and Jussi opens the flat's Sharing page
+- **WHEN** Annika (owner) has shared `Kuusikuja 3 B 12` with Jussi (member) and invited `liisa@example.com`, and Jussi opens the flat's Ownership and sharing page
 - **THEN** it lists "Annika · Owner", "You · Member" and `liisa@example.com` as invited
 
 #### Scenario: Another user can't open the Sharing page
@@ -71,7 +71,7 @@ Every user with access to a flat SHALL be able to open its Sharing page from the
 - **THEN** they see that the flat was not found
 
 ### Requirement: Removing access to a flat
-A flat's owner SHALL be able to remove a member's access on the Sharing page. The flat SHALL then disappear from the removed user's list and SHALL behave for them as if it didn't exist. A member SHALL NOT be able to remove anyone, and the owner SHALL NOT be able to remove their own access.
+An owner of a flat SHALL be able to remove a member's access on the Ownership and sharing page. The flat SHALL then disappear from the removed user's list and SHALL behave for them as if it didn't exist. A member SHALL NOT be able to remove anyone. No one SHALL be able to remove an owner's access, their own included, other than through an ownership change that takes the owner's share to 0 %.
 
 #### Scenario: The owner removes a member
 - **WHEN** Annika removes Jussi's access to `Kuusikuja 3 B 12`
@@ -85,8 +85,12 @@ A flat's owner SHALL be able to remove a member's access on the Sharing page. Th
 - **WHEN** Annika sends the removal of her own access to `Kuusikuja 3 B 12` to the server
 - **THEN** it is refused with the reason `sharing_owner_only`, and she keeps her access
 
+#### Scenario: An owner can't remove another owner
+- **WHEN** Annika and Jussi own 50 % each, and Annika sends the removal of Jussi's access to the server
+- **THEN** it is refused with the reason `sharing_owner_only`, and Jussi keeps his access and share
+
 ### Requirement: Leaving a shared flat
-A member SHALL be able to leave a flat on its Sharing page. The flat SHALL then disappear from their list. The owner SHALL NOT be able to leave.
+A member SHALL be able to leave a flat on its Ownership and sharing page. The flat SHALL then disappear from their list. An owner SHALL NOT be able to leave; their share must first go to others through an ownership change.
 
 #### Scenario: A member leaves a flat
 - **WHEN** Jussi leaves `Kuusikuja 3 B 12`

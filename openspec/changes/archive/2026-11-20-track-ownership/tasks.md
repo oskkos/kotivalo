@@ -63,4 +63,4 @@
 
 `docs(openspec): archive track-ownership`
 
-- [ ] 8.1 `openspec archive track-ownership`, fill in the new spec's Purpose, check the merged specs and `pnpm check:traceability`
+- [x] 8.1 `openspec archive track-ownership`, fill in the new spec's Purpose, check the merged specs and `pnpm check:traceability`
