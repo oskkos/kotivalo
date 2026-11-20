@@ -48,16 +48,16 @@
 
 `feat(sharing): add the flat's sharing page`
 
-- [ ] 5.1 Write `features/sharing/SharingPage.tsx`, built from the "Omistus ja jakaminen" card style (design decision 7):
+- [x] 5.1 Write `features/sharing/SharingPage.tsx`, built from the "Omistus ja jakaminen" card style (design decision 7):
   - people with roles
   - pending invitations with "Cancel"
   - the invite form (TanStack Form, `TextField`)
   - "Remove" and "Leave flat" with a confirmation dialog
 
   Component tests per role.
-- [ ] 5.2 Add the route `/_authed/properties/$propertyId/sharing` (loader, `notFound()`) and the "Sharing" link on the edit form; fi, sv and en messages
-- [ ] 5.3 Playwright: inviting (the email arrives in the test inbox), the refused duplicate invitation, cancelling, and another user's not-found page
-- [ ] 5.4 Screenshots of the Sharing page as owner, with an invitation and the form (fi, 390 × 844), for review before the commit
+- [x] 5.2 Add the route `/_authed/properties/$propertyId/sharing` (loader, `notFound()`) and the "Sharing" link on the edit form; fi, sv and en messages
+- [x] 5.3 Playwright: inviting (the email arrives in the test inbox), the refused duplicate invitation, cancelling, and another user's not-found page
+- [x] 5.4 Screenshots of the Sharing page as owner, with an invitation and the form (fi, 390 × 844), for review before the commit
 
 ## 6. Invitations on the flats list
 

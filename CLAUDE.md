@@ -28,7 +28,7 @@ Package manager is **pnpm** (pinned in `package.json` via `packageManager`; enab
 - `pnpm test:e2e`: Playwright tests in `e2e/` (builds the app and serves it with `vite preview` on port 4173, or reuses a server already running there); `pnpm test:e2e:ui` for the UI mode
   - one file: `pnpm test:e2e e2e/home.spec.ts`
   - one test by name: `pnpm test:e2e -g "shows the app name"`
-  - e2e helpers are in `e2e/support/sign-in.ts`: `signIn(page, email, name?)` signs in and gives a name to a new account; `waitForHydration(page)` before submitting a form on a freshly loaded page, or the browser submits it without the app
+  - e2e helpers are in `e2e/support/`: `flats.ts` (`addFlat`, `flatId`) and `sign-in.ts`: `signIn(page, email, name?)` signs in and gives a name to a new account; `waitForHydration(page)` before submitting a form on a freshly loaded page, or the browser submits it without the app
   - first time on a machine: `pnpm exec playwright install chromium`
 - `pnpm check:traceability`: checks that every OpenSpec scenario in the main specs has a test and every requirement has a Playwright test or a recorded reason; active changes are reported as pending (see "Specs and tests")
 - `pnpm format` / `pnpm format:check`: Prettier (no semicolons, single quotes, trailing commas)

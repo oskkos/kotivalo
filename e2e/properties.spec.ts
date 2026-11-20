@@ -1,59 +1,8 @@
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test } from '@playwright/test'
+import { addFlat, card, fillInFlat, flatId, kuusikuja } from './support/flats'
 import { signIn, uniqueEmail } from './support/sign-in'
 
 // The browser's language is English, so the app is in English.
-
-async function fillInFlat(
-  page: Page,
-  flat: {
-    streetAddress: string
-    postcode: string
-    city: string
-    rooms: string
-    floorArea: string
-  },
-) {
-  await page
-    .getByRole('textbox', { name: 'Street address' })
-    .fill(flat.streetAddress)
-  await page.getByRole('textbox', { name: 'Postcode' }).fill(flat.postcode)
-  await page.getByRole('textbox', { name: 'City' }).fill(flat.city)
-  await page.getByRole('button', { name: flat.rooms }).click()
-  await page
-    .getByRole('textbox', { name: 'Floor area (m²)' })
-    .fill(flat.floorArea)
-}
-
-/** Adds a flat through the form and returns to the list. */
-async function addFlat(page: Page, flat: Parameters<typeof fillInFlat>[1]) {
-  await page.goto('/properties/new')
-  await fillInFlat(page, flat)
-  await page.getByRole('button', { name: 'Save flat' }).click()
-  await expect(page).toHaveURL(/\/$/)
-}
-
-const card = (page: Page, streetAddress: string) =>
-  page.getByRole('listitem').filter({ hasText: streetAddress })
-
-/** The id of a flat on the list, from its card's link. */
-async function flatId(page: Page, streetAddress: string) {
-  const href = await card(page, streetAddress)
-    .getByRole('link')
-    .getAttribute('href')
-  const id = /\/properties\/([^/]+)\/edit/.exec(href ?? '')?.[1]
-  if (id === undefined) {
-    throw new Error(`No link on the card of ${streetAddress}`)
-  }
-  return id
-}
-
-const kuusikuja = {
-  streetAddress: 'Kuusikuja 3 B 12',
-  postcode: '33100',
-  city: 'Tampere',
-  rooms: '2 rooms',
-  floorArea: '48,5',
-}
 
 test.describe('Adding a flat', () => {
   test.beforeEach(async ({ page }) => {

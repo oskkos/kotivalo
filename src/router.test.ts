@@ -5,6 +5,7 @@ import { getRouter } from './router'
 // doesn't do; the route tree only needs them to exist.
 vi.mock('#/features/authentication/functions', () => ({}))
 vi.mock('#/features/properties/functions', () => ({}))
+vi.mock('#/features/sharing/functions', () => ({}))
 
 describe('Router', () => {
   test('registers the home and sign-in pages', () => {
