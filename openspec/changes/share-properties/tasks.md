@@ -38,9 +38,9 @@
 
 `feat(sharing): accept, decline, remove access and leave a flat`
 
-- [ ] 4.1 Write `listMyInvitations`, `acceptInvitation`, `declineInvitation`, `removeAccess` and `leaveProperty` (address from the session, the 100-flat limit when accepting)
-- [ ] 4.2 Log `sharing.invitation_accepted`, `sharing.invitation_declined`, `sharing.invitation_cancelled`, `sharing.access_removed` and `sharing.property_left`
-- [ ] 4.3 Workers tests:
+- [x] 4.1 Write `listMyInvitations`, `acceptInvitation`, `declineInvitation`, `removeAccess` and `leaveProperty` (address from the session, the 100-flat limit when accepting)
+- [x] 4.2 Log `sharing.invitation_accepted`, `sharing.invitation_declined`, `sharing.invitation_cancelled`, `sharing.access_removed` and `sharing.property_left`
+- [x] 4.3 Workers tests:
   - the server-side scenarios of "Accepting a flat invitation", "Cancelling a flat invitation", "Removing access to a flat" and "Leaving a shared flat"
   - a member can edit the flat through `updateProperty`
 

@@ -1,6 +1,7 @@
 // Sharing flats: the logic behind the server functions in functions.ts, with
 // its dependencies passed in so Workers tests can drive it (openspec:
 // sharing).
+import { PROPERTY_LIMIT } from '#/features/properties/properties.server'
 import type { PropertyRepository } from '#/features/properties/property.repository.server'
 import type { AlertReason, FieldReason } from '#/lib/reasons'
 import type { Locale } from '#/paraglide/runtime.js'
@@ -11,6 +12,7 @@ import type { LimitResult, LimitRule } from '#/server/platform/limits.server'
 import { INVITATION_VALID_DAYS, invitationEmail } from './invitation-email'
 import type {
   PendingInvitation,
+  ReceivedInvitation,
   SharingRepository,
 } from './sharing.repository.server'
 
@@ -190,5 +192,95 @@ export async function cancelInvitation(
     return invitationNotFound
   }
   deps.log.info('sharing.invitation_cancelled', { propertyId, invitationId })
+  return { ok: true }
+}
+
+/** The signed-in user's pending invitations, for the flats list. */
+export function listMyInvitations(
+  deps: SharingDeps,
+): Promise<ReceivedInvitation[]> {
+  return deps.sharing.listForInvitee(deps.user.email, deps.now())
+}
+
+/**
+ * Accepts an invitation for the signed-in user's own address. Counts toward
+ * the flat limit like adding a flat (the count and the insert are separate
+ * statements, as there).
+ */
+export async function acceptInvitation(
+  deps: SharingDeps,
+  invitationId: string,
+): Promise<
+  | { ok: true; propertyId: string }
+  | typeof invitationNotFound
+  | Failure<'property_limit_reached'>
+> {
+  if ((await deps.properties.countForUser(deps.user.id)) >= PROPERTY_LIMIT) {
+    deps.log.warn('property.limit_reached', { limit: PROPERTY_LIMIT })
+    return { ok: false, reason: 'property_limit_reached' }
+  }
+  const propertyId = await deps.sharing.accept(
+    deps.user.id,
+    deps.user.email,
+    invitationId,
+    deps.now(),
+  )
+  if (propertyId === undefined) {
+    return invitationNotFound
+  }
+  deps.log.info('sharing.invitation_accepted', { propertyId, invitationId })
+  return { ok: true, propertyId }
+}
+
+export async function declineInvitation(
+  deps: SharingDeps,
+  invitationId: string,
+): Promise<{ ok: true } | typeof invitationNotFound> {
+  if (!(await deps.sharing.decline(deps.user.email, invitationId))) {
+    return invitationNotFound
+  }
+  deps.log.info('sharing.invitation_declined', { invitationId })
+  return { ok: true }
+}
+
+/** The owner removes a member's access. */
+export async function removeAccess(
+  deps: SharingDeps,
+  propertyId: string,
+  userId: string,
+): Promise<{ ok: true } | typeof propertyNotFound | typeof ownerOnly> {
+  const role = await deps.sharing.roleOf(deps.user.id, propertyId)
+  if (!role) {
+    return propertyNotFound
+  }
+  if (
+    role !== 'owner' ||
+    !(await deps.sharing.removeMember(deps.user.id, propertyId, userId))
+  ) {
+    return ownerOnly
+  }
+  deps.log.info('sharing.access_removed', {
+    propertyId,
+    removedUserId: userId,
+  })
+  return { ok: true }
+}
+
+/** A member leaves a flat. The owner can't. */
+export async function leaveProperty(
+  deps: SharingDeps,
+  propertyId: string,
+): Promise<{ ok: true } | typeof propertyNotFound | typeof ownerOnly> {
+  const role = await deps.sharing.roleOf(deps.user.id, propertyId)
+  if (!role) {
+    return propertyNotFound
+  }
+  if (
+    role !== 'member' ||
+    !(await deps.sharing.leave(deps.user.id, propertyId))
+  ) {
+    return ownerOnly
+  }
+  deps.log.info('sharing.property_left', { propertyId })
   return { ok: true }
 }

@@ -1,5 +1,9 @@
 import { env } from 'cloudflare:workers'
 import { beforeEach, describe, expect, test } from 'vitest'
+import {
+  getProperty,
+  updateProperty,
+} from '#/features/properties/properties.server'
 import { propertyRepository } from '#/features/properties/property.repository.server'
 import { EmailError, type SendEmail } from '#/server/email/email'
 import { createDb } from '#/server/platform/db.server'
@@ -16,9 +20,14 @@ import { addTestUser, emptyTables } from '#/test/users.server'
 import { emailSchema } from '#/features/authentication/schemas'
 import { sharingRepository } from './sharing.repository.server'
 import {
+  acceptInvitation,
   cancelInvitation,
+  declineInvitation,
   getSharing,
   inviteToProperty,
+  leaveProperty,
+  listMyInvitations,
+  removeAccess,
   type SharingDeps,
 } from './sharing.server'
 
@@ -262,6 +271,17 @@ describe('Limiting invitations', () => {
 })
 
 describe('Cancelling a flat invitation', () => {
+  test("A cancelled invitation can't be accepted", async () => {
+    const id = await inviteJussi()
+    await cancelInvitation(deps('anna'), id)
+
+    expect(await acceptInvitation(deps('jussi'), id)).toEqual({
+      ok: false,
+      reason: 'invitation_not_found',
+    })
+    expect(await flatsOf('jussi')).toEqual([])
+  })
+
   test('the owner cancels a pending invitation', async () => {
     const result = await invite('anna', flat, 'jussi@example.com')
     const id = result.ok ? result.id : ''
@@ -320,5 +340,237 @@ describe('Listing who has access to a flat', () => {
       ok: false,
       reason: 'property_not_found',
     })
+  })
+})
+
+/** Annika invites Jussi to the flat; returns the invitation's id. */
+async function inviteJussi(): Promise<string> {
+  const result = await invite('anna', flat, 'jussi@example.com')
+  if (!result.ok) {
+    throw new Error(result.reason)
+  }
+  return result.id
+}
+
+const flatsOf = (userId: string) => propertyRepository(db).listForUser(userId)
+
+const propertyDeps = (userId: string) => ({
+  userId,
+  properties: propertyRepository(db),
+  log: createCaptureLogger().log,
+  now: () => now,
+  collation: 'fi-FI',
+})
+
+describe('Accepting a flat invitation', () => {
+  test('Accepting an invitation shows the flat in the list', async () => {
+    const id = await inviteJussi()
+    expect(await listMyInvitations(deps('jussi'))).toEqual([
+      expect.objectContaining({
+        id,
+        streetAddress: 'Kuusikuja 3 B 12',
+        city: 'Tampere',
+        inviterName: 'Annika',
+      }),
+    ])
+
+    expect(await acceptInvitation(deps('jussi'), id)).toEqual({
+      ok: true,
+      propertyId: flat,
+    })
+    expect(logLines).toEqual([
+      expect.objectContaining({
+        event: 'sharing.invitation_accepted',
+        propertyId: flat,
+        invitationId: id,
+      }),
+    ])
+    expect(await flatsOf('jussi')).toEqual([
+      expect.objectContaining({ id: flat }),
+    ])
+    expect(await listMyInvitations(deps('jussi'))).toEqual([])
+  })
+
+  test('An invitation is only for the invited address', async () => {
+    const id = await inviteJussi()
+
+    expect(await listMyInvitations(deps('toinen'))).toEqual([])
+    expect(await acceptInvitation(deps('toinen'), id)).toEqual({
+      ok: false,
+      reason: 'invitation_not_found',
+    })
+    expect(await flatsOf('toinen')).toEqual([])
+  })
+
+  test("An expired invitation can't be accepted", async () => {
+    const id = await inviteJussi()
+    const expired = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000 + 1000)
+
+    expect(
+      await acceptInvitation(deps('jussi', { now: () => expired }), id),
+    ).toEqual({ ok: false, reason: 'invitation_not_found' })
+    expect(await flatsOf('jussi')).toEqual([])
+  })
+
+  test('Accepting is refused at the flat limit', async () => {
+    const id = await inviteJussi()
+    for (let i = 0; i < 100; i++) {
+      await propertyRepository(db).create(
+        'jussi',
+        {
+          streetAddress: `Katu ${String(i)}`,
+          postcode: '33100',
+          city: 'Tampere',
+          roomCount: 1,
+          floorArea: 300,
+        },
+        now,
+      )
+    }
+
+    expect(await acceptInvitation(deps('jussi'), id)).toEqual({
+      ok: false,
+      reason: 'property_limit_reached',
+    })
+    expect(await flatsOf('jussi')).toHaveLength(100)
+    expect(await listMyInvitations(deps('jussi'))).toHaveLength(1)
+  })
+})
+
+describe('Declining a flat invitation', () => {
+  test('Declining removes the invitation', async () => {
+    const id = await inviteJussi()
+
+    expect(await declineInvitation(deps('jussi'), id)).toEqual({ ok: true })
+    expect(logLines).toEqual([
+      expect.objectContaining({
+        event: 'sharing.invitation_declined',
+        invitationId: id,
+      }),
+    ])
+    expect(await listMyInvitations(deps('jussi'))).toEqual([])
+    expect(await flatsOf('jussi')).toEqual([])
+    const view = await getSharing(deps('anna'), flat)
+    expect(view.ok && view.invitations).toEqual([])
+  })
+
+  test('another address cannot decline it', async () => {
+    const id = await inviteJussi()
+
+    expect(await declineInvitation(deps('toinen'), id)).toEqual({
+      ok: false,
+      reason: 'invitation_not_found',
+    })
+    expect(await listMyInvitations(deps('jussi'))).toHaveLength(1)
+  })
+})
+
+describe('Removing access to a flat', () => {
+  test('The owner removes a member', async () => {
+    await shareWithJussi(flat)
+
+    expect(await removeAccess(deps('anna'), flat, 'jussi')).toEqual({
+      ok: true,
+    })
+    expect(logLines).toEqual([
+      expect.objectContaining({
+        event: 'sharing.access_removed',
+        propertyId: flat,
+        removedUserId: 'jussi',
+      }),
+    ])
+    expect(await flatsOf('jussi')).toEqual([])
+    expect(await getProperty(propertyDeps('jussi'), flat)).toEqual({
+      ok: false,
+      reason: 'property_not_found',
+    })
+  })
+
+  test("A member can't remove access", async () => {
+    await shareWithJussi(flat)
+    const id = await (async () => {
+      const r = await invite('anna', flat, 'toinen@example.com')
+      return r.ok ? r.id : ''
+    })()
+    await sharing.accept('toinen', 'toinen@example.com', id, now)
+
+    for (const target of ['anna', 'toinen']) {
+      expect(await removeAccess(deps('jussi'), flat, target)).toEqual({
+        ok: false,
+        reason: 'sharing_owner_only',
+      })
+    }
+    expect(await flatsOf('anna')).toHaveLength(1)
+    expect(await flatsOf('toinen')).toHaveLength(1)
+  })
+
+  test("The owner can't remove their own access", async () => {
+    expect(await removeAccess(deps('anna'), flat, 'anna')).toEqual({
+      ok: false,
+      reason: 'sharing_owner_only',
+    })
+    expect(await flatsOf('anna')).toHaveLength(1)
+  })
+
+  test('a user without access is told the flat was not found', async () => {
+    await shareWithJussi(flat)
+    expect(await removeAccess(deps('toinen'), flat, 'jussi')).toEqual({
+      ok: false,
+      reason: 'property_not_found',
+    })
+  })
+})
+
+describe('Leaving a shared flat', () => {
+  test('A member leaves a flat', async () => {
+    await shareWithJussi(flat)
+
+    expect(await leaveProperty(deps('jussi'), flat)).toEqual({ ok: true })
+    expect(logLines).toEqual([
+      expect.objectContaining({
+        event: 'sharing.property_left',
+        propertyId: flat,
+      }),
+    ])
+    expect(await flatsOf('jussi')).toEqual([])
+    const view = await getSharing(deps('anna'), flat)
+    expect(view.ok && view.people.map((p) => p.userId)).toEqual(['anna'])
+  })
+
+  test("The owner can't leave", async () => {
+    expect(await leaveProperty(deps('anna'), flat)).toEqual({
+      ok: false,
+      reason: 'sharing_owner_only',
+    })
+    expect(await flatsOf('anna')).toHaveLength(1)
+  })
+})
+
+describe('Flats are shown only to users with access', () => {
+  test('A pending invitation does not give access', async () => {
+    await inviteJussi()
+
+    expect(await getProperty(propertyDeps('jussi'), flat)).toEqual({
+      ok: false,
+      reason: 'property_not_found',
+    })
+    expect(await flatsOf('jussi')).toEqual([])
+  })
+
+  test('A member can edit a shared flat', async () => {
+    await shareWithJussi(flat)
+
+    const result = await updateProperty(propertyDeps('jussi'), flat, {
+      streetAddress: 'Kuusikuja 3 B 12',
+      postcode: '33100',
+      city: 'Tampere',
+      roomCount: 2,
+      floorArea: 490,
+    })
+
+    expect(result.ok).toBe(true)
+    expect(await flatsOf('anna')).toEqual([
+      expect.objectContaining({ floorArea: 490 }),
+    ])
   })
 })
