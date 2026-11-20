@@ -3,3 +3,8 @@ allowBuilds:
   workerd: true
   # Hooks are installed by our own "prepare" script instead.
   lefthook: false
+overrides:
+  # drizzle-kit loads its config through @esbuild-kit, which pins esbuild
+  # 0.18 (GHSA-67mh-4wv8-2f99, in esbuild's dev server). Drop this when
+  # drizzle-kit stops depending on @esbuild-kit.
+  '@esbuild-kit/core-utils>esbuild': ^0.25.12
