@@ -63,14 +63,14 @@
 
 `feat(sharing): show flat invitations on the flats list`
 
-- [ ] 6.1 Write `features/sharing/InvitationCards.tsx` (inviter, address, Accept, Decline), with component tests; show them on `/` above the list and the empty state
-- [ ] 6.2 Playwright for the rest of the browser scenarios:
+- [x] 6.1 Write `features/sharing/InvitationCards.tsx` (inviter, address, Accept, Decline), with component tests; show them on `/` above the list and the empty state
+- [x] 6.2 Playwright for the rest of the browser scenarios:
   - "Accepting a flat invitation" and "Declining a flat invitation"
   - "Listing who has access to a flat" as a member
   - removing and leaving
   - the modified "First run without flats" and "Flats are shown only to users with access" (pending invitation, member edits)
-- [ ] 6.3 Screenshots of the invitation card on the list and on the empty state, and of the Sharing page as a member (fi, 390 × 844), for review before the commit
-- [ ] 6.4 Update CLAUDE.md "Current state" and the glossary's access row, and CONCEPT.md's data model (`property_invitations`; `property_access` without invitation status); `pnpm check:traceability` and the full test suite pass
+- [x] 6.3 Screenshots of the invitation card on the list and on the empty state, and of the Sharing page as a member (fi, 390 × 844), for review before the commit
+- [x] 6.4 Update CLAUDE.md "Current state" and the glossary's access row, and CONCEPT.md's data model (`property_invitations`; `property_access` without invitation status); `pnpm check:traceability` and the full test suite pass
 
 ## 7. Archive
 

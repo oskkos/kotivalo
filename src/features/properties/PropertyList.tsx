@@ -19,6 +19,8 @@ interface Props {
   properties: readonly Property[]
   /** Shown above sign-out at the end of the page. */
   email: string
+  /** Shown above the list or the empty state, e.g. flat invitations. */
+  notices?: ReactNode
   onSignOut: () => void
 }
 
@@ -152,7 +154,7 @@ function Header(): ReactNode {
   )
 }
 
-export function PropertyList({ properties, email, onSignOut }: Props) {
+export function PropertyList({ properties, email, onSignOut, notices }: Props) {
   return (
     <Stack sx={{ minHeight: '100dvh' }}>
       <Header />
@@ -168,6 +170,7 @@ export function PropertyList({ properties, email, onSignOut }: Props) {
             </Typography>
           )}
         </Stack>
+        {notices}
         {properties.length === 0 ? (
           <EmptyState />
         ) : (

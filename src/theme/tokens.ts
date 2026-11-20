@@ -25,6 +25,7 @@ export const colors = {
   // Surfaces and tints
   white: '#FFFFFF',
   yellowTint: '#FFF0CC', // paid chips, hints
+  yellowBorder: '#F2D58A', // invitation cards on the yellow tint
   lavenderTint: '#F1EAF6', // expense icons, notes
   sand: '#F1E6D3', // segmented control track, pressed icon button
 

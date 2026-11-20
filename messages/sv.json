@@ -163,5 +163,12 @@
   "sharing_leave_dialog_title": "Lämna bostaden?",
   "sharing_leave_dialog_text": "{address} försvinner från din lista. Du får tillgång igen bara om ägaren bjuder in dig på nytt.",
   "sharing_leave_dialog_confirm": "Lämna",
-  "sharing_dialog_cancel": "Avbryt"
+  "sharing_dialog_cancel": "Avbryt",
+  "invitations_label": "Inbjudningar",
+  "invitation_from": "{inviter} har delat en bostad med dig",
+  "invitation_details": "{city} · gäller till {expires}",
+  "invitation_accept": "Godkänn",
+  "invitation_decline": "Avböj",
+  "invitation_accepted": "{address} finns nu på din lista.",
+  "invitation_declined": "Inbjudan avböjd."
 }

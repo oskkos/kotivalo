@@ -163,5 +163,12 @@
   "sharing_leave_dialog_title": "Leave the flat?",
   "sharing_leave_dialog_text": "{address} will disappear from your list. You get access again only if the owner invites you again.",
   "sharing_leave_dialog_confirm": "Leave",
-  "sharing_dialog_cancel": "Cancel"
+  "sharing_dialog_cancel": "Cancel",
+  "invitations_label": "Invitations",
+  "invitation_from": "{inviter} shared a flat with you",
+  "invitation_details": "{city} · valid until {expires}",
+  "invitation_accept": "Accept",
+  "invitation_decline": "Decline",
+  "invitation_accepted": "{address} is now on your list.",
+  "invitation_declined": "Invitation declined."
 }
