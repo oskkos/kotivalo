@@ -15,6 +15,13 @@
       "when": 1795117266099,
       "tag": "0001_properties",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1795192536279,
+      "tag": "0002_property_invitations",
+      "breakpoints": true
     }
   ]
 }

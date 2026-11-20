@@ -2,7 +2,7 @@ import { env } from 'cloudflare:workers'
 import { eq } from 'drizzle-orm'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { createDb } from '#/server/platform/db.server'
-import { properties, propertyAccess, user } from './schema'
+import { properties, propertyAccess, propertyInvitations, user } from './schema'
 
 const db = createDb(env.DB)
 const now = new Date(Date.UTC(2026, 10, 19, 12, 0, 0))
@@ -32,6 +32,7 @@ async function addProperty(id: string) {
 }
 
 beforeEach(async () => {
+  await db.delete(propertyInvitations)
   await db.delete(propertyAccess)
   await db.delete(properties)
   await db.delete(user)
@@ -89,5 +90,40 @@ describe('Properties tables', () => {
 
     expect(await db.select().from(propertyAccess)).toEqual([])
     expect(await db.select().from(properties)).toHaveLength(1)
+  })
+})
+
+describe('Invitations table', () => {
+  const invitation = {
+    id: 'i1',
+    propertyId: 'p1',
+    email: 'jussi@example.com',
+    invitedBy: 'u1',
+    createdAt: now,
+    expiresAt: new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000),
+  }
+
+  beforeEach(async () => {
+    await addUser('u1')
+    await addProperty('p1')
+  })
+
+  test('allow one invitation per flat and address', async () => {
+    await db.insert(propertyInvitations).values(invitation)
+    await expect(
+      db.insert(propertyInvitations).values({ ...invitation, id: 'i2' }),
+    ).rejects.toThrow()
+  })
+
+  test('are removed with their flat', async () => {
+    await db.insert(propertyInvitations).values(invitation)
+    await db.delete(properties).where(eq(properties.id, 'p1'))
+    expect(await db.select().from(propertyInvitations)).toEqual([])
+  })
+
+  test('are removed with the user who sent them', async () => {
+    await db.insert(propertyInvitations).values(invitation)
+    await db.delete(user).where(eq(user.id, 'u1'))
+    expect(await db.select().from(propertyInvitations)).toEqual([])
   })
 })
