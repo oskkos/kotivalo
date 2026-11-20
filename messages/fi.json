@@ -135,15 +135,9 @@
   "invitation_email_validity": "Kutsu on voimassa {days} päivää.",
   "invitation_email_ignore": "Jos et tunne lähettäjää, voit jättää viestin huomiotta. Asunto ei näy sinulle, ellet hyväksy kutsua.",
   "invitation_email_action": "Avaa Kotivalo",
-  "sharing_page_title": "Jakaminen – Kotivalo",
-  "sharing_title": "Jakaminen",
   "sharing_back": "Takaisin asunnon tietoihin",
-  "sharing_people": "Pääsy asuntoon",
   "sharing_you": "Sinä",
-  "sharing_role_owner": "Omistaja",
   "sharing_member_since": "Jäsen · {date} alkaen",
-  "sharing_owner_note": "Jäsen näkee asunnon ja voi muokata sen tietoja. Vain omistaja voi kutsua ja poistaa pääsyjä.",
-  "sharing_member_note": "Vain omistaja voi kutsua ja poistaa pääsyjä.",
   "sharing_remove": "Poista",
   "sharing_remove_label": "Poista {name} asunnosta",
   "sharing_pending": "Odottaa vastausta",
@@ -226,5 +220,7 @@
   "ownership_correct_title": "Korjaa omistuksen alkupäivä",
   "ownership_correct_hint": "Päivän pitää olla ennen seuraavaa omistusmuutosta ({date}).",
   "ownership_correct_save": "Tallenna",
-  "ownership_dialog_cancel": "Peru"
+  "ownership_dialog_cancel": "Peru",
+  "ownership_page_title": "Omistus ja jakaminen – Kotivalo",
+  "ownership_title": "Omistus ja jakaminen"
 }

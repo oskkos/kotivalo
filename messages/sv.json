@@ -135,15 +135,9 @@
   "invitation_email_validity": "Inbjudan gäller i {days} dagar.",
   "invitation_email_ignore": "Om du inte känner avsändaren kan du strunta i meddelandet. Bostaden syns inte för dig om du inte godkänner inbjudan.",
   "invitation_email_action": "Öppna Kotivalo",
-  "sharing_page_title": "Delning – Kotivalo",
-  "sharing_title": "Delning",
   "sharing_back": "Tillbaka till bostaden",
-  "sharing_people": "Tillgång till bostaden",
   "sharing_you": "Du",
-  "sharing_role_owner": "Ägare",
   "sharing_member_since": "Medlem sedan {date}",
-  "sharing_owner_note": "En medlem ser bostaden och kan redigera dess uppgifter. Bara ägaren kan bjuda in och ta bort åtkomst.",
-  "sharing_member_note": "Bara ägaren kan bjuda in och ta bort åtkomst.",
   "sharing_remove": "Ta bort",
   "sharing_remove_label": "Ta bort {name} från bostaden",
   "sharing_pending": "Väntar på svar",
@@ -226,5 +220,7 @@
   "ownership_correct_title": "Rätta ägandets startdatum",
   "ownership_correct_hint": "Datumet måste vara före nästa ägarändring ({date}).",
   "ownership_correct_save": "Spara",
-  "ownership_dialog_cancel": "Avbryt"
+  "ownership_dialog_cancel": "Avbryt",
+  "ownership_page_title": "Ägande och delning – Kotivalo",
+  "ownership_title": "Ägande och delning"
 }

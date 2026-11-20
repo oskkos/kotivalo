@@ -1,5 +1,9 @@
 import { expect, test, type Request } from '@playwright/test'
-import { uniqueEmail, useOwnClientIp } from './support/sign-in'
+import {
+  uniqueEmail,
+  useOwnClientIp,
+  waitForHydration,
+} from './support/sign-in'
 
 // Server functions refuse calls from other sites (src/start.ts). The call
 // is taken from the sign-in page and sent again from Playwright, which, not
@@ -8,6 +12,7 @@ test.describe('Cross-site server function calls', () => {
   test('are refused, while same-origin calls go through', async ({ page }) => {
     await useOwnClientIp(page)
     await page.goto('/sign-in')
+    await waitForHydration(page)
     const call = page.waitForRequest(
       (request) =>
         request.url().includes('/_serverFn/') && request.method() === 'POST',

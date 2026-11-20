@@ -33,9 +33,16 @@ import {
   removeAccess,
 } from './functions'
 import type { SharingView } from './sharing.server'
+import { OwnershipChangeForm } from '#/features/ownership/OwnershipChangeForm'
+import {
+  CurrentOwners,
+  OwnershipHistory,
+} from '#/features/ownership/OwnershipHistory'
+import type { OwnershipView } from '#/features/ownership/ownership.server'
 
 interface Props {
   view: SharingView
+  ownership: OwnershipView
   /** Reloads the view after a change. */
   onChanged: () => Promise<void>
   /** After leaving the flat, which is then gone from the user's list. */
@@ -159,8 +166,16 @@ function Section(props: { title: string; children: ReactNode }) {
   )
 }
 
-export function SharingPage({ view, onChanged, onLeft, onBack }: Props) {
+export function SharingPage({
+  view,
+  ownership,
+  onChanged,
+  onLeft,
+  onBack,
+}: Props) {
   const isOwner = view.role === 'owner'
+  const members = view.people.filter((p) => p.role === 'member')
+  const [changing, setChanging] = useState(false)
   const address = view.property.streetAddress
   const [alert, setAlert] = useState<AlertReason>()
   const [confirm, setConfirm] = useState<Confirm>()
@@ -211,7 +226,7 @@ export function SharingPage({ view, onChanged, onLeft, onBack }: Props) {
         </IconButton>
         <Stack sx={{ alignItems: 'center', minWidth: 0 }}>
           <Typography variant="h3" component="h1" sx={{ fontSize: 18 }}>
-            {m.sharing_title()}
+            {m.ownership_title()}
           </Typography>
           <Typography variant="caption" color="text.secondary">
             {address}
@@ -223,46 +238,90 @@ export function SharingPage({ view, onChanged, onLeft, onBack }: Props) {
         sx={{ flex: 1, gap: 2, px: 2.5, pt: 1.25, pb: 3 }}
       >
         {alert === undefined ? null : <ReasonAlert reason={alert} />}
-        <Section title={m.sharing_people()}>
-          <Box component="ul" sx={{ ...card, listStyle: 'none', m: 0, px: 2 }}>
-            {view.people.map((person) => {
-              const name = person.isYou ? m.sharing_you() : person.name
-              return (
-                <Row
-                  key={person.userId}
-                  icon={<Initial name={name} you={person.isYou} />}
-                  title={name}
-                  meta={
-                    person.role === 'owner'
-                      ? m.sharing_role_owner()
-                      : m.sharing_member_since({
-                          date: formatDay(person.since),
-                        })
-                  }
-                  action={
-                    isOwner && person.role === 'member' ? (
-                      <Button
-                        variant="outlined"
-                        color="inherit"
-                        size="small"
-                        aria-label={m.sharing_remove_label({ name })}
-                        onClick={() => {
-                          setConfirm({ kind: 'remove', person })
-                        }}
-                        sx={{ minHeight: 44, flexShrink: 0 }}
-                      >
-                        {m.sharing_remove()}
-                      </Button>
-                    ) : undefined
-                  }
-                />
-              )
-            })}
-          </Box>
-          <Typography variant="body2" color="text.secondary">
-            {isOwner ? m.sharing_owner_note() : m.sharing_member_note()}
-          </Typography>
-        </Section>
+        <CurrentOwners
+          periods={ownership.periods}
+          names={ownership.names}
+          you={ownership.you}
+        />
+        {members.length === 0 ? null : (
+          <Section title={m.ownership_others()}>
+            <Box
+              component="ul"
+              sx={{ ...card, listStyle: 'none', m: 0, px: 2 }}
+            >
+              {members.map((person) => {
+                const name = person.isYou ? m.sharing_you() : person.name
+                return (
+                  <Row
+                    key={person.userId}
+                    icon={<Initial name={name} you={person.isYou} />}
+                    title={name}
+                    meta={m.sharing_member_since({
+                      date: formatDay(person.since),
+                    })}
+                    action={
+                      isOwner ? (
+                        <Button
+                          variant="outlined"
+                          color="inherit"
+                          size="small"
+                          aria-label={m.sharing_remove_label({ name })}
+                          onClick={() => {
+                            setConfirm({ kind: 'remove', person })
+                          }}
+                          sx={{ minHeight: 44, flexShrink: 0 }}
+                        >
+                          {m.sharing_remove()}
+                        </Button>
+                      ) : undefined
+                    }
+                  />
+                )
+              })}
+            </Box>
+          </Section>
+        )}
+        <Typography variant="body2" color="text.secondary">
+          {isOwner ? m.ownership_owner_note() : m.ownership_member_note()}
+        </Typography>
+        {!isOwner ? null : changing ? (
+          <OwnershipChangeForm
+            propertyId={view.property.id}
+            people={ownership.people}
+            names={{
+              ...ownership.names,
+              ...Object.fromEntries(
+                ownership.people.map((p) => [p.userId, p.name]),
+              ),
+            }}
+            you={ownership.you}
+            current={ownership.periods.at(0)?.shares ?? []}
+            onSaved={async () => {
+              await onChanged()
+              setChanging(false)
+            }}
+            onCancel={() => {
+              setChanging(false)
+            }}
+          />
+        ) : (
+          <Button
+            size="large"
+            onClick={() => {
+              setChanging(true)
+            }}
+          >
+            {m.ownership_change()}
+          </Button>
+        )}
+        <OwnershipHistory
+          propertyId={view.property.id}
+          periods={ownership.periods}
+          names={ownership.names}
+          you={ownership.you}
+          isOwner={isOwner}
+          onChanged={onChanged}
+        />
         {view.invitations.length === 0 ? null : (
           <Section title={m.sharing_pending()}>
             <Box

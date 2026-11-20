@@ -11,6 +11,8 @@ export async function fillInFlat(
     city: string
     rooms: string
     floorArea: string
+    /** "Owned since", as typed; the form's default (today) otherwise. */
+    ownedSince?: string
   },
 ) {
   await page
@@ -22,6 +24,11 @@ export async function fillInFlat(
   await page
     .getByRole('textbox', { name: 'Floor area (m²)' })
     .fill(flat.floorArea)
+  if (flat.ownedSince !== undefined) {
+    await page
+      .getByRole('textbox', { name: 'Owned since' })
+      .fill(flat.ownedSince)
+  }
 }
 
 /** Adds a flat through the form and returns to the list. */

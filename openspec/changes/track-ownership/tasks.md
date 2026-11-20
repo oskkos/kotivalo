@@ -46,10 +46,10 @@
 
 `feat(ownership): change ownership on the ownership and sharing page`
 
-- [ ] 6.1 Turn the Sharing page into "Ownership and sharing" (design decision 6): current owners, the change form (free list, presets, date, reason, remove-access checkboxes, live total), the history with Undo and Correct date
-- [ ] 6.2 Component tests; Playwright for the browser scenarios of "Changing a flat's ownership", "Roles follow the current shares", "Undoing the latest ownership change", "Correcting the first ownership date", "Showing a flat's ownership history" and the modified sharing requirements
-- [ ] 6.3 Screenshots of the page as an owner (form open, history) and as a member (fi, 390 × 844) for review before the commit
-- [ ] 6.4 Update CLAUDE.md (current state, glossary) and CONCEPT.md (data model, the free-list open question); `pnpm check:traceability` and the full test suite pass
+- [x] 6.1 Turn the Sharing page into "Ownership and sharing" (design decision 6): current owners, the change form (free list, presets, date, reason, remove-access checkboxes, live total), the history with Undo and Correct date
+- [x] 6.2 Component tests; Playwright for the browser scenarios of "Changing a flat's ownership", "Roles follow the current shares", "Undoing the latest ownership change", "Correcting the first ownership date", "Showing a flat's ownership history" and the modified sharing requirements
+- [x] 6.3 Screenshots of the page as an owner (form open, history) and as a member (fi, 390 × 844) for review before the commit
+- [x] 6.4 Update CLAUDE.md (current state, glossary) and CONCEPT.md (data model, the free-list open question); `pnpm check:traceability` and the full test suite pass
 
 ## 7. Archive
 

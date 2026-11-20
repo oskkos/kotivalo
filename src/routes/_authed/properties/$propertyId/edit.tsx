@@ -45,7 +45,7 @@ function EditPropertyRoute() {
         <IconLink
           to="/properties/$propertyId/sharing"
           params={{ propertyId: id }}
-          aria-label={m.sharing_title()}
+          aria-label={m.ownership_title()}
         >
           <PeopleIcon />
         </IconLink>

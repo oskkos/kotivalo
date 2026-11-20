@@ -1,5 +1,6 @@
 import { createFileRoute, notFound, useRouter } from '@tanstack/react-router'
 import { NotFoundView } from '#/components/NotFoundView'
+import { getOwnership } from '#/features/ownership/functions'
 import { getSharing } from '#/features/sharing/functions'
 import { SharingPage } from '#/features/sharing/SharingPage'
 import { m } from '#/paraglide/messages.js'
@@ -7,16 +8,18 @@ import { m } from '#/paraglide/messages.js'
 export const Route = createFileRoute('/_authed/properties/$propertyId/sharing')(
   {
     loader: async ({ params }) => {
-      const result = await getSharing({
-        data: { propertyId: params.propertyId },
-      })
-      if (!result.ok) {
+      const data = { propertyId: params.propertyId }
+      const [view, ownership] = await Promise.all([
+        getSharing({ data }),
+        getOwnership({ data }),
+      ])
+      if (!view.ok || !ownership.ok) {
         // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router's not-found signal
         throw notFound()
       }
-      return result
+      return { view, ownership }
     },
-    head: () => ({ meta: [{ title: m.sharing_page_title() }] }),
+    head: () => ({ meta: [{ title: m.ownership_page_title() }] }),
     component: SharingRoute,
     notFoundComponent: () => (
       <NotFoundView
@@ -29,12 +32,13 @@ export const Route = createFileRoute('/_authed/properties/$propertyId/sharing')(
 )
 
 function SharingRoute() {
-  const view = Route.useLoaderData()
+  const { view, ownership } = Route.useLoaderData()
   const { propertyId } = Route.useParams()
   const router = useRouter()
   return (
     <SharingPage
       view={view}
+      ownership={ownership}
       onChanged={() => router.invalidate()}
       onLeft={() => {
         void router.invalidate().then(() => router.navigate({ to: '/' }))
