@@ -139,6 +139,8 @@ export async function inviteToProperty(
     deps.log.warn('sharing.invitation_limit_reached', { limit: 'property' })
     return { ok: false, reason: 'invitation_limit_reached' }
   }
+  // Counted before sending, so a failed send uses a slot too: retrying while
+  // Resend fails can't spend the free plan's 100 emails a day.
   const daily = await deps.consumeLimit(
     `invite-user:${deps.user.id}`,
     INVITATION_LIMITS.perUserPerDay,
@@ -172,7 +174,7 @@ export async function inviteToProperty(
     }
     throw error
   }
-  await deps.sharing.invite({
+  const saved = await deps.sharing.invite({
     id,
     propertyId,
     email,
@@ -180,6 +182,12 @@ export async function inviteToProperty(
     now,
     expiresAt: new Date(now.getTime() + INVITATION_VALID_DAYS * DAY_MS),
   })
+  if (!saved) {
+    // Another invitation to the address was saved after the isPending check
+    // (two tabs, two owners). Its email went out too; the button in both
+    // leads to the app, where the saved one is waiting.
+    return { ok: false, reason: 'invitation_already_pending' }
+  }
   deps.log.info('sharing.invitation_sent', { propertyId, invitationId: id })
   return { ok: true, id }
 }
@@ -254,11 +262,15 @@ export async function removeAccess(
   if (!role) {
     return propertyNotFound
   }
-  if (
-    role !== 'owner' ||
-    !(await deps.sharing.removeMember(deps.user.id, propertyId, userId))
-  ) {
+  if (role !== 'owner') {
     return ownerOnly
+  }
+  if (!(await deps.sharing.removeMember(deps.user.id, propertyId, userId))) {
+    // Already gone (left, or removed in another tab): the outcome the owner
+    // asked for. An owner's own access can't be removed.
+    return (await deps.sharing.roleOf(userId, propertyId))
+      ? ownerOnly
+      : { ok: true }
   }
   deps.log.info('sharing.access_removed', {
     propertyId,

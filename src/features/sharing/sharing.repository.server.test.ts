@@ -21,7 +21,7 @@ async function addFlat(id: string, ownerId: string) {
   ])
 }
 
-const invite = (email: string, at = now) =>
+const tryInvite = (email: string, at = now) =>
   repo.invite({
     propertyId: 'flat',
     email,
@@ -29,6 +29,15 @@ const invite = (email: string, at = now) =>
     now: at,
     expiresAt: new Date(at.getTime() + 30 * DAY),
   })
+
+/** An invitation that must be saved. */
+async function invite(email: string, at = now): Promise<{ id: string }> {
+  const saved = await tryInvite(email, at)
+  if (!saved) {
+    throw new Error(`no invitation saved for ${email}`)
+  }
+  return saved
+}
 
 const accessRows = async () =>
   (
@@ -99,9 +108,10 @@ describe('Sharing repository', () => {
     ])
   })
 
-  test('the unique key refuses a second pending invitation', async () => {
+  test('the unique key keeps the first pending invitation', async () => {
     await invite('jussi@example.com')
-    await expect(invite('jussi@example.com')).rejects.toThrow()
+    expect(await tryInvite('jussi@example.com')).toBeUndefined()
+    expect(await repo.countPending('flat', now)).toBe(1)
   })
 
   test('pending invitations and counts leave out expired ones', async () => {

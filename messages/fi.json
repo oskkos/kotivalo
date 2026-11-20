@@ -59,7 +59,7 @@
   "reason_room_count_required": "Valitse huoneluku.",
   "reason_name_required": "Kirjoita nimi.",
   "reason_name_too_long": "Nimi on liian pitkä. Enintään 50 merkkiä.",
-  "reason_name_invalid": "Nimessä ei voi olla merkkejä @ / : < >.",
+  "reason_name_invalid": "Nimessä ei voi olla verkko-osoitetta, rivinvaihtoja eikä merkkejä @ / : < >.",
   "reason_floor_area_invalid": "Kirjoita pinta-ala neliömetreinä, esimerkiksi 48,5.",
   "reason_property_not_found_title": "Asuntoa ei löydy",
   "reason_property_not_found": "Asunto on voitu poistaa, tai sinulla ei ole siihen pääsyä.",

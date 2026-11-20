@@ -61,6 +61,10 @@ describe('Asking for a display name', () => {
       'https://huijaus.fi',
       'Anna <b>',
       'a/b',
+      'Verottaja www.vero-palautus.example',
+      'pankki.fi',
+      'Anna\nVirtanen',
+      'Anna\tVirtanen',
     ]) {
       expect(issue(displayNameSchema.safeParse(value))).toBe('name_invalid')
     }

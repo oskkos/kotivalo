@@ -182,9 +182,9 @@ export function sharingRepository(db: Db) {
       invitedBy: string
       now: Date
       expiresAt: Date
-    }): Promise<{ id: string }> {
+    }): Promise<{ id: string } | undefined> {
       const id = invitation.id ?? crypto.randomUUID()
-      await atomically(db, [
+      const [, inserted] = await atomically(db, [
         db
           .delete(propertyInvitations)
           .where(
@@ -194,16 +194,20 @@ export function sharingRepository(db: Db) {
               lte(propertyInvitations.expiresAt, invitation.now),
             ),
           ),
-        db.insert(propertyInvitations).values({
-          id,
-          propertyId: invitation.propertyId,
-          email: invitation.email,
-          invitedBy: invitation.invitedBy,
-          createdAt: invitation.now,
-          expiresAt: invitation.expiresAt,
-        }),
+        db
+          .insert(propertyInvitations)
+          .values({
+            id,
+            propertyId: invitation.propertyId,
+            email: invitation.email,
+            invitedBy: invitation.invitedBy,
+            createdAt: invitation.now,
+            expiresAt: invitation.expiresAt,
+          })
+          .onConflictDoNothing()
+          .returning({ id: propertyInvitations.id }),
       ])
-      return { id }
+      return inserted.length > 0 ? { id } : undefined
     },
 
     /**
