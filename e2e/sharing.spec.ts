@@ -276,3 +276,17 @@ test.describe('Flats are shown only to users with access', () => {
     await jussi.close()
   })
 })
+
+test.describe('Listing flats', () => {
+  test("A member's card says the flat is shared with them", async ({
+    page,
+    browser,
+  }) => {
+    const { jussi } = await accepted(page, browser)
+
+    await expect(card(jussi, kuusikuja.streetAddress)).toContainText(
+      'Annika 100% · shared with you',
+    )
+    await jussi.close()
+  })
+})

@@ -13,10 +13,13 @@ import { formatArea } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 import { colors, radii } from '#/theme/tokens'
 import type { Property } from './property'
+import { ownershipLine, type CardOwner } from './ownership-line'
 import { roomCountLabel } from './room-count'
 
 interface Props {
   properties: readonly Property[]
+  /** The current owners by flat id, for each card's ownership line. */
+  owners?: Readonly<Record<string, readonly CardOwner[]>>
   /** Shown above sign-out at the end of the page. */
   email: string
   /** Shown above the list or the empty state, e.g. flat invitations. */
@@ -41,7 +44,14 @@ function PlusIcon() {
   )
 }
 
-export function PropertyCard({ property }: { property: Property }) {
+export function PropertyCard({
+  property,
+  owners = [],
+}: {
+  property: Property
+  owners?: readonly CardOwner[] | undefined
+}) {
+  const ownership = ownershipLine(owners)
   return (
     <Link
       to="/properties/$propertyId/edit"
@@ -84,6 +94,16 @@ export function PropertyCard({ property }: { property: Property }) {
               area: formatArea(property.floorArea),
             })}
           </Typography>
+          {ownership === '' ? null : (
+            <Typography
+              variant="caption"
+              component="span"
+              color="text.secondary"
+              sx={{ fontWeight: 800 }}
+            >
+              {ownership}
+            </Typography>
+          )}
         </Stack>
       </Box>
     </Link>
@@ -154,7 +174,13 @@ function Header(): ReactNode {
   )
 }
 
-export function PropertyList({ properties, email, onSignOut, notices }: Props) {
+export function PropertyList({
+  properties,
+  owners = {},
+  email,
+  onSignOut,
+  notices,
+}: Props) {
   return (
     <Stack sx={{ minHeight: '100dvh' }}>
       <Header />
@@ -180,7 +206,10 @@ export function PropertyList({ properties, email, onSignOut, notices }: Props) {
           >
             {properties.map((property) => (
               <li key={property.id}>
-                <PropertyCard property={property} />
+                <PropertyCard
+                  property={property}
+                  owners={owners[property.id]}
+                />
               </li>
             ))}
           </Stack>

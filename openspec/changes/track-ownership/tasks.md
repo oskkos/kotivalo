@@ -37,10 +37,10 @@
 
 `feat(properties): ask when a flat was bought and show its owners`
 
-- [ ] 5.1 Add the Ownership section with "Owned since" to the new flat form; the edit form doesn't show it
-- [ ] 5.2 Show the ownership line on the flat cards from `currentForUser` ("You 50 % · Jussi 50 %", "Annika 100 % · shared with you")
-- [ ] 5.3 fi, sv and en messages; component tests; Playwright for "The first ownership period" and the modified "Adding a flat" and "Listing flats"
-- [ ] 5.4 Screenshots of the new flat form and the list (fi, 390 × 844) for review before the commit
+- [x] 5.1 Add the Ownership section with "Owned since" to the new flat form; the edit form doesn't show it
+- [x] 5.2 Show the ownership line on the flat cards from `currentForUser` ("You 50 % · Jussi 50 %", "Annika 100 % · shared with you")
+- [x] 5.3 fi, sv and en messages; component tests; Playwright for "The first ownership period" and the modified "Adding a flat" and "Listing flats"
+- [x] 5.4 Screenshots of the new flat form and the list (fi, 390 × 844) for review before the commit
 
 ## 6. Ownership and sharing page
 

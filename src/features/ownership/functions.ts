@@ -61,3 +61,15 @@ export const correctFirstOwnershipDate = createServerFn({ method: 'POST' })
   .handler(async ({ data }) =>
     correct(await ownershipDeps(), data.propertyId, data.date),
   )
+
+/** The current owners of each of the user's flats, for the flat cards. */
+export const listCurrentOwners = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    const deps = await ownershipDeps()
+    const shares = await deps.ownership.currentForUser(deps.userId)
+    return shares.map(({ userId, ...share }) => ({
+      ...share,
+      isYou: userId === deps.userId,
+    }))
+  },
+)

@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 import { addFlat, card, fillInFlat, flatId, kuusikuja } from './support/flats'
-import { signIn, uniqueEmail } from './support/sign-in'
+import { signIn, uniqueEmail, waitForHydration } from './support/sign-in'
 
 // The browser's language is English, so the app is in English.
 
@@ -160,5 +160,36 @@ test.describe('Flats are shown only to users with access', () => {
     ).toBeVisible()
     await expect(other.getByRole('textbox')).toHaveCount(0)
     await other.close()
+  })
+})
+
+test.describe('The first ownership period', () => {
+  test('Adding a flat records its owner from the given date', async ({
+    page,
+  }) => {
+    await signIn(page, uniqueEmail('omistettu'))
+    await page.goto('/properties/new')
+    await waitForHydration(page)
+    await fillInFlat(page, kuusikuja)
+    const ownedSince = page.getByRole('textbox', { name: 'Owned since' })
+    await ownedSince.fill('12/06/2022')
+    await page.getByRole('button', { name: 'Save flat' }).click()
+
+    await expect(page).toHaveURL(/\/$/)
+    await expect(card(page, kuusikuja.streetAddress)).toContainText('You 100%')
+  })
+
+  test('An ownership date in the future is refused', async ({ page }) => {
+    await signIn(page, uniqueEmail('tulevaisuus'))
+    await page.goto('/properties/new')
+    await waitForHydration(page)
+    await fillInFlat(page, kuusikuja)
+    await page.getByRole('textbox', { name: 'Owned since' }).fill('31/12/2999')
+    await page.getByRole('button', { name: 'Save flat' }).click()
+
+    await expect(
+      page.getByText("The date can't be in the future."),
+    ).toBeVisible()
+    await expect(page).toHaveURL('/properties/new')
   })
 })

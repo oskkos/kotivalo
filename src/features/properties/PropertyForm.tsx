@@ -18,9 +18,9 @@ import { m } from '#/paraglide/messages.js'
 import { colors } from '#/theme/tokens'
 import { ROOM_COUNTS } from './property'
 import { roomCountLabel } from './room-count'
-import { propertyDetailsInput, type PropertyDetailsInput } from './schemas'
+import { newPropertyInput, type NewPropertyInput } from './schemas'
 
-export const EMPTY_PROPERTY: PropertyDetailsInput = {
+export const EMPTY_PROPERTY: NewPropertyInput = {
   streetAddress: '',
   postcode: '',
   city: '',
@@ -32,9 +32,10 @@ export type SaveResult = { ok: true } | { ok: false; reason: AlertReason }
 
 interface Props {
   title: string
-  initial: PropertyDetailsInput
+  /** With `ownedSince`, the form asks for it (new flats only). */
+  initial: NewPropertyInput
   /** Gets the details as typed; the server function parses them again. */
-  save: (details: PropertyDetailsInput) => Promise<SaveResult>
+  save: (details: NewPropertyInput) => Promise<SaveResult>
   onSaved: () => void
   onClose: () => void
   /** An icon button at the right of the header, e.g. to Sharing. */
@@ -80,7 +81,8 @@ export function PropertyForm({
   const [alert, setAlert] = useState<AlertReason>()
   const form = useForm({
     defaultValues: initial,
-    validators: { onChange: propertyDetailsInput },
+    // `ownedSince` is optional, so the same schema checks the edit form.
+    validators: { onChange: newPropertyInput },
     onSubmit: async ({ value }) => {
       setAlert(undefined)
       try {
@@ -199,6 +201,23 @@ export function PropertyForm({
             )}
           </form.Field>
         </Section>
+        {initial.ownedSince === undefined ? null : (
+          <Section title={m.property_section_ownership()}>
+            <form.Field name="ownedSince">
+              {(field) => (
+                <TextField
+                  field={field}
+                  label={m.property_owned_since()}
+                  placeholder={m.date_placeholder()}
+                  fullWidth
+                />
+              )}
+            </form.Field>
+            <Typography variant="body2" color="text.secondary">
+              {m.property_owned_since_hint()}
+            </Typography>
+          </Section>
+        )}
         {alert === undefined ? null : <ReasonAlert reason={alert} />}
       </Stack>
       <Box

@@ -112,3 +112,25 @@ describe('PropertyList', () => {
     expect(onSignOut).toHaveBeenCalledOnce()
   })
 })
+
+describe('Listing flats', () => {
+  test('The card shows the owners and their shares', () => {
+    render(
+      <PropertyList
+        properties={[flat('a', 'Kuusikuja 3 B 12')]}
+        owners={{
+          a: [
+            { name: 'Jussi', share: 5000, isYou: false },
+            { name: 'Annika', share: 5000, isYou: true },
+          ],
+        }}
+        email="anna@example.com"
+        onSignOut={vi.fn()}
+      />,
+    )
+
+    expect(screen.getByRole('listitem')).toHaveTextContent(
+      'You 50% · Jussi 50%',
+    )
+  })
+})

@@ -6,6 +6,7 @@ import { getRouter } from './router'
 vi.mock('#/features/authentication/functions', () => ({}))
 vi.mock('#/features/properties/functions', () => ({}))
 vi.mock('#/features/sharing/functions', () => ({}))
+vi.mock('#/features/ownership/functions', () => ({}))
 
 describe('Router', () => {
   test('registers the home and sign-in pages', () => {
