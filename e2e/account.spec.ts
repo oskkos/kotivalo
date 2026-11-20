@@ -34,6 +34,37 @@ test.describe('The account page', () => {
   })
 })
 
+test.describe('Changing the display name', () => {
+  test('Saving a new name', async ({ page }) => {
+    await signIn(page, uniqueEmail('nimi'), 'Annika')
+    await openAccount(page)
+
+    await page.getByRole('button', { name: 'Muuta nimeä' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Muuta nimeä' })
+    await dialog.getByRole('textbox', { name: 'Nimi' }).fill('Anni')
+    await dialog.getByRole('button', { name: 'Tallenna' }).click()
+
+    await expect(dialog).toBeHidden()
+    await expect(page.getByText('Anni', { exact: true })).toBeVisible()
+    await page.reload()
+    await expect(page.getByText('Anni', { exact: true })).toBeVisible()
+  })
+
+  test('An empty new name is not saved', async ({ page }) => {
+    await signIn(page, uniqueEmail('tyhja'), 'Annika')
+    await openAccount(page)
+
+    await page.getByRole('button', { name: 'Muuta nimeä' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Muuta nimeä' })
+    await dialog.getByRole('textbox', { name: 'Nimi' }).fill('   ')
+    await dialog.getByRole('button', { name: 'Tallenna' }).click()
+
+    await expect(dialog.getByText('Kirjoita nimi.')).toBeVisible()
+    await page.reload()
+    await expect(page.getByText('Annika', { exact: true })).toBeVisible()
+  })
+})
+
 test.describe('Choosing the language on the account page', () => {
   test('Switching from Finnish to Swedish', async ({ page, context }) => {
     await signIn(page, uniqueEmail('kieli'))

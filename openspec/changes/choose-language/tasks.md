@@ -29,8 +29,8 @@
 
 `feat(account): change the display name on the account page`
 
-- [ ] 4.1 Write the name dialog with `displayNameInput`, `TextField` and `setDisplayName`; Cancel keeps the old name; `router.invalidate()` after saving; fi, sv and en messages
-- [ ] 4.2 Component tests and Playwright for "Changing the display name"; a screenshot of the dialog with an empty name
+- [x] 4.1 Write the name dialog with `displayNameInput`, `TextField` and `setDisplayName`; Cancel keeps the old name; `router.invalidate()` after saving; fi, sv and en messages
+- [x] 4.2 Component tests and Playwright for "Changing the display name"; a screenshot of the dialog with an empty name
 
 ## 5. Account button on the flats list
 

@@ -227,6 +227,11 @@
   "account_page_title": "Account – Kotivalo",
   "account_title": "Account",
   "account_back": "Back to flats",
+  "account_change_name": "Change name",
   "account_language": "Language",
-  "account_language_help": "The app and emails from Kotivalo are in this language. Your choice is saved at once."
+  "account_language_help": "The app and emails from Kotivalo are in this language. Your choice is saved at once.",
+  "account_name_label": "Name",
+  "account_name_help": "Your name is shown to the people you share flats with.",
+  "account_cancel": "Cancel",
+  "account_save": "Save"
 }

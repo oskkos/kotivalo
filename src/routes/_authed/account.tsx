@@ -27,6 +27,7 @@ function AccountRoute() {
       // The server stored the language and set the cookie, so a reload
       // renders the page in it. Not Paraglide's setLocale(): it reads the
       // already-changed cookie as the current language and skips the reload.
+      onNameSaved={() => router.invalidate()}
       onLanguageChanged={() => {
         window.location.reload()
       }}

@@ -15,6 +15,7 @@ import { locales, type Locale } from '#/paraglide/runtime.js'
 import { colors, radii } from '#/theme/tokens'
 import { AccountAvatar } from './AccountAvatar'
 import { setAccountLanguage } from './functions'
+import { NameDialog } from './NameDialog'
 
 interface Props {
   name: string
@@ -22,6 +23,8 @@ interface Props {
   locale: Locale
   onBack: () => void
   onSignOut: () => void
+  /** Reloads the signed-in user after the name was changed. */
+  onNameSaved: () => Promise<void>
   /** Loads the app again in the new language; it is already stored. */
   onLanguageChanged: (locale: Locale) => void
 }
@@ -142,6 +145,8 @@ function LanguageChoice({
 }
 
 export function AccountPage(props: Props) {
+  const [naming, setNaming] = useState(false)
+
   return (
     <Stack sx={{ minHeight: '100dvh' }}>
       <Box
@@ -194,6 +199,16 @@ export function AccountPage(props: Props) {
               {props.email}
             </Typography>
           </Stack>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={() => {
+              setNaming(true)
+            }}
+            sx={{ flexShrink: 0, bgcolor: 'background.paper' }}
+          >
+            {m.account_change_name()}
+          </Button>
         </Stack>
         <LanguageChoice
           current={props.locale}
@@ -207,6 +222,15 @@ export function AccountPage(props: Props) {
           {m.sign_out()}
         </Button>
       </Stack>
+      {naming ? (
+        <NameDialog
+          name={props.name}
+          onClose={() => {
+            setNaming(false)
+          }}
+          onSaved={props.onNameSaved}
+        />
+      ) : null}
     </Stack>
   )
 }

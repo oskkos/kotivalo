@@ -227,6 +227,11 @@
   "account_page_title": "Konto – Kotivalo",
   "account_title": "Konto",
   "account_back": "Tillbaka till bostäderna",
+  "account_change_name": "Ändra namn",
   "account_language": "Språk",
-  "account_language_help": "Appen och e-post från Kotivalo visas på det här språket. Valet sparas direkt."
+  "account_language_help": "Appen och e-post från Kotivalo visas på det här språket. Valet sparas direkt.",
+  "account_name_label": "Namn",
+  "account_name_help": "Namnet syns för dem du delar bostäder med.",
+  "account_cancel": "Avbryt",
+  "account_save": "Spara"
 }
