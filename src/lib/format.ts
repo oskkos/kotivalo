@@ -38,6 +38,16 @@ export function formatDate(iso: string, locale: Locale = getLocale()) {
   }).format(date)
 }
 
+/**
+ * The day of a point in time, as it was in Finland, e.g. when an invitation
+ * was sent: "20.11.2026" in Finnish.
+ */
+export function formatDay(instant: Date, locale: Locale = getLocale()) {
+  return new Intl.DateTimeFormat(INTL_LOCALES[locale], {
+    timeZone: 'Europe/Helsinki',
+  }).format(instant)
+}
+
 // Plain numbers: ICU formats en-FI numbers the Finnish way ("48,5") but
 // en-FI money the English way ("€1,234.56"), so English uses en-GB here to
 // match the money format's decimal point.
