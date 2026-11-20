@@ -1,5 +1,4 @@
 import { render, screen, within } from '@testing-library/react'
-import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
 import { describe, expect, test, vi } from 'vitest'
 import type { Property } from './property'
@@ -48,8 +47,7 @@ describe('PropertyList', () => {
           flat('a', 'Koivupolku 7 A 4'),
           flat('b', 'Rantatie 15 C 21'),
         ]}
-        email="anna@example.com"
-        onSignOut={vi.fn()}
+        name="Annika"
       />,
     )
 
@@ -70,21 +68,14 @@ describe('PropertyList', () => {
     render(
       <PropertyList
         properties={[flat('a', 'Koivupolku 7 A 4')]}
-        email="anna@example.com"
-        onSignOut={vi.fn()}
+        name="Annika"
       />,
     )
     expect(screen.getByText('1 flat')).toBeInTheDocument()
   })
 
   test('shows the empty state without flats', () => {
-    render(
-      <PropertyList
-        properties={[]}
-        email="anna@example.com"
-        onSignOut={vi.fn()}
-      />,
-    )
+    render(<PropertyList properties={[]} name="Annika" />)
 
     expect(
       screen.getByRole('heading', { name: 'Add your first flat' }),
@@ -95,21 +86,13 @@ describe('PropertyList', () => {
     }
   })
 
-  test('shows who is signed in and signs out', async () => {
-    const onSignOut = vi.fn()
-    render(
-      <PropertyList
-        properties={[]}
-        email="anna@example.com"
-        onSignOut={onSignOut}
-      />,
-    )
+  test("the header opens the account page with the name's initial", () => {
+    render(<PropertyList properties={[]} name="Annika" />)
 
-    expect(
-      screen.getByText('Signed in as anna@example.com'),
-    ).toBeInTheDocument()
-    await userEvent.click(screen.getByRole('button', { name: 'Sign out' }))
-    expect(onSignOut).toHaveBeenCalledOnce()
+    const account = screen.getByRole('link', { name: 'Account' })
+    expect(account).toHaveAttribute('href', '/account')
+    expect(account).toHaveTextContent('A')
+    expect(screen.queryByRole('button', { name: 'Sign out' })).toBeNull()
   })
 })
 
@@ -124,8 +107,7 @@ describe('Listing flats', () => {
             { name: 'Annika', share: 5000, isYou: true },
           ],
         }}
-        email="anna@example.com"
-        onSignOut={vi.fn()}
+        name="Annika"
       />,
     )
 

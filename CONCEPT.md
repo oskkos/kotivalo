@@ -181,7 +181,7 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 - [ ] Bank connection and the Kotivalo Plus subscription are suggestions, not decisions. Pricing is open.
 - [ ] Swedish and English translations: who translates, and a glossary for tax terms. Swedish tax terms should come from the Tax Administration's Swedish-language guidance and forms.
 - [x] ~~Confirm `en-FI` locale support in browsers and on Workers.~~ Supported in Node, workerd and Chromium. English uses the `en-FI` format (`€1,234.56`, `05/03/2026`), not Finnish style.
-- [ ] Language selection has no screen. The language is stored per user, but the Account sketch has no language setting.
+- [x] ~~Language selection has no screen.~~ A light Account page (`/account`: name, email, language, sign out) chooses the language, and a language chosen on the sign-in page also updates an existing account (#27, Design canvas row "Tili ja kieli"). The rest of the Account sketch comes later.
 - [ ] Loans have no input screen. The year summary shows loan interest and the data model has `loans`, `loan_borrowers` and `loan_payments`, but no sketch collects them.
 - [ ] How a joint loan's deductible interest is split between borrowers: by debt shares, by who actually paid, or equally by default. Check against Vero.fi guidance before the loans proposal. If the rule is "by who paid", the split moves from `loan_borrowers` to each payment.
 - [ ] Logging the deposit return later has no screen. End tenancy says to log it after the final inspection, but nothing shows where.
