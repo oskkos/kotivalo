@@ -8,6 +8,7 @@ import {
   primaryKey,
   sqliteTable,
   text,
+  unique,
 } from 'drizzle-orm/sqlite-core'
 import { id, instant, tenths } from './columns'
 
@@ -111,8 +112,12 @@ export const properties = sqliteTable('properties', {
   updatedAt: instant('updated_at').notNull(),
 })
 
-/** Roles a user can have on a flat. Invitations (#29) add more. */
-export const PROPERTY_ROLES = ['owner'] as const
+/**
+ * Roles a user can have on a flat (openspec: sharing): the `owner` added it
+ * and manages who has access; a `member` accepted an invitation and can see
+ * and edit the flat.
+ */
+export const PROPERTY_ROLES = ['owner', 'member'] as const
 export type PropertyRole = (typeof PROPERTY_ROLES)[number]
 
 export const propertyAccess = sqliteTable(
@@ -130,5 +135,31 @@ export const propertyAccess = sqliteTable(
   (t) => [
     primaryKey({ columns: [t.propertyId, t.userId] }),
     index('property_access_user_id_idx').on(t.userId),
+  ],
+)
+
+/**
+ * Pending invitations to a flat, by email address: the invitee may have no
+ * account yet. Accepting turns one into a property_access row; accepted,
+ * declined and cancelled invitations are deleted (openspec: sharing).
+ */
+export const propertyInvitations = sqliteTable(
+  'property_invitations',
+  {
+    id: id(),
+    propertyId: text('property_id')
+      .notNull()
+      .references(() => properties.id, { onDelete: 'cascade' }),
+    /** Lower-cased, as accounts store it. */
+    email: text('email').notNull(),
+    invitedBy: text('invited_by')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    createdAt: instant('created_at').notNull(),
+    expiresAt: instant('expires_at').notNull(),
+  },
+  (t) => [
+    unique('property_invitations_property_email').on(t.propertyId, t.email),
+    index('property_invitations_email_idx').on(t.email),
   ],
 )

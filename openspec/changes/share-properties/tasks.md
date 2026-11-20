@@ -13,9 +13,9 @@
 
 `feat(sharing): add the property_invitations table and sharing repository`
 
-- [ ] 2.1 Add `property_invitations` (design decision 1) and the `member` role to `src/server/db/schema.ts`; run `pnpm db:generate`, review and commit the migration; a Workers test checks the unique key and the cascades from `properties` and `user`
-- [ ] 2.2 Write `features/sharing/sharing.repository.server.ts` (design decision 3)
-- [ ] 2.3 Workers tests:
+- [x] 2.1 Add `property_invitations` (design decision 1) and the `member` role to `src/server/db/schema.ts`; run `pnpm db:generate`, review and commit the migration; a Workers test checks the unique key and the cascades from `properties` and `user`
+- [x] 2.2 Write `features/sharing/sharing.repository.server.ts` (design decision 3)
+- [x] 2.3 Workers tests:
   - `accept` gives `member` access and deletes the invitation, and does nothing for another address or an expired invitation (30 days + 1 s)
   - `invite` replaces an expired invitation for the same address
   - `removeMember` and `leave` never touch the owner's row
