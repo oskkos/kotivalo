@@ -135,15 +135,9 @@
   "invitation_email_validity": "The invitation is valid for {days} days.",
   "invitation_email_ignore": "If you don't know the sender, you can ignore this email. The flat isn't shown to you unless you accept the invitation.",
   "invitation_email_action": "Open Kotivalo",
-  "sharing_page_title": "Sharing – Kotivalo",
-  "sharing_title": "Sharing",
   "sharing_back": "Back to the flat",
-  "sharing_people": "Access to the flat",
   "sharing_you": "You",
-  "sharing_role_owner": "Owner",
   "sharing_member_since": "Member since {date}",
-  "sharing_owner_note": "A member sees the flat and can edit its details. Only the owner can invite people and remove access.",
-  "sharing_member_note": "Only the owner can invite people and remove access.",
   "sharing_remove": "Remove",
   "sharing_remove_label": "Remove {name} from the flat",
   "sharing_pending": "Waiting for a reply",
@@ -226,5 +220,7 @@
   "ownership_correct_title": "Correct the ownership start date",
   "ownership_correct_hint": "The date must be before the next ownership change ({date}).",
   "ownership_correct_save": "Save",
-  "ownership_dialog_cancel": "Cancel"
+  "ownership_dialog_cancel": "Cancel",
+  "ownership_page_title": "Ownership and sharing – Kotivalo",
+  "ownership_title": "Ownership and sharing"
 }

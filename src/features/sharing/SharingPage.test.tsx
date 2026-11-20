@@ -7,12 +7,14 @@ import {
   leaveProperty,
   removeAccess,
 } from './functions'
+import type { OwnershipView } from '#/features/ownership/ownership.server'
 import type { SharingView } from './sharing.server'
 import { SharingPage } from './SharingPage'
 
 // The server functions are replaced: these tests drive the page's states.
 // jsdom's browser language is English, so the page is in English.
 vi.mock('#/lib/client-log', () => ({ clientLog: { error: vi.fn() } }))
+vi.mock('#/features/ownership/functions', () => ({}))
 vi.mock('./functions', () => ({
   cancelInvitation: vi.fn(),
   inviteToProperty: vi.fn(),
@@ -57,6 +59,26 @@ const memberView: SharingView = {
   people: ownerView.people.map((p) => ({ ...p, isYou: p.userId === 'jussi' })),
 }
 
+const ownership = (view: SharingView): OwnershipView => ({
+  you: view.people.find((p) => p.isYou)?.userId ?? '',
+  role: view.role,
+  people: view.people.map((p) => ({
+    userId: p.userId,
+    name: p.name,
+    role: p.role,
+    since: p.since,
+  })),
+  periods: [
+    {
+      validFrom: '2025-03-01',
+      validTo: null,
+      reason: null,
+      shares: [{ userId: 'anna', share: 10000 }],
+    },
+  ],
+  names: { anna: 'Annika' },
+})
+
 function setup(view: SharingView) {
   const user = userEvent.setup()
   const onChanged = vi.fn(() => Promise.resolve())
@@ -64,6 +86,7 @@ function setup(view: SharingView) {
   render(
     <SharingPage
       view={view}
+      ownership={ownership(view)}
       onChanged={onChanged}
       onLeft={onLeft}
       onBack={vi.fn()}
@@ -87,13 +110,19 @@ describe('Sharing page as the owner', () => {
   test('lists people with roles and the pending invitation', () => {
     setup(ownerView)
 
-    const people = screen.getByRole('heading', { name: 'Access to the flat' })
+    const owners = screen.getByRole('heading', { name: 'Current owners' })
       .nextElementSibling as HTMLElement
-    const rows = within(people).getAllByRole('listitem')
-    expect(rows[0]).toHaveTextContent('You')
-    expect(rows[0]).toHaveTextContent('Owner')
-    expect(rows[1]).toHaveTextContent('Jussi')
-    expect(rows[1]).toHaveTextContent('Member since 12/11/2026')
+    expect(within(owners).getByRole('listitem')).toHaveTextContent(
+      'YouOwner since 01/03/2025100%',
+    )
+    const others = screen.getByRole('heading', { name: 'Others with access' })
+      .nextElementSibling as HTMLElement
+    const member = within(others).getByRole('listitem')
+    expect(member).toHaveTextContent('Jussi')
+    expect(member).toHaveTextContent('Member since 12/11/2026')
+    expect(
+      screen.getByRole('button', { name: 'Change ownership' }),
+    ).toBeInTheDocument()
     expect(screen.getByText('liisa@example.com')).toBeInTheDocument()
     expect(
       screen.getByText('Invited 18/11/2026 · valid until 18/12/2026'),
@@ -222,10 +251,14 @@ describe('Sharing page as a member', () => {
       screen.queryByRole('textbox', { name: 'Email' }),
     ).not.toBeInTheDocument()
     expect(
-      screen.queryByRole('button', { name: /^Remove|^Cancel/ }),
+      screen.queryByRole('button', {
+        name: /^Remove|^Cancel|^Change ownership/,
+      }),
     ).not.toBeInTheDocument()
     expect(
-      screen.getByText('Only the owner can invite people and remove access.'),
+      screen.getByText(
+        'Only owners can invite people, remove access and change the ownership.',
+      ),
     ).toBeInTheDocument()
   })
 

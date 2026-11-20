@@ -1,36 +1,23 @@
-import { expect, test, type Browser, type Page } from '@playwright/test'
-import { addFlat, card, flatId, kuusikuja } from './support/flats'
+import { expect, test } from '@playwright/test'
+import { card, kuusikuja } from './support/flats'
+import {
+  accepted,
+  invitationCard,
+  invite,
+  invited,
+  openSharing,
+  ownerWithFlat,
+  pending,
+} from './support/sharing'
 import { inbox, signIn, uniqueEmail, waitForHydration } from './support/sign-in'
 
 // The browser's language is English, so the app is in English.
-
-/** Signs in as a new owner named Annika and adds Kuusikuja; returns its id. */
-async function ownerWithFlat(page: Page): Promise<string> {
-  await signIn(page, uniqueEmail('omistaja'), 'Annika')
-  await addFlat(page, kuusikuja)
-  return flatId(page, kuusikuja.streetAddress)
-}
-
-async function openSharing(page: Page, id: string) {
-  await page.goto(`/properties/${id}/sharing`)
-  await waitForHydration(page)
-}
-
-async function invite(page: Page, email: string) {
-  await page.getByRole('textbox', { name: 'Email' }).fill(email)
-  await page.getByRole('button', { name: 'Send invitation' }).click()
-}
-
-const pending = (page: Page) =>
-  page
-    .getByRole('heading', { name: 'Waiting for a reply' })
-    .locator('xpath=following-sibling::*[1]')
 
 test.describe('Inviting a user to a flat', () => {
   test('Inviting an address sends an invitation', async ({ page }) => {
     const id = await ownerWithFlat(page)
     await page.goto(`/properties/${id}/edit`)
-    await page.getByRole('link', { name: 'Sharing' }).click()
+    await page.getByRole('link', { name: 'Ownership and sharing' }).click()
     await expect(page).toHaveURL(`/properties/${id}/sharing`)
     await waitForHydration(page)
 
@@ -94,14 +81,15 @@ test.describe('Listing who has access to a flat', () => {
 
     await openSharing(jussi, id)
 
-    const people = jussi
-      .getByRole('heading', { name: 'Access to the flat' })
-      .locator('xpath=following-sibling::*[1]')
-      .getByRole('listitem')
-    await expect(people.nth(0)).toContainText('Annika')
-    await expect(people.nth(0)).toContainText('Owner')
-    await expect(people.nth(1)).toContainText('You')
-    await expect(people.nth(1)).toContainText('Member since')
+    const list = (heading: string) =>
+      jussi
+        .getByRole('heading', { name: heading })
+        .locator('xpath=following-sibling::*[1]')
+        .getByRole('listitem')
+    await expect(list('Current owners')).toContainText('Annika')
+    await expect(list('Current owners')).toContainText('Owner since')
+    await expect(list('Others with access')).toContainText('You')
+    await expect(list('Others with access')).toContainText('Member since')
     await expect(pending(jussi)).toContainText(liisa)
     await expect(jussi.getByRole('textbox', { name: 'Email' })).toHaveCount(0)
     await jussi.close()
@@ -123,34 +111,6 @@ test.describe('Listing who has access to a flat', () => {
     await other.close()
   })
 })
-
-/**
- * Annika invites a new user, who signs in as Jussi in their own browser.
- * Returns the flat's id and Jussi's page, on `/` with the invitation.
- */
-async function invited(page: Page, browser: Browser) {
-  const id = await ownerWithFlat(page)
-  await openSharing(page, id)
-  const email = uniqueEmail('jussi')
-  await invite(page, email)
-  await expect(pending(page)).toContainText(email)
-
-  const jussi = await browser.newPage()
-  await signIn(jussi, email, 'Jussi')
-  await waitForHydration(jussi)
-  return { id, jussi }
-}
-
-const invitationCard = (page: Page) =>
-  page.getByRole('list', { name: 'Invitations' }).getByRole('listitem')
-
-/** Jussi accepts, and the flat is on his list. */
-async function accepted(page: Page, browser: Browser) {
-  const { id, jussi } = await invited(page, browser)
-  await invitationCard(jussi).getByRole('button', { name: 'Accept' }).click()
-  await expect(card(jussi, kuusikuja.streetAddress)).toBeVisible()
-  return { id, jussi }
-}
 
 test.describe('Accepting a flat invitation', () => {
   test('Accepting an invitation shows the flat in the list', async ({
