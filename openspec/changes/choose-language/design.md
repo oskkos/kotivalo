@@ -42,7 +42,7 @@ The account page is a place users go, not part of signing in. It gets its own sp
 4. sets the `kotivalo_locale` cookie
 5. logs `authentication.locale_changed` with `{ locale, source: 'account' }`
 
-The client then calls Paraglide's `setLocale(locale)`, which writes the same cookie and reloads. The server renders the next page in the new language, including MUI's own texts (`themeFor(getLocale())`).
+The client then reloads the page (`window.location.reload()`). Paraglide's `setLocale()` would not: it reads the already-changed cookie as the current language and skips the reload. The server renders the next page in the new language, including MUI's own texts (`themeFor(getLocale())`).
 
 *Alternative:* switch the language in the browser without a reload. Rejected: the theme locale, the `<html lang>` and every loader's data are resolved on the server. A partial switch would mix languages until the next navigation.
 

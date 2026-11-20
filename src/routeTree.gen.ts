@@ -13,6 +13,7 @@ import { Route as AuthedRouteImport } from './routes/_authed'
 import { Route as OfflineRouteImport } from './routes/offline'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as AuthedIndexRouteImport } from './routes/_authed/index'
+import { Route as AuthedAccountRouteImport } from './routes/_authed/account'
 import { Route as AuthedWelcomeRouteImport } from './routes/_authed/welcome'
 import { Route as ApiLogRouteImport } from './routes/api/log'
 import { Route as AuthedPropertiesNewRouteImport } from './routes/_authed/properties/new'
@@ -37,6 +38,11 @@ const SignInRoute = SignInRouteImport.update({
 const AuthedIndexRoute = AuthedIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedAccountRoute = AuthedAccountRouteImport.update({
+  id: '/account',
+  path: '/account',
   getParentRoute: () => AuthedRoute,
 } as any)
 const AuthedWelcomeRoute = AuthedWelcomeRouteImport.update({
@@ -76,6 +82,7 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
   '/offline': typeof OfflineRoute
   '/sign-in': typeof SignInRoute
+  '/account': typeof AuthedAccountRoute
   '/welcome': typeof AuthedWelcomeRoute
   '/api/log': typeof ApiLogRoute
   '/properties/new': typeof AuthedPropertiesNewRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/offline': typeof OfflineRoute
   '/sign-in': typeof SignInRoute
+  '/account': typeof AuthedAccountRoute
   '/welcome': typeof AuthedWelcomeRoute
   '/api/log': typeof ApiLogRoute
   '/': typeof AuthedIndexRoute
@@ -99,6 +107,7 @@ export interface FileRoutesById {
   '/_authed': typeof AuthedRouteWithChildren
   '/offline': typeof OfflineRoute
   '/sign-in': typeof SignInRoute
+  '/_authed/account': typeof AuthedAccountRoute
   '/_authed/welcome': typeof AuthedWelcomeRoute
   '/api/log': typeof ApiLogRoute
   '/_authed/': typeof AuthedIndexRoute
@@ -113,6 +122,7 @@ export interface FileRouteTypes {
     | '/'
     | '/offline'
     | '/sign-in'
+    | '/account'
     | '/welcome'
     | '/api/log'
     | '/properties/new'
@@ -123,6 +133,7 @@ export interface FileRouteTypes {
   to:
     | '/offline'
     | '/sign-in'
+    | '/account'
     | '/welcome'
     | '/api/log'
     | '/'
@@ -135,6 +146,7 @@ export interface FileRouteTypes {
     | '/_authed'
     | '/offline'
     | '/sign-in'
+    | '/_authed/account'
     | '/_authed/welcome'
     | '/api/log'
     | '/_authed/'
@@ -180,6 +192,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof AuthedIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/account': {
+      id: '/_authed/account'
+      path: '/account'
+      fullPath: '/account'
+      preLoaderRoute: typeof AuthedAccountRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/_authed/welcome': {
@@ -228,6 +247,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthedRouteChildren {
+  AuthedAccountRoute: typeof AuthedAccountRoute
   AuthedWelcomeRoute: typeof AuthedWelcomeRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
   AuthedPropertiesNewRoute: typeof AuthedPropertiesNewRoute
@@ -236,6 +256,7 @@ interface AuthedRouteChildren {
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
+  AuthedAccountRoute: AuthedAccountRoute,
   AuthedWelcomeRoute: AuthedWelcomeRoute,
   AuthedIndexRoute: AuthedIndexRoute,
   AuthedPropertiesNewRoute: AuthedPropertiesNewRoute,

@@ -223,5 +223,10 @@
   "ownership_dialog_cancel": "Avbryt",
   "ownership_page_title": "Ägande och delning – Kotivalo",
   "ownership_title": "Ägande och delning",
-  "ownership_preview_correction": "Datumet är den nuvarande periodens startdatum, så detta rättar dess fördelning och ingen ny period skapas."
+  "ownership_preview_correction": "Datumet är den nuvarande periodens startdatum, så detta rättar dess fördelning och ingen ny period skapas.",
+  "account_page_title": "Konto – Kotivalo",
+  "account_title": "Konto",
+  "account_back": "Tillbaka till bostäderna",
+  "account_language": "Språk",
+  "account_language_help": "Appen och e-post från Kotivalo visas på det här språket. Valet sparas direkt."
 }
