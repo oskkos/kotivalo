@@ -96,6 +96,9 @@ Each flat stores whether the housing company recognises the financing charge (ra
 - Figures are calculated per person, using ownership shares and validity periods.
 - The form 7H breakdown is made flat by flat.
 - Loan interest is reported as its own item.
+- **Loans** belong to a flat and have one or more borrowers: an owner's own loan, or a joint loan such as one taken by the co-owners of a 50/50 flat. Each borrower has a debt share (basis points, a validity period), which is not assumed to equal their ownership share.
+- Each year's loan payment records **interest** and **principal** separately. Interest is deductible and goes into the year summary; principal is not deductible and stays out of the form 7H figures (cash flow and statistics only).
+- How a joint loan's interest is split between borrowers for tax is open (see §6).
 - The capital income tax estimate uses 30 % and is clearly labelled as an estimate.
 
 ## 5. Technical choices
@@ -157,7 +160,9 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 | `transactions`                               | property_id, type (income / expense), category, amount, date, note, receipt, recurrence                |
 | `receipts`                                   | id, transaction_id, R2 key, mime, size                                                                 |
 | `attachments`                                | id, tenancy_id, R2 key, type (e.g. tenancy contract), mime, size                                       |
-| `loan_interest`                              | property_id, user_id, year, amount                                                                     |
+| `loans`                                      | property_id, name                                                                                      |
+| `loan_borrowers`                             | loan_id, user_id, share (debt share, adding up to 10000), valid_from, valid_to                         |
+| `loan_payments`                              | loan_id, year, interest, principal                                                                     |
 
 ## 6. Open questions
 
@@ -177,7 +182,8 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 - [ ] Swedish and English translations: who translates, and a glossary for tax terms. Swedish tax terms should come from the Tax Administration's Swedish-language guidance and forms.
 - [x] ~~Confirm `en-FI` locale support in browsers and on Workers.~~ Supported in Node, workerd and Chromium. English uses the `en-FI` format (`€1,234.56`, `05/03/2026`), not Finnish style.
 - [ ] Language selection has no screen. The language is stored per user, but the Account sketch has no language setting.
-- [ ] Loan interest has no input screen. The year summary shows it and the data model has `loan_interest`, but no sketch collects it.
+- [ ] Loans have no input screen. The year summary shows loan interest and the data model has `loans`, `loan_borrowers` and `loan_payments`, but no sketch collects them.
+- [ ] How a joint loan's deductible interest is split between borrowers: by debt shares, by who actually paid, or equally by default. Check against Vero.fi guidance before the loans proposal. If the rule is "by who paid", the split moves from `loan_borrowers` to each payment.
 - [ ] Logging the deposit return later has no screen. End tenancy says to log it after the final inspection, but nothing shows where.
 - [x] ~~Missing screens: accepting a flat invitation, and the first-run empty state with no flats.~~ Both are on the Design canvas ("Jakaminen ja kutsut") and built; so are the sign-in screens. A passkey option comes with its own issue.
 - [ ] The former owner's read-only view of their ownership period is not sketched.
