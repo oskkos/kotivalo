@@ -208,7 +208,8 @@ Code, database and test names use these English terms. The English UI copy may u
 | kirjaus (tulo / meno)     | `transaction` (`income` / `expense`) | Not to be confused with a database transaction                                                         |
 | kuitti                    | `receipt`                            |                                                                                                        |
 | liite                     | `attachment`                         | E.g. a tenancy contract                                                                                |
-| lainan korot              | `loanInterest`                       | Per owner and year                                                                                     |
+| laina, lainanottaja       | `loan`, `borrower`                   | Per property; borrowers have a debt `share` (basis points, a validity period)                          |
+| lainanmaksu               | `loanPayment`                        | Per loan and year: `interest` (deductible), `principal` (not deductible)                               |
 | hankintameno              | `acquisitionCost`                    | Capitalised financing charges add to it                                                                |
 | vuosiyhteenveto           | `yearSummary`                        | Computed, never stored                                                                                 |
 | voimassaolojakso          | validity period                      | `validFrom` / `validTo`, columns `valid_from` / `valid_to`                                             |
