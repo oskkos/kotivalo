@@ -7,6 +7,7 @@ describe('signInCodeEmail', () => {
       to: 'uusi@example.com',
       code: '482913',
       locale: 'fi',
+      appUrl: 'https://kotivalo.example',
     })
     expect(email.to).toBe('uusi@example.com')
     expect(email.subject).toBe('482913 on Kotivalo-kirjautumiskoodisi')
@@ -31,6 +32,7 @@ describe('signInCodeEmail', () => {
       to: 'a@example.com',
       code: '482913',
       locale,
+      appUrl: 'https://kotivalo.example',
     })
     expect(email.subject).toBe(subject)
     expect(email.text).toContain(validity)

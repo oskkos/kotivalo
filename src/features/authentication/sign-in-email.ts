@@ -13,11 +13,14 @@ export function signInCodeEmail(options: {
   to: string
   code: string
   locale: Locale
+  /** The app's origin, for the logo. */
+  appUrl: string
 }): EmailMessage {
-  const { to, code, locale } = options
+  const { to, code, locale, appUrl } = options
   return renderEmail({
     to,
     locale,
+    appUrl,
     subject: m.sign_in_email_subject({ code }, { locale }),
     heading: m.sign_in_email_heading({}, { locale }),
     paragraphs: [

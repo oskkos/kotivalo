@@ -2,7 +2,7 @@
 // signed-in layout. The logic is in sign-in.server.ts; these validate the
 // input with the shared schemas and wire in the request context.
 import { createServerFn } from '@tanstack/react-start'
-import { setCookie } from '@tanstack/react-start/server'
+import { getRequest, setCookie } from '@tanstack/react-start/server'
 import {
   cookieMaxAge,
   cookieName,
@@ -25,6 +25,7 @@ function signInDeps(): SignInDeps {
     consumeLimit: (key, rule) => consumeLimit(context.db, key, rule),
     clientIp: context.clientIp(),
     requestLocale: getLocale(),
+    appUrl: new URL(getRequest().url).origin,
   }
 }
 

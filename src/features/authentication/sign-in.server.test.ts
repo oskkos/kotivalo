@@ -42,6 +42,7 @@ function deps(
     consumeLimit: (key, rule) => consumeLimit(db, key, rule, now),
     clientIp: '203.0.113.1',
     requestLocale: 'fi',
+    appUrl: 'https://kotivalo.example',
     ...overrides,
   }
 }

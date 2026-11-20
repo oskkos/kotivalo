@@ -18,6 +18,8 @@ export interface SignInDeps {
   clientIp: string
   /** The language the request resolved to: for new accounts and their email. */
   requestLocale: Locale
+  /** The app's origin, for the logo in the email. */
+  appUrl: string
 }
 
 /** Each code request sends an email; Resend's free plan allows 100 a day. */
@@ -70,7 +72,9 @@ export async function requestCode(
   const code = await deps.auth.createSignInCode(email)
   const locale = (await deps.auth.findLocale(email)) ?? deps.requestLocale
   try {
-    await deps.sendEmail(signInCodeEmail({ to: email, code, locale }))
+    await deps.sendEmail(
+      signInCodeEmail({ to: email, code, locale, appUrl: deps.appUrl }),
+    )
   } catch (error) {
     if (error instanceof EmailError) {
       deps.log.error(
