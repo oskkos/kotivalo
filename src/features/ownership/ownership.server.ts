@@ -49,6 +49,8 @@ const changedMeanwhile = {
 } as const satisfies Failure
 
 export interface OwnershipView extends OwnershipHistory {
+  /** The signed-in user's id, to show them as "You". */
+  you: string
   role: PropertyRole
   /** Everyone with access now, who can be in a new split. */
   people: Person[]
@@ -78,7 +80,7 @@ export async function getOwnership(
     deps.ownership.history(propertyId),
     deps.sharing.listPeople(propertyId),
   ])
-  return { ok: true, role, people, ...history }
+  return { ok: true, you: deps.userId, role, people, ...history }
 }
 
 export interface OwnershipChange {

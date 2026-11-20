@@ -5,6 +5,7 @@ import {
   formatDate,
   formatDay,
   formatMoney,
+  formatPercentNumber,
   formatShare,
 } from './format'
 
@@ -83,5 +84,16 @@ describe('formatShare', () => {
     ['en', 3333, '33.33%'],
   ] as const)('%s: %i basis points is %s', (locale, bp, expected) => {
     expect(formatShare(bp, locale)).toBe(expected)
+  })
+})
+
+describe('formatPercentNumber', () => {
+  test.each([
+    ['fi', 5000, '50'],
+    ['fi', 3333, '33,33'],
+    ['en', 3334, '33.34'],
+    ['sv', 1250, '12,5'],
+  ] as const)('%s: %i basis points is %s', (locale, bp, expected) => {
+    expect(formatPercentNumber(bp, locale)).toBe(expected)
   })
 })
