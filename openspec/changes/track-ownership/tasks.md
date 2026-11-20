@@ -2,8 +2,8 @@
 
 `feat(db): add the ownership_periods table`
 
-- [ ] 1.1 Add `ownership_periods` to `src/server/db/schema.ts` (design decision 1); run `pnpm db:generate`, name the migration `0003_ownership_periods.sql`, and add the backfill of one 100 % period per existing `owner` access from the flat's creation date
-- [ ] 1.2 Workers tests: the cascades from `properties` and `user`, and the backfill on a database with flats created before the migration
+- [x] 1.1 Add `ownership_periods` to `src/server/db/schema.ts` (design decision 1); run `pnpm db:generate`, name the migration `0003_ownership_periods.sql`, and add the backfill of one 100 % period per existing `owner` access from the flat's creation date
+- [x] 1.2 Workers tests: the cascades from `properties` and `user`, and the backfill on a database with flats created before the migration
 
 ## 2. Period rules
 

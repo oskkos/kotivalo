@@ -10,7 +10,7 @@ import {
   text,
   unique,
 } from 'drizzle-orm/sqlite-core'
-import { id, instant, tenths } from './columns'
+import { basisPoints, id, instant, tenths, validity } from './columns'
 
 // Authentication (openspec: authentication). Better Auth's models: the
 // property names are Better Auth's field names, so its Drizzle adapter maps
@@ -161,5 +161,42 @@ export const propertyInvitations = sqliteTable(
   (t) => [
     unique('property_invitations_property_email').on(t.propertyId, t.email),
     index('property_invitations_email_idx').on(t.email),
+  ],
+)
+
+/** Why ownership changed; the first period has none. */
+export const OWNERSHIP_REASONS = [
+  'sale',
+  'gift',
+  'inheritance',
+  'division',
+  'other',
+] as const
+export type OwnershipReason = (typeof OWNERSHIP_REASONS)[number]
+
+/**
+ * Who owns how much of a flat, from when (openspec: ownership). One row per
+ * owner and period; a period is the rows with the same `valid_from`. A
+ * change closes the open rows and adds the new split, so rows are never
+ * overwritten. A 0 % share has no row: that person is a member.
+ */
+export const ownershipPeriods = sqliteTable(
+  'ownership_periods',
+  {
+    id: id(),
+    propertyId: text('property_id')
+      .notNull()
+      .references(() => properties.id, { onDelete: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => user.id, { onDelete: 'cascade' }),
+    /** Basis points: 5000 = 50 %. A period's shares add up to 10000. */
+    share: basisPoints('share').notNull(),
+    ...validity(),
+    /** Null for the first period, which records how the flat was acquired. */
+    reason: text('reason', { enum: OWNERSHIP_REASONS }),
+  },
+  (t) => [
+    index('ownership_periods_property_idx').on(t.propertyId, t.validFrom),
   ],
 )
