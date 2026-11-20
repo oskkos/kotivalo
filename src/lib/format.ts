@@ -87,3 +87,17 @@ export function formatShare(basisPoints: number, locale: Locale = getLocale()) {
     maximumFractionDigits: 2,
   }).format(basisPoints / 10000)
 }
+
+/**
+ * A share as a number to edit in percent, without the sign: 3333 → "33,33"
+ * in Finnish and "33.33" in English, as parsePercent() reads it back.
+ */
+export function formatPercentNumber(
+  basisPoints: number,
+  locale: Locale = getLocale(),
+) {
+  return new Intl.NumberFormat(NUMBER_LOCALES[locale], {
+    maximumFractionDigits: 2,
+    useGrouping: false,
+  }).format(basisPoints / 100)
+}
