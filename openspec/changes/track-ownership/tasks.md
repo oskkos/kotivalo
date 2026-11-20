@@ -51,8 +51,16 @@
 - [x] 6.3 Screenshots of the page as an owner (form open, history) and as a member (fi, 390 × 844) for review before the commit
 - [x] 6.4 Update CLAUDE.md (current state, glossary) and CONCEPT.md (data model, the free-list open question); `pnpm check:traceability` and the full test suite pass
 
-## 7. Archive
+## 7. Correcting the current split
+
+`feat(ownership): correct the current split with a change on its start date`
+
+- [x] 7.1 Accept a change dated on the current period's start in `validateChangeDate`, and replace the current rows in `ownershipRepository.change` (design decision 7), with unit and Workers tests, the log line's `corrected: true`
+- [x] 7.2 Say in the change form's preview that the current split is corrected; fi, sv and en messages; component test
+- [x] 7.3 Playwright for "A change on the current period's start corrects its split"
+
+## 8. Archive
 
 `docs(openspec): archive track-ownership`
 
-- [ ] 7.1 `openspec archive track-ownership`, fill in the new spec's Purpose, check the merged specs and `pnpm check:traceability`
+- [ ] 8.1 `openspec archive track-ownership`, fill in the new spec's Purpose, check the merged specs and `pnpm check:traceability`

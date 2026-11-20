@@ -296,6 +296,7 @@ export function SharingPage({
             }}
             you={ownership.you}
             current={ownership.periods.at(0)?.shares ?? []}
+            currentStart={ownership.periods.at(0)?.validFrom ?? ''}
             onSaved={async () => {
               await onChanged()
               setChanging(false)

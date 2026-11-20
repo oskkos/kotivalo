@@ -37,6 +37,25 @@ test.describe("Changing a flat's ownership", () => {
     await jussi.close()
   })
 
+  test("A change on the current period's start corrects its split", async ({
+    page,
+    browser,
+  }) => {
+    const { id, jussi } = await accepted(page, browser)
+    await openSharing(page, id)
+
+    await page.getByRole('button', { name: 'Change ownership' }).click()
+    await page.getByRole('button', { name: 'Equal shares' }).click()
+    // The flat was added as owned since 12 June 2022.
+    await page.getByRole('textbox', { name: 'From' }).fill('12/06/2022')
+    await page.getByRole('button', { name: 'Save ownership change' }).click()
+
+    await expect(history(page).nth(0)).toContainText('You 50% · Jussi 50%')
+    await expect(history(page)).toHaveCount(1)
+    await expect(history(page).nth(0)).toContainText('From 12/06/2022')
+    await jussi.close()
+  })
+
   test("A split that doesn't add up is refused", async ({ page, browser }) => {
     const { id, jussi } = await accepted(page, browser)
     await openSharing(page, id)

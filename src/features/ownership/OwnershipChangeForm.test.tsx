@@ -25,6 +25,7 @@ function setup() {
       names={names}
       you="annika"
       current={[{ userId: 'annika', share: 10000 }]}
+      currentStart="2022-06-12"
       onSaved={onSaved}
       onCancel={vi.fn()}
     />,
@@ -77,6 +78,19 @@ describe('Ownership change form', () => {
     expect(onSaved).toHaveBeenCalled()
   })
 
+  test("says that a change on the current period's start corrects it", async () => {
+    const { user } = setup()
+
+    await user.click(screen.getByRole('button', { name: 'Equal shares' }))
+    await user.type(screen.getByRole('textbox', { name: 'From' }), '12/06/2022')
+
+    expect(
+      screen.getByText(
+        "The date is the current period's start, so this corrects its split; no new period is added.",
+      ),
+    ).toBeInTheDocument()
+  })
+
   test('shows the live total when the shares do not add up', async () => {
     const { user, share } = setup()
 
@@ -116,7 +130,7 @@ describe('Ownership change form', () => {
 
     expect(
       await screen.findByText(
-        'The change must start after the current ownership period started.',
+        "The change can start on the current ownership period's start date at the earliest.",
       ),
     ).toBeInTheDocument()
     expect(onSaved).not.toHaveBeenCalled()
