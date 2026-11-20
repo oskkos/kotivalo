@@ -127,7 +127,7 @@ The Design canvas row "Omistus ja omistusmuutokset" has every screen below, with
 
 - One migration creates `ownership_periods` and backfills a 100 % period for each existing owner from the flat's creation date.
 - The old version ignores the table.
-- A flat added by the old version between the migration and the deploy would have no period. Every read treats "no period" as "the `owner` access holds 100 % since creation" until its first change. That keeps the deploy safe without a second backfill.
+- A flat added by the old version between the migration and the deploy (seconds, in the same CI job) would have no period. Accepted: its card shows no owners and its ownership page offers no change until a period exists; the migration's backfill statement, limited to flats without periods, would fix it by hand. No read path special-cases it.
 - Rollback: redeploy the previous version; the table stays.
 
 ## Open Questions

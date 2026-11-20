@@ -1,5 +1,9 @@
 import { describe, expect, test } from 'vitest'
-import { propertyDetailsInput, type PropertyDetailsInput } from './schemas'
+import {
+  newPropertyInput,
+  propertyDetailsInput,
+  type PropertyDetailsInput,
+} from './schemas'
 
 const valid: PropertyDetailsInput = {
   streetAddress: ' Kuusikuja 3 B 12 ',
@@ -52,5 +56,31 @@ describe('propertyDetailsInput', () => {
   test('accepts the limits of the floor area', () => {
     expect(reasons({ floorArea: '1' })).toEqual({})
     expect(reasons({ floorArea: '10 000' })).toEqual({})
+  })
+})
+
+describe('The first ownership period', () => {
+  const issue = (ownedSince: string) =>
+    newPropertyInput.safeParse({ ...valid, ownedSince }).error?.issues[0]
+      ?.message
+
+  test('An ownership date in the future is refused', () => {
+    expect(issue('31.12.2999')).toBe('ownership_date_in_future')
+  })
+
+  test('reads the date as typed, and leaves it out when empty', () => {
+    expect(
+      newPropertyInput.parse({ ...valid, ownedSince: '12.6.2022' }),
+    ).toMatchObject({
+      ownedSince: '2022-06-12',
+    })
+    expect(
+      newPropertyInput.parse({ ...valid, ownedSince: '' }).ownedSince,
+    ).toBeUndefined()
+    expect(newPropertyInput.parse(valid).ownedSince).toBeUndefined()
+  })
+
+  test('refuses something that is not a date', () => {
+    expect(issue('31.2.2026')).toBe('date_invalid')
   })
 })

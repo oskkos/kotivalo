@@ -32,7 +32,7 @@ beforeEach(async () => {
 
 describe('propertyRepository', () => {
   test('create gives the creator owner access and no one else', async () => {
-    const flat = await repository.create('anna', kuusikuja, now)
+    const flat = await repository.create('anna', kuusikuja, now, '2022-06-12')
 
     expect(flat).toMatchObject(kuusikuja)
     expect(flat.id).toMatch(/^[0-9a-f-]{36}$/)
@@ -42,11 +42,12 @@ describe('propertyRepository', () => {
   })
 
   test('finds and lists only flats the user has access to', async () => {
-    const annas = await repository.create('anna', kuusikuja, now)
+    const annas = await repository.create('anna', kuusikuja, now, '2022-06-12')
     const berttas = await repository.create(
       'bertta',
       { ...kuusikuja, streetAddress: 'Rantatie 15 C 21' },
       now,
+      '2022-06-12',
     )
 
     expect(await repository.findForUser('anna', annas.id)).toEqual(annas)
@@ -57,7 +58,7 @@ describe('propertyRepository', () => {
   })
 
   test('update changes a flat the user has access to', async () => {
-    const flat = await repository.create('anna', kuusikuja, now)
+    const flat = await repository.create('anna', kuusikuja, now, '2022-06-12')
     const changed = { ...kuusikuja, floorArea: 490, roomCount: 3 } as const
 
     expect(await repository.update('anna', flat.id, changed, now)).toBe(true)
@@ -68,7 +69,7 @@ describe('propertyRepository', () => {
   })
 
   test('update leaves a flat without access unchanged', async () => {
-    const flat = await repository.create('anna', kuusikuja, now)
+    const flat = await repository.create('anna', kuusikuja, now, '2022-06-12')
 
     expect(
       await repository.update(
@@ -82,9 +83,9 @@ describe('propertyRepository', () => {
   })
 
   test('counts the flats the user has access to', async () => {
-    await repository.create('anna', kuusikuja, now)
-    await repository.create('anna', kuusikuja, now)
-    await repository.create('bertta', kuusikuja, now)
+    await repository.create('anna', kuusikuja, now, '2022-06-12')
+    await repository.create('anna', kuusikuja, now, '2022-06-12')
+    await repository.create('bertta', kuusikuja, now, '2022-06-12')
 
     expect(await repository.countForUser('anna')).toBe(2)
     expect(await repository.countForUser('bertta')).toBe(1)

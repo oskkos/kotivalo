@@ -14,7 +14,7 @@ import {
   type PropertyDeps,
 } from './properties.server'
 import {
-  propertyDetailsInput,
+  newPropertyInput,
   propertyIdInput,
   updatePropertyInput,
 } from './schemas'
@@ -47,8 +47,10 @@ export const getProperty = createServerFn({ method: 'GET' })
   .handler(async ({ data }) => get(await propertyDeps(), data.id))
 
 export const createProperty = createServerFn({ method: 'POST' })
-  .validator(propertyDetailsInput)
-  .handler(async ({ data }) => create(await propertyDeps(), data))
+  .validator(newPropertyInput)
+  .handler(async ({ data: { ownedSince, ...details } }) =>
+    create(await propertyDeps(), details, ownedSince),
+  )
 
 export const updateProperty = createServerFn({ method: 'POST' })
   .validator(updatePropertyInput)
