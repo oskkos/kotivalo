@@ -167,7 +167,7 @@
   "invitation_declined": "Inbjudan avböjd.",
   "reason_date_invalid": "Skriv datumet som dd.mm.åååå, till exempel 12.6.2022.",
   "reason_ownership_date_in_future": "Datumet kan inte vara i framtiden.",
-  "reason_ownership_date_too_early": "Ändringen måste börja efter att den nuvarande ägarperioden började.",
+  "reason_ownership_date_too_early": "Ändringen kan börja tidigast på den nuvarande ägarperiodens startdatum.",
   "reason_ownership_date_too_late": "Datumet måste vara före nästa ägarändring.",
   "reason_ownership_share_invalid": "Skriv andelen i procent, till exempel 50 eller 33,33.",
   "reason_ownership_shares_total": "Andelarna måste bli 100 % tillsammans.",
@@ -222,5 +222,6 @@
   "ownership_correct_save": "Spara",
   "ownership_dialog_cancel": "Avbryt",
   "ownership_page_title": "Ägande och delning – Kotivalo",
-  "ownership_title": "Ägande och delning"
+  "ownership_title": "Ägande och delning",
+  "ownership_preview_correction": "Datumet är den nuvarande periodens startdatum, så detta rättar dess fördelning och ingen ny period skapas."
 }

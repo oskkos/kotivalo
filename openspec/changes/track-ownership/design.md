@@ -61,7 +61,7 @@ These have no database access and are unit-tested. The year summary reuses them.
   - every share is a number between 0 and 10000 (`ownership_share_invalid`)
   - at least one share is above 0 (`ownership_no_owner`)
   - each person appears once
-- `validateChangeDate(date, currentStart, today)` refuses a date that is too early (`ownership_date_too_early`) or in the future (`ownership_date_in_future`).
+- `validateChangeDate(date, currentStart, today)` refuses a date before the current start (`ownership_date_too_early`) or in the future (`ownership_date_in_future`). A date equal to the current start is a correction (decision 7).
 - `parsePercent(text)` turns the typed percent into basis points: `parseDecimal(text, 2)` (`33,33` is 3333).
 
 ### 3. Repository `features/ownership/ownership.repository.server.ts`
@@ -116,7 +116,22 @@ The Design canvas row "Omistus ja omistusmuutokset" has every screen below, with
 - **New flat form:** an "Ownership" section with "Owned since" (default today). The edit form doesn't show it; the date is corrected on the ownership page.
 - **Card line:** the owners by share, then name, the user as "You", formatted with `formatShare(basisPoints)` (`50 %`, `33,33 %`), plus "· shared with you" for a member. A shared `formatShare` goes in `lib/format.ts`.
 
+### 7. A change on the current period's start corrects it
+
+A flat bought together can't be recorded together when it is added: the co-owner needs access first, which takes an invitation. With changes only after the current start, the flat would get a one-day period of 100 % for whoever added it, which skews that day's figures and reads oddly in the history.
+
+So a change dated on the current period's start replaces that period's rows (split and reason) instead of adding a period. `ownershipRepository.change` branches on `from === currentStart`:
+1. delete the current rows, with the owner check in the statement
+2. insert the new split, guarded by "no row of the flat starts on or after `from` other than the new ones", so a failed delete inserts nothing
+3. set the roles and remove access as for a change
+
+The preview in the form says that the current split is corrected. The log line carries `corrected: true`.
+
+*Alternative:* allow editing the first period's split as well as its date. That would fix only the first period, while a wrong split in a later period would still need undo plus a new change.
+
 ## Risks / Trade-offs
+
+- [A correction can't be undone on its own] → Undo deletes the whole latest period, the corrected one included, and goes back to the one before. A correction of the first period can't be undone, but can be corrected again the same way.
 
 - [Undo can't bring back access removed by the undone change] → The dialog says so; a new invitation restores it.
 - [Typed dates instead of a picker] → Validation shows the expected format. A picker can replace the field later without changing the stored value.

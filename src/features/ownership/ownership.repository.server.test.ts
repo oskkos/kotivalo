@@ -182,6 +182,25 @@ describe('Ownership repository', () => {
     ])
   })
 
+  test('a correction by a member changes nothing', async () => {
+    const applied = await repo.change({
+      propertyId: flat,
+      actorId: 'jussi',
+      currentStart: '2022-06-12',
+      from: '2022-06-12',
+      reason: 'sale',
+      split: [{ userId: 'jussi', share: 10000 }],
+      removeAccess: [],
+    })
+
+    expect(applied).toBe(false)
+    expect((await repo.history(flat)).periods).toEqual([
+      expect.objectContaining({
+        shares: [{ userId: 'annika', share: 10000 }],
+      }),
+    ])
+  })
+
   test('a change against a period that has already changed does nothing', async () => {
     await halves()
     // Validated against the first period, which ended meanwhile.

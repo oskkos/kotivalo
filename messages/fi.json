@@ -167,7 +167,7 @@
   "invitation_declined": "Kutsu hylätty.",
   "reason_date_invalid": "Kirjoita päivä muodossa pp.kk.vvvv, esimerkiksi 12.6.2022.",
   "reason_ownership_date_in_future": "Päivä ei voi olla tulevaisuudessa.",
-  "reason_ownership_date_too_early": "Muutoksen pitää alkaa nykyisen omistusjakson alun jälkeen.",
+  "reason_ownership_date_too_early": "Muutos voi alkaa aikaisintaan nykyisen omistusjakson alkupäivänä.",
   "reason_ownership_date_too_late": "Päivän pitää olla ennen seuraavaa omistusmuutosta.",
   "reason_ownership_share_invalid": "Kirjoita osuus prosentteina, esimerkiksi 50 tai 33,33.",
   "reason_ownership_shares_total": "Osuuksien summan pitää olla 100 %.",
@@ -222,5 +222,6 @@
   "ownership_correct_save": "Tallenna",
   "ownership_dialog_cancel": "Peru",
   "ownership_page_title": "Omistus ja jakaminen – Kotivalo",
-  "ownership_title": "Omistus ja jakaminen"
+  "ownership_title": "Omistus ja jakaminen",
+  "ownership_preview_correction": "Päivä on nykyisen jakson alkupäivä, joten tämä korjaa sen jaon eikä uutta jaksoa synny."
 }

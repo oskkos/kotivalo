@@ -144,6 +144,7 @@ export async function changeOwnership(
     from: change.from,
     owners: change.split.filter((s) => s.share > 0).length,
     accessRemoved: change.removeAccess.length,
+    corrected: change.from === current.validFrom,
   })
   return { ok: true }
 }

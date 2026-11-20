@@ -155,6 +155,48 @@ describe("Changing a flat's ownership", () => {
     expect(JSON.stringify(logLines)).not.toContain('5000')
   })
 
+  test("A change on the current period's start corrects its split", async () => {
+    expect(
+      await changeOwnership(
+        deps('annika'),
+        flat,
+        sale(5000, 5000, '2022-06-12'),
+      ),
+    ).toEqual({ ok: true })
+
+    const { periods } = await view('annika')
+    expect(periods).toEqual([
+      {
+        validFrom: '2022-06-12',
+        validTo: null,
+        reason: 'sale',
+        shares: expect.arrayContaining([
+          { userId: 'annika', share: 5000 },
+          { userId: 'jussi', share: 5000 },
+        ]) as unknown,
+      },
+    ])
+    expect(await role('jussi')).toBe('owner')
+    expect(logLines).toEqual([
+      expect.objectContaining({
+        event: 'ownership.changed',
+        corrected: true,
+      }),
+    ])
+  })
+
+  test('a correction of a later period keeps the earlier ones', async () => {
+    await changeOwnership(deps('annika'), flat, sale(5000, 5000))
+    await changeOwnership(deps('annika'), flat, sale(6000, 4000))
+
+    const { periods } = await view('annika')
+    expect(periods.map((p) => [p.validFrom, p.validTo])).toEqual([
+      ['2025-03-01', null],
+      ['2022-06-12', '2025-02-28'],
+    ])
+    expect(periods[0]?.shares).toContainEqual({ userId: 'annika', share: 6000 })
+  })
+
   test("A split that doesn't add up is refused", async () => {
     expect(
       await changeOwnership(deps('annika'), flat, sale(6000, 3000)),

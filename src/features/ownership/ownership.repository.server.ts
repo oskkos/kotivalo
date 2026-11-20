@@ -143,9 +143,10 @@ export function ownershipRepository(db: Db) {
     /**
      * Records a new split from `from`: ends the current period the day
      * before, adds the new one, sets the roles from it and removes the
-     * access of `removeAccess` (people going to 0 %). Returns whether it
-     * applied: not when the actor isn't an owner or the current period no
-     * longer starts at `currentStart`.
+     * access of `removeAccess` (people going to 0 %). On the current
+     * period's start it replaces that period's split instead (design
+     * decision 7). Returns whether it applied: not when the actor isn't an
+     * owner or the current period no longer starts at `currentStart`.
      */
     async change(change: {
       propertyId: string
@@ -177,26 +178,36 @@ export function ownershipRepository(db: Db) {
         notExists(startingOn(propertyId, from, ids)),
         eq(properties.id, propertyId),
       )
+      const correcting = from === change.currentStart
+      // A correction deleted the current rows, and nothing else starts on
+      // or after `from`.
+      const corrected = and(
+        notExists(startingOn(propertyId, from, ids)),
+        eq(properties.id, propertyId),
+      )
       const applied = exists(
         db
           .select({ one: sql`1` })
           .from(ownershipPeriods)
           .where(inArray(ownershipPeriods.id, ids)),
       )
+      const current = and(
+        eq(ownershipPeriods.propertyId, propertyId),
+        isNull(ownershipPeriods.validTo),
+        eq(ownershipPeriods.validFrom, change.currentStart),
+        isOwner(change.actorId, propertyId),
+      )
       const results = await atomically(db, [
-        db
-          .update(ownershipPeriods)
-          .set({ validTo: dayBefore(from) })
-          .where(
-            and(
-              eq(ownershipPeriods.propertyId, propertyId),
-              isNull(ownershipPeriods.validTo),
-              eq(ownershipPeriods.validFrom, change.currentStart),
-              lt(ownershipPeriods.validFrom, from),
-              isOwner(change.actorId, propertyId),
-            ),
-          )
-          .returning({ id: ownershipPeriods.id }),
+        correcting
+          ? db
+              .delete(ownershipPeriods)
+              .where(current)
+              .returning({ id: ownershipPeriods.id })
+          : db
+              .update(ownershipPeriods)
+              .set({ validTo: dayBefore(from) })
+              .where(and(current, lt(ownershipPeriods.validFrom, from)))
+              .returning({ id: ownershipPeriods.id }),
         ...owners.map((owner, i) => {
           const id = ids[i] ?? ''
           return db.insert(ownershipPeriods).select(
@@ -211,7 +222,7 @@ export function ownershipRepository(db: Db) {
                 reason: sql<OwnershipReason>`${change.reason}`.as('reason'),
               })
               .from(properties)
-              .where(closed),
+              .where(correcting ? corrected : closed),
           )
         }),
         ...setRoles(

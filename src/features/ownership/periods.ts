@@ -93,7 +93,10 @@ export function validateSplit(
   return undefined
 }
 
-/** A change starts after the current period's start, and not after today. */
+/**
+ * A change starts on or after the current period's start, and not after
+ * today. On the start itself it corrects the current split.
+ */
 export function validateChangeDate(
   from: IsoDate,
   currentStart: IsoDate,
@@ -102,7 +105,7 @@ export function validateChangeDate(
   if (from > today) {
     return 'ownership_date_in_future'
   }
-  if (from <= currentStart) {
+  if (from < currentStart) {
     return 'ownership_date_too_early'
   }
   return undefined

@@ -119,17 +119,17 @@ describe('validateSplit', () => {
 describe('validateChangeDate', () => {
   const today = '2026-11-20'
 
-  test('accepts the day after the current start and today', () => {
+  test('accepts the current start (a correction), later days and today', () => {
+    expect(
+      validateChangeDate('2025-03-01', '2025-03-01', today),
+    ).toBeUndefined()
     expect(
       validateChangeDate('2025-03-02', '2025-03-01', today),
     ).toBeUndefined()
     expect(validateChangeDate(today, '2025-03-01', today)).toBeUndefined()
   })
 
-  test('refuses the current start or earlier, and tomorrow', () => {
-    expect(validateChangeDate('2025-03-01', '2025-03-01', today)).toBe(
-      'ownership_date_too_early',
-    )
+  test('refuses a day before the current start, and tomorrow', () => {
     expect(validateChangeDate('2025-02-01', '2025-03-01', today)).toBe(
       'ownership_date_too_early',
     )

@@ -34,6 +34,8 @@ interface Props {
   you: string
   /** The current split, to start from. */
   current: readonly Share[]
+  /** The current period's start: a change on it corrects the split. */
+  currentStart: string
   onSaved: () => Promise<void>
   onCancel: () => void
 }
@@ -66,6 +68,7 @@ export function OwnershipChangeForm({
   names,
   you,
   current,
+  currentStart,
   onSaved,
   onCancel,
 }: Props) {
@@ -358,7 +361,11 @@ export function OwnershipChangeForm({
               split: splitText(parsed, names, you),
             })}
           </Typography>
-          <Typography variant="body2">{m.ownership_preview_hint()}</Typography>
+          <Typography variant="body2">
+            {fromDate === currentStart
+              ? m.ownership_preview_correction()
+              : m.ownership_preview_hint()}
+          </Typography>
         </Stack>
       ) : null}
       {alert === undefined ? null : <ReasonAlert reason={alert} />}

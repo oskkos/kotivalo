@@ -167,7 +167,7 @@
   "invitation_declined": "Invitation declined.",
   "reason_date_invalid": "Enter the date as dd/mm/yyyy, for example 12/06/2022.",
   "reason_ownership_date_in_future": "The date can't be in the future.",
-  "reason_ownership_date_too_early": "The change must start after the current ownership period started.",
+  "reason_ownership_date_too_early": "The change can start on the current ownership period's start date at the earliest.",
   "reason_ownership_date_too_late": "The date must be before the next ownership change.",
   "reason_ownership_share_invalid": "Enter the share in percent, for example 50 or 33.33.",
   "reason_ownership_shares_total": "The shares must add up to 100%.",
@@ -222,5 +222,6 @@
   "ownership_correct_save": "Save",
   "ownership_dialog_cancel": "Cancel",
   "ownership_page_title": "Ownership and sharing – Kotivalo",
-  "ownership_title": "Ownership and sharing"
+  "ownership_title": "Ownership and sharing",
+  "ownership_preview_correction": "The date is the current period's start, so this corrects its split; no new period is added."
 }

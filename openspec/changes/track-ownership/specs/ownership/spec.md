@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: Ownership is recorded as periods
-A flat's ownership SHALL be a sequence of periods, each with a start date, an end date (open for the current one) and the owners' shares in basis points that add up to exactly 10000. Periods SHALL follow each other without gaps or overlaps, and a recorded period SHALL NOT be changed except by the corrections in "Undoing the latest ownership change" and "Correcting the first ownership date". The shares on any date SHALL be those of the period that contains it. A user with access and no share SHALL be a member, with no stored share.
+A flat's ownership SHALL be a sequence of periods, each with a start date, an end date (open for the current one) and the owners' shares in basis points that add up to exactly 10000. Periods SHALL follow each other without gaps or overlaps, and a recorded period SHALL NOT be changed except by the corrections in "Undoing the latest ownership change", "Correcting the first ownership date" and a change dated on the current period's start (see "Changing a flat's ownership"). The shares on any date SHALL be those of the period that contains it. A user with access and no share SHALL be a member, with no stored share.
 
 **No Playwright test:** these are rules for stored periods and pure calculations; Vitest covers them with the functions and the repository, and the browser tests of the other requirements use them.
 
@@ -29,11 +29,15 @@ Adding a flat SHALL record its first ownership period: the user who adds it owns
 - **THEN** the date field shows an error, and no flat is added
 
 ### Requirement: Changing a flat's ownership
-An owner of a flat SHALL be able to record a new split of its ownership on the Ownership and sharing page. The split SHALL list everyone with access to the flat with a share given in percent with at most two decimals, adding up to exactly 100 %, with at least one share above 0 %. The change SHALL have a date after the start of the current period and not in the future, and a reason: sale, gift, inheritance, division of property / divorce, or other. For each person whose share becomes 0 %, the owner SHALL be able to remove their access in the same change. A member SHALL NOT be able to change ownership.
+An owner of a flat SHALL be able to record a new split of its ownership on the Ownership and sharing page. The split SHALL list everyone with access to the flat with a share given in percent with at most two decimals, adding up to exactly 100 %, with at least one share above 0 %. The change SHALL have a date on or after the start of the current period and not in the future, and a reason: sale, gift, inheritance, division of property / divorce, or other. A change dated on the current period's start SHALL correct that period's split and reason instead of starting a new period, so that a flat bought together is recorded from the day it was bought, without a one-day period of one owner. For each person whose share becomes 0 %, the owner SHALL be able to remove their access in the same change. A member SHALL NOT be able to change ownership.
 
 #### Scenario: An owner records a sale of half the flat
 - **WHEN** Annika, owner of 100 % since `2022-06-12`, records Annika 50 % and Jussi 50 % from `1.3.2025`, reason sale
 - **THEN** the history shows "from 1.3.2025: Annika 50 % · Jussi 50 %, sale" above "from 12.6.2022: Annika 100 %", and the current owners are Annika and Jussi with 50 % each
+
+#### Scenario: A change on the current period's start corrects its split
+- **WHEN** Annika and Jussi bought `Kuusikuja 3 B 12` together on `12.6.2022`, Annika added it owned since `12.6.2022`, and after Jussi joined she records Annika 50 % and Jussi 50 % from `12.6.2022`, reason sale
+- **THEN** the history has one period, "from 12.6.2022: Annika 50 % · Jussi 50 %, sale", and Jussi is an owner
 
 #### Scenario: A split that doesn't add up is refused
 - **WHEN** Annika enters 60 % and 30 % and saves
