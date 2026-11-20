@@ -1,10 +1,13 @@
 // Chooses the language before sign-in: Suomi, Svenska, English. Paraglide's
 // setLocale() stores the choice in the kotivalo_locale cookie and reloads,
-// so the server renders the page, and later a new account, in it.
+// so the server renders the page, and later a new account, in it. The choice
+// is also remembered for this tab, so signing in stores it on an existing
+// account too (spec: "Choosing the language before sign-in").
 import Button from '@mui/material/Button'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import { useId, useState } from 'react'
+import { rememberChosenLocale } from '#/lib/chosen-locale'
 import { m } from '#/paraglide/messages.js'
 import {
   getLocale,
@@ -76,6 +79,8 @@ export function LanguageMenu() {
             selected={locale === current}
             onClick={() => {
               setAnchor(null)
+              // Choosing the current language counts too: it is a choice.
+              rememberChosenLocale(locale)
               if (locale !== current) {
                 void setLocale(locale)
               }

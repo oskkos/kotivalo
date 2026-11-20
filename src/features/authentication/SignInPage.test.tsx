@@ -43,6 +43,7 @@ beforeEach(() => {
 afterEach(() => {
   vi.useRealTimers()
   vi.clearAllMocks()
+  sessionStorage.clear()
 })
 
 describe('Sign-in page', () => {
@@ -231,5 +232,33 @@ describe('Requesting a new code', () => {
     expect(screen.getByRole('textbox', { name: 'Email' })).toHaveValue(
       'omistaja@example.com',
     )
+  })
+})
+
+describe('A language chosen on the sign-in page', () => {
+  test('is sent with the code request and the sign-in, then forgotten', async () => {
+    const { user, onSignedIn } = setup()
+    // English is the current language, so the page doesn't reload.
+    await user.click(screen.getByRole('button', { name: 'Language: English' }))
+    await user.click(screen.getByRole('menuitem', { name: 'English' }))
+    await toCodeStep(user)
+
+    await user.type(screen.getByLabelText('Sign-in code'), '482913')
+
+    expect(requestCode).toHaveBeenCalledWith({
+      data: { email: 'omistaja@example.com', locale: 'en' },
+    })
+    expect(verifyCode).toHaveBeenCalledWith({
+      data: { email: 'omistaja@example.com', code: '482913', locale: 'en' },
+    })
+    expect(onSignedIn).toHaveBeenCalledOnce()
+    expect(sessionStorage.getItem('kotivalo_locale_chosen')).toBeNull()
+  })
+
+  test('is not sent when nothing was chosen in this tab', async () => {
+    const { user } = setup()
+    await toCodeStep(user)
+
+    expect(requestCode.mock.calls[0]?.[0].data.locale).toBeUndefined()
   })
 })

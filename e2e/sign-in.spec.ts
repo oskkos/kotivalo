@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Browser } from '@playwright/test'
 import {
   codeFor,
   enterCode,
@@ -115,6 +115,68 @@ test.describe('Choosing the language before sign-in', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'sv')
     const cookies = await context.cookies()
     expect(cookies.find((c) => c.name === 'kotivalo_locale')?.value).toBe('sv')
+  })
+
+  /** Creates an account whose stored language is English. */
+  async function englishAccount(browser: Browser): Promise<string> {
+    const email = uniqueEmail('english')
+    const context = await browser.newContext({ locale: 'en-US' })
+    await signIn(await context.newPage(), email)
+    await context.close()
+    return email
+  }
+
+  test("Choosing a language changes an existing account's language", async ({
+    page,
+    browser,
+  }) => {
+    const email = await englishAccount(browser)
+
+    // A Finnish browser: the page is in Finnish, and the user picks Suomi.
+    await page.goto('/sign-in')
+    await waitForHydration(page)
+    await page.getByRole('button', { name: 'Kieli: Suomi' }).click()
+    await page.getByRole('menuitem', { name: 'Suomi' }).click()
+    await signIn(page, email)
+
+    expect((await inbox(page.request, email)).at(-1)?.subject).toMatch(
+      /on Kotivalo-kirjautumiskoodisi$/,
+    )
+    await expect(page.locator('html')).toHaveAttribute('lang', 'fi')
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Asunnot' }),
+    ).toBeVisible()
+
+    // The account's language is now Finnish, also on another device.
+    const other = await browser.newContext({ locale: 'en-US' })
+    const otherPage = await other.newPage()
+    await signIn(otherPage, email)
+    await expect(otherPage.locator('html')).toHaveAttribute('lang', 'fi')
+    await other.close()
+  })
+
+  test("A cookie left on the device does not change the account's language", async ({
+    page,
+    context,
+    browser,
+    baseURL,
+  }) => {
+    const email = await englishAccount(browser)
+    await context.addCookies([
+      { name: 'kotivalo_locale', value: 'fi', url: baseURL ?? '' },
+    ])
+
+    await page.goto('/sign-in')
+    await expect(page.locator('html')).toHaveAttribute('lang', 'fi')
+    await signIn(page, email)
+
+    expect((await inbox(page.request, email)).at(-1)?.subject).toMatch(
+      /is your Kotivalo sign-in code$/,
+    )
+    await expect(page.locator('html')).toHaveAttribute('lang', 'en')
+    await expect(
+      page.getByRole('heading', { level: 1, name: 'Flats' }),
+    ).toBeVisible()
   })
 })
 

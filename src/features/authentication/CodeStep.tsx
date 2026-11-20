@@ -11,6 +11,7 @@ import { failureReason } from '#/lib/network-error'
 import type { AlertReason, FieldReason } from '#/lib/reasons'
 import { m } from '#/paraglide/messages.js'
 import { SIGN_IN_CODE } from '#/server/auth/auth'
+import { chosenLocale, forgetChosenLocale } from '#/lib/chosen-locale'
 import { CodeField } from './CodeField'
 import { requestSignInCode, verifySignInCode } from './functions'
 
@@ -100,8 +101,11 @@ export function CodeStep(props: Props) {
     setFieldReason(undefined)
     setAlert(undefined)
     try {
-      const result = await verifySignInCode({ data: { email, code: value } })
+      const result = await verifySignInCode({
+        data: { email, code: value, locale: chosenLocale() },
+      })
       if (result.ok) {
+        forgetChosenLocale()
         props.onSignedIn()
         return
       }
@@ -123,7 +127,9 @@ export function CodeStep(props: Props) {
     setFieldReason(undefined)
     setAlert(undefined)
     try {
-      const result = await requestSignInCode({ data: { email } })
+      const result = await requestSignInCode({
+        data: { email, locale: chosenLocale() },
+      })
       if (result.ok) {
         setCode('')
         props.onResent(Date.now())

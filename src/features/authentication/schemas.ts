@@ -2,6 +2,7 @@
 // are reason codes (src/lib/reasons.ts), never text.
 import { z } from 'zod'
 import type { FieldReason } from '#/lib/reasons'
+import { locales } from '#/paraglide/runtime.js'
 
 const reason = (code: FieldReason) => ({ error: code })
 
@@ -18,11 +19,24 @@ export const codeSchema = z
   .trim()
   .regex(/^\d{6}$/, reason('code_invalid'))
 
-export const requestCodeInput = z.object({ email: emailSchema })
+/** One of the app's languages: `fi`, `sv` or `en`. */
+export const localeSchema = z.enum(locales)
+
+export const localeInput = z.object({ locale: localeSchema })
+
+/**
+ * `locale` is sent only when the user chose a language on the sign-in page
+ * in this tab (spec: "Choosing the language before sign-in").
+ */
+export const requestCodeInput = z.object({
+  email: emailSchema,
+  locale: localeSchema.optional(),
+})
 
 export const verifyCodeInput = z.object({
   email: emailSchema,
   code: codeSchema,
+  locale: localeSchema.optional(),
 })
 
 /**

@@ -14,6 +14,7 @@ import { failureReason } from '#/lib/network-error'
 import type { AlertReason } from '#/lib/reasons'
 import { m } from '#/paraglide/messages.js'
 import { colors } from '#/theme/tokens'
+import { chosenLocale } from '#/lib/chosen-locale'
 import { requestSignInCode } from './functions'
 import { emailSchema, requestCodeInput } from './schemas'
 
@@ -32,7 +33,9 @@ export function EmailStep({ defaultEmail, onSent }: Props) {
       setAlert(undefined)
       const email = emailSchema.parse(value.email)
       try {
-        const result = await requestSignInCode({ data: { email } })
+        const result = await requestSignInCode({
+          data: { email, locale: chosenLocale() },
+        })
         if (result.ok) {
           onSent(email)
         } else {

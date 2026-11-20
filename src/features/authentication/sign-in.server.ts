@@ -8,6 +8,7 @@ import type { LimitRule } from '#/server/platform/limits.server'
 import { EmailError, type SendEmail } from '#/server/email/email'
 import type { Logger } from '#/server/log/log'
 import { signInCodeEmail } from './sign-in-email'
+import type { UserRepository } from './user.repository.server'
 
 export interface SignInDeps {
   auth: Auth
@@ -20,6 +21,8 @@ export interface SignInDeps {
   requestLocale: Locale
   /** The app's origin, for the logo in the email. */
   appUrl: string
+  users: UserRepository
+  now: () => Date
 }
 
 /** Each code request sends an email; Resend's free plan allows 100 a day. */
@@ -54,10 +57,15 @@ async function emailKey(email: string): Promise<string> {
   return `otp-email:${hex}`
 }
 
-/** `email` is already validated and normalised (schemas.ts). */
+/**
+ * `email` is already validated and normalised (schemas.ts). `chosenLocale`
+ * is the language the user chose on the sign-in page in this tab, if any:
+ * the email is in it, not in the account's stored language.
+ */
 export async function requestCode(
   deps: SignInDeps,
   email: string,
+  chosenLocale?: Locale,
 ): Promise<RequestCodeResult> {
   const { perIp, perEmail } = CODE_REQUEST_LIMITS
   if (!(await deps.consumeLimit(`otp-ip:${deps.clientIp}`, perIp)).allowed) {
@@ -70,7 +78,8 @@ export async function requestCode(
   }
 
   const code = await deps.auth.createSignInCode(email)
-  const locale = (await deps.auth.findLocale(email)) ?? deps.requestLocale
+  const locale =
+    chosenLocale ?? (await deps.auth.findLocale(email)) ?? deps.requestLocale
   try {
     await deps.sendEmail(
       signInCodeEmail({ to: email, code, locale, appUrl: deps.appUrl }),
@@ -91,20 +100,37 @@ export async function requestCode(
 }
 
 /**
- * Signs in, creating the account for a new address. Returns the account's
+ * Signs in, creating the account for a new address. A language the user
+ * chose on the sign-in page (`chosenLocale`) becomes the account's language,
+ * also for an existing account; without a choice the stored one stays
+ * (spec: "Choosing the language before sign-in"). Returns the account's
  * language, which the caller stores in the language cookie.
  */
 export async function verifyCode(
   deps: SignInDeps,
   email: string,
   code: string,
+  chosenLocale?: Locale,
 ): Promise<VerifyCodeResult> {
-  const result = await deps.auth.signInWithCode(email, code, deps.requestLocale)
+  const result = await deps.auth.signInWithCode(
+    email,
+    code,
+    chosenLocale ?? deps.requestLocale,
+  )
   if (!result.ok) {
     deps.log.info('authentication.sign_in_refused', { reason: result.failure })
     return { ok: false, reason: result.failure }
   }
   // The user id is on the line through the log context.
   deps.log.info('authentication.signed_in')
-  return { ok: true, locale: result.user.locale }
+  const { id, locale } = result.user
+  if (chosenLocale === undefined || chosenLocale === locale) {
+    return { ok: true, locale }
+  }
+  await deps.users.setLocale(id, chosenLocale, deps.now())
+  deps.log.info('authentication.locale_changed', {
+    locale: chosenLocale,
+    source: 'sign_in',
+  })
+  return { ok: true, locale: chosenLocale }
 }

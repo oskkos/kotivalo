@@ -2,16 +2,12 @@
 // signed-in layout. The logic is in sign-in.server.ts; these validate the
 // input with the shared schemas and wire in the request context.
 import { createServerFn } from '@tanstack/react-start'
-import { getRequest, setCookie } from '@tanstack/react-start/server'
-import {
-  cookieMaxAge,
-  cookieName,
-  getLocale,
-  type Locale,
-} from '#/paraglide/runtime.js'
+import { getRequest } from '@tanstack/react-start/server'
+import { getLocale } from '#/paraglide/runtime.js'
 import { getRequestContext } from '#/server/platform/context.server'
 import { consumeLimit } from '#/server/platform/limits.server'
 import { setDisplayName as setName } from './display-name.server'
+import { setLocaleCookie } from './locale-cookie.server'
 import { displayNameInput, requestCodeInput, verifyCodeInput } from './schemas'
 import { requestCode, verifyCode, type SignInDeps } from './sign-in.server'
 import { userRepository } from './user.repository.server'
@@ -26,26 +22,24 @@ function signInDeps(): SignInDeps {
     clientIp: context.clientIp(),
     requestLocale: getLocale(),
     appUrl: new URL(getRequest().url).origin,
+    users: userRepository(context.db),
+    now: () => new Date(),
   }
-}
-
-/** Keeps the language cookie in step with the account's language. */
-function setLocaleCookie(locale: Locale): void {
-  setCookie(cookieName, locale, {
-    path: '/',
-    maxAge: cookieMaxAge,
-    sameSite: 'lax',
-  })
 }
 
 export const requestSignInCode = createServerFn({ method: 'POST' })
   .validator(requestCodeInput)
-  .handler(({ data }) => requestCode(signInDeps(), data.email))
+  .handler(({ data }) => requestCode(signInDeps(), data.email, data.locale))
 
 export const verifySignInCode = createServerFn({ method: 'POST' })
   .validator(verifyCodeInput)
   .handler(async ({ data }) => {
-    const result = await verifyCode(signInDeps(), data.email, data.code)
+    const result = await verifyCode(
+      signInDeps(),
+      data.email,
+      data.code,
+      data.locale,
+    )
     if (result.ok) {
       setLocaleCookie(result.locale)
     }

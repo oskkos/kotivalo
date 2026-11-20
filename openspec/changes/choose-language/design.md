@@ -46,10 +46,10 @@ The client then calls Paraglide's `setLocale(locale)`, which writes the same coo
 
 *Alternative:* switch the language in the browser without a reload. Rejected: the theme locale, the `<html lang>` and every loader's data are resolved on the server. A partial switch would mix languages until the next navigation.
 
-The cookie helper `setLocaleCookie()` in `features/authentication/functions.ts` moves to `features/authentication/locale-cookie.ts` so both features use one implementation.
+The cookie helper `setLocaleCookie()` in `features/authentication/functions.ts` moves to `features/authentication/locale-cookie.server.ts` so both features use one implementation.
 
 ### An explicit sign-in choice: remembered per tab in `sessionStorage`
-When the user picks a language in `LanguageMenu`, it writes the key `kotivalo_locale_chosen` to `sessionStorage` before calling `setLocale()`. The value survives the reload in the same tab. The sign-in steps read it and pass it as the optional `locale` to:
+When the user picks a language in `LanguageMenu`, it writes the key `kotivalo_locale_chosen` to `sessionStorage` before calling `setLocale()` (helpers in `src/lib/chosen-locale.ts`, used by `components/LanguageMenu.tsx`). The value survives the reload in the same tab. The sign-in steps read it and pass it as the optional `locale` to:
 - `requestSignInCode`: the code email is in that language
 - `verifySignInCode`: `verifyCode` stores it on the account when it differs from the stored language, logs `authentication.locale_changed` with `source: 'sign_in'`, and returns it as the locale for the cookie
 

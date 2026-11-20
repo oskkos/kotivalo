@@ -17,6 +17,7 @@ import { testInboxResponse } from '#/server/platform/test-inbox.server'
 import { testBrowser, type TestBrowser } from '#/test/auth-browser.server'
 import { emailSchema } from './schemas'
 import { requestCode, verifyCode, type SignInDeps } from './sign-in.server'
+import { userRepository } from './user.repository.server'
 
 const db = createDb(env.DB)
 /** Log lines of the current test. */
@@ -43,6 +44,8 @@ function deps(
     clientIp: '203.0.113.1',
     requestLocale: 'fi',
     appUrl: 'https://kotivalo.example',
+    users: userRepository(db),
+    now: () => now,
     ...overrides,
   }
 }
@@ -381,6 +384,77 @@ describe("The user's language is stored on the account", () => {
     expect(await signIn(testBrowser(db), 'omistaja@example.com', 'fi')).toEqual(
       { ok: true, locale: 'sv' },
     )
+  })
+})
+
+describe('Choosing the language before sign-in', () => {
+  /** Requests a code and signs in with a language chosen on the page. */
+  async function signInChoosing(
+    email: string,
+    chosen: 'fi' | 'sv' | 'en' | undefined,
+    requestLocale: 'fi' | 'sv' | 'en',
+  ) {
+    const d = deps(testBrowser(db), { requestLocale })
+    expect(await requestCode(d, email, chosen)).toEqual({ ok: true })
+    return verifyCode(d, email, lastCode(email), chosen)
+  }
+
+  const storedLocale = async (email: string) =>
+    (await db.select().from(user)).find((u) => u.email === email)?.locale
+
+  test("Choosing a language changes an existing account's language", async () => {
+    await signIn(testBrowser(db), 'omistaja@example.com', 'en')
+    capturedEmails.clear()
+
+    expect(await signInChoosing('omistaja@example.com', 'fi', 'fi')).toEqual({
+      ok: true,
+      locale: 'fi',
+    })
+
+    expect(capturedEmails.last()?.subject).toMatch(
+      /on Kotivalo-kirjautumiskoodisi$/,
+    )
+    expect(await storedLocale('omistaja@example.com')).toBe('fi')
+    expect(logLines).toContainEqual(
+      expect.objectContaining({
+        event: 'authentication.locale_changed',
+        locale: 'fi',
+        source: 'sign_in',
+      }),
+    )
+  })
+
+  test("A cookie left on the device does not change the account's language", async () => {
+    await signIn(testBrowser(db), 'omistaja@example.com', 'en')
+    capturedEmails.clear()
+
+    // The request resolves to Finnish from the cookie, but nothing was chosen.
+    expect(
+      await signInChoosing('omistaja@example.com', undefined, 'fi'),
+    ).toEqual({ ok: true, locale: 'en' })
+
+    expect(capturedEmails.last()?.subject).toMatch(/is your Kotivalo/)
+    expect(await storedLocale('omistaja@example.com')).toBe('en')
+    expect(logLines.map((l) => l.event)).not.toContain(
+      'authentication.locale_changed',
+    )
+  })
+
+  test('choosing the stored language changes nothing', async () => {
+    await signIn(testBrowser(db), 'omistaja@example.com', 'sv')
+
+    expect(await signInChoosing('omistaja@example.com', 'sv', 'fi')).toEqual({
+      ok: true,
+      locale: 'sv',
+    })
+    expect(logLines.map((l) => l.event)).not.toContain(
+      'authentication.locale_changed',
+    )
+  })
+
+  test('a new account gets the chosen language', async () => {
+    await signInChoosing('uusi@example.com', 'en', 'fi')
+    expect(await storedLocale('uusi@example.com')).toBe('en')
   })
 })
 
