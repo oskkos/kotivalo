@@ -223,5 +223,10 @@
   "ownership_dialog_cancel": "Cancel",
   "ownership_page_title": "Ownership and sharing – Kotivalo",
   "ownership_title": "Ownership and sharing",
-  "ownership_preview_correction": "The date is the current period's start, so this corrects its split; no new period is added."
+  "ownership_preview_correction": "The date is the current period's start, so this corrects its split; no new period is added.",
+  "account_page_title": "Account – Kotivalo",
+  "account_title": "Account",
+  "account_back": "Back to flats",
+  "account_language": "Language",
+  "account_language_help": "The app and emails from Kotivalo are in this language. Your choice is saved at once."
 }

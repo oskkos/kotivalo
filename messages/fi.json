@@ -223,5 +223,10 @@
   "ownership_dialog_cancel": "Peru",
   "ownership_page_title": "Omistus ja jakaminen – Kotivalo",
   "ownership_title": "Omistus ja jakaminen",
-  "ownership_preview_correction": "Päivä on nykyisen jakson alkupäivä, joten tämä korjaa sen jaon eikä uutta jaksoa synny."
+  "ownership_preview_correction": "Päivä on nykyisen jakson alkupäivä, joten tämä korjaa sen jaon eikä uutta jaksoa synny.",
+  "account_page_title": "Tili – Kotivalo",
+  "account_title": "Tili",
+  "account_back": "Takaisin asuntoihin",
+  "account_language": "Kieli",
+  "account_language_help": "Sovellus ja Kotivalon sähköpostit tulevat tällä kielellä. Valinta tallentuu heti."
 }

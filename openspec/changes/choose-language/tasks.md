@@ -18,12 +18,12 @@
 
 `feat(account): add the account page with the language and sign-out`
 
-- [ ] 3.1 Write `features/account/AccountPage.tsx` from the canvas's `TiliKevyt`: the back button, the name and address card, the language buttons (save, then reload the page; disabled while saving; `failureReason` alert on failure), and Sign out
-- [ ] 3.2 Add the route `src/routes/_authed/account.tsx` and register it in the router test
-- [ ] 3.3 fi, sv and en messages (Finnish first, from the canvas)
-- [ ] 3.4 Component tests for the page (the name and address, the language buttons' `aria-pressed` and `lang`, saving, a failure)
-- [ ] 3.5 Playwright for "The account page needs a signed-in user" and "Choosing the language on the account page"
-- [ ] 3.6 Screenshots of `/account` (fi and sv) at 390 × 844 for review before the commit
+- [x] 3.1 Write `features/account/AccountPage.tsx` from the canvas's `TiliKevyt`: the back button, the name and address card, the language buttons (save, then reload the page; disabled while saving; `failureReason` alert on failure), and Sign out
+- [x] 3.2 Add the route `src/routes/_authed/account.tsx` and register it in the router test
+- [x] 3.3 fi, sv and en messages (Finnish first, from the canvas)
+- [x] 3.4 Component tests for the page (the name and address, the language buttons' `aria-pressed` and `lang`, saving, a failure)
+- [x] 3.5 Playwright for "The account page needs a signed-in user" and "Choosing the language on the account page"
+- [x] 3.6 Screenshots of `/account` (fi and sv) at 390 × 844 for review before the commit
 
 ## 4. Changing the name
 

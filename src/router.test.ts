@@ -7,6 +7,7 @@ vi.mock('#/features/authentication/functions', () => ({}))
 vi.mock('#/features/properties/functions', () => ({}))
 vi.mock('#/features/sharing/functions', () => ({}))
 vi.mock('#/features/ownership/functions', () => ({}))
+vi.mock('#/features/account/functions', () => ({}))
 
 describe('Router', () => {
   test('registers the home and sign-in pages', () => {
@@ -23,5 +24,9 @@ describe('Router', () => {
     const { routesById } = getRouter()
     expect(routesById).toHaveProperty('/_authed/properties/new')
     expect(routesById).toHaveProperty('/_authed/properties/$propertyId/edit')
+  })
+
+  test('registers the account page behind the signed-in layout', () => {
+    expect(getRouter().routesById).toHaveProperty('/_authed/account')
   })
 })
