@@ -1,5 +1,11 @@
 import { describe, expect, test } from 'vitest'
-import { codeSchema, displayNameSchema, emailSchema } from './schemas'
+import {
+  codeSchema,
+  displayNameSchema,
+  emailSchema,
+  localeSchema,
+  verifyCodeInput,
+} from './schemas'
 
 const issue = (result: { error?: { issues: { message: string }[] } }) =>
   result.error?.issues[0]?.message
@@ -35,6 +41,22 @@ describe('codeSchema', () => {
       expect(issue(codeSchema.safeParse(value))).toBe('code_invalid')
     },
   )
+})
+
+describe('localeSchema', () => {
+  test.each(['fi', 'sv', 'en'])('accepts %s', (value) => {
+    expect(localeSchema.parse(value)).toBe(value)
+  })
+
+  test.each(['de', 'FI', '', null])('rejects %j', (value) => {
+    expect(localeSchema.safeParse(value).success).toBe(false)
+  })
+
+  test('is optional when signing in', () => {
+    const input = { email: 'a@example.com', code: '123456' }
+    expect(verifyCodeInput.parse(input)).toEqual(input)
+    expect(verifyCodeInput.parse({ ...input, locale: 'sv' }).locale).toBe('sv')
+  })
 })
 
 describe('displayNameSchema', () => {

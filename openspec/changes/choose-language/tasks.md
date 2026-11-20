@@ -2,11 +2,11 @@
 
 `fix(auth): let a language chosen on the sign-in page update the account`
 
-- [ ] 1.1 Add `setLocale(userId, locale, now)` to `features/authentication/user.repository.server.ts`, with a Workers test
-- [ ] 1.2 Move `setLocaleCookie()` to `features/authentication/locale-cookie.ts`; add a `localeInput` schema (`z.enum(locales)`) and an optional `locale` to `requestCodeInput` and `verifyCodeInput`, with unit tests
-- [ ] 1.3 `requestCode` uses the chosen locale for the code email; `verifyCode` creates a new account with it, stores it on an existing account when it differs (`authentication.locale_changed`, `source: 'sign_in'`) and returns it for the cookie; Workers tests for the email language, the stored language, no change without a choice, and the log line
-- [ ] 1.4 `LanguageMenu` writes `kotivalo_locale_chosen` to `sessionStorage` before `setLocale()`; the email and code steps send it; it is removed after a successful sign-in; all `sessionStorage` access in try/catch; component tests
-- [ ] 1.5 Playwright for "Choosing a language changes an existing account's language" and "A cookie left on the device does not change the account's language"; the existing "Choosing Swedish on the sign-in page" still passes
+- [x] 1.1 Add `setLocale(userId, locale, now)` to `features/authentication/user.repository.server.ts`, with a Workers test
+- [x] 1.2 Move `setLocaleCookie()` to `features/authentication/locale-cookie.server.ts`; add a `localeInput` schema (`z.enum(locales)`) and an optional `locale` to `requestCodeInput` and `verifyCodeInput`, with unit tests
+- [x] 1.3 `requestCode` uses the chosen locale for the code email; `verifyCode` creates a new account with it, stores it on an existing account when it differs (`authentication.locale_changed`, `source: 'sign_in'`) and returns it for the cookie; Workers tests for the email language, the stored language, no change without a choice, and the log line
+- [x] 1.4 `LanguageMenu` writes `kotivalo_locale_chosen` to `sessionStorage` before `setLocale()` (helpers in `src/lib/chosen-locale.ts`); the email and code steps send it; it is removed after a successful sign-in; all `sessionStorage` access in try/catch; component tests
+- [x] 1.5 Playwright for "Choosing a language changes an existing account's language" and "A cookie left on the device does not change the account's language"; the existing "Choosing Swedish on the sign-in page" still passes
 
 ## 2. Account page
 
