@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { areaCases, dateCases, moneyCases } from './format.cases'
-import { formatArea, formatDate, formatMoney } from './format'
+import { formatArea, formatDate, formatDay, formatMoney } from './format'
 
 describe('formatMoney', () => {
   test.each(moneyCases)('%s: %i cents is %s', (locale, cents, expected) => {
@@ -54,5 +54,15 @@ describe('formatArea', () => {
 
   test('rejects areas that are not integer tenths', () => {
     expect(() => formatArea(48.5, 'fi')).toThrow(RangeError)
+  })
+})
+
+describe('formatDay', () => {
+  test('formats the day in Finnish time', () => {
+    // 23.30 UTC on 19 November is already the 20th in Finland.
+    const instant = new Date(Date.UTC(2026, 10, 19, 23, 30))
+    expect(formatDay(instant, 'fi')).toBe('20.11.2026')
+    expect(formatDay(instant, 'sv')).toBe('20.11.2026')
+    expect(formatDay(instant, 'en')).toBe('20/11/2026')
   })
 })
