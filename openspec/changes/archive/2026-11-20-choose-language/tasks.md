@@ -45,4 +45,4 @@
 
 `docs(openspec): archive choose-language`
 
-- [ ] 6.1 `openspec archive choose-language`; `pnpm check:traceability` passes with the specs in `openspec/specs/`
+- [x] 6.1 `openspec archive choose-language`; `pnpm check:traceability` passes with the specs in `openspec/specs/`
