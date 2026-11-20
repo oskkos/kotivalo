@@ -1,6 +1,12 @@
 import { describe, expect, test } from 'vitest'
 import { areaCases, dateCases, moneyCases } from './format.cases'
-import { formatArea, formatDate, formatDay, formatMoney } from './format'
+import {
+  formatArea,
+  formatDate,
+  formatDay,
+  formatMoney,
+  formatShare,
+} from './format'
 
 describe('formatMoney', () => {
   test.each(moneyCases)('%s: %i cents is %s', (locale, cents, expected) => {
@@ -64,5 +70,18 @@ describe('formatDay', () => {
     expect(formatDay(instant, 'fi')).toBe('20.11.2026')
     expect(formatDay(instant, 'sv')).toBe('20.11.2026')
     expect(formatDay(instant, 'en')).toBe('20/11/2026')
+  })
+})
+
+describe('formatShare', () => {
+  test.each([
+    ['fi', 5000, '50\u00a0%'],
+    ['fi', 3333, '33,33\u00a0%'],
+    ['fi', 10000, '100\u00a0%'],
+    ['sv', 3334, '33,34\u00a0%'],
+    ['en', 5000, '50%'],
+    ['en', 3333, '33.33%'],
+  ] as const)('%s: %i basis points is %s', (locale, bp, expected) => {
+    expect(formatShare(bp, locale)).toBe(expected)
   })
 })

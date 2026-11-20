@@ -9,9 +9,9 @@
 
 `feat(ownership): add the ownership period rules`
 
-- [ ] 2.1 Write `features/ownership/periods.ts`: `sharesOn`, `validateSplit`, `validateChangeDate`, `parsePercent`, `equalSplit` (the remainder to the first person), with unit tests for the scenarios of "Ownership is recorded as periods" and the boundaries (the day before and the day of a change, 33,34 + 33,33 + 33,33)
-- [ ] 2.2 Add `parseFiDate(text)` (`12.6.2022`, `2022-06-12`) and `formatShare(basisPoints)` (`50 %`, `33,33 %`, per language) to `src/lib/`, with unit tests
-- [ ] 2.3 Add the reason codes `ownership_shares_total`, `ownership_share_invalid`, `ownership_no_owner`, `ownership_date_too_early`, `ownership_date_in_future`, `ownership_date_too_late`, `ownership_nothing_to_undo`, `ownership_invalid`, `date_invalid` with fi, sv and en messages
+- [x] 2.1 Write `features/ownership/periods.ts`: `sharesOn`, `validateSplit`, `validateChangeDate`, `parsePercent`, `equalSplit` (the remainder to the first person), with unit tests for the scenarios of "Ownership is recorded as periods" and the boundaries (the day before and the day of a change, 33,34 + 33,33 + 33,33)
+- [x] 2.2 Add `parseFiDate(text)` (`12.6.2022`, `2022-06-12`) and `formatShare(basisPoints)` (`50 %`, `33,33 %`, per language) to `src/lib/`, with unit tests
+- [x] 2.3 Add the reason codes `ownership_shares_total`, `ownership_share_invalid`, `ownership_no_owner`, `ownership_date_too_early`, `ownership_date_in_future`, `ownership_date_too_late`, `ownership_nothing_to_undo`, `ownership_invalid`, `date_invalid` with fi, sv and en messages
 
 ## 3. Ownership repository and the first period
 

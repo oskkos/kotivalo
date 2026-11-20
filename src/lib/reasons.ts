@@ -19,6 +19,13 @@ export type FieldReason =
   | 'name_invalid'
   | 'invitation_already_member'
   | 'invitation_already_pending'
+  | 'date_invalid'
+  | 'ownership_date_in_future'
+  | 'ownership_date_too_early'
+  | 'ownership_date_too_late'
+  | 'ownership_share_invalid'
+  | 'ownership_shares_total'
+  | 'ownership_no_owner'
   | 'floor_area_invalid'
 
 /** Errors about the whole action, shown as an alert with a title. */
@@ -37,6 +44,8 @@ export type AlertReason =
   | 'invitation_email_quota'
   | 'invitation_email_failed'
   | 'sharing_owner_only'
+  | 'ownership_nothing_to_undo'
+  | 'ownership_invalid'
   /** A request never reached the server: offline or cancelled. */
   | 'network'
   /** A request failed in a way the app doesn't expect (a server error). */
@@ -70,6 +79,17 @@ const texts: Record<Reason, () => ReasonText> = {
   invitation_already_pending: () => ({
     text: m.reason_invitation_already_pending(),
   }),
+  date_invalid: () => ({ text: m.reason_date_invalid() }),
+  ownership_date_in_future: () => ({
+    text: m.reason_ownership_date_in_future(),
+  }),
+  ownership_date_too_early: () => ({
+    text: m.reason_ownership_date_too_early(),
+  }),
+  ownership_date_too_late: () => ({ text: m.reason_ownership_date_too_late() }),
+  ownership_share_invalid: () => ({ text: m.reason_ownership_share_invalid() }),
+  ownership_shares_total: () => ({ text: m.reason_ownership_shares_total() }),
+  ownership_no_owner: () => ({ text: m.reason_ownership_no_owner() }),
   floor_area_invalid: () => ({ text: m.reason_floor_area_invalid() }),
   code_expired: () => ({
     title: m.reason_code_expired_title(),
@@ -126,6 +146,14 @@ const texts: Record<Reason, () => ReasonText> = {
   sharing_owner_only: () => ({
     title: m.reason_sharing_owner_only_title(),
     text: m.reason_sharing_owner_only(),
+  }),
+  ownership_nothing_to_undo: () => ({
+    title: m.reason_ownership_nothing_to_undo_title(),
+    text: m.reason_ownership_nothing_to_undo(),
+  }),
+  ownership_invalid: () => ({
+    title: m.reason_ownership_invalid_title(),
+    text: m.reason_ownership_invalid(),
   }),
   network: () => ({
     title: m.reason_network_title(),
