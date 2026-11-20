@@ -30,8 +30,8 @@
 
 `feat(ownership): change, undo and correct ownership on the server`
 
-- [ ] 4.1 Write `getOwnership`, `changeOwnership`, `undoOwnershipChange` and `correctFirstOwnershipDate` (design decision 5) in `ownership.server.ts` and `functions.ts`, with the logging
-- [ ] 4.2 Workers tests for every server-side scenario of the `ownership` spec, "Removing access to a flat" ("An owner can't remove another owner") and the role scenarios; log lines carry ids and no shares
+- [x] 4.1 Write `getOwnership`, `changeOwnership`, `undoOwnershipChange` and `correctFirstOwnershipDate` (design decision 5) in `ownership.server.ts` and `functions.ts`, with the logging
+- [x] 4.2 Workers tests for every server-side scenario of the `ownership` spec, "Removing access to a flat" ("An owner can't remove another owner") and the role scenarios; log lines carry ids and no shares
 
 ## 5. Owned since and the card line
 
