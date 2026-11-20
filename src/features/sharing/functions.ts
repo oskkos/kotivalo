@@ -7,12 +7,22 @@ import { propertyRepository } from '#/features/properties/property.repository.se
 import { getLocale } from '#/paraglide/runtime.js'
 import { getRequestContext } from '#/server/platform/context.server'
 import { consumeLimit } from '#/server/platform/limits.server'
-import { invitationIdInput, inviteInput, propertyRefInput } from './schemas'
+import {
+  invitationIdInput,
+  inviteInput,
+  propertyRefInput,
+  removeAccessInput,
+} from './schemas'
 import { sharingRepository } from './sharing.repository.server'
 import {
+  acceptInvitation as accept,
   cancelInvitation as cancel,
+  declineInvitation as decline,
   getSharing as get,
   inviteToProperty as invite,
+  leaveProperty as leave,
+  listMyInvitations as listMine,
+  removeAccess as remove,
   type SharingDeps,
 } from './sharing.server'
 
@@ -53,3 +63,25 @@ export const inviteToProperty = createServerFn({ method: 'POST' })
 export const cancelInvitation = createServerFn({ method: 'POST' })
   .validator(invitationIdInput)
   .handler(async ({ data }) => cancel(await sharingDeps(), data.invitationId))
+
+export const listMyInvitations = createServerFn({ method: 'GET' }).handler(
+  async () => listMine(await sharingDeps()),
+)
+
+export const acceptInvitation = createServerFn({ method: 'POST' })
+  .validator(invitationIdInput)
+  .handler(async ({ data }) => accept(await sharingDeps(), data.invitationId))
+
+export const declineInvitation = createServerFn({ method: 'POST' })
+  .validator(invitationIdInput)
+  .handler(async ({ data }) => decline(await sharingDeps(), data.invitationId))
+
+export const removeAccess = createServerFn({ method: 'POST' })
+  .validator(removeAccessInput)
+  .handler(async ({ data }) =>
+    remove(await sharingDeps(), data.propertyId, data.userId),
+  )
+
+export const leaveProperty = createServerFn({ method: 'POST' })
+  .validator(propertyRefInput)
+  .handler(async ({ data }) => leave(await sharingDeps(), data.propertyId))
