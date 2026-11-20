@@ -25,11 +25,11 @@
 
 `feat(sharing): invite to a flat by email and cancel invitations`
 
-- [ ] 3.1 Write `features/sharing/invitation-email.ts` with `renderEmail()` (inviter's name, the invited address, a button to the app; no flat address), with unit tests in each language; fi, sv and en messages
-- [ ] 3.2 Write `features/sharing/schemas.ts` (`inviteInput`: property id, email normalised as in sign-in)
-- [ ] 3.3 Write `inviteToProperty`, `cancelInvitation` and `getSharing` in `sharing.server.ts` and `functions.ts`, with the checks in the order of design decision 4 and the email in the recipient's language
-- [ ] 3.4 Add the reason codes `invitation_already_member`, `invitation_already_pending`, `invitation_not_found`, `invitation_limit_reached`, `invitation_daily_limit_reached`, `sharing_owner_only` and `invitation_email_quota` / `_busy` / `_failed`, with the canvas's fi copy and sv and en messages
-- [ ] 3.5 Workers tests:
+- [x] 3.1 Write `features/sharing/invitation-email.ts` with `renderEmail()` (inviter's name, the invited address, a button to the app; no flat address), with unit tests in each language; fi, sv and en messages
+- [x] 3.2 Write `features/sharing/schemas.ts` (`inviteInput`: property id, email normalised as in sign-in)
+- [x] 3.3 Write `inviteToProperty`, `cancelInvitation` and `getSharing` in `sharing.server.ts` and `functions.ts`, with the checks in the order of design decision 4 and the email in the recipient's language
+- [x] 3.4 Add the reason codes `invitation_already_member`, `invitation_already_pending`, `invitation_not_found`, `invitation_limit_reached`, `invitation_daily_limit_reached`, `sharing_owner_only`, `invitation_email_quota` and `invitation_email_failed` (a busy provider reuses `email_busy`), with the canvas's fi copy and sv and en messages
+- [x] 3.5 Workers tests:
   - the scenarios of "Inviting a user to a flat" and "Limiting invitations"
   - a failed send saves no invitation
   - log lines carry ids and no address
