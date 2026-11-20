@@ -4,6 +4,7 @@ import { escapeHtml, renderEmail, type EmailContent } from './layout'
 const content: EmailContent = {
   to: 'owner@example.com',
   locale: 'fi',
+  appUrl: 'https://kotivalo.example',
   subject: 'Kirjaudu Kotivaloon',
   heading: 'Kirjaudu sisään',
   paragraphs: ['Linkki on voimassa 15 minuuttia.'],
@@ -14,6 +15,25 @@ const content: EmailContent = {
 }
 
 describe('renderEmail', () => {
+  test('starts with the logo and the tagline', () => {
+    const { html, text } = renderEmail(content)
+    expect(html).toContain(
+      '<img src="https://kotivalo.example/email/logo.png" alt="Kotivalo" width="123" height="32"',
+    )
+    expect(html.indexOf('Valoa vuokranantajan arkeen')).toBeLessThan(
+      html.indexOf('<h1'),
+    )
+    expect(text.startsWith('Kotivalo – Valoa vuokranantajan arkeen\n\n')).toBe(
+      true,
+    )
+  })
+
+  test('refuses an app address that is not http(s)', () => {
+    expect(() =>
+      renderEmail({ ...content, appUrl: 'javascript:alert(1)' }),
+    ).toThrow()
+  })
+
   test('writes the plain-text body with the link', () => {
     const { text } = renderEmail(content)
     expect(text).toContain('Kirjaudu sisään')
@@ -89,6 +109,7 @@ describe('renderEmail codes', () => {
   const withCode: EmailContent = {
     to: 'owner@example.com',
     locale: 'fi',
+    appUrl: 'https://kotivalo.example',
     subject: '482913 on Kotivalo-kirjautumiskoodisi',
     heading: 'Kirjautumiskoodisi',
     paragraphs: ['Syötä tämä koodi:', { code: '482913' }, 'Voimassa 10 min.'],

@@ -27,6 +27,7 @@ export function invitationEmail(options: {
   return renderEmail({
     to,
     locale,
+    appUrl,
     // No name in the subject: it is the line a phishing attempt would use.
     subject: m.invitation_email_subject({}, { locale }),
     heading: m.invitation_email_heading({}, { locale }),

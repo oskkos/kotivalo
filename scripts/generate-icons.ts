@@ -1,10 +1,12 @@
 // The app icons in public/, drawn from the Kotivalo mark (src/components/
-// Logo.tsx; Design canvas, "Main": the plum app icon with a cream roof).
+// Logo.tsx; Design canvas, "Main": the plum app icon with a cream roof), and
+// the logo at the top of emails (public/email/logo.png): email clients show
+// neither SVG nor web fonts, so the mark and the name are one PNG.
 // The PNGs are rendered with Playwright's Chromium and committed; run this
 // again only when the mark or the colours change.
 //
 // Usage: pnpm icons:generate
-import { mkdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { chromium } from '@playwright/test'
 import { colors } from '../src/theme/tokens.ts'
@@ -43,7 +45,29 @@ const pngs: { file: string; source: string; size: number }[] = [
   { file: 'icons/apple-touch-icon.png', source: square, size: 180 },
 ]
 
+/**
+ * The email logo as on the sign-in page: the mark with a plum roof and
+ * "kotivalo" in Nunito 900, drawn at twice its size in emails (148 × 32) so
+ * it stays sharp on high-density screens.
+ */
+const EMAIL_LOGO_SCALE = 2
+const nunito = readFileSync(
+  join(
+    import.meta.dirname,
+    '..',
+    'node_modules/@fontsource-variable/nunito/files/nunito-latin-wght-normal.woff2',
+  ),
+).toString('base64')
+const emailLogo = `<style>
+@font-face{font-family:Nunito;font-weight:200 1000;src:url(data:font/woff2;base64,${nunito}) format('woff2')}
+html,body{margin:0;background:transparent}
+#logo{display:inline-flex;align-items:center;gap:${String(6 * EMAIL_LOGO_SCALE)}px;padding:0 ${String(2 * EMAIL_LOGO_SCALE)}px}
+#logo span{font-family:Nunito;font-weight:900;font-size:${String(22 * EMAIL_LOGO_SCALE)}px;letter-spacing:-0.035em;color:${colors.plum};line-height:1}
+</style>
+<div id="logo"><svg width="${String(32 * EMAIL_LOGO_SCALE)}" height="${String(32 * EMAIL_LOGO_SCALE)}" viewBox="0 0 64 64"><circle cx="32" cy="38" r="20" fill="${colors.yellow}"/><path d="M11 31 L32 12 L53 31" fill="none" stroke="${colors.plum}" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/></svg><span>kotivalo</span></div>`
+
 mkdirSync(join(PUBLIC, 'icons'), { recursive: true })
+mkdirSync(join(PUBLIC, 'email'), { recursive: true })
 writeFileSync(join(PUBLIC, 'favicon.svg'), `${round}\n`)
 
 const browser = await chromium.launch()
@@ -57,6 +81,16 @@ try {
     await page.screenshot({ path: join(PUBLIC, file), omitBackground: true })
     console.log(`public/${file}`)
   }
+  await page.setViewportSize({ width: 600, height: 200 })
+  await page.setContent(emailLogo)
+  await page.evaluate(() => document.fonts.ready)
+  await page
+    .locator('#logo')
+    .screenshot({ path: join(PUBLIC, 'email/logo.png'), omitBackground: true })
+  const size = await page.locator('#logo').boundingBox()
+  console.log(
+    `public/email/logo.png (${String(size?.width)} × ${String(size?.height)})`,
+  )
 } finally {
   await browser.close()
 }

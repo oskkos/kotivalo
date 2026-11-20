@@ -16,6 +16,8 @@ export type EmailBlock = string | { code: string }
 export interface EmailContent {
   to: string
   locale: Locale
+  /** The app's origin; the logo at the top is loaded from it. */
+  appUrl: string
   subject: string
   heading: string
   paragraphs: EmailBlock[]
@@ -37,6 +39,12 @@ export function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (char) => HTML_ESCAPES[char] ?? char)
 }
 
+/**
+ * The logo at the top (public/email/logo.png, drawn by `pnpm icons:generate`
+ * at twice this size). Update the size if the image is redrawn.
+ */
+export const EMAIL_LOGO = { path: '/email/logo.png', width: 123, height: 32 }
+
 function assertHttpUrl(url: string): void {
   const { protocol } = new URL(url)
   if (protocol !== 'https:' && protocol !== 'http:') {
@@ -46,19 +54,20 @@ function assertHttpUrl(url: string): void {
 
 export function renderEmail(content: EmailContent): EmailMessage {
   const { locale, action } = content
+  assertHttpUrl(content.appUrl)
   if (action) {
     assertHttpUrl(action.url)
   }
-  const footer = `Kotivalo – ${m.app_tagline({}, { locale })}`
+  const tagline = m.app_tagline({}, { locale })
+  const logoUrl = new URL(EMAIL_LOGO.path, content.appUrl).href
 
   const text = [
+    `Kotivalo – ${tagline}`,
     content.heading,
     ...content.paragraphs.map((block) =>
       typeof block === 'string' ? block : block.code,
     ),
     ...(action ? [`${action.label}: ${action.url}`] : []),
-    '—',
-    footer,
   ].join('\n\n')
 
   const paragraph = (value: string) =>
@@ -78,10 +87,11 @@ export function renderEmail(content: EmailContent): EmailMessage {
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(content.subject)}</title></head>
 <body style="margin:0;padding:24px 16px;background:${colors.cream};color:${colors.plum};font-family:'Segoe UI',system-ui,-apple-system,sans-serif">
 <div style="max-width:480px;margin:0 auto;padding:24px;background:${colors.white};border-radius:${String(radii.card)}px">
+<img src="${escapeHtml(logoUrl)}" alt="Kotivalo" width="${String(EMAIL_LOGO.width)}" height="${String(EMAIL_LOGO.height)}" style="display:block;border:0">
+<p style="margin:4px 0 24px;font-size:14px;font-weight:700;color:${colors.plumMuted}">${escapeHtml(tagline)}</p>
 <h1 style="margin:0 0 16px;font-size:24px;line-height:1.2">${escapeHtml(content.heading)}</h1>
 ${content.paragraphs.map(block).join('\n')}
 ${button}
-<p style="margin:24px 0 0;font-size:13px;color:${colors.plumMuted}">${escapeHtml(footer)}</p>
 </div>
 </body>
 </html>`
