@@ -8,6 +8,7 @@ import {
   signIn,
   uniqueEmail,
   useOwnClientIp,
+  waitForHydration,
 } from './support/sign-in'
 
 test.use({ locale: 'fi-FI' })
@@ -98,6 +99,7 @@ test.describe('Requesting a new code', () => {
 test.describe('Choosing the language before sign-in', () => {
   test('Choosing Swedish on the sign-in page', async ({ page, context }) => {
     await page.goto('/sign-in')
+    await waitForHydration(page)
     await page.getByRole('button', { name: 'Kieli: Suomi' }).click()
     await page.getByRole('menuitem', { name: 'Svenska' }).click()
 

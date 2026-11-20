@@ -181,5 +181,11 @@
   "reason_ownership_nothing_to_undo_title": "Ingen ändring att ångra",
   "reason_ownership_nothing_to_undo": "Bostaden har bara den första ägarperioden. Rätta vid behov dess startdatum.",
   "reason_ownership_invalid_title": "Ägarfördelningen kan inte sparas",
-  "reason_ownership_invalid": "Fördelningen kan bara innehålla personer med tillgång till bostaden, var och en en gång. Ladda om sidan och försök igen."
+  "reason_ownership_invalid": "Fördelningen kan bara innehålla personer med tillgång till bostaden, var och en en gång. Ladda om sidan och försök igen.",
+  "property_section_ownership": "Ägande",
+  "property_owned_since": "Ägd sedan",
+  "property_owned_since_hint": "Dagen då bostaden blev din. Du äger den först till 100 %. Delägare bjuds in och andelarna fördelas på bostadens sida Ägande och delning.",
+  "date_placeholder": "dd.mm.åååå",
+  "property_card_owner": "{name} {share}",
+  "property_card_shared_with_you": "delad med dig"
 }

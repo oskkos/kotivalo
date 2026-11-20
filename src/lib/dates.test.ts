@@ -7,6 +7,7 @@ describe('parseFiDate', () => {
     ['01.03.2025', '2025-03-01'],
     [' 29.2.2024 ', '2024-02-29'],
     ['2022-06-12', '2022-06-12'],
+    ['12/06/2022', '2022-06-12'],
   ])('reads %s as %s', (text, iso) => {
     expect(parseFiDate(text)).toBe(iso)
   })
@@ -17,7 +18,7 @@ describe('parseFiDate', () => {
     '31.2.2026',
     '29.2.2025',
     '2022-6-12',
-    '12/6/2022',
+    '12/6/22',
     'eilen',
   ])('rejects %j', (text) => {
     expect(parseFiDate(text)).toBeUndefined()

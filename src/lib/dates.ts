@@ -4,11 +4,13 @@
 /** A calendar date as `YYYY-MM-DD`, as stored (`isoDate()` columns). */
 export type IsoDate = string
 
-const FI_DATE = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/
+/** Day first, with dots (Finnish, Swedish) or slashes (English in Finland). */
+const FI_DATE = /^(\d{1,2})[./](\d{1,2})[./](\d{4})$/
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/
 
 /**
- * A date typed as `12.6.2022` (Finnish and Swedish) or `2022-06-12`, as ISO,
+ * A date typed as `12.6.2022`, `12/06/2022` (as formatDate() writes it in
+ * English) or `2022-06-12`, as ISO,
  * or undefined when it isn't a real date (`31.2.2026`).
  */
 export function parseFiDate(text: string): IsoDate | undefined {

@@ -2,15 +2,15 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import { EMPTY_PROPERTY, PropertyForm, type SaveResult } from './PropertyForm'
-import type { PropertyDetailsInput } from './schemas'
+import type { NewPropertyInput } from './schemas'
 
 // jsdom's browser language is English, so the form is in English.
 vi.mock('#/lib/client-log', () => ({ clientLog: { error: vi.fn() } }))
 
 function setup(
   options: {
-    initial?: PropertyDetailsInput
-    save?: (details: PropertyDetailsInput) => Promise<SaveResult>
+    initial?: NewPropertyInput
+    save?: (details: NewPropertyInput) => Promise<SaveResult>
   } = {},
 ) {
   const save = vi.fn(
@@ -142,5 +142,43 @@ describe('PropertyForm', () => {
 
     expect(onClose).toHaveBeenCalledOnce()
     expect(save).not.toHaveBeenCalled()
+  })
+})
+
+describe('The Ownership section', () => {
+  test('a new flat asks since when it has been owned, and sends it', async () => {
+    const { user, save } = setup({
+      initial: { ...EMPTY_PROPERTY, ownedSince: '20/11/2026' },
+    })
+    await fillIn(user)
+    await user.clear(field('Owned since'))
+    await user.type(field('Owned since'), '12/06/2022')
+    await user.click(saveButton())
+
+    expect(save).toHaveBeenCalledWith(
+      expect.objectContaining({ ownedSince: '12/06/2022' }),
+    )
+  })
+
+  test('an invalid date is shown under the field and nothing is saved', async () => {
+    const { user, save } = setup({
+      initial: { ...EMPTY_PROPERTY, ownedSince: '31/02/2026' },
+    })
+    await fillIn(user)
+    await user.click(saveButton())
+
+    expect(
+      await screen.findByText(
+        'Enter the date as dd/mm/yyyy, for example 12/06/2022.',
+      ),
+    ).toBeInTheDocument()
+    expect(save).not.toHaveBeenCalled()
+  })
+
+  test('the edit form has no ownership section', () => {
+    setup()
+    expect(
+      screen.queryByRole('textbox', { name: 'Owned since' }),
+    ).not.toBeInTheDocument()
   })
 })

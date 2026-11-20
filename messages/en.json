@@ -171,7 +171,7 @@
   "invitation_decline": "Decline",
   "invitation_accepted": "{address} is now on your list.",
   "invitation_declined": "Invitation declined.",
-  "reason_date_invalid": "Enter the date as dd.mm.yyyy, for example 12.6.2022.",
+  "reason_date_invalid": "Enter the date as dd/mm/yyyy, for example 12/06/2022.",
   "reason_ownership_date_in_future": "The date can't be in the future.",
   "reason_ownership_date_too_early": "The change must start after the current ownership period started.",
   "reason_ownership_date_too_late": "The date must be before the next ownership change.",
@@ -181,5 +181,11 @@
   "reason_ownership_nothing_to_undo_title": "No change to undo",
   "reason_ownership_nothing_to_undo": "The flat has only its first ownership period. Correct its start date if needed.",
   "reason_ownership_invalid_title": "The split can't be saved",
-  "reason_ownership_invalid": "The split can only include people with access to the flat, each once. Reload the page and try again."
+  "reason_ownership_invalid": "The split can only include people with access to the flat, each once. Reload the page and try again.",
+  "property_section_ownership": "Ownership",
+  "property_owned_since": "Owned since",
+  "property_owned_since_hint": "The day the flat became yours. You own 100% of it to start with. Co-owners are invited and shares split on the flat's Ownership and sharing page.",
+  "date_placeholder": "dd/mm/yyyy",
+  "property_card_owner": "{name} {share}",
+  "property_card_shared_with_you": "shared with you"
 }

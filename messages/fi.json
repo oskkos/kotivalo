@@ -181,5 +181,11 @@
   "reason_ownership_nothing_to_undo_title": "Ei peruttavaa muutosta",
   "reason_ownership_nothing_to_undo": "Asunnolla on vain ensimmäinen omistusjakso. Korjaa sen alkupäivä tarvittaessa.",
   "reason_ownership_invalid_title": "Omistusjakoa ei voi tallentaa",
-  "reason_ownership_invalid": "Jaossa voi olla vain ihmisiä, joilla on pääsy asuntoon, kukin kerran. Lataa sivu uudelleen ja yritä uudelleen."
+  "reason_ownership_invalid": "Jaossa voi olla vain ihmisiä, joilla on pääsy asuntoon, kukin kerran. Lataa sivu uudelleen ja yritä uudelleen.",
+  "property_section_ownership": "Omistus",
+  "property_owned_since": "Omistettu alkaen",
+  "property_owned_since_hint": "Päivä, jolloin asunto tuli omistukseesi. Omistat sen aluksi 100 %. Kanssaomistajat kutsutaan ja osuudet jaetaan asunnon Omistus ja jakaminen -sivulla.",
+  "date_placeholder": "pp.kk.vvvv",
+  "property_card_owner": "{name} {share}",
+  "property_card_shared_with_you": "jaettu sinulle"
 }
