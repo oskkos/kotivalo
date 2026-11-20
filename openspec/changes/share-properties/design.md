@@ -134,7 +134,7 @@ The Design canvas row "Jakaminen ja kutsut" has every screen below: `Welcome`, `
 
 - New field reasons: `name_required`, `name_too_long`, `invitation_already_member`, `invitation_already_pending`
 - New alert reasons: `invitation_not_found`, `invitation_limit_reached`, `invitation_daily_limit_reached`, `sharing_owner_only`
-- **Email failures:** the sign-in reasons' texts talk about codes ("Koodeja ei voi lähettää juuri nyt"). Invitations therefore map `EmailError` to their own `invitation_email_quota`, `invitation_email_busy` and `invitation_email_failed`.
+- **Email failures:** the sign-in reasons' texts talk about codes ("Koodeja ei voi lähettää juuri nyt"). Invitations therefore map `EmailError` to their own `invitation_email_quota` and `invitation_email_failed`; `email_busy` ("try again in a moment") fits both and is reused.
 
 Each gets messages in fi, sv and en. The Finnish copy is on the Design canvas board "Jakamisen virheilmoitukset".
 

@@ -175,13 +175,15 @@ export function sharingRepository(db: Db) {
      * key refuses a duplicate that slipped past.
      */
     async invite(invitation: {
+      /** Chosen by the caller when the email needs it first. */
+      id?: string
       propertyId: string
       email: string
       invitedBy: string
       now: Date
       expiresAt: Date
     }): Promise<{ id: string }> {
-      const id = crypto.randomUUID()
+      const id = invitation.id ?? crypto.randomUUID()
       await atomically(db, [
         db
           .delete(propertyInvitations)
