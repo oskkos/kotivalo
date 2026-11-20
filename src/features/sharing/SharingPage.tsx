@@ -181,6 +181,8 @@ export function SharingPage({ view, onChanged, onLeft, onBack }: Props) {
         await after()
       } else {
         setAlert(result.reason)
+        // Someone else may have changed the flat's sharing meanwhile.
+        await onChanged()
       }
     } catch (error) {
       clientLog.error(event, {}, error)

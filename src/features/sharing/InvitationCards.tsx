@@ -26,12 +26,13 @@ interface Props {
 
 export function InvitationCards({ invitations, onAnswered }: Props) {
   const [alert, setAlert] = useState<AlertReason>()
-  const [busy, setBusy] = useState<string>()
+  /** The invitation being answered, and how. */
+  const [busy, setBusy] = useState<{ id: string; accept: boolean }>()
   const [notice, setNotice] = useState<string>()
 
   async function answer(invitation: ReceivedInvitation, accept: boolean) {
     setAlert(undefined)
-    setBusy(invitation.id)
+    setBusy({ id: invitation.id, accept })
     try {
       const data = { invitationId: invitation.id }
       const result = accept
@@ -112,7 +113,7 @@ export function InvitationCards({ invitations, onAnswered }: Props) {
               <Box sx={{ display: 'flex', gap: 1 }}>
                 <Button
                   fullWidth
-                  loading={busy === invitation.id}
+                  loading={busy?.id === invitation.id && busy.accept}
                   disabled={busy !== undefined}
                   onClick={() => {
                     void answer(invitation, true)
@@ -124,6 +125,7 @@ export function InvitationCards({ invitations, onAnswered }: Props) {
                   fullWidth
                   variant="outlined"
                   color="inherit"
+                  loading={busy?.id === invitation.id && !busy.accept}
                   disabled={busy !== undefined}
                   onClick={() => {
                     void answer(invitation, false)

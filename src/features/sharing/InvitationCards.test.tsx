@@ -74,6 +74,25 @@ describe('Invitation cards', () => {
     expect(await screen.findByText('Invitation declined.')).toBeInTheDocument()
   })
 
+  test('only the pressed button shows progress', async () => {
+    let finish: (result: { ok: true }) => void = vi.fn()
+    vi.mocked(declineInvitation).mockReturnValue(
+      new Promise((resolve) => {
+        finish = resolve
+      }),
+    )
+    const { user, card } = setup()
+    const accept = within(card).getByRole('button', { name: 'Accept' })
+    const decline = within(card).getByRole('button', { name: 'Decline' })
+
+    await user.click(decline)
+
+    expect(within(decline).getByRole('progressbar')).toBeInTheDocument()
+    expect(within(accept).queryByRole('progressbar')).not.toBeInTheDocument()
+    finish({ ok: true })
+    expect(await screen.findByText('Invitation declined.')).toBeInTheDocument()
+  })
+
   test('a cancelled invitation shows why and reloads', async () => {
     vi.mocked(acceptInvitation).mockResolvedValue({
       ok: false,

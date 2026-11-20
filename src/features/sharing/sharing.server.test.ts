@@ -173,6 +173,21 @@ describe('Inviting a user to a flat', () => {
     expect(emailsTo('jussi@example.com')).toHaveLength(1)
   })
 
+  test('a second invitation saved at the same moment is refused, not an error', async () => {
+    await invite('anna', flat, 'jussi@example.com')
+    // The other request passed its pending check before this one saved.
+    const racing = deps('anna', {
+      sharing: { ...sharing, isPending: () => Promise.resolve(false) },
+    })
+
+    expect(await inviteToProperty(racing, flat, 'jussi@example.com')).toEqual({
+      ok: false,
+      reason: 'invitation_already_pending',
+    })
+    expect(await sharing.countPending(flat, now)).toBe(1)
+    expect(logLines).toEqual([])
+  })
+
   test("A member can't invite", async () => {
     await shareWithJussi(flat)
     capturedEmails.clear()
@@ -503,6 +518,16 @@ describe('Removing access to a flat', () => {
     }
     expect(await flatsOf('anna')).toHaveLength(1)
     expect(await flatsOf('toinen')).toHaveLength(1)
+  })
+
+  test('removing a member who has already left succeeds', async () => {
+    await shareWithJussi(flat)
+    await leaveProperty(deps('jussi'), flat)
+
+    expect(await removeAccess(deps('anna'), flat, 'jussi')).toEqual({
+      ok: true,
+    })
+    expect(logLines).toEqual([])
   })
 
   test("The owner can't remove their own access", async () => {
