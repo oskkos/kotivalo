@@ -76,4 +76,4 @@
 
 `docs(openspec): archive share-properties`
 
-- [ ] 7.1 `openspec archive share-properties`, check the merged `sharing`, `authentication` and `properties` specs, and `pnpm check:traceability`
+- [x] 7.1 `openspec archive share-properties`, check the merged `sharing`, `authentication` and `properties` specs, and `pnpm check:traceability`
