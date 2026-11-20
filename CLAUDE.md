@@ -10,7 +10,7 @@ Kotivalo ("Valoa vuokranantajan arkeen", roughly "light for a landlord's everyda
 
 ## Current state
 
-The app is scaffolded (TanStack Start on Cloudflare Workers) with the flats list as the home page behind sign-in (add, edit and list flats; `features/properties/`, the first repository and the pattern for the next features), ESLint, Prettier, Vitest, Playwright, CI, commitlint, Git hooks, a D1 database with Drizzle (Better Auth's tables so far), i18n with Paraglide (fi / sv / en; a language menu on the sign-in page only), the MUI theme, email sending (Resend), R2 file storage, a production deploy from `develop`, an installable app (PWA) with an offline page, and sign-in with an emailed one-time code (Better Auth; passkeys come later). Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
+The app is scaffolded (TanStack Start on Cloudflare Workers) with the flats list as the home page behind sign-in (add, edit and list flats; `features/properties/`, the first repository and the pattern for the next features), sharing a flat by email invitation with owner and member roles (`features/sharing/`; ownership shares come next), a display name asked once after the first sign-in, ESLint, Prettier, Vitest, Playwright, CI, commitlint, Git hooks, a D1 database with Drizzle, i18n with Paraglide (fi / sv / en; a language menu on the sign-in page only), the MUI theme, email sending (Resend), R2 file storage, a production deploy from `develop`, an installable app (PWA) with an offline page, and sign-in with an emailed one-time code (Better Auth; passkeys come later). Don't invent commands that aren't listed below; add them here as each tool lands, including how to run a single Vitest test and a single Playwright test.
 
 ## Commands
 
@@ -191,29 +191,29 @@ Vitest projects are chosen by file name (`vitest.config.ts`):
 
 Code, database and test names use these English terms. The English UI copy may use friendlier words; that is decided in the translations, not here.
 
-| Finnish                   | Code                                 | Notes                                                            |
-| ------------------------- | ------------------------------------ | ---------------------------------------------------------------- |
-| asunto                    | `property`                           | One rental unit; also covers a house. Table `properties`         |
-| omistaja, omistusosuus    | owner, `share`                       | Share in basis points (5000 = 50 %), per `ownership_periods` row |
-| pääsy, jakaminen          | `access`                             | Per property, by invitation. Table `property_access`             |
-| vuokrasuhde               | `tenancy`                            |                                                                  |
-| vuokralainen              | `tenant`                             |                                                                  |
-| irtisanominen             | `notice`                             | `noticeDate`, `noticeGivenBy`                                    |
-| vakuus, vakuuden palautus | `deposit`, `depositReturn`           |                                                                  |
-| vuokra                    | `rent`                               |                                                                  |
-| hoitovastike              | `maintenanceCharge`                  |                                                                  |
-| rahoitusvastike           | `financingCharge`                    |                                                                  |
-| tulouttaa / rahastoida    | `incomeRecognised` / `capitalised`   | Financing charge treatment, a validity period                    |
-| toistuva summa            | `recurringAmount`                    | Rent and charges over time                                       |
-| kirjaus (tulo / meno)     | `transaction` (`income` / `expense`) | Not to be confused with a database transaction                   |
-| kuitti                    | `receipt`                            |                                                                  |
-| liite                     | `attachment`                         | E.g. a tenancy contract                                          |
-| lainan korot              | `loanInterest`                       | Per owner and year                                               |
-| hankintameno              | `acquisitionCost`                    | Capitalised financing charges add to it                          |
-| vuosiyhteenveto           | `yearSummary`                        | Computed, never stored                                           |
-| voimassaolojakso          | validity period                      | `validFrom` / `validTo`, columns `valid_from` / `valid_to`       |
-| taloyhtiö                 | `housingCompany`                     |                                                                  |
-| kuolinpesä                | `estate`                             |                                                                  |
+| Finnish                   | Code                                 | Notes                                                                                                  |
+| ------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------ |
+| asunto                    | `property`                           | One rental unit; also covers a house. Table `properties`                                               |
+| omistaja, omistusosuus    | owner, `share`                       | Share in basis points (5000 = 50 %), per `ownership_periods` row                                       |
+| pääsy, jakaminen          | `access`                             | Per property, by invitation. Tables `property_access`, `property_invitations`; roles `owner`, `member` |
+| vuokrasuhde               | `tenancy`                            |                                                                                                        |
+| vuokralainen              | `tenant`                             |                                                                                                        |
+| irtisanominen             | `notice`                             | `noticeDate`, `noticeGivenBy`                                                                          |
+| vakuus, vakuuden palautus | `deposit`, `depositReturn`           |                                                                                                        |
+| vuokra                    | `rent`                               |                                                                                                        |
+| hoitovastike              | `maintenanceCharge`                  |                                                                                                        |
+| rahoitusvastike           | `financingCharge`                    |                                                                                                        |
+| tulouttaa / rahastoida    | `incomeRecognised` / `capitalised`   | Financing charge treatment, a validity period                                                          |
+| toistuva summa            | `recurringAmount`                    | Rent and charges over time                                                                             |
+| kirjaus (tulo / meno)     | `transaction` (`income` / `expense`) | Not to be confused with a database transaction                                                         |
+| kuitti                    | `receipt`                            |                                                                                                        |
+| liite                     | `attachment`                         | E.g. a tenancy contract                                                                                |
+| lainan korot              | `loanInterest`                       | Per owner and year                                                                                     |
+| hankintameno              | `acquisitionCost`                    | Capitalised financing charges add to it                                                                |
+| vuosiyhteenveto           | `yearSummary`                        | Computed, never stored                                                                                 |
+| voimassaolojakso          | validity period                      | `validFrom` / `validTo`, columns `valid_from` / `valid_to`                                             |
+| taloyhtiö                 | `housingCompany`                     |                                                                                                        |
+| kuolinpesä                | `estate`                             |                                                                                                        |
 
 ## Domain rules that shape the code
 

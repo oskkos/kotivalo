@@ -163,5 +163,12 @@
   "sharing_leave_dialog_title": "Poistutaanko asunnosta?",
   "sharing_leave_dialog_text": "{address} katoaa listaltasi. Pääsyn saa takaisin vain, jos omistaja kutsuu sinut uudelleen.",
   "sharing_leave_dialog_confirm": "Poistu",
-  "sharing_dialog_cancel": "Peru"
+  "sharing_dialog_cancel": "Peru",
+  "invitations_label": "Kutsut",
+  "invitation_from": "{inviter} jakoi sinulle asunnon",
+  "invitation_details": "{city} · voimassa {expires} asti",
+  "invitation_accept": "Hyväksy",
+  "invitation_decline": "Hylkää",
+  "invitation_accepted": "{address} on nyt listallasi.",
+  "invitation_declined": "Kutsu hylätty."
 }

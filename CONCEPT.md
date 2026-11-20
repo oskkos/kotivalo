@@ -147,7 +147,8 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `user`, `session`, `account`, `verification` | Better Auth's own tables, part of the Drizzle schema and migrations                                    |
 | `properties`                                 | id, address, postcode, city, room count, floor area                                                    |
-| `property_access`                            | property_id, user_id, role, invitation status                                                          |
+| `property_access`                            | property_id, user_id, role (`owner`, `member`)                                                         |
+| `property_invitations`                       | property_id, email, invited_by, created, expires (pending only; accepting adds `property_access`)      |
 | `ownership_periods`                          | property_id, user_id, share, valid_from, valid_to, reason                                              |
 | `tenancies`                                  | property_id, tenant, contact details, type, start, end, deposit, due day, notice given by, notice date |
 | `deposit_returns`                            | tenancy_id, amount returned, deduction, reason, date                                                   |
@@ -178,7 +179,7 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 - [ ] Language selection has no screen. The language is stored per user, but the Account sketch has no language setting.
 - [ ] Loan interest has no input screen. The year summary shows it and the data model has `loan_interest`, but no sketch collects it.
 - [ ] Logging the deposit return later has no screen. End tenancy says to log it after the final inspection, but nothing shows where.
-- [ ] Missing screens: accepting a flat invitation, and the first-run empty state with no flats. The sign-in screens (email and one-time code) are on the Design canvas; a passkey option comes with its own issue.
+- [x] ~~Missing screens: accepting a flat invitation, and the first-run empty state with no flats.~~ Both are on the Design canvas ("Jakaminen ja kutsut") and built; so are the sign-in screens. A passkey option comes with its own issue.
 - [ ] The former owner's read-only view of their ownership period is not sketched.
 - [ ] Expense details shows _Payee_ (Saaja) and _Deductible_ (Vähennyskelpoinen), but `transactions` has neither field. Add them to the data model or drop them from the screen.
 

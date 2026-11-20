@@ -335,6 +335,11 @@ export function SharingPage({ view, onChanged, onLeft, onBack }: Props) {
             onClick={() => {
               setConfirm({ kind: 'leave' })
             }}
+            sx={{
+              color: colors.error,
+              borderColor: colors.errorBorder,
+              bgcolor: 'background.paper',
+            }}
           >
             {m.sharing_leave()}
           </Button>
@@ -349,7 +354,10 @@ export function SharingPage({ view, onChanged, onLeft, onBack }: Props) {
       >
         {confirm === undefined ? null : (
           <>
-            <DialogTitle id="sharing-confirm-title">
+            <DialogTitle
+              id="sharing-confirm-title"
+              sx={{ fontSize: 20, fontWeight: 900, lineHeight: 1.3 }}
+            >
               {confirm.kind === 'remove'
                 ? m.sharing_remove_dialog_title({ name: confirm.person.name })
                 : m.sharing_leave_dialog_title()}
