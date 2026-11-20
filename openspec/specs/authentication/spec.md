@@ -1,14 +1,14 @@
 # authentication Specification
 
 ## Purpose
-Who the user is: signing in with a one-time code sent by email (which also creates the account), limits that protect the email quota, sessions and signing out, pages for signed-in users only, and the language stored on the account. Passkeys come later (#58).
+Who the user is: signing in with a one-time code sent by email (which also creates the account), limits that protect the email quota, sessions and signing out, pages for signed-in users only, the language stored on the account, and the display name asked after the first sign-in. Passkeys come later (#58).
 ## Requirements
 ### Requirement: Sign in with an emailed code
 A user SHALL sign in by entering their email address and then the 6-digit code emailed to that address, in the same tab. Signing in with an address that has no account SHALL create the account; there is no separate sign-up. Email addresses SHALL be compared case-insensitively. The code email SHALL be in the language the request resolved to for a new account, and in the user's stored language for an existing one.
 
 #### Scenario: A new address creates an account and signs in
-- **WHEN** a visitor enters `uusi@example.com` on `/sign-in`, then the code from the email sent to that address
-- **THEN** an account exists for `uusi@example.com`, the visitor is signed in and lands on `/`, the flats list, which is empty for the new account
+- **WHEN** a visitor enters `uusi@example.com` on `/sign-in`, then the code from the email sent to that address, then the name `Uusi`
+- **THEN** an account named `Uusi` exists for `uusi@example.com`, the visitor is signed in and lands on `/`, the flats list, which is empty for the new account
 
 #### Scenario: An existing user signs in to the same account
 - **WHEN** the user with the account `omistaja@example.com` signs in again with a new code
@@ -167,4 +167,23 @@ When `EMAIL_TRANSPORT` is `capture`, the app SHALL expose a route that returns t
 #### Scenario: Production does not capture emails
 - **WHEN** the production environment's configuration in `wrangler.jsonc` is read
 - **THEN** its `EMAIL_TRANSPORT` is `resend`
+
+### Requirement: Asking for a display name
+A signed-in user without a display name SHALL be asked for one before any other page: every page for signed-in users SHALL redirect them to `/welcome`. The name SHALL be 1–50 characters after trimming and SHALL NOT contain `@`, `/`, `:`, `<` or `>`, so it can't pose as an email address or carry a link into the invitation emails Kotivalo sends. After saving, the user SHALL land on the page they were going to, or on `/`. A user who has a name and opens `/welcome` SHALL be redirected to `/`. The name is shown to the people a flat is shared with.
+
+#### Scenario: A user without a name is asked for one
+- **WHEN** a signed-in user without a name opens `/properties/new`
+- **THEN** they land on `/welcome`, and after saving the name `Annika` they land on `/properties/new`
+
+#### Scenario: An empty name is not saved
+- **WHEN** a user enters only spaces as their name and saves
+- **THEN** the name field shows that a name is required, and they stay on `/welcome`
+
+#### Scenario: A name with an address or a link is not saved
+- **WHEN** a user enters `anna@example.com` or `https://huijaus.fi` as their name
+- **THEN** it is refused with the reason `name_invalid`, and no name is stored
+
+#### Scenario: A user with a name is not asked again
+- **WHEN** the user named `Annika` opens `/welcome`
+- **THEN** they are redirected to `/`
 
