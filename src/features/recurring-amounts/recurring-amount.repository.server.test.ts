@@ -197,3 +197,28 @@ describe('The recurring amount repository', () => {
     expect(left?.n).toBe(0)
   })
 })
+
+describe('Rent and charges are recorded as monthly periods', () => {
+  test('A new amount ends the previous period the month before', async () => {
+    await repo.setAmount({
+      propertyId: flat,
+      actorId: 'annika',
+      kind: 'rent',
+      amount: 89000,
+      from: '2025-03-01',
+      latestStart: null,
+    })
+    await repo.setAmount({
+      propertyId: flat,
+      actorId: 'annika',
+      kind: 'rent',
+      amount: 92000,
+      from: '2027-03-01',
+      latestStart: '2025-03-01',
+    })
+    expect(await amounts('rent')).toEqual([
+      { validFrom: '2025-03-01', validTo: '2027-02-28', value: 89000 },
+      { validFrom: '2027-03-01', validTo: null, value: 92000 },
+    ])
+  })
+})

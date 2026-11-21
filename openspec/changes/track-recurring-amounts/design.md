@@ -68,7 +68,7 @@ Each write is one `atomically(db, [...])` call:
 - **Undoing the latest change:** delete the latest period and reopen the previous one (`valid_to = null`).
 - **Setting the treatment:** the same as setting an amount.
 
-The rules (month start, not before ownership, not before the latest start) are checked in the server layer against the periods just read. The repository doesn't check them. Like ownership, two owners saving the same amount at the same moment is not guarded against beyond that read; D1 has no interactive transactions, and the risk is negligible for a flat.
+The rules (month start, not before the month the flat's ownership starts in, not before the latest start) are checked in the server layer against the periods just read. The repository doesn't check them. Like ownership, two owners saving the same amount at the same moment is not guarded against beyond that read; D1 has no interactive transactions, and the risk is negligible for a flat.
 
 ### Pure functions
 
