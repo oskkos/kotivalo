@@ -32,6 +32,14 @@ export type FieldReason =
   | 'amount_date_before_ownership'
   | 'amount_date_too_early'
   | 'treatment_required'
+  | 'transaction_amount_invalid'
+  | 'transaction_category_invalid'
+  | 'transaction_date_in_future'
+  | 'transaction_date_before_ownership'
+  | 'transaction_note_too_long'
+  | 'receipt_unsupported_type'
+  | 'receipt_too_large'
+  | 'receipt_unreadable'
 
 /** Errors about the whole action, shown as an alert with a title. */
 export type AlertReason =
@@ -53,6 +61,8 @@ export type AlertReason =
   | 'ownership_invalid'
   | 'amount_nothing_to_undo'
   | 'treatment_nothing_to_undo'
+  | 'transaction_not_found'
+  | 'storage_quota_full'
   /** The amounts changed since they were read; the page reloads them. */
   | 'amount_changed'
   /** A request never reached the server: offline or cancelled. */
@@ -109,6 +119,26 @@ const texts: Record<Reason, () => ReasonText> = {
   }),
   amount_date_too_early: () => ({ text: m.reason_amount_date_too_early() }),
   treatment_required: () => ({ text: m.reason_treatment_required() }),
+  transaction_amount_invalid: () => ({
+    text: m.reason_transaction_amount_invalid(),
+  }),
+  transaction_category_invalid: () => ({
+    text: m.reason_transaction_category_invalid(),
+  }),
+  transaction_date_in_future: () => ({
+    text: m.reason_transaction_date_in_future(),
+  }),
+  transaction_date_before_ownership: () => ({
+    text: m.reason_transaction_date_before_ownership(),
+  }),
+  transaction_note_too_long: () => ({
+    text: m.reason_transaction_note_too_long(),
+  }),
+  receipt_unsupported_type: () => ({
+    text: m.reason_receipt_unsupported_type(),
+  }),
+  receipt_too_large: () => ({ text: m.reason_receipt_too_large() }),
+  receipt_unreadable: () => ({ text: m.reason_receipt_unreadable() }),
   code_expired: () => ({
     title: m.reason_code_expired_title(),
     text: m.reason_code_expired(),
@@ -180,6 +210,14 @@ const texts: Record<Reason, () => ReasonText> = {
   treatment_nothing_to_undo: () => ({
     title: m.reason_treatment_nothing_to_undo_title(),
     text: m.reason_treatment_nothing_to_undo(),
+  }),
+  transaction_not_found: () => ({
+    title: m.reason_transaction_not_found_title(),
+    text: m.reason_transaction_not_found(),
+  }),
+  storage_quota_full: () => ({
+    title: m.reason_storage_quota_full_title(),
+    text: m.reason_storage_quota_full(),
   }),
   amount_changed: () => ({
     title: m.reason_amount_changed_title(),
