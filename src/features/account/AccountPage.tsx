@@ -2,10 +2,9 @@
 // language and signing out (openspec: account).
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import { useId, useState } from 'react'
+import { useId, useState, type ReactNode } from 'react'
 import { ReasonAlert } from '#/components/ReasonAlert'
 import { clientLog } from '#/lib/client-log'
 import { failureReason } from '#/lib/network-error'
@@ -21,7 +20,8 @@ interface Props {
   name: string
   email: string
   locale: Locale
-  onBack: () => void
+  /** The bottom navigation bar. */
+  bottomNav?: ReactNode
   onSignOut: () => void
   /** Reloads the signed-in user after the name was changed. */
   onNameSaved: () => Promise<void>
@@ -34,24 +34,6 @@ const names: Record<Locale, () => string> = {
   fi: () => m.language_fi(),
   sv: () => m.language_sv(),
   en: () => m.language_en(),
-}
-
-function BackIcon() {
-  return (
-    <svg
-      width="24"
-      height="24"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M15 5 L8 12 L15 19" />
-    </svg>
-  )
 }
 
 function LanguageChoice({
@@ -160,9 +142,7 @@ export function AccountPage(props: Props) {
           pb: 0.5,
         }}
       >
-        <IconButton aria-label={m.account_back()} onClick={props.onBack}>
-          <BackIcon />
-        </IconButton>
+        <span />
         <Typography
           variant="h3"
           component="h1"
@@ -231,6 +211,7 @@ export function AccountPage(props: Props) {
           onSaved={props.onNameSaved}
         />
       ) : null}
+      {props.bottomNav}
     </Stack>
   )
 }

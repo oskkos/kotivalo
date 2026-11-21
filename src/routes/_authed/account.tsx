@@ -1,4 +1,5 @@
 import { createFileRoute, useRouter } from '@tanstack/react-router'
+import { BottomNav } from '#/components/BottomNav'
 import { AccountPage } from '#/features/account/AccountPage'
 import { signOut } from '#/features/authentication/functions'
 import { m } from '#/paraglide/messages.js'
@@ -16,9 +17,7 @@ function AccountRoute() {
       name={user.name}
       email={user.email}
       locale={user.locale}
-      onBack={() => {
-        void router.navigate({ to: '/' })
-      }}
+      bottomNav={<BottomNav current="account" />}
       onSignOut={() => {
         void signOut().then(() => {
           window.location.assign('/sign-in')

@@ -1,3 +1,4 @@
+import { BottomNav } from '#/components/BottomNav'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { listProperties } from '#/features/properties/functions'
 import { listCurrentOwners } from '#/features/ownership/functions'
@@ -25,14 +26,13 @@ export const Route = createFileRoute('/_authed/')({
 })
 
 function HomeRoute() {
-  const { user } = Route.useRouteContext()
   const { properties, invitations, owners } = Route.useLoaderData()
   const router = useRouter()
   return (
     <PropertyList
       properties={properties}
       owners={owners}
-      name={user.name}
+      bottomNav={<BottomNav current="flats" />}
       notices={
         <InvitationCards
           invitations={invitations}

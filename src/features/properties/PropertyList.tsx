@@ -9,7 +9,6 @@ import Typography from '@mui/material/Typography'
 import { Link } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
 import { Logo, LogoMark } from '#/components/Logo'
-import { AccountAvatar } from '#/features/account/AccountAvatar'
 import { formatArea } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 import { colors, radii } from '#/theme/tokens'
@@ -21,8 +20,8 @@ interface Props {
   properties: readonly Property[]
   /** The current owners by flat id, for each card's ownership line. */
   owners?: Readonly<Record<string, readonly CardOwner[]>>
-  /** The signed-in user's display name, for the account button. */
-  name: string
+  /** The bottom navigation bar. */
+  bottomNav?: ReactNode
   /** Shown above the list or the empty state, e.g. flat invitations. */
   notices?: ReactNode
 }
@@ -144,7 +143,7 @@ function EmptyState() {
   )
 }
 
-function Header({ name }: { name: string }): ReactNode {
+function Header(): ReactNode {
   return (
     <Stack
       component="header"
@@ -171,14 +170,6 @@ function Header({ name }: { name: string }): ReactNode {
         >
           <PlusIcon />
         </IconButton>
-        <IconButton
-          component={Link}
-          to="/account"
-          aria-label={m.account_title()}
-          sx={{ p: 0 }}
-        >
-          <AccountAvatar name={name} size={44} />
-        </IconButton>
       </Stack>
     </Stack>
   )
@@ -187,12 +178,12 @@ function Header({ name }: { name: string }): ReactNode {
 export function PropertyList({
   properties,
   owners = {},
-  name,
+  bottomNav,
   notices,
 }: Props) {
   return (
     <Stack sx={{ minHeight: '100dvh' }}>
-      <Header name={name} />
+      <Header />
       <Stack
         component="main"
         sx={{ flex: 1, gap: 1.75, px: 2.5, pt: 1, pb: 4 }}
@@ -224,6 +215,7 @@ export function PropertyList({
           </Stack>
         )}
       </Stack>
+      {bottomNav}
     </Stack>
   )
 }

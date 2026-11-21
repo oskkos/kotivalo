@@ -60,7 +60,7 @@ All screens are sketched on the [Design canvas](https://claude.ai/code/artifact/
 | **Year summary** (Vuosiyhteenveto)                    | Menus: flat and person (own share / other owners / whole flats). Form 7H breakdown, loan interest, capitalised charges, capital income tax estimate, PDF and copy.                                              |
 | **Account** (Tili)                                    | Profile, subscription, notifications, tax settings, bank connection, data export.                                                                                                                               |
 
-Navigation: bottom bar _Flats · Statistics · [new entry] · Taxes · Account_. The receipt icon in the middle opens a new entry.
+Navigation: bottom bar _Flats · Statistics · [new entry] · Taxes · Account_. The receipt icon in the middle opens a new entry. Built so far: _Flats · [new entry] · Account_ on the flats list and the account page (#32); Statistics and Taxes join it with their pages.
 
 ## 4. Logic and decisions
 
@@ -146,23 +146,23 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 
 ### 5.2 Data model draft (D1 + Drizzle)
 
-| Table                                        | Key fields                                                                                                                                              |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `user`, `session`, `account`, `verification` | Better Auth's own tables, part of the Drizzle schema and migrations                                                                                     |
-| `properties`                                 | id, address, postcode, city, room count, floor area                                                                                                     |
-| `property_access`                            | property_id, user_id, role (`owner`, `member`)                                                                                                          |
-| `property_invitations`                       | property_id, email, invited_by, created, expires (pending only; accepting adds `property_access`)                                                       |
-| `ownership_periods`                          | property_id, user_id, share (basis points, > 0), valid_from, valid_to, reason (sale / gift / inheritance / division / other; none for the first period) |
-| `tenancies`                                  | property_id, tenant, contact details, type, start, end, deposit, due day, notice given by, notice date                                                  |
-| `deposit_returns`                            | tenancy_id, amount returned, deduction, reason, date                                                                                                    |
-| `recurring_amounts`                          | property_id, kind (rent / maintenance charge / financing charge), amount, valid_from, valid_to                                                          |
-| `financing_treatments`                       | property_id, treatment (income-recognised / capitalised), valid_from, valid_to                                                                          |
-| `transactions`                               | property_id, type (income / expense), category, amount, date, note, receipt, recurrence                                                                 |
-| `receipts`                                   | id, transaction_id, R2 key, mime, size                                                                                                                  |
-| `attachments`                                | id, tenancy_id, R2 key, type (e.g. tenancy contract), mime, size                                                                                        |
-| `loans`                                      | property_id, name                                                                                                                                       |
-| `loan_borrowers`                             | loan_id, user_id, share (debt share, adding up to 10000), valid_from, valid_to                                                                          |
-| `loan_payments`                              | loan_id, year, interest, principal                                                                                                                      |
+| Table                                        | Key fields                                                                                                                                                          |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `user`, `session`, `account`, `verification` | Better Auth's own tables, part of the Drizzle schema and migrations                                                                                                 |
+| `properties`                                 | id, address, postcode, city, room count, floor area                                                                                                                 |
+| `property_access`                            | property_id, user_id, role (`owner`, `member`)                                                                                                                      |
+| `property_invitations`                       | property_id, email, invited_by, created, expires (pending only; accepting adds `property_access`)                                                                   |
+| `ownership_periods`                          | property_id, user_id, share (basis points, > 0), valid_from, valid_to, reason (sale / gift / inheritance / division / other; none for the first period)             |
+| `tenancies`                                  | property_id, tenant, contact details, type, start, end, deposit, due day, notice given by, notice date                                                              |
+| `deposit_returns`                            | tenancy_id, amount returned, deduction, reason, date                                                                                                                |
+| `recurring_amounts`                          | property_id, kind (rent / maintenance charge / financing charge), amount, valid_from, valid_to                                                                      |
+| `financing_treatments`                       | property_id, treatment (income-recognised / capitalised), valid_from, valid_to                                                                                      |
+| `transactions`                               | property_id, type (income / expense), category (decides the form 7H row and deductibility), amount (positive cents), date, note, created_by, created_at, updated_at |
+| `receipts`                                   | id, transaction_id (one per entry), R2 key, content type, size, file name, uploaded_by (counts against the storage quota), created_at                               |
+| `attachments`                                | id, tenancy_id, R2 key, type (e.g. tenancy contract), mime, size                                                                                                    |
+| `loans`                                      | property_id, name                                                                                                                                                   |
+| `loan_borrowers`                             | loan_id, user_id, share (debt share, adding up to 10000), valid_from, valid_to                                                                                      |
+| `loan_payments`                              | loan_id, year, interest, principal                                                                                                                                  |
 
 ## 6. Open questions
 
@@ -187,7 +187,7 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 - [ ] Logging the deposit return later has no screen. End tenancy says to log it after the final inspection, but nothing shows where.
 - [x] ~~Missing screens: accepting a flat invitation, and the first-run empty state with no flats.~~ Both are on the Design canvas ("Jakaminen ja kutsut") and built; so are the sign-in screens. A passkey option comes with its own issue.
 - [ ] The former owner's read-only view of their ownership period is not sketched.
-- [ ] Expense details shows _Payee_ (Saaja) and _Deductible_ (Vähennyskelpoinen), but `transactions` has neither field. Add them to the data model or drop them from the screen.
+- [x] ~~Expense details shows _Payee_ (Saaja) and _Deductible_ (Vähennyskelpoinen), but `transactions` has neither field.~~ No Payee field (the note covers it); deductibility follows from the category (#23, #32).
 
 **Tax and legal** (to be checked with an expert / the Finnish Tax Administration)
 

@@ -17,7 +17,6 @@ const saveName = vi.mocked(setDisplayName)
 function setup() {
   const user = userEvent.setup()
   const props = {
-    onBack: vi.fn(),
     onSignOut: vi.fn(),
     onNameSaved: vi.fn(() => Promise.resolve()),
     onLanguageChanged: vi.fn(),
@@ -44,7 +43,7 @@ afterEach(() => {
 
 describe('Account page', () => {
   test('shows the name, the address and the actions', async () => {
-    const { user, onBack, onSignOut } = setup()
+    const { user, onSignOut } = setup()
 
     expect(
       screen.getByRole('heading', { level: 1, name: 'Account' }),
@@ -52,8 +51,6 @@ describe('Account page', () => {
     expect(screen.getByText('Annika')).toBeVisible()
     expect(screen.getByText('annika@example.com')).toBeVisible()
 
-    await user.click(screen.getByRole('button', { name: 'Back to flats' }))
-    expect(onBack).toHaveBeenCalledOnce()
     await user.click(screen.getByRole('button', { name: 'Sign out' }))
     expect(onSignOut).toHaveBeenCalledOnce()
   })

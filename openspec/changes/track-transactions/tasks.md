@@ -150,11 +150,11 @@
 
 ## 9. The bottom bar
 
-- [ ] 9.1 `src/components/BottomNav.tsx` (design.md, "The bottom bar"), rendered on `/` and `/account`
-- [ ] 9.2 Remove the account button from the flats list header and the back button from the account page
-- [ ] 9.3 Messages in fi, then sv and en with the translate skill; the term-critic on the diff
-- [ ] 9.4 Component test for `aria-current`
-- [ ] 9.5 Playwright:
+- [x] 9.1 `src/components/BottomNav.tsx` (design.md, "The bottom bar"), rendered on `/` and `/account`
+- [x] 9.2 Remove the account button from the flats list header and the back button from the account page
+- [x] 9.3 Messages in fi, then sv and en with the translate skill; the term-critic on the diff
+- [x] 9.4 Component test for `aria-current`; the account page test no longer has a back button
+- [x] 9.5 Playwright:
   - "Moving between the flats list and the account page"
   - "The bottom bar opens a new entry"
   - "Forms don't show the bottom bar"
@@ -165,10 +165,10 @@
   - "A member of shared flats only can't add entries"
 
   Update the existing e2e tests that used the header account button
-- [ ] 9.6 Docs:
+- [x] 9.6 Docs:
   - CLAUDE.md "Current state": entries and receipts, and the bottom bar
   - CONCEPT.md: tick the Payee and Deductible question (#23); update the data model rows of `transactions` and `receipts`; under §3, the bottom bar now has Flats · New entry · Account, with Statistics and Taxes to come
-- [ ] 9.7 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
+- [x] 9.7 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
 
 ## 10. Archive
 
