@@ -130,7 +130,7 @@ describe('Ownership change form', () => {
 
     expect(
       await screen.findByText(
-        "The change can start on the current ownership period's start date at the earliest.",
+        "The change can't start before the current ownership period does.",
       ),
     ).toBeInTheDocument()
     expect(onSaved).not.toHaveBeenCalled()
