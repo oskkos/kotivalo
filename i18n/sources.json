@@ -1,0 +1,58 @@
+{
+  "finlex": {
+    "name": "Finlex: Finnish legislation in Finnish and Swedish",
+    "url": "https://www.finlex.fi/",
+    "languages": ["fi", "sv"],
+    "authority": "authoritative",
+    "useFor": "Legal terms. Laws are official in both languages, so the Swedish text of e.g. the Act on Residential Leases (481/1995) and the Limited Liability Housing Companies Act (1599/2009) settles Finland-Swedish terms."
+  },
+  "finlex_en": {
+    "name": "Finlex: unofficial English translations of Finnish legislation",
+    "url": "https://www.finlex.fi/en/",
+    "languages": ["en"],
+    "authority": "reference",
+    "useFor": "English legal terms. The translations are unofficial, so they support a choice but don't settle it."
+  },
+  "iate": {
+    "name": "IATE, the EU's terminology database",
+    "url": "https://iate.europa.eu/",
+    "languages": ["fi", "sv", "en"],
+    "authority": "reference",
+    "useFor": "Cross-checking equivalents between the three languages. Its Swedish is often Sweden's, so check Finland-Swedish usage elsewhere."
+  },
+  "kielitoimisto": {
+    "name": "Kielitoimiston sanakirja",
+    "url": "https://www.kielitoimistonsanakirja.fi/",
+    "languages": ["fi"],
+    "authority": "reference",
+    "useFor": "Finnish meaning, spelling and inflection, for the match patterns."
+  },
+  "svenska_se": {
+    "name": "Svenska.se (Svenska Akademiens ordböcker)",
+    "url": "https://svenska.se/",
+    "languages": ["sv"],
+    "authority": "reference",
+    "useFor": "Swedish spelling and inflection, for the match patterns. It describes Sweden's Swedish; Finland-Swedish legal and tax terms come from Finlex and the Tax Administration."
+  },
+  "vero_en": {
+    "name": "Finnish Tax Administration, English pages",
+    "url": "https://www.vero.fi/en/",
+    "languages": ["en"],
+    "authority": "authoritative",
+    "useFor": "English tax terms as the Tax Administration uses them."
+  },
+  "vero_fi": {
+    "name": "Verohallinto",
+    "url": "https://www.vero.fi/",
+    "languages": ["fi"],
+    "authority": "authoritative",
+    "useFor": "Finnish tax terms: rental income, deductible expenses, form 7H."
+  },
+  "vero_sv": {
+    "name": "Skatteförvaltningen, svenska sidor",
+    "url": "https://www.vero.fi/sv/",
+    "languages": ["sv"],
+    "authority": "authoritative",
+    "useFor": "Finland-Swedish tax terms, including the Swedish form 7H."
+  }
+}

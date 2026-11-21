@@ -189,32 +189,11 @@ Vitest projects are chosen by file name (`vitest.config.ts`):
 
 ## Domain glossary
 
-Code, database and test names use these English terms. The English UI copy may use friendlier words; that is decided in the translations, not here.
+The term bank `i18n/terms.json` is the glossary: one entry per domain term, with the Finnish, Swedish and English words, the name used in code, the database and tests (`code`, with `codeNotes` on tables, columns and units) and a definition. Read it before naming domain code or writing messages.
 
-| Finnish                   | Code                                 | Notes                                                                                                  |
-| ------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| asunto                    | `property`                           | One rental unit; also covers a house. Table `properties`                                               |
-| omistaja, omistusosuus    | owner, `share`                       | Share in basis points (5000 = 50 %), per `ownership_periods` row                                       |
-| pääsy, jakaminen          | `access`                             | Per property, by invitation. Tables `property_access`, `property_invitations`; roles `owner`, `member` |
-| vuokrasuhde               | `tenancy`                            |                                                                                                        |
-| vuokralainen              | `tenant`                             |                                                                                                        |
-| irtisanominen             | `notice`                             | `noticeDate`, `noticeGivenBy`                                                                          |
-| vakuus, vakuuden palautus | `deposit`, `depositReturn`           |                                                                                                        |
-| vuokra                    | `rent`                               |                                                                                                        |
-| hoitovastike              | `maintenanceCharge`                  |                                                                                                        |
-| rahoitusvastike           | `financingCharge`                    |                                                                                                        |
-| tulouttaa / rahastoida    | `incomeRecognised` / `capitalised`   | Financing charge treatment, a validity period                                                          |
-| toistuva summa            | `recurringAmount`                    | Rent and charges over time                                                                             |
-| kirjaus (tulo / meno)     | `transaction` (`income` / `expense`) | Not to be confused with a database transaction                                                         |
-| kuitti                    | `receipt`                            |                                                                                                        |
-| liite                     | `attachment`                         | E.g. a tenancy contract                                                                                |
-| laina, lainanottaja       | `loan`, `borrower`                   | Per property; borrowers have a debt `share` (basis points, a validity period)                          |
-| lainanmaksu               | `loanPayment`                        | Per loan and year: `interest` (deductible), `principal` (not deductible)                               |
-| hankintameno              | `acquisitionCost`                    | Capitalised financing charges add to it                                                                |
-| vuosiyhteenveto           | `yearSummary`                        | Computed, never stored                                                                                 |
-| voimassaolojakso          | validity period                      | `validFrom` / `validTo`, columns `valid_from` / `valid_to`                                             |
-| taloyhtiö                 | `housingCompany`                     |                                                                                                        |
-| kuolinpesä                | `estate`                             |                                                                                                        |
+- Code names stay English and follow `code` (`property`, `tenancy`, `share`, `recurringAmount`, `transaction`, …). The English UI copy may use a friendlier word; the bank's `en.term` decides it (`property` is a "flat" in the UI).
+- `transaction` means an income or expense entry, not a database transaction.
+- Each language's term has a `status` that says how sure we are, from the sources behind it: `proposed` (no source yet), `derived`, `verified` (an authoritative source, listed in `i18n/sources.json`) or `reviewed` (accepted by a fluent speaker). Tests in `scripts/terms/` check the rules.
 
 ## Domain rules that shape the code
 
@@ -226,7 +205,7 @@ Code, database and test names use these English terms. The English UI copy may u
 
 ## i18n
 
-- Finnish (primary), Swedish and English from day one. Write the Finnish copy first. Translations live in `messages/fi.json`, `sv.json` and `en.json` (Paraglide; project in `project.inlang/`, compiler options in `project.inlang/paraglide.config.ts`). Keys are in alphabetical order (ESLint `jsonc/sort-keys`; `pnpm lint:fix` and the pre-commit hook sort them). Use them as `m.key()` from `#/paraglide/messages.js`; message keys are static (ESLint `paraglide/no-dynamic-message-access`). Paraglide silently falls back to Finnish for a message missing in another language, so `src/messages.test.ts` checks that every language has the same keys and variables and no empty messages.
+- Finnish (primary), Swedish and English from day one. Write the Finnish copy first, with the words from the term bank (`i18n/terms.json`, see "Domain glossary"). Translations live in `messages/fi.json`, `sv.json` and `en.json` (Paraglide; project in `project.inlang/`, compiler options in `project.inlang/paraglide.config.ts`). Keys are in alphabetical order (ESLint `jsonc/sort-keys`; `pnpm lint:fix` and the pre-commit hook sort them). Use them as `m.key()` from `#/paraglide/messages.js`; message keys are static (ESLint `paraglide/no-dynamic-message-access`). Paraglide silently falls back to Finnish for a message missing in another language, so `src/messages.test.ts` checks that every language has the same keys and variables and no empty messages.
 - **No hard-coded text**: all UI copy, errors and emails come from messages, in the recipient's language. ESLint flags JSX text, string literals in JSX and user-facing attributes (`title`, `aria-label`, `alt`, `placeholder`, …) in `.tsx` files. Strings that are never translated (the brand name) go in `UNTRANSLATED` in `eslint.config.js`.
 - **Language resolution**: the server entry `src/server.ts` wraps TanStack Start in Paraglide's middleware, so `getLocale()` and messages follow the request during SSR. Before sign-in the language comes from the `kotivalo_locale` cookie, then the browser language, then Finnish. Signed-in users get the language stored on their account (`user.locale`): signing in sets the cookie to it, and the signed-in layout puts it back if it drifts and reloads the page (a redirect during SSR), so the page never renders in one language on the server and another in the browser. The stored language changes only by the user's choice: on the account page (`setAccountLanguage`, then a full reload, not Paraglide's `setLocale()`, which sees the new cookie and skips the reload), or from the sign-in page's menu, which remembers the choice for the tab (`src/lib/chosen-locale.ts`, `sessionStorage`) and sends it with the sign-in; the cookie alone never changes an account's language. The language is not part of the URL.
 - **Formatting** uses each language as used in Finland: `fi-FI`, `sv-FI`, `en-FI` (`1 234,56 €` and `5.3.2026` in Finnish and Swedish, `€1,234.56` and `05/03/2026` in English). Format amounts, dates and floor areas with `formatMoney(cents)`, `formatDate(iso)` and `formatArea(tenths)` in `src/lib/format.ts`, also when they appear inside a message: pass the formatted string as a parameter. Don't use Paraglide's `number` or `datetime` formatters in messages, because they format with the bare language (`sv` gives Swedish ISO dates, `en` gives US dates). `plural` in messages is fine.
