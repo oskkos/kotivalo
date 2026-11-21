@@ -135,7 +135,7 @@ The service worker already ignores `/api/*`, so receipts are never cached in the
 
 The receipts repository gives `usage(userId)`, a sum and count over `receipts.uploaded_by`. Attachments (#30) will add theirs to the same usage.
 
-- **Parallel uploads:** two uploads at the same moment can pass the check together and exceed the quota by one file. That is acceptable for an abuse limit. The quota keeps a misused account from filling R2, which has no spending cap once billing is on; it is not an exact accounting.
+- **Checked twice:** once before `storage.put()`, so a full quota stores no file, and again inside the write. The receipt row (and, for a new entry, the entry itself) is inserted only if the user's recorded sizes and file count, plus the new file, still fit. Parallel uploads therefore can't all pass a check made before them; the one that doesn't fit is refused with `storage_quota_full`, and its file is deleted again. The quota keeps a misused account from filling R2, which has no spending cap once billing is on.
 - **Per user, not per flat,** so co-owners don't block each other, and a user can't escape the limit by adding flats (flats are limited separately).
 
 ### Who may do what
