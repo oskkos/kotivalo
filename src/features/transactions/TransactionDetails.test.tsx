@@ -115,7 +115,7 @@ describe('entry details', () => {
     })
   })
 
-  test('a PDF opens in the browser’s viewer', () => {
+  test("a PDF opens in the browser's viewer", () => {
     setup({
       ...expense,
       receipt: {

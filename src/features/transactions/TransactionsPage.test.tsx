@@ -129,7 +129,7 @@ describe('The entries page', () => {
     expect(screen.queryByRole('listitem')).toBeNull()
   })
 
-  test('A member sees the entries but can’t add them', () => {
+  test("A member sees the entries but can't add them", () => {
     setup(view({ role: 'member' }))
     expect(screen.getByText('Annual repair')).toBeVisible()
     expect(

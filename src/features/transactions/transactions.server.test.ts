@@ -185,7 +185,7 @@ describe('Logging an entry', () => {
     ).toEqual({ ok: false, reason: 'transaction_date_before_ownership' })
   })
 
-  test('A member can’t log an entry', async () => {
+  test("A member can't log an entry", async () => {
     expect(
       await createTransaction(deps('matti'), flat, repair, jpeg()),
     ).toEqual({ ok: false, reason: 'sharing_owner_only' })
@@ -223,7 +223,7 @@ describe('Attaching a receipt', () => {
     expect((await details(id)).receipt?.contentType).toBe('application/pdf')
   })
 
-  test('A file that isn’t an image or a PDF is refused', async () => {
+  test("A file that isn't an image or a PDF is refused", async () => {
     const text = {
       bytes: new TextEncoder().encode('not a receipt'),
       filename: 'kuitti.jpg',
@@ -335,7 +335,7 @@ describe('Storage quota for receipts', () => {
     expect(await fileKeys()).toHaveLength(1)
   })
 
-  test('Another owner’s files don’t count', async () => {
+  test("Another owner's files don't count", async () => {
     await recordUploads('jussi', 1000, 1)
     expect(
       (await createTransaction(deps('annika'), flat, repair, jpeg())).ok,
@@ -416,7 +416,7 @@ describe('Editing an entry', () => {
     expect(await fileKeys()).toEqual([])
   })
 
-  test('A member can’t edit an entry', async () => {
+  test("A member can't edit an entry", async () => {
     const id = await created()
     expect(
       await updateTransaction(
@@ -463,7 +463,7 @@ describe('Deleting an entry', () => {
     expect(events()).toContain('transaction.deleted')
   })
 
-  test('A member can’t delete an entry', async () => {
+  test("A member can't delete an entry", async () => {
     const id = await created()
     expect(await deleteTransaction(deps('matti'), flat, id)).toEqual({
       ok: false,
