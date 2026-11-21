@@ -1,6 +1,5 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "account_back": "Tillbaka till bostäderna",
   "account_cancel": "Avbryt",
   "account_change_name": "Ändra namn",
   "account_language": "Språk",
@@ -182,6 +181,7 @@
   "language_fi": "Suomi",
   "language_menu_label": "Språk: {language}",
   "language_sv": "Svenska",
+  "nav_label": "Huvudnavigering",
   "not_found_home": "Till startsidan",
   "not_found_text": "Det finns ingen sida på adressen. Kontrollera adressen eller gå tillbaka till startsidan.",
   "not_found_title": "Sidan hittades inte",

@@ -1,6 +1,5 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "account_back": "Takaisin asuntoihin",
   "account_cancel": "Peru",
   "account_change_name": "Muuta nimeä",
   "account_language": "Kieli",
@@ -182,6 +181,7 @@
   "language_fi": "Suomi",
   "language_menu_label": "Kieli: {language}",
   "language_sv": "Svenska",
+  "nav_label": "Päänavigaatio",
   "not_found_home": "Etusivulle",
   "not_found_text": "Osoitteessa ei ole sivua. Tarkista osoite tai palaa etusivulle.",
   "not_found_title": "Sivua ei löydy",

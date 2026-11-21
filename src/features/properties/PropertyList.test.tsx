@@ -47,7 +47,6 @@ describe('PropertyList', () => {
           flat('a', 'Koivupolku 7 A 4'),
           flat('b', 'Rantatie 15 C 21'),
         ]}
-        name="Annika"
       />,
     )
 
@@ -65,17 +64,12 @@ describe('PropertyList', () => {
   })
 
   test('says "1 flat" for one flat', () => {
-    render(
-      <PropertyList
-        properties={[flat('a', 'Koivupolku 7 A 4')]}
-        name="Annika"
-      />,
-    )
+    render(<PropertyList properties={[flat('a', 'Koivupolku 7 A 4')]} />)
     expect(screen.getByText('1 flat')).toBeInTheDocument()
   })
 
   test('shows the empty state without flats', () => {
-    render(<PropertyList properties={[]} name="Annika" />)
+    render(<PropertyList properties={[]} />)
 
     expect(
       screen.getByRole('heading', { name: 'Add your first flat' }),
@@ -84,15 +78,6 @@ describe('PropertyList', () => {
     for (const link of screen.getAllByRole('link', { name: 'Add flat' })) {
       expect(link).toHaveAttribute('href', '/properties/new')
     }
-  })
-
-  test("the header opens the account page with the name's initial", () => {
-    render(<PropertyList properties={[]} name="Annika" />)
-
-    const account = screen.getByRole('link', { name: 'Account' })
-    expect(account).toHaveAttribute('href', '/account')
-    expect(account).toHaveTextContent('A')
-    expect(screen.queryByRole('button', { name: 'Sign out' })).toBeNull()
   })
 })
 
@@ -107,7 +92,6 @@ describe('Listing flats', () => {
             { name: 'Annika', share: 5000, isYou: true },
           ],
         }}
-        name="Annika"
       />,
     )
 

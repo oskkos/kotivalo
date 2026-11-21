@@ -1,6 +1,5 @@
 {
   "$schema": "https://inlang.com/schema/inlang-message-format",
-  "account_back": "Back to flats",
   "account_cancel": "Cancel",
   "account_change_name": "Change name",
   "account_language": "Language",
@@ -182,6 +181,7 @@
   "language_fi": "Suomi",
   "language_menu_label": "Language: {language}",
   "language_sv": "Svenska",
+  "nav_label": "Main navigation",
   "not_found_home": "Go to the home page",
   "not_found_text": "There is no page at this address. Check the address or go back to the home page.",
   "not_found_title": "Page not found",

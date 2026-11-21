@@ -24,9 +24,8 @@ test.describe('The account page', () => {
     await signIn(page, email, 'Annika')
     await waitForHydration(page)
 
-    const account = page.getByRole('link', { name: 'Tili' })
-    await expect(account).toHaveText('A')
-    await account.click()
+    const nav = page.getByRole('navigation', { name: 'Päänavigaatio' })
+    await nav.getByRole('link', { name: 'Tili' }).click()
     await expect(page).toHaveURL('/account')
 
     await expect(
@@ -34,7 +33,7 @@ test.describe('The account page', () => {
     ).toBeVisible()
     await expect(page.getByText('Annika', { exact: true })).toBeVisible()
     await expect(page.getByText(email)).toBeVisible()
-    await page.getByRole('button', { name: 'Takaisin asuntoihin' }).click()
+    await nav.getByRole('link', { name: 'Asunnot' }).click()
     await expect(page).toHaveURL('/')
   })
 })
