@@ -196,6 +196,26 @@ test.describe('Undoing the latest rent or charge change', () => {
     await expect(charge.getByText('€214.00/month')).toBeVisible()
     await expect(charge.getByText(/: €226.00\/month/)).toHaveCount(0)
   })
+
+  test('Undoing the only rent', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await openAmounts(page, id)
+    await setAmount(page, 'Rent', '890', '01/06/2025')
+
+    await page.getByRole('button', { name: 'Change: Rent' }).click()
+    await page.getByRole('button', { name: 'Undo the latest change' }).click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toContainText('The amount is removed.')
+    await dialog.getByRole('button', { name: 'Undo change' }).click()
+    await expect(
+      page.getByRole('heading', { name: 'Rent and charges' }),
+    ).toBeVisible()
+    await setAmount(page, 'Rent', '890', '01/03/2025')
+
+    const rent = section(page, 'Rent')
+    await expect(rent.getByText('€890.00/month')).toBeVisible()
+    await expect(rent.getByText('From 01/03/2025')).toBeVisible()
+  })
 })
 
 /** On the Rent and charges page: sets the treatment via its form. */
@@ -244,6 +264,32 @@ test.describe('The financing charge treatment', () => {
       `From 01/01/${String(nextYear)}Recorded as revenue`,
     )
     await expect(history.nth(1)).toHaveText('From 01/03/2025Placed in reserve')
+  })
+})
+
+test.describe('Undoing the latest treatment change', () => {
+  test('Undoing a treatment change', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await openAmounts(page, id)
+    await setTreatment(page, 'Placed in reserve', '01/03/2025')
+    await setTreatment(page, 'Recorded as revenue', `01/01/${String(nextYear)}`)
+
+    await page
+      .getByRole('button', { name: 'Change: Treatment by the housing company' })
+      .click()
+    await waitForHydration(page)
+    await page.getByRole('button', { name: 'Undo the latest change' }).click()
+    const dialog = page.getByRole('dialog', {
+      name: `Undo the treatment from 01/01/${String(nextYear)}?`,
+    })
+    await expect(dialog).toContainText(
+      'The previous treatment, Placed in reserve from 01/03/2025, applies again.',
+    )
+    await dialog.getByRole('button', { name: 'Undo change' }).click()
+
+    const financing = section(page, 'Financing charge')
+    await expect(financing.getByText('Placed in reserve')).toBeVisible()
+    await expect(financing.getByText('Recorded as revenue')).toHaveCount(0)
   })
 })
 

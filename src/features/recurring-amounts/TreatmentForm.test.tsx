@@ -1,14 +1,18 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, test, vi } from 'vitest'
-import { setFinancingTreatment } from './functions'
+import { setFinancingTreatment, undoFinancingTreatment } from './functions'
 import type { RecurringAmountsView } from './recurring-amounts.server'
 import { TreatmentForm } from './TreatmentForm'
 
 // jsdom's browser language is English, so the form is in English.
 vi.mock('#/lib/client-log', () => ({ clientLog: { error: vi.fn() } }))
-vi.mock('./functions', () => ({ setFinancingTreatment: vi.fn() }))
+vi.mock('./functions', () => ({
+  setFinancingTreatment: vi.fn(),
+  undoFinancingTreatment: vi.fn(),
+}))
 const save = vi.mocked(setFinancingTreatment)
+const undo = vi.mocked(undoFinancingTreatment)
 
 afterEach(() => {
   vi.clearAllMocks()
@@ -112,5 +116,56 @@ describe('The financing charge treatment', () => {
       'From 01/01/2027Recorded as revenue',
       'From 01/03/2025Placed in reserve',
     ])
+  })
+})
+
+describe('Undoing the latest treatment change', () => {
+  const twoTreatments: RecurringAmountsView = {
+    ...view,
+    treatments: [
+      { validFrom: '2025-03-01', validTo: '2026-12-31', value: 'capitalised' },
+      { validFrom: '2027-01-01', validTo: null, value: 'income_recognised' },
+    ],
+  }
+
+  test('undoing asks first and names the treatment that applies again', async () => {
+    undo.mockResolvedValue({ ok: true })
+    const { user, onDone } = setup(twoTreatments)
+    await user.click(
+      screen.getByRole('button', { name: 'Undo the latest change' }),
+    )
+    const dialog = screen.getByRole('dialog', {
+      name: 'Undo the treatment from 01/01/2027?',
+    })
+    expect(dialog).toHaveTextContent(
+      'The previous treatment, Placed in reserve from 01/03/2025, applies again.',
+    )
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Undo change' }),
+    )
+    expect(undo).toHaveBeenCalledWith({ data: { propertyId: 'flat' } })
+    expect(onDone).toHaveBeenCalled()
+  })
+
+  test('the only treatment can be undone, and the dialog says it is removed', async () => {
+    const { user } = setup({
+      ...view,
+      treatments: [
+        { validFrom: '2025-03-01', validTo: null, value: 'capitalised' },
+      ],
+    })
+    await user.click(
+      screen.getByRole('button', { name: 'Undo the latest change' }),
+    )
+    expect(screen.getByRole('dialog')).toHaveTextContent(
+      'The treatment is removed. You can set it again from the right date.',
+    )
+  })
+
+  test('there is nothing to undo without a treatment', () => {
+    setup()
+    expect(
+      screen.queryByRole('button', { name: 'Undo the latest change' }),
+    ).toBeNull()
   })
 })

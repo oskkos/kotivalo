@@ -1,6 +1,7 @@
 // Setting the financing charge treatment (Design canvas: Kasittely):
-// income-recognised or capitalised, from a date, with the history (spec:
-// "The financing charge treatment").
+// income-recognised or capitalised, from a date, with the history and
+// undoing the latest change (spec: "The financing charge treatment",
+// "Undoing the latest treatment change").
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
@@ -22,10 +23,11 @@ import {
   type FinancingTreatment,
 } from '#/server/db/schema'
 import { colors, radii } from '#/theme/tokens'
-import { setFinancingTreatment } from './functions'
+import { setFinancingTreatment, undoFinancingTreatment } from './functions'
 import { treatmentLabel } from './labels'
 import type { RecurringAmountsView } from './recurring-amounts.server'
 import { monthStartDate } from './schemas'
+import { UndoButton, UndoDialog } from './UndoDialog'
 
 interface Props {
   propertyId: string
@@ -79,6 +81,9 @@ export function TreatmentForm(props: Props) {
   const [alert, setAlert] = useState<AlertReason>()
   const [dateReason, setDateReason] = useState<FieldReason>()
   const treatments = view.treatments
+  const latest = treatments.at(-1)
+  const previous = treatments.at(-2)
+  const [undoing, setUndoing] = useState(false)
 
   const form = useForm({
     defaultValues: { treatment: '' as FinancingTreatment | '', from: '' },
@@ -239,6 +244,11 @@ export function TreatmentForm(props: Props) {
                 </Box>
               ))}
             </Box>
+            <UndoButton
+              onClick={() => {
+                setUndoing(true)
+              }}
+            />
           </Stack>
         ) : null}
       </Stack>
@@ -267,6 +277,28 @@ export function TreatmentForm(props: Props) {
           )}
         </form.Subscribe>
       </Box>
+      {latest ? (
+        <UndoDialog
+          open={undoing}
+          onClose={() => {
+            setUndoing(false)
+          }}
+          title={m.amounts_treatment_undo_title({
+            date: formatDate(latest.validFrom),
+          })}
+          text={
+            previous
+              ? m.amounts_treatment_undo_text({
+                  treatment: treatmentLabel[previous.value](),
+                  date: formatDate(previous.validFrom),
+                })
+              : m.amounts_treatment_undo_only_text()
+          }
+          undo={() => undoFinancingTreatment({ data: { propertyId } })}
+          failureEvent="financing_treatment.undo_failed"
+          onDone={props.onDone}
+        />
+      ) : null}
     </Stack>
   )
 }

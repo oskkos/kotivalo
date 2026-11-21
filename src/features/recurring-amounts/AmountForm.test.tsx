@@ -186,8 +186,41 @@ describe('Undoing the latest rent or charge change', () => {
     expect(onDone).toHaveBeenCalled()
   })
 
-  test('there is nothing to undo with one period', () => {
-    setup('financing_charge')
+  test('the only period can be undone, and the dialog says it is removed', async () => {
+    undo.mockResolvedValue({ ok: true })
+    const { user, onDone } = setup('financing_charge')
+    await user.click(
+      screen.getByRole('button', { name: 'Undo the latest change' }),
+    )
+    const dialog = screen.getByRole('dialog')
+    expect(dialog).toHaveTextContent(
+      'The amount is removed. You can set it again from the right date.',
+    )
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Undo change' }),
+    )
+    expect(undo).toHaveBeenCalledWith({
+      data: { propertyId: 'flat', kind: 'financing_charge' },
+    })
+    expect(onDone).toHaveBeenCalled()
+  })
+
+  test('a refused undo is shown in the dialog', async () => {
+    undo.mockResolvedValue({ ok: false, reason: 'amount_changed' })
+    const { user, onDone } = setup('financing_charge')
+    await user.click(
+      screen.getByRole('button', { name: 'Undo the latest change' }),
+    )
+    const dialog = screen.getByRole('dialog')
+    await user.click(
+      within(dialog).getByRole('button', { name: 'Undo change' }),
+    )
+    expect(within(dialog).getByText('The details have changed')).toBeVisible()
+    expect(onDone).not.toHaveBeenCalled()
+  })
+
+  test('there is nothing to undo without a period', () => {
+    setup('rent')
     expect(
       screen.queryByRole('button', { name: 'Undo the latest change' }),
     ).toBeNull()
