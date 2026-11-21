@@ -46,10 +46,17 @@ function RecurringAmountsRoute() {
         })
       }}
       onEdit={(what) => {
-        void router.navigate({
-          to: `/properties/$propertyId/amounts/${what === 'treatment' ? 'treatment' : kindSlug(what)}`,
-          params: { propertyId },
-        })
+        if (what === 'treatment') {
+          void router.navigate({
+            to: '/properties/$propertyId/amounts/treatment',
+            params: { propertyId },
+          })
+        } else {
+          void router.navigate({
+            to: '/properties/$propertyId/amounts/$kind',
+            params: { propertyId, kind: kindSlug(what) },
+          })
+        }
       }}
     />
   )

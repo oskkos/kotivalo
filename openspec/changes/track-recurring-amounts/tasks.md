@@ -59,11 +59,11 @@
 
 ## 6. Financing charge treatment
 
-- [ ] 6.1 Route `/properties/$propertyId/amounts/treatment`. Members are sent back to the page
-- [ ] 6.2 `TreatmentForm.tsx`: the two choices with their explanations (`ChoiceField`), the date and the history
-- [ ] 6.3 Messages in fi, then sv and en with the translate skill
-- [ ] 6.4 Component tests
-- [ ] 6.5 Playwright for "Setting the treatment for the first time", "A new treatment keeps the history" and "Only capitalised months count" (shown on the page)
+- [x] 6.1 Route `/properties/$propertyId/amounts/treatment`. Members are sent back to the page
+- [x] 6.2 `TreatmentForm.tsx`: the two choices with their explanations (`ChoiceField`), the date and the history
+- [x] 6.3 Messages in fi, then sv and en with the translate skill
+- [x] 6.4 Component tests
+- [x] 6.5 Playwright for "Setting the treatment for the first time", "A new treatment keeps the history" and "Only capitalised months count" (shown on the page)
 
 ## 7. Opening the page from the edit page
 
