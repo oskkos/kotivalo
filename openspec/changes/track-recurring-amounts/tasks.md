@@ -21,12 +21,12 @@
 
 ## 3. Server functions
 
-- [ ] 3.1 `schemas.ts`: the amount (`parseDecimal(text, 2)`, 0–9 999 999 cents, `amount_invalid`), the date with the month-start check, the kind and the treatment; unit tests
-- [ ] 3.2 Add the reason codes to `src/lib/reasons.ts`: `amount_invalid`, `amount_date_not_month_start`, `amount_date_before_ownership`, `amount_date_too_early` as field reasons, `amount_nothing_to_undo` as an alert. Write their messages in fi, then sv and en with the translate skill
-- [ ] 3.3 `recurring-amounts.server.ts`: get (periods, current and upcoming, accumulated capitalised, first ownership start, role), set amount, undo, set treatment. Each write checks access (`property_not_found`), the owner role (`sharing_owner_only`) and the date rules against the periods just read
-- [ ] 3.4 `functions.ts`: `getRecurringAmounts`, `setRecurringAmount`, `undoRecurringAmount`, `setFinancingTreatment`, with session checks
-- [ ] 3.5 Log `recurring_amount.set` (`propertyId`, `kind`, `corrected`), `recurring_amount.undone` and `financing_treatment.set` at info, ids only
-- [ ] 3.6 Workers tests covering:
+- [x] 3.1 `schemas.ts`: the amount (`parseDecimal(text, 2)`, 0–9 999 999 cents, `amount_invalid`), the date with the month-start check, the kind and the treatment; unit tests
+- [x] 3.2 Add the reason codes to `src/lib/reasons.ts`: `amount_invalid`, `amount_date_not_month_start`, `amount_date_before_ownership`, `amount_date_too_early` as field reasons, `amount_nothing_to_undo` as an alert. Write their messages in fi, then sv and en with the translate skill
+- [x] 3.3 `recurring-amounts.server.ts`: get (periods, current and upcoming, accumulated capitalised, first ownership start, role), set amount, undo, set treatment. Each write checks access (`property_not_found`), the owner role (`sharing_owner_only`) and the date rules against the periods just read
+- [x] 3.4 `functions.ts`: `getRecurringAmounts`, `setRecurringAmount`, `undoRecurringAmount`, `setFinancingTreatment`, with session checks
+- [x] 3.5 Log `recurring_amount.set` (`propertyId`, `kind`, `corrected`), `recurring_amount.undone` and `financing_treatment.set` at info, ids only
+- [x] 3.6 Workers tests covering:
   - "Setting a rent or charge": first amount, correction, date before ownership, date before the latest change, member refused
   - "Undoing the latest rent or charge change"
   - "The financing charge treatment": member refused
