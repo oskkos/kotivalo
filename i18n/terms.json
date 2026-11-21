@@ -24,12 +24,15 @@
     "definition": "A user's sign-in identity in Kotivalo: email address, display name and language.",
     "fi": {
       "term": "tili",
-      "match": ["tili\\p{L}*"],
+      "match": [
+        "tili(n|ä|t|in|ssä|stä|en|ni|si|isi|lle|llä|ltä|ksi|llesi|lläsi|ltäsi|äsi|ssäsi|stäsi)?",
+        "tile(jä|jen|ihin|issä|istä|ille|illä|iltä)"
+      ],
       "status": "proposed"
     },
     "sv": {
       "term": "konto",
-      "match": ["kont\\p{L}*"],
+      "match": ["kont(o|ot|on|ots|ona|onas|ons)"],
       "status": "proposed"
     },
     "en": {
@@ -46,17 +49,78 @@
     "fi": {
       "term": "hankintameno",
       "match": ["hankintamen\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/vahennykset/",
+          "quote": "Hankintameno tarkoittaa arvoa, jolla olet hankkinut omaisuuden itsellesi"
+        }
+      ]
     },
     "sv": {
       "term": "anskaffningsutgift",
       "match": ["anskaffningsutgift\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/hyresinkomster/avdrag/",
+          "quote": "Anskaffningsutgiften avser det värde till vilket du har anskaffat egendomen."
+        }
+      ]
     },
     "en": {
       "term": "acquisition cost",
       "match": ["acquisition costs?"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/individuals/property/rental_income/deductions/",
+          "quote": "The meaning of ‘acquisition cost’ is the price paid for the property"
+        }
+      ]
+    }
+  },
+  "annual_repair": {
+    "definition": "A repair that restores a flat to its original condition; deductible in the year it is paid.",
+    "showOriginal": true,
+    "fi": {
+      "term": "vuosikorjaus",
+      "match": ["vuosikorjau\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/vahennykset/",
+          "quote": "Vuosikorjauksessa huoneisto tai rakennus saatetaan alkuperäistä vastaavaan kuntoon."
+        }
+      ]
+    },
+    "sv": {
+      "term": "årlig reparation",
+      "match": ["årlig\\p{L}* reparation\\p{L}*", "årsreparation\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/hyresinkomster/avdrag/",
+          "quote": "I en årlig reparation återställs en lägenhet eller en byggnad i ett skick som motsvarar det ursprungliga."
+        }
+      ]
+    },
+    "en": {
+      "term": "annual repairs",
+      "match": ["annual repairs?"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/About-us/contact-us/forms/filling-instructions/7h-rental-income-rental-apartments--instructions/",
+          "quote": "2.4. Expenses for annual repairs per year (your share)"
+        }
+      ]
     }
   },
   "attachment": {
@@ -79,6 +143,48 @@
       "status": "proposed"
     }
   },
+  "basic_improvement": {
+    "definition": "An extension, alteration or modernisation of a flat; not deductible at once but depreciated.",
+    "showOriginal": true,
+    "notes": "The Swedish is \"ombyggnad\", not \"grundförbättring\", which the Tax Administration does not use.",
+    "fi": {
+      "term": "perusparannus",
+      "match": ["perusparannu\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/vahennykset/",
+          "quote": "Perusparannusta ovat huoneiston tai rakennuksen laajentaminen, muutostyöt, uudistustyöt ja muut vastaavat toimenpiteet."
+        }
+      ]
+    },
+    "sv": {
+      "term": "ombyggnad",
+      "match": ["ombyggnad\\p{L}*"],
+      "avoid": ["grundförbättring\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/hyresinkomster/avdrag/",
+          "quote": "Ombyggnader är tillbyggnader, ändringar, moderniseringar och motsvarande åtgärder i lägenheten eller byggnaden."
+        }
+      ]
+    },
+    "en": {
+      "term": "improvement",
+      "match": ["improvements?", "moderni[sz]ations?"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/individuals/property/rental_income/deductions/",
+          "quote": "Extensions, alterations, modernisations and other similar work done to an apartment or a building are considered improvements."
+        }
+      ]
+    }
+  },
   "borrower": {
     "code": "borrower",
     "codeNotes": "Borrowers have a debt share (basis points, a validity period)",
@@ -99,6 +205,87 @@
       "status": "proposed"
     }
   },
+  "capital_gain": {
+    "definition": "The taxable gain when a flat is sold for more than its acquisition cost.",
+    "showOriginal": true,
+    "notes": "The Tax Administration pairs the tax words with plain ones: myyntivoitto / försäljningsvinst.",
+    "fi": {
+      "term": "luovutusvoitto",
+      "match": ["luovutusvoit\\p{L}*", "myyntivoit\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/asunnon-myynti/asunnon-verollinen-myynti/",
+          "quote": "maksat myyntivoitosta eli luovutusvoitosta veroa."
+        }
+      ]
+    },
+    "sv": {
+      "term": "överlåtelsevinst",
+      "match": ["överlåtelsevinst\\p{L}*", "försäljningsvinst\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/forsaljning-av-bostad/skattepliktig-f%C3%B6rs%C3%A4ljning-av-en-bostad/",
+          "quote": "Försäljningsvinsten, det vill säga överlåtelsevinsten"
+        }
+      ]
+    },
+    "en": {
+      "term": "capital gain",
+      "match": ["capital gains?"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/individuals/property/selling-your-home/taxable-sale-of-a-residential-property/",
+          "quote": "Capital gains are always taxed as capital income, received the year when the sale was made."
+        }
+      ]
+    }
+  },
+  "capital_income": {
+    "definition": "The income category rental income belongs to, taxed at the capital income tax rate.",
+    "showOriginal": true,
+    "fi": {
+      "term": "pääomatulo",
+      "match": ["pääomatulo\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/",
+          "quote": "Vuokratulot ovat pääomatuloa ja niitä verotetaan pääomatuloveroprosentin mukaan."
+        }
+      ]
+    },
+    "sv": {
+      "term": "kapitalinkomst",
+      "match": ["kapitalinkomst\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/hyresinkomster/",
+          "quote": "Hyresinkomsterna är kapitalinkomster och beskattas enligt kapitalinkomstskattesatsen."
+        }
+      ]
+    },
+    "en": {
+      "term": "capital income",
+      "match": ["capital income"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/individuals/property/rental_income/",
+          "quote": "The income you receive as you rent out your investment property is treated as capital income"
+        }
+      ]
+    }
+  },
   "capitalised": {
     "code": "capitalised",
     "codeNotes": "Financing charge treatment, a validity period",
@@ -107,37 +294,127 @@
     "fi": {
       "term": "rahastoitu",
       "match": ["rahastoi\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/vahennykset/",
+          "quote": "Jos pääomavastike on rahastoitu, sitä ei voi vähentää vuokratulosta."
+        }
+      ]
     },
     "sv": {
       "term": "fonderat",
-      "match": ["fonder\\p{L}*"],
-      "status": "proposed"
+      "match": ["fonder(a|ar|as|at|ad|ade|ades|ats)"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/hyresinkomster/avdrag/",
+          "quote": "Om kapitalvederlaget har fonderats kan det inte dras av från hyresinkomsten."
+        }
+      ]
     },
     "en": {
-      "term": "capitalised",
-      "match": ["capitali[sz]\\p{L}*"],
-      "status": "proposed"
+      "term": "placed in reserve",
+      "match": ["placed in (a )?reserve"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/About-us/contact-us/forms/filling-instructions/7h-rental-income-rental-apartments--instructions/",
+          "quote": "Do not report charges placed in reserve, as they are not deductible from rental income."
+        }
+      ]
+    },
+    "notes": "The code name stays capitalised; the Tax Administration's English says \"placed in reserve\", never \"capitalised\"."
+  },
+  "deductible": {
+    "definition": "An expense that can be subtracted from rental income in taxation.",
+    "showOriginal": true,
+    "notes": "The Tax Administration's Swedish pages use both \"avdragbar\" and \"avdragsgill\" (both on its rental income pages and in its detailed guidance), so the pattern accepts both; the term follows the deductions page.",
+    "fi": {
+      "term": "vähennyskelpoinen",
+      "match": ["vähennyskelpoi\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/vahennykset/",
+          "quote": "Kulut ovat vähennyskelpoisia vuokraustoiminnan aloittamisesta lähtien."
+        }
+      ]
+    },
+    "sv": {
+      "term": "avdragbar",
+      "match": ["avdragbar\\p{L}*", "avdragsgill\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/hyresinkomster/avdrag/",
+          "quote": "Kostnaderna är avdragbara från och med tidpunkten då uthyrningsverksamheten har inletts."
+        }
+      ]
+    },
+    "en": {
+      "term": "deductible",
+      "match": ["(tax-)?deductib\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/About-us/contact-us/forms/filling-instructions/7h-rental-income-rental-apartments--instructions/",
+          "quote": "Deductible monthly maintenance charges include maintenance charges and capital charges"
+        }
+      ]
     }
   },
   "deposit": {
     "code": "deposit",
     "definition": "Money the tenant pays at the start of a tenancy as security for the rent and the flat's condition.",
-    "notes": "The Swedish term follows the Swedish text of the Finnish Act on Residential Leases, not Sweden's usage.",
+    "notes": "The law's Swedish word is the general \"säkerhet\" (Act on Residential Leases §8); the Tax Administration and landlords say \"hyresgaranti\", which is clearer in the UI. The law's English translation says \"security\"; \"deposit\" is the everyday British word and the Tax Administration's (\"security deposit\"). Chosen on purpose over the law's word; a Finland-Swedish reviewer should confirm it.",
     "fi": {
       "term": "vakuus",
-      "match": ["vakuu(s|de\\p{L}*|tta|ks\\p{L}*)"],
-      "status": "proposed"
+      "match": ["vakuu(s|de\\p{L}*|tta|tena|teen\\p{L}*|ks\\p{L}*)"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "finlex",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/1995/481",
+          "quote": "Vakuus asuinhuoneiston vuokrasuhteessa"
+        },
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/mika-on-vuokratuloa/",
+          "quote": "Vuokravakuus sen sijaan ei ole vuokranantajan tuloa"
+        }
+      ]
     },
     "sv": {
-      "term": "säkerhet",
-      "match": ["säkerhet\\p{L}*"],
-      "status": "proposed"
+      "term": "hyresgaranti",
+      "match": ["hyresgaranti\\p{L}*", "garanti(n|er|erna)?"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/hyresinkomster/vad-ar-hyresinkomst/",
+          "quote": "En hyresgaranti är däremot inte en inkomst för hyresvärden"
+        }
+      ],
+      "avoid": ["deposition\\p{L}*"]
     },
     "en": {
       "term": "deposit",
       "match": ["deposits?"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/individuals/property/rental_income/what-is-considered-rental-income/",
+          "quote": "However, if the tenant pays you a security deposit, it is not income to you"
+        }
+      ]
     }
   },
   "deposit_return": {
@@ -149,8 +426,8 @@
       "status": "proposed"
     },
     "sv": {
-      "term": "återbetalning av säkerheten",
-      "match": ["återbetalning\\p{L}* av säkerhet\\p{L}*"],
+      "term": "återbetalning av hyresgarantin",
+      "match": ["återbetalning\\p{L}* av (hyres)?garanti\\p{L}*"],
       "status": "proposed"
     },
     "en": {
@@ -166,18 +443,40 @@
     "fi": {
       "term": "kuolinpesä",
       "match": ["kuolinpe[sr]\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/perinto/kuolinpesan-veroasioiden-hoito/vuokratulot/",
+          "quote": "Kun kuolinpesä antaa vuokralle esimerkiksi asunto-osakkeen, vuokratulot ovat kuolinpesän tuloa."
+        }
+      ]
     },
     "sv": {
       "term": "dödsbo",
       "match": ["dödsbo\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/arv/dodsboets-skattearenden/hyresinkomster/",
+          "quote": "När dödsboet hyr ut exempelvis en bostadsaktie utgör hyresinkomsterna inkomst för dödsboet."
+        }
+      ]
     },
     "en": {
       "term": "estate",
       "match": ["estates?"],
-      "status": "proposed"
-    }
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/individuals/property/inheritance/handling-the-taxes-of-a-death-estate/rental-income/",
+          "quote": "Only the estates of deceased persons that have a Business ID"
+        }
+      ]
+    },
+    "notes": "The Tax Administration's English page titles say \"death estate\"; its body text and Kotivalo say \"estate\" or \"estate of a deceased person\"."
   },
   "expense": {
     "code": "expense",
@@ -196,8 +495,16 @@
     "en": {
       "term": "expense",
       "match": ["expenses?"],
-      "status": "proposed"
-    }
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/individuals/property/rental_income/deductions/",
+          "quote": "you can claim deductions for the direct expenses of renting."
+        }
+      ]
+    },
+    "notes": "The Tax Administration says kulut / kostnader for expenses in general and menot / utgifter for capital items (remontin kustannukset … vuosikorjauskuluihin ja perusparannusmenoihin). Which pair the UI uses is open until the entries screens (#32); the Finnish and Swedish stay proposed."
   },
   "financing_charge": {
     "code": "financingCharge",
@@ -205,19 +512,34 @@
     "showOriginal": true,
     "fi": {
       "term": "rahoitusvastike",
-      "match": ["rahoitusvastik\\p{L}*"],
-      "status": "proposed"
+      "match": ["rahoitusvastik\\p{L}*", "pääomavastik\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/vahennykset/",
+          "quote": "Voit vähentää pääomavastikkeen (rahoitusvastike) vuokratulosta, jos vastikkeet on tuloutettu yhtiön kirjanpidossa."
+        }
+      ]
     },
     "sv": {
       "term": "finansieringsvederlag",
-      "match": ["finansieringsvederlag\\p{L}*"],
-      "status": "proposed"
+      "match": ["finansieringsvederlag\\p{L}*", "kapitalvederlag\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/hyresinkomster/avdrag/",
+          "quote": "Du kan dra av kapitalvederlaget (finansieringsvederlaget) från hyresinkomsterna om vederlagen har intäktsförts i bolagets bokföring."
+        }
+      ]
     },
     "en": {
       "term": "financing charge",
-      "match": ["financing charges?"],
+      "match": ["financing charges?", "capital charges?"],
       "status": "proposed"
-    }
+    },
+    "notes": "The Tax Administration's main word is pääomavastike / kapitalvederlag (also the Limited Liability Housing Companies Act's, 3:3), with rahoitusvastike / finansieringsvederlag in brackets. Kotivalo uses rahoitusvastike, the word on housing company invoices, and the patterns accept both. The Tax Administration's English has no settled term (\"capital charges\", \"capital expenditure charges\", \"loan charge\"), so \"financing charge\" stays proposed until a fluent reviewer decides; the 7H instructions' \"capital charges\" is accepted by the pattern and is the main alternative. Once a reviewer decides, keep one English pattern and move the other to avoid."
   },
   "housing_company": {
     "code": "housingCompany",
@@ -225,18 +547,40 @@
     "fi": {
       "term": "taloyhtiö",
       "match": ["taloyhti\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/vahennykset/",
+          "quote": "Saat vähentää vuokratulosta taloyhtiölle maksamasi"
+        }
+      ]
     },
     "sv": {
       "term": "husbolag",
       "match": ["husbolag\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/hyresinkomster/avdrag/",
+          "quote": "vattenavgifter som du har betalat till husbolaget."
+        }
+      ]
     },
     "en": {
       "term": "housing company",
       "match": ["housing compan(y|ies)"],
-      "status": "proposed"
-    }
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/About-us/contact-us/forms/filling-instructions/7h-rental-income-rental-apartments--instructions/",
+          "quote": "the name and Business ID of the housing company or real estate holding company"
+        }
+      ]
+    },
+    "notes": "The everyday words. The formal ones are asunto-osakeyhtiö / bostadsaktiebolag / limited liability housing company (Act 1599/2009)."
   },
   "income": {
     "code": "income",
@@ -266,18 +610,44 @@
     "fi": {
       "term": "tuloutettu",
       "match": ["tulout\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/tietoa-verohallinnosta/yhteystiedot-ja-asiointi/lomakkeet/tayttoohjeet/7h-vuokratulot--osakehuoneistot-t%C3%A4ytt%C3%B6ohje/",
+          "quote": "Ilmoita tässä kohdin vain yhtiön kirjanpidossa tuloutetut pääomavastikkeet."
+        }
+      ]
     },
     "sv": {
       "term": "intäktsfört",
       "match": ["intäktsför\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/skatteforvaltningen/kontakta-oss/blanketter/deklarationsanvisningar/7h-hyresinkomster--aktiel%C3%A4genheter/",
+          "quote": "Ange i den här punkten endast de kapitalvederlag som bolaget har intäktsfört i bokföringen."
+        }
+      ]
     },
     "en": {
-      "term": "income-recognised",
-      "match": ["income[- ]recogni[sz]\\p{L}*", "recogni[sz]\\p{L}* as income"],
-      "status": "proposed"
-    }
+      "term": "recorded as revenue",
+      "match": [
+        "recorded as (income|revenue)",
+        "recogni[sz]\\p{L}* as (income|revenue)",
+        "income[- ]recogni[sz]\\p{L}*"
+      ],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/About-us/contact-us/forms/filling-instructions/7h-rental-income-rental-apartments--instructions/",
+          "quote": "2.3 Capital expenditure charges recorded as revenue by the housing company per year"
+        }
+      ]
+    },
+    "notes": "The English follows the 7H form's field label (\"recorded as revenue\"), which users compare against; the instructions also say \"recorded as income\", which the pattern accepts."
   },
   "interest": {
     "code": "interest",
@@ -285,18 +655,41 @@
     "definition": "The interest part of a loan payment, deductible from rental income.",
     "fi": {
       "term": "korko",
-      "match": ["kor(ko|on|koa|ot|koja|kojen)"],
-      "status": "proposed"
+      "match": [
+        "kor(ko|on|koa|ot|koja|kojen|kojaan|kona|oista|koihin|olla|oksi|oille|osta|koon|olle|ossa|oilla|oissa)"
+      ],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/vahennykset/",
+          "quote": "kyseessä on tulonhankkimisvelka, jonka korot ja toimitusmaksut voi vähentää verotuksessa."
+        }
+      ]
     },
     "sv": {
       "term": "ränta",
       "match": ["ränt\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/hyresinkomster/avdrag/",
+          "quote": "då kan du dra av räntorna på lånet och expeditionsavgifterna för det i beskattningen."
+        }
+      ]
     },
     "en": {
       "term": "interest",
       "match": ["interest"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/individuals/property/rental_income/deductions/",
+          "quote": "As a result, the interest and the bank’s service fees are tax-deductible."
+        }
+      ]
     }
   },
   "invitation": {
@@ -325,18 +718,40 @@
     "fi": {
       "term": "vuokranantaja",
       "match": ["vuokranantaj\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/mika-on-vuokratuloa/",
+          "quote": "Vuokravakuus sen sijaan ei ole vuokranantajan tuloa"
+        }
+      ]
     },
     "sv": {
       "term": "hyresvärd",
       "match": ["hyresvärd\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/hyresinkomster/vad-ar-hyresinkomst/",
+          "quote": "En hyresgaranti är däremot inte en inkomst för hyresvärden"
+        }
+      ]
     },
     "en": {
       "term": "landlord",
       "match": ["landlords?"],
-      "status": "proposed"
-    }
+      "status": "derived",
+      "sources": [
+        {
+          "source": "finlex_en",
+          "url": "https://www.finlex.fi/en/legislation/translations/1995/eng/481",
+          "quote": "When the landlord terminates the lease agreement, the notice period is four months"
+        }
+      ]
+    },
+    "notes": "The Tax Administration's English pages say \"property owner\"; \"landlord\" follows the English translation of the Act on Residential Leases and everyday British usage. Its Swedish detailed guidance also uses \"hyresgivare\"; the public pages and the law say \"hyresvärd\"."
   },
   "loan": {
     "code": "loan",
@@ -385,18 +800,40 @@
     "fi": {
       "term": "hoitovastike",
       "match": ["hoitovastik\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/tietoa-verohallinnosta/yhteystiedot-ja-asiointi/lomakkeet/tayttoohjeet/7h-vuokratulot--osakehuoneistot-t%C3%A4ytt%C3%B6ohje/",
+          "quote": "2.2 Hoitovastikkeet ja vesimaksut / vuosi (ilmoita vain oma osuutesi)"
+        }
+      ]
     },
     "sv": {
       "term": "skötselvederlag",
       "match": ["skötselvederlag\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/skatteforvaltningen/kontakta-oss/blanketter/deklarationsanvisningar/7h-hyresinkomster--aktiel%C3%A4genheter/",
+          "quote": "2.2 Skötselvederlag och vattenavgifter/år (ange endast din egen andel)"
+        }
+      ]
     },
     "en": {
       "term": "maintenance charge",
       "match": ["maintenance charges?"],
-      "status": "proposed"
-    }
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/About-us/contact-us/forms/filling-instructions/7h-rental-income-rental-apartments--instructions/",
+          "quote": "2.2 Maintenance charges and water charges per year (report only your share of the charges)"
+        }
+      ]
+    },
+    "notes": "Not a term of the Limited Liability Housing Companies Act, whose general word is yhtiövastike / bolagsvederlag; hoitovastike is the Tax Administration's and landlords' word."
   },
   "member": {
     "code": "member",
@@ -425,18 +862,40 @@
     "fi": {
       "term": "irtisanominen",
       "match": ["irtisano\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "finlex",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/1995/481",
+          "quote": "Vuokrasopimuksen päättyminen irtisanomisen johdosta"
+        }
+      ]
     },
     "sv": {
       "term": "uppsägning",
       "match": ["uppsäg\\p{L}*", "säg\\p{L}* upp"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "finlex",
+          "url": "https://www.finlex.fi/sv/lagstiftning/1995/481",
+          "quote": "Upphörande av hyresavtal med anledning av uppsägning"
+        }
+      ]
     },
     "en": {
       "term": "notice",
       "match": ["notice"],
-      "status": "proposed"
-    }
+      "status": "derived",
+      "sources": [
+        {
+          "source": "finlex_en",
+          "url": "https://www.finlex.fi/en/legislation/translations/1995/eng/481",
+          "quote": "from the last day of the calendar month during which the notice of termination was given"
+        }
+      ]
+    },
+    "notes": "The notice period is irtisanomisaika / uppsägningstid / notice period (Act on Residential Leases §52)."
   },
   "owner": {
     "code": "owner",
@@ -474,10 +933,10 @@
       "term": "ownership",
       "match": ["ownership", "owned"],
       "status": "proposed"
-    }
+    },
+    "notes": "The Swedish patterns include \"ägar-\" compounds (ägarändring, ägarfördelning), which the owner term also matches; harmless, since a Swedish pattern only has to be present."
   },
   "ownership_period": {
-    "code": "ownership period",
     "codeNotes": "Table ownership_periods: one row per owner and period",
     "definition": "A validity period during which a flat's ownership shares stay the same.",
     "fi": {
@@ -514,7 +973,8 @@
       "term": "principal",
       "match": ["principal"],
       "status": "proposed"
-    }
+    },
+    "notes": "Not found on the Tax Administration's rental pages in any language; a source is still needed."
   },
   "property": {
     "code": "property",
@@ -539,14 +999,17 @@
         "reason_property_not_found": "The alert's title says \"Flat not found\"; the body refers to it as \"it\".",
         "sharing_remove_dialog_text": "The flat is named by its address."
       }
-    }
+    },
+    "notes": "The Act on Residential Leases says asuinhuoneisto / bostadslägenhet / residential apartment; the UI uses the everyday asunto / bostad / flat."
   },
   "receipt": {
     "code": "receipt",
     "definition": "A photo or PDF of a receipt, kept with an expense.",
     "fi": {
       "term": "kuitti",
-      "match": ["kuit(ti|in|tia|it|teja|tien|eista|tiin|ille|ista)"],
+      "match": [
+        "kuit(ti|in|tia|it|teja|tien|eista|tiin|ille|ista|issa|illa|eissa|eilla|iksi|teihin|eille|ilta)"
+      ],
       "status": "proposed"
     },
     "sv": {
@@ -585,18 +1048,81 @@
     "definition": "What the tenant pays the landlord for the flat, usually monthly.",
     "fi": {
       "term": "vuokra",
-      "match": ["vuokr(a|an|aa|at|ia|ien|ista|ille|ana|aan|asta|alle)"],
-      "status": "proposed"
+      "match": [
+        "vuokr(a|an|aa|at|ia|ien|ista|ille|ana|aan|asta|alle|alla|assa|aksi)"
+      ],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/mika-on-vuokratuloa/",
+          "quote": "Vuokratuloa ovat vuokran lisäksi muut maksut, joita saat vuokralaiselta"
+        }
+      ]
     },
     "sv": {
       "term": "hyra",
       "match": ["hyr(a|an|or|orna|ans|ornas)"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/hyresinkomster/vad-ar-hyresinkomst/",
+          "quote": "Hyresinkomst är utöver hyran också andra avgifter som du får av hyresgästen"
+        }
+      ]
     },
     "en": {
       "term": "rent",
       "match": ["rents?"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/individuals/property/rental_income/what-is-considered-rental-income/",
+          "quote": "In addition to rent, rental income also covers all other payments you get from your tenant"
+        }
+      ]
+    }
+  },
+  "rental_income": {
+    "definition": "Rent and other payments a landlord gets from renting out a flat; taxed as capital income.",
+    "showOriginal": true,
+    "fi": {
+      "term": "vuokratulo",
+      "match": ["vuokratulo\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/",
+          "quote": "Vuokratulot ovat pääomatuloa ja niitä verotetaan pääomatuloveroprosentin mukaan."
+        }
+      ]
+    },
+    "sv": {
+      "term": "hyresinkomst",
+      "match": ["hyresinkomst\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/hyresinkomster/",
+          "quote": "Hyresinkomsterna är kapitalinkomster och beskattas enligt kapitalinkomstskattesatsen."
+        }
+      ]
+    },
+    "en": {
+      "term": "rental income",
+      "match": ["rental income"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/individuals/property/rental_income/what-is-considered-rental-income/",
+          "quote": "In addition to rent, rental income also covers all other payments you get from your tenant"
+        }
+      ]
     }
   },
   "share": {
@@ -605,7 +1131,7 @@
     "definition": "An owner's part of a flat in per cent.",
     "fi": {
       "term": "osuus",
-      "match": ["osuu\\p{L}*"],
+      "match": ["osuu(s|d\\p{L}*|t\\p{L}*|ks\\p{L}*)"],
       "status": "proposed"
     },
     "sv": {
@@ -637,24 +1163,78 @@
       "status": "proposed"
     }
   },
+  "tax_year": {
+    "definition": "The calendar year whose income and expenses a tax return covers.",
+    "fi": {
+      "term": "verovuosi",
+      "match": ["verovuo\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/tietoa-verohallinnosta/yhteystiedot-ja-asiointi/lomakkeet/tayttoohjeet/7h-vuokratulot--osakehuoneistot-t%C3%A4ytt%C3%B6ohje/",
+          "quote": "Ilmoita myös verovuosi eli se vuosi, jolta ilmoitat vuokratuloja."
+        }
+      ]
+    },
+    "sv": {
+      "term": "skatteår",
+      "match": ["skatteår\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/skatteforvaltningen/kontakta-oss/blanketter/deklarationsanvisningar/7h-hyresinkomster--aktiel%C3%A4genheter/",
+          "quote": "Ange också skatteåret, dvs. det år för vilket du deklarerar hyresinkomster."
+        }
+      ]
+    },
+    "en": {
+      "term": "tax year",
+      "match": ["tax years?"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/About-us/contact-us/forms/filling-instructions/7h-rental-income-rental-apartments--instructions/",
+          "quote": "Report also the tax year, i.e. the year during which the reported rental income was earned."
+        }
+      ]
+    }
+  },
   "tenancy": {
     "code": "tenancy",
     "definition": "A lease between a landlord and a tenant for a flat, open-ended or fixed-term.",
     "fi": {
       "term": "vuokrasuhde",
       "match": ["vuokrasuh[dt]\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "finlex",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/1995/481",
+          "quote": "Jos vuokralainen kuolee, vuokrasuhde pysyy voimassa entisin ehdoin"
+        }
+      ]
     },
     "sv": {
       "term": "hyresförhållande",
       "match": ["hyresförhållande\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "finlex",
+          "url": "https://www.finlex.fi/sv/lagstiftning/1995/481",
+          "quote": "förblir hyresförhållandet i kraft på de tidigare villkoren"
+        }
+      ]
     },
     "en": {
       "term": "tenancy",
       "match": ["tenanc(y|ies)"],
       "status": "proposed"
-    }
+    },
+    "notes": "The unofficial English translation of the Act on Residential Leases says \"lease\" or \"lease relationship\", never \"tenancy\". \"Tenancy\" is the everyday British word for the relationship; the agreement itself is a \"lease agreement\" (vuokrasopimus, hyresavtal). The law's fixed-term and open-ended leases are \"määräaikainen\" / \"tidsbestämt\" and \"toistaiseksi voimassa oleva\" / \"gäller tills vidare\"."
   },
   "tenant": {
     "code": "tenant",
@@ -662,18 +1242,40 @@
     "fi": {
       "term": "vuokralainen",
       "match": ["vuokralai\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/vahennykset/",
+          "quote": "kun aloitat aktiivisesti etsiä vuokralaista asuntoon"
+        }
+      ]
     },
     "sv": {
       "term": "hyresgäst",
       "match": ["hyresgäst\\p{L}*"],
-      "status": "proposed"
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/hyresinkomster/avdrag/",
+          "quote": "från den tidpunkt då du aktivt börjar leta efter hyresgäst till bostaden"
+        }
+      ]
     },
     "en": {
       "term": "tenant",
       "match": ["tenants?"],
-      "status": "proposed"
-    }
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/individuals/property/rental_income/deductions/",
+          "quote": "the start date for tax purposes is the date when you begin an active search for a tenant"
+        }
+      ]
+    },
+    "notes": "The Tax Administration's Swedish detailed guidance also uses \"hyrestagare\"; \"hyresgäst\" is the law's word and the more common one."
   },
   "transaction": {
     "code": "transaction",
@@ -696,7 +1298,6 @@
     }
   },
   "validity_period": {
-    "code": "validity period",
     "codeNotes": "validFrom / validTo, columns valid_from / valid_to",
     "definition": "The dates from which, and until which, a time-bound fact holds: rent, charges, shares, tenancies.",
     "fi": {
