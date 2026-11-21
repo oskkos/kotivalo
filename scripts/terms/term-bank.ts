@@ -1,6 +1,7 @@
 // The term bank (i18n/terms.json) and its reference sources
 // (i18n/sources.json): one terminology for Finnish, Swedish and English.
-// This module reads and validates them.
+// This module reads and validates them; ./usage.ts checks messages against
+// them.
 import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { z } from 'zod'

@@ -19,6 +19,7 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "check:traceability": "node scripts/check-traceability.ts",
+    "terms:report": "node scripts/terms-report.ts",
     "deploy": "CLOUDFLARE_ENV=production vite build && wrangler deploy",
     "cf-typegen": "wrangler types",
     "db:generate": "drizzle-kit generate",

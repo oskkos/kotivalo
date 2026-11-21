@@ -3,20 +3,40 @@
     "code": "access",
     "codeNotes": "Per property, by invitation. Tables property_access, property_invitations; roles owner, member",
     "definition": "The right to see a flat in Kotivalo and edit its details, given by an invitation.",
-    "fi": { "term": "pääsy", "match": ["pääsy\\p{L}*"], "status": "proposed" },
+    "fi": {
+      "term": "pääsy",
+      "match": ["pääsy\\p{L}*"],
+      "status": "proposed"
+    },
     "sv": {
       "term": "åtkomst",
       "match": ["åtkomst\\p{L}*"],
       "avoid": ["tillgång\\p{L}*"],
       "status": "proposed"
     },
-    "en": { "term": "access", "match": ["access\\p{L}*"], "status": "proposed" }
+    "en": {
+      "term": "access",
+      "match": ["access\\p{L}*"],
+      "status": "proposed"
+    }
   },
   "account": {
     "definition": "A user's sign-in identity in Kotivalo: email address, display name and language.",
-    "fi": { "term": "tili", "match": ["tili\\p{L}*"], "status": "proposed" },
-    "sv": { "term": "konto", "match": ["kont\\p{L}*"], "status": "proposed" },
-    "en": { "term": "account", "match": ["accounts?"], "status": "proposed" }
+    "fi": {
+      "term": "tili",
+      "match": ["tili\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "konto",
+      "match": ["kont\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "account",
+      "match": ["accounts?"],
+      "status": "proposed"
+    }
   },
   "acquisition_cost": {
     "code": "acquisitionCost",
@@ -48,7 +68,11 @@
       "match": ["liite(ttä)?", "liittee\\p{L}*", "liitteit\\p{L}*"],
       "status": "proposed"
     },
-    "sv": { "term": "bilaga", "match": ["bilag\\p{L}*"], "status": "proposed" },
+    "sv": {
+      "term": "bilaga",
+      "match": ["bilag\\p{L}*"],
+      "status": "proposed"
+    },
     "en": {
       "term": "attachment",
       "match": ["attachments?"],
@@ -69,7 +93,11 @@
       "match": ["låntagar\\p{L}*"],
       "status": "proposed"
     },
-    "en": { "term": "borrower", "match": ["borrowers?"], "status": "proposed" }
+    "en": {
+      "term": "borrower",
+      "match": ["borrowers?"],
+      "status": "proposed"
+    }
   },
   "capitalised": {
     "code": "capitalised",
@@ -106,7 +134,11 @@
       "match": ["säkerhet\\p{L}*"],
       "status": "proposed"
     },
-    "en": { "term": "deposit", "match": ["deposits?"], "status": "proposed" }
+    "en": {
+      "term": "deposit",
+      "match": ["deposits?"],
+      "status": "proposed"
+    }
   },
   "deposit_return": {
     "code": "depositReturn",
@@ -141,7 +173,11 @@
       "match": ["dödsbo\\p{L}*"],
       "status": "proposed"
     },
-    "en": { "term": "estate", "match": ["estates?"], "status": "proposed" }
+    "en": {
+      "term": "estate",
+      "match": ["estates?"],
+      "status": "proposed"
+    }
   },
   "expense": {
     "code": "expense",
@@ -157,7 +193,11 @@
       "match": ["utgift\\p{L}*"],
       "status": "proposed"
     },
-    "en": { "term": "expense", "match": ["expenses?"], "status": "proposed" }
+    "en": {
+      "term": "expense",
+      "match": ["expenses?"],
+      "status": "proposed"
+    }
   },
   "financing_charge": {
     "code": "financingCharge",
@@ -212,7 +252,11 @@
       "match": ["intäkt\\p{L}*"],
       "status": "proposed"
     },
-    "en": { "term": "income", "match": ["income"], "status": "proposed" }
+    "en": {
+      "term": "income",
+      "match": ["income"],
+      "status": "proposed"
+    }
   },
   "income_recognised": {
     "code": "incomeRecognised",
@@ -244,15 +288,27 @@
       "match": ["kor(ko|on|koa|ot|koja|kojen)"],
       "status": "proposed"
     },
-    "sv": { "term": "ränta", "match": ["ränt\\p{L}*"], "status": "proposed" },
-    "en": { "term": "interest", "match": ["interest"], "status": "proposed" }
+    "sv": {
+      "term": "ränta",
+      "match": ["ränt\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "interest",
+      "match": ["interest"],
+      "status": "proposed"
+    }
   },
   "invitation": {
     "code": "invitation",
     "codeNotes": "Table property_invitations",
     "definition": "An emailed invitation that gives its recipient access to one flat once accepted.",
     "notes": "The Finnish and Swedish patterns cover the verb too (kutsua, bjuda in), since sentences switch between the noun and the verb.",
-    "fi": { "term": "kutsu", "match": ["kutsu\\p{L}*"], "status": "proposed" },
+    "fi": {
+      "term": "kutsu",
+      "match": ["kutsu\\p{L}*"],
+      "status": "proposed"
+    },
     "sv": {
       "term": "inbjudan",
       "match": ["inbjud\\p{L}*", "bjud\\p{L}* in"],
@@ -276,7 +332,11 @@
       "match": ["hyresvärd\\p{L}*"],
       "status": "proposed"
     },
-    "en": { "term": "landlord", "match": ["landlords?"], "status": "proposed" }
+    "en": {
+      "term": "landlord",
+      "match": ["landlords?"],
+      "status": "proposed"
+    }
   },
   "loan": {
     "code": "loan",
@@ -292,7 +352,11 @@
       "match": ["lån(et|en|ets|ens)?"],
       "status": "proposed"
     },
-    "en": { "term": "loan", "match": ["loans?"], "status": "proposed" }
+    "en": {
+      "term": "loan",
+      "match": ["loans?"],
+      "status": "proposed"
+    }
   },
   "loan_payment": {
     "code": "loanPayment",
@@ -338,13 +402,21 @@
     "code": "member",
     "codeNotes": "property_access role; a 0 % share",
     "definition": "Someone with access to a flat but no ownership share: sees the flat and can edit its details.",
-    "fi": { "term": "jäsen", "match": ["jäsen\\p{L}*"], "status": "proposed" },
+    "fi": {
+      "term": "jäsen",
+      "match": ["jäsen\\p{L}*"],
+      "status": "proposed"
+    },
     "sv": {
       "term": "medlem",
       "match": ["medlem\\p{L}*"],
       "status": "proposed"
     },
-    "en": { "term": "member", "match": ["members?"], "status": "proposed" }
+    "en": {
+      "term": "member",
+      "match": ["members?"],
+      "status": "proposed"
+    }
   },
   "notice": {
     "code": "notice",
@@ -360,7 +432,11 @@
       "match": ["uppsäg\\p{L}*", "säg\\p{L}* upp"],
       "status": "proposed"
     },
-    "en": { "term": "notice", "match": ["notice"], "status": "proposed" }
+    "en": {
+      "term": "notice",
+      "match": ["notice"],
+      "status": "proposed"
+    }
   },
   "owner": {
     "code": "owner",
@@ -434,7 +510,11 @@
       "match": ["amorter\\p{L}*"],
       "status": "proposed"
     },
-    "en": { "term": "principal", "match": ["principal"], "status": "proposed" }
+    "en": {
+      "term": "principal",
+      "match": ["principal"],
+      "status": "proposed"
+    }
   },
   "property": {
     "code": "property",
@@ -454,7 +534,11 @@
       "term": "flat",
       "match": ["flats?"],
       "avoid": ["apartments?"],
-      "status": "proposed"
+      "status": "proposed",
+      "except": {
+        "reason_property_not_found": "The alert's title says \"Flat not found\"; the body refers to it as \"it\".",
+        "sharing_remove_dialog_text": "The flat is named by its address."
+      }
     }
   },
   "receipt": {
@@ -470,7 +554,11 @@
       "match": ["kvitt(o|on|ot|ona|ots)"],
       "status": "proposed"
     },
-    "en": { "term": "receipt", "match": ["receipts?"], "status": "proposed" }
+    "en": {
+      "term": "receipt",
+      "match": ["receipts?"],
+      "status": "proposed"
+    }
   },
   "recurring_amount": {
     "code": "recurringAmount",
@@ -505,15 +593,31 @@
       "match": ["hyr(a|an|or|orna|ans|ornas)"],
       "status": "proposed"
     },
-    "en": { "term": "rent", "match": ["rents?"], "status": "proposed" }
+    "en": {
+      "term": "rent",
+      "match": ["rents?"],
+      "status": "proposed"
+    }
   },
   "share": {
     "code": "share",
     "codeNotes": "Basis points (5000 = 50 %), per ownership_periods row; shares add up to exactly 10000",
     "definition": "An owner's part of a flat in per cent.",
-    "fi": { "term": "osuus", "match": ["osuu\\p{L}*"], "status": "proposed" },
-    "sv": { "term": "andel", "match": ["andel\\p{L}*"], "status": "proposed" },
-    "en": { "term": "share", "match": ["shares?"], "status": "proposed" }
+    "fi": {
+      "term": "osuus",
+      "match": ["osuu\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "andel",
+      "match": ["andel\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "share",
+      "match": ["shares?"],
+      "status": "proposed"
+    }
   },
   "sharing": {
     "definition": "Giving other people access to a flat by invitation.",
@@ -527,7 +631,11 @@
       "match": ["delning\\p{L}*"],
       "status": "proposed"
     },
-    "en": { "term": "sharing", "match": ["sharing"], "status": "proposed" }
+    "en": {
+      "term": "sharing",
+      "match": ["sharing"],
+      "status": "proposed"
+    }
   },
   "tenancy": {
     "code": "tenancy",
@@ -561,7 +669,11 @@
       "match": ["hyresgäst\\p{L}*"],
       "status": "proposed"
     },
-    "en": { "term": "tenant", "match": ["tenants?"], "status": "proposed" }
+    "en": {
+      "term": "tenant",
+      "match": ["tenants?"],
+      "status": "proposed"
+    }
   },
   "transaction": {
     "code": "transaction",
@@ -577,7 +689,11 @@
       "match": ["registrering\\p{L}*"],
       "status": "proposed"
     },
-    "en": { "term": "entry", "match": ["entr(y|ies)"], "status": "proposed" }
+    "en": {
+      "term": "entry",
+      "match": ["entr(y|ies)"],
+      "status": "proposed"
+    }
   },
   "validity_period": {
     "code": "validity period",

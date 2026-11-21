@@ -157,7 +157,7 @@
   "reason_ownership_date_too_early": "The change can start on the current ownership period's start date at the earliest.",
   "reason_ownership_date_too_late": "The date must be before the next ownership change.",
   "reason_ownership_invalid": "The split can only include people with access to the flat, each once. Reload the page and try again.",
-  "reason_ownership_invalid_title": "The split can't be saved",
+  "reason_ownership_invalid_title": "The ownership split can't be saved",
   "reason_ownership_no_owner": "At least one person must have a share.",
   "reason_ownership_nothing_to_undo": "The flat has only its first ownership period. Correct its start date if needed.",
   "reason_ownership_nothing_to_undo_title": "No change to undo",

@@ -31,6 +31,7 @@ Package manager is **pnpm** (pinned in `package.json` via `packageManager`; enab
   - e2e helpers are in `e2e/support/`: `flats.ts` (`addFlat`, `flatId`) and `sign-in.ts`: `signIn(page, email, name?)` signs in and gives a name to a new account; `waitForHydration(page)` before submitting a form on a freshly loaded page, or the browser submits it without the app
   - first time on a machine: `pnpm exec playwright install chromium`
 - `pnpm check:traceability`: checks that every OpenSpec scenario in the main specs has a test and every requirement has a Playwright test or a recorded reason; active changes are reported as pending (see "Specs and tests")
+- `pnpm terms:report`: how sure the term bank is of its translations: terms per status and language, then every term not yet verified (the list for a fluent speaker to check)
 - `pnpm format` / `pnpm format:check`: Prettier (no semicolons, single quotes, trailing commas)
 - `pnpm db:generate`: generate a SQL migration in `migrations/` from changes to `src/server/db/schema.ts` (drizzle-kit). Commit it; never edit an applied migration
 - `pnpm db:migrate:local`: apply migrations to the local D1 database (`.wrangler/state`, shared with `pnpm dev`). Vitest Workers tests apply them to their own database automatically
@@ -193,6 +194,7 @@ The term bank `i18n/terms.json` is the glossary: one entry per domain term, with
 
 - Code names stay English and follow `code` (`property`, `tenancy`, `share`, `recurringAmount`, `transaction`, …). The English UI copy may use a friendlier word; the bank's `en.term` decides it (`property` is a "flat" in the UI).
 - `transaction` means an income or expense entry, not a database transaction.
+- Messages follow the bank: when a Finnish message uses a term, the Swedish and English ones use that term's translation, and no message uses a word in a term's `avoid` list. Each term's `match` patterns recognise it in all its inflections; a message that may leave the term out is listed in the language's `except` with the reason. `scripts/terms/usage.test.ts` checks this in `pnpm test`.
 - Each language's term has a `status` that says how sure we are, from the sources behind it: `proposed` (no source yet), `derived`, `verified` (an authoritative source, listed in `i18n/sources.json`) or `reviewed` (accepted by a fluent speaker). Tests in `scripts/terms/` check the rules.
 
 ## Domain rules that shape the code
