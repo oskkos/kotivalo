@@ -1,7 +1,7 @@
 # recurring-amounts Specification
 
 ## Purpose
-A flat's rent, maintenance charge and financing charge as monthly validity periods from the first of a month, the financing charge treatment (income-recognised or capitalised) as periods, the Rent and charges page opened from the edit page, setting and undoing amounts (owners only), and the monthly amounts and capitalised total computed from the periods, never stored. Rent per tenancy (#30), payment status (#25), entries (#32) and the year summary (#34) come later.
+A flat's rent, maintenance charge and financing charge as monthly validity periods from the first of a month, the financing charge treatment (income-recognised or capitalised) as periods, the Rent and charges page opened from the edit page, setting and undoing amounts and the treatment (owners only; undoing the only period leaves it unset), and the monthly amounts and capitalised total computed from the periods, never stored. Rent per tenancy (#30), payment status (#25), entries (#32) and the year summary (#34) come later.
 ## Requirements
 ### Requirement: Rent and charges are recorded as monthly periods
 A flat's rent, maintenance charge and financing charge SHALL each be a sequence of periods, each with a monthly amount in cents, a start date and an end date (open for the current one). Every start date SHALL be the first day of a month. Periods of the same kind SHALL follow each other without gaps or overlaps. A new amount SHALL end the previous period on the last day of the month before it starts, and a recorded period SHALL NOT be changed except by the corrections in "Setting a rent or charge" and "Undoing the latest rent or charge change". A month's amount SHALL be that of the period containing the month's first day, and a month before the first period SHALL have no amount. An amount SHALL be from 0 to 99 999,99 € with at most two decimals.
@@ -75,14 +75,18 @@ An owner of a flat SHALL be able to set its rent, maintenance charge or financin
 - **THEN** it is refused with the reason `sharing_owner_only`, and nothing changes
 
 ### Requirement: Undoing the latest rent or charge change
-An owner SHALL be able to undo the latest change of a rent or charge that has more than one period. Undoing SHALL delete the latest period and make the previous one current again, with no end.
+An owner SHALL be able to undo the latest change of a rent or charge that has at least one period. Undoing SHALL delete the latest period and make the previous one current again, with no end. When the deleted period was the only one, the amount SHALL no longer be set, so that it can be set again from the right date. The confirmation SHALL name the amount that stays in force, or say that the amount will be removed. A member SHALL NOT be able to undo.
 
 #### Scenario: Undoing a charge increase
 - **WHEN** the maintenance charge is 21400 cents from `2026-01-01` and 22600 cents from `2027-01-01`, and Annika undoes the latest change
 - **THEN** the maintenance charge is 21400 cents from `2026-01-01` with no end, and no upcoming change is shown
 
-#### Scenario: The only period can't be undone
-- **WHEN** an owner sends undoing the rent of a flat whose rent has one period to the server
+#### Scenario: Undoing the only rent
+- **WHEN** the rent's only period is 89000 cents from `2025-06-01`, and Annika undoes it and sets `890` from `1.3.2025`
+- **THEN** the rent has one period, 89000 cents from `2025-03-01` with no end
+
+#### Scenario: Nothing to undo is refused
+- **WHEN** an owner sends undoing the rent of a flat that has no rent to the server
 - **THEN** it is refused with the reason `amount_nothing_to_undo`, and nothing changes
 
 ### Requirement: The financing charge treatment
@@ -110,4 +114,23 @@ The Rent and charges page SHALL show the financing charges added to the flat's a
 #### Scenario: Months without a treatment don't count
 - **WHEN** the financing charge is 8000 cents from `2025-03-01` and no treatment is set
 - **THEN** no accumulated amount is shown
+
+### Requirement: Undoing the latest treatment change
+An owner SHALL be able to undo the latest change of the financing charge treatment, with the same confirmation as undoing an amount. Undoing SHALL delete the latest treatment period and make the previous one current again, with no end. When the deleted period was the only one, the treatment SHALL no longer be set. Undoing when no treatment is set SHALL be refused with the reason `treatment_nothing_to_undo`. A member SHALL NOT be able to undo the treatment.
+
+#### Scenario: Undoing a treatment change
+- **WHEN** the treatment is capitalised from `2025-03-01` and income-recognised from `2027-01-01`, and Annika undoes the latest change
+- **THEN** the treatment is capitalised from `2025-03-01` with no end
+
+#### Scenario: Undoing the only treatment
+- **WHEN** today is `2026-11-21`, the financing charge is 8000 cents from `2025-03-01`, the treatment's only period is capitalised from `2025-03-01`, and Annika undoes it
+- **THEN** no treatment is set, and no accumulated capitalised amount is shown
+
+#### Scenario: No treatment to undo is refused
+- **WHEN** an owner sends undoing the treatment of a flat that has no treatment to the server
+- **THEN** it is refused with the reason `treatment_nothing_to_undo`, and nothing changes
+
+#### Scenario: A member can't undo the treatment
+- **WHEN** the treatment is capitalised from `2025-03-01`, and Jussi, a member, sends undoing it to the server
+- **THEN** it is refused with the reason `sharing_owner_only`, and nothing changes
 
