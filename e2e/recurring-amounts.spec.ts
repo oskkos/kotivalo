@@ -283,7 +283,7 @@ test.describe('Undoing the latest treatment change', () => {
       name: `Undo the treatment from 01/01/${String(nextYear)}?`,
     })
     await expect(dialog).toContainText(
-      'The previous treatment, Placed in reserve from 01/03/2025, applies again.',
+      'The previous treatment, “Placed in reserve” from 01/03/2025, applies again.',
     )
     await dialog.getByRole('button', { name: 'Undo change' }).click()
 

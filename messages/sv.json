@@ -152,7 +152,7 @@
   "amounts_treatment_label": "Behandling i husbolaget",
   "amounts_treatment_not_set_note": "Disponenten vet om vederlaget intäktsförs eller fonderas.",
   "amounts_treatment_undo_only_text": "Behandlingen tas bort. Du kan ange den på nytt från rätt datum.",
-  "amounts_treatment_undo_text": "Den tidigare behandlingen, {treatment} (från {date}), gäller igen.",
+  "amounts_treatment_undo_text": "Den tidigare behandlingen ”{treatment}” (från {date}) gäller igen.",
   "amounts_treatment_undo_title": "Ångra behandlingen från {date}?",
   "amounts_undo": "Ångra den senaste ändringen",
   "amounts_undo_confirm": "Ångra ändringen",

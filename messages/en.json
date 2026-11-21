@@ -152,7 +152,7 @@
   "amounts_treatment_label": "Treatment by the housing company",
   "amounts_treatment_not_set_note": "The property manager knows whether the charge is recorded as revenue or placed in reserve.",
   "amounts_treatment_undo_only_text": "The treatment is removed. You can set it again from the right date.",
-  "amounts_treatment_undo_text": "The previous treatment, {treatment} from {date}, applies again.",
+  "amounts_treatment_undo_text": "The previous treatment, “{treatment}” from {date}, applies again.",
   "amounts_treatment_undo_title": "Undo the treatment from {date}?",
   "amounts_undo": "Undo the latest change",
   "amounts_undo_confirm": "Undo change",
