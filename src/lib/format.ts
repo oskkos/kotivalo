@@ -157,3 +157,13 @@ export function formatDayMonth(iso: string, locale: Locale = getLocale()) {
     month: 'numeric',
   }).format(new Date(Date.UTC(year, month - 1, day)))
 }
+
+/** A file size: "412 kt" under a megabyte, "2,3 Mt" above, in Finnish. */
+export function formatFileSize(bytes: number, locale: Locale = getLocale()) {
+  const megabytes = bytes >= 1024 * 1024
+  return new Intl.NumberFormat(NUMBER_LOCALES[locale], {
+    style: 'unit',
+    unit: megabytes ? 'megabyte' : 'kilobyte',
+    maximumFractionDigits: megabytes ? 1 : 0,
+  }).format(megabytes ? bytes / (1024 * 1024) : Math.max(1, bytes / 1024))
+}
