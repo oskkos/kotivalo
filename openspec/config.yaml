@@ -27,7 +27,8 @@ context: |
     Calculations are pure functions with Vitest coverage.
   - Use the code names and the words from the term bank i18n/terms.json
     (property, tenancy, share, recurringAmount, transaction, …), in code and
-    in all three languages' messages.
+    in all three languages' messages. Write Swedish and English messages
+    with the translate skill (.claude/skills/translate/).
 
   i18n: Finnish first, Swedish and English from day one. No hard-coded UI
   text, errors or emails; everything comes from Paraglide messages in the

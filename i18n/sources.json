@@ -13,6 +13,13 @@
     "authority": "reference",
     "useFor": "English legal terms. The translations are unofficial, so they support a choice but don't settle it."
   },
+  "fsob": {
+    "name": "Finlandssvensk ordbok (Institutet för de inhemska språken)",
+    "url": "https://kaino.kotus.fi/fsob/",
+    "languages": ["sv"],
+    "authority": "reference",
+    "useFor": "Where Finland-Swedish differs from Sweden's Swedish: which words are Finland-Swedish, which are Sweden-only, and which are finlandisms to avoid."
+  },
   "iate": {
     "name": "IATE, the EU's terminology database",
     "url": "https://iate.europa.eu/",
@@ -33,6 +40,20 @@
     "languages": ["sv"],
     "authority": "reference",
     "useFor": "Swedish spelling and inflection, for the match patterns. It describes Sweden's Swedish; Finland-Swedish legal and tax terms come from Finlex and the Tax Administration."
+  },
+  "tepa": {
+    "name": "TEPA term bank (Sanastokeskus)",
+    "url": "https://termipankki.fi/tepa/",
+    "languages": ["fi", "sv", "en"],
+    "authority": "reference",
+    "useFor": "Special-field terms with definitions in Finnish, Swedish and English, including economics and housing."
+  },
+  "valter": {
+    "name": "Valter, the Finnish Government's term bank",
+    "url": "https://valtioneuvosto.fi/kaannos-ja-kielipalvelut/sanastot",
+    "languages": ["fi", "sv", "en"],
+    "authority": "reference",
+    "useFor": "How the Government translates administrative and legislative terms, e.g. agency names and the glossary of legislative terms."
   },
   "vero_en": {
     "name": "Finnish Tax Administration, English pages",

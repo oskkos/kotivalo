@@ -196,6 +196,7 @@ The term bank `i18n/terms.json` is the glossary: one entry per domain term, with
 - `transaction` means an income or expense entry, not a database transaction.
 - Messages follow the bank: when a Finnish message uses a term, the Swedish and English ones use that term's translation, and no message uses a word in a term's `avoid` list. Each term's `match` patterns recognise it in all its inflections; a message that may leave the term out is listed in the language's `except` with the reason. `scripts/terms/usage.test.ts` checks this in `pnpm test`.
 - Each language's term has a `status` that says how sure we are, from the sources behind it: `proposed` (no source yet), `derived`, `verified` (an authoritative source, listed in `i18n/sources.json`) or `reviewed` (accepted by a fluent speaker). Tests in `scripts/terms/` check the rules.
+- Translate messages and add or change terms with the `translate` skill (`.claude/skills/translate/`). It researches each word in the sources and records them, and every term bank change ends with a review by the `term-critic` agent (`.claude/agents/term-critic.md`), which gets only the diff. A hook in `.claude/settings.json` reminds about the review when `i18n/terms.json` is edited with Edit or Write; edits made otherwise get no reminder.
 
 ## Domain rules that shape the code
 
