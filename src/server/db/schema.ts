@@ -10,7 +10,7 @@ import {
   text,
   unique,
 } from 'drizzle-orm/sqlite-core'
-import { basisPoints, id, instant, tenths, validity } from './columns'
+import { basisPoints, cents, id, instant, tenths, validity } from './columns'
 
 // Authentication (openspec: authentication). Better Auth's models: the
 // property names are Better Auth's field names, so its Drizzle adapter maps
@@ -198,5 +198,67 @@ export const ownershipPeriods = sqliteTable(
   },
   (t) => [
     index('ownership_periods_property_idx').on(t.propertyId, t.validFrom),
+  ],
+)
+
+/** The monthly amounts a flat has (openspec: recurring-amounts). */
+export const RECURRING_AMOUNT_KINDS = [
+  'rent',
+  'maintenance_charge',
+  'financing_charge',
+] as const
+export type RecurringAmountKind = (typeof RECURRING_AMOUNT_KINDS)[number]
+
+/**
+ * Rent and charges over time (openspec: recurring-amounts). One row per kind
+ * and period; every period starts on the first of a month. A change closes
+ * the open row the day before and adds the next, so rows are never
+ * overwritten. Monthly amounts are computed from these rows, never stored.
+ */
+export const recurringAmounts = sqliteTable(
+  'recurring_amounts',
+  {
+    id: id(),
+    propertyId: text('property_id')
+      .notNull()
+      .references(() => properties.id, { onDelete: 'cascade' }),
+    kind: text('kind', { enum: RECURRING_AMOUNT_KINDS }).notNull(),
+    /** Per month, in cents. */
+    amount: cents('amount').notNull(),
+    ...validity(),
+  },
+  (t) => [
+    index('recurring_amounts_property_idx').on(
+      t.propertyId,
+      t.kind,
+      t.validFrom,
+    ),
+  ],
+)
+
+/** How the housing company books a flat's financing charge. */
+export const FINANCING_TREATMENTS = [
+  'income_recognised',
+  'capitalised',
+] as const
+export type FinancingTreatment = (typeof FINANCING_TREATMENTS)[number]
+
+/**
+ * The financing charge's treatment over time (openspec: recurring-amounts):
+ * income-recognised charges are deductible, capitalised ones add to the
+ * acquisition cost. Periods like recurring_amounts.
+ */
+export const financingTreatments = sqliteTable(
+  'financing_treatments',
+  {
+    id: id(),
+    propertyId: text('property_id')
+      .notNull()
+      .references(() => properties.id, { onDelete: 'cascade' }),
+    treatment: text('treatment', { enum: FINANCING_TREATMENTS }).notNull(),
+    ...validity(),
+  },
+  (t) => [
+    index('financing_treatments_property_idx').on(t.propertyId, t.validFrom),
   ],
 )

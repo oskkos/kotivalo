@@ -1,13 +1,13 @@
 ## 1. Tables and repository
 
-- [ ] 1.1 Add `recurring_amounts` (id, property id with cascade, kind enum `rent | maintenance_charge | financing_charge`, amount `cents()`, `validity()`) and `financing_treatments` (id, property id with cascade, treatment enum `income_recognised | capitalised`, `validity()`) to `src/server/db/schema.ts`, with indexes on property id, kind and `valid_from`
-- [ ] 1.2 `pnpm db:generate`; commit the migration
-- [ ] 1.3 `features/recurring-amounts/recurring-amount.repository.server.ts`:
+- [x] 1.1 Add `recurring_amounts` (id, property id with cascade, kind enum `rent | maintenance_charge | financing_charge`, amount `cents()`, `validity()`) and `financing_treatments` (id, property id with cascade, treatment enum `income_recognised | capitalised`, `validity()`) to `src/server/db/schema.ts`, with indexes on property id, kind and `valid_from`
+- [x] 1.2 `pnpm db:generate`; commit the migration
+- [x] 1.3 `features/recurring-amounts/recurring-amount.repository.server.ts`:
   - `forProperty(propertyId)`: amount periods per kind and treatment periods, oldest first
   - `setAmount`: correct the latest period on its own start, or close it the day before and insert the new one, with `atomically`
   - `undoLatest`: delete the latest period and reopen the previous one
   - `setTreatment`: like `setAmount`
-- [ ] 1.4 Workers tests for the repository: periods are closed and reopened, a correction keeps one period, other flats and kinds are untouched, deleting a flat deletes its periods
+- [x] 1.4 Workers tests for the repository: periods are closed and reopened, a correction keeps one period, other flats and kinds are untouched, deleting a flat deletes its periods
 
 ## 2. Period calculations
 
