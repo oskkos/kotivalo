@@ -38,7 +38,7 @@ interface Props {
   save: (details: NewPropertyInput) => Promise<SaveResult>
   onSaved: () => void
   onClose: () => void
-  /** An icon button at the right of the header, e.g. to Sharing. */
+  /** Icon buttons at the right of the header, e.g. to Sharing. */
   headerAction?: ReactNode
 }
 
@@ -113,14 +113,19 @@ export function PropertyForm({
         component="header"
         sx={{
           display: 'grid',
-          gridTemplateColumns: '44px 1fr 44px',
+          // Equal sides keep the title centred with one or two actions.
+          gridTemplateColumns: '1fr auto 1fr',
           alignItems: 'center',
           px: 1.5,
           pt: 2,
           pb: 0.5,
         }}
       >
-        <IconButton aria-label={m.property_close()} onClick={onClose}>
+        <IconButton
+          aria-label={m.property_close()}
+          onClick={onClose}
+          sx={{ justifySelf: 'start' }}
+        >
           <CloseIcon />
         </IconButton>
         <Typography
@@ -130,7 +135,9 @@ export function PropertyForm({
         >
           {title}
         </Typography>
-        {headerAction}
+        <Box sx={{ justifySelf: 'end', display: 'flex', gap: 0.5 }}>
+          {headerAction}
+        </Box>
       </Box>
       <Stack
         component="main"

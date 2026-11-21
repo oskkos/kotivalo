@@ -42,19 +42,47 @@ function EditPropertyRoute() {
       }}
       onClose={toList}
       headerAction={
-        <IconLink
-          to="/properties/$propertyId/sharing"
-          params={{ propertyId: id }}
-          aria-label={m.ownership_title()}
-        >
-          <PeopleIcon />
-        </IconLink>
+        <>
+          <IconLink
+            to="/properties/$propertyId/amounts"
+            params={{ propertyId: id }}
+            aria-label={m.amounts_title()}
+          >
+            <EuroIcon />
+          </IconLink>
+          <IconLink
+            to="/properties/$propertyId/sharing"
+            params={{ propertyId: id }}
+            aria-label={m.ownership_title()}
+          >
+            <PeopleIcon />
+          </IconLink>
+        </>
       }
     />
   )
 }
 
 const IconLink = createLink(IconButton)
+
+function EuroIcon() {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M17.5 6.5 A7 7 0 1 0 17.5 17.5" />
+      <path d="M4 10 H13 M4 14 H13" />
+    </svg>
+  )
+}
 
 function PeopleIcon() {
   return (
