@@ -128,3 +128,32 @@ export function formatPercentChange(
     signDisplay: 'exceptZero',
   }).format(percent / 100)
 }
+
+/** A month as a heading, e.g. 2026, 11 → "Marraskuu 2026" in Finnish. */
+export function formatMonth(
+  year: number,
+  month: number,
+  locale: Locale = getLocale(),
+) {
+  const text = new Intl.DateTimeFormat(INTL_LOCALES[locale], {
+    timeZone: 'UTC',
+    month: 'long',
+    year: 'numeric',
+  }).format(new Date(Date.UTC(year, month - 1, 1)))
+  return text.charAt(0).toLocaleUpperCase(INTL_LOCALES[locale]) + text.slice(1)
+}
+
+/** A date without its year, e.g. "2026-11-12" → "12.11." in Finnish. */
+export function formatDayMonth(iso: string, locale: Locale = getLocale()) {
+  formatDate(iso, locale) // validates
+  const [year, month, day] = iso.split('-').map(Number) as [
+    number,
+    number,
+    number,
+  ]
+  return new Intl.DateTimeFormat(INTL_LOCALES[locale], {
+    timeZone: 'UTC',
+    day: 'numeric',
+    month: 'numeric',
+  }).format(new Date(Date.UTC(year, month - 1, day)))
+}

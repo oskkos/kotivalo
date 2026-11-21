@@ -79,35 +79,32 @@
 
 ## 5. The Entries page
 
-- [ ] 5.1 Route `/properties/$propertyId/transactions` with `?year=` and a loader calling `getTransactions`, and a page title
-- [ ] 5.2 `TransactionsPage.tsx`, as on the Design canvas ("Kirjaukset", "Kirjaukset · ei kirjauksia"):
+- [x] 5.1 Route `/properties/$propertyId/transactions` with `?year=` and a loader calling `getTransactions`, and a page title
+- [x] 5.2 `TransactionsPage.tsx`, as on the Design canvas ("Kirjaukset", "Kirjaukset · ei kirjauksia"):
   - the year choice
   - the totals
   - the note on rent and charges, linking to the Rent and charges page
   - the month groups with signed amounts and the receipt icon
   - the empty state
-  - New entry for owners, linking to `/transactions/new?propertyId=…`
-- [ ] 5.3 The "Kirjaukset" icon link in the edit page's header, next to Rent and charges
-- [ ] 5.4 Messages in fi, then sv and en with the translate skill; the term-critic on the diff
-- [ ] 5.5 Component tests: month grouping, the totals, the empty state, the member view
-- [ ] 5.6 Playwright, with entries created through the server functions in a helper (`e2e/support/transactions.ts`):
-  - "Opening the page from the edit page"
-  - "Entries are grouped by month, newest first"
-  - "Choosing an earlier year"
-  - "A flat without entries"
-  - "A member sees the entries but can't add them"
+
+  The rows become links in group 6 and the New entry button comes in group 7, with the routes they open
+- [x] 5.3 The "Kirjaukset" icon link in the edit page's header, next to Rent and charges
+- [x] 5.4 Messages in fi, then sv and en with the translate skill; the term-critic on the diff
+- [x] 5.5 Component tests: month grouping, the totals, the empty state, the member view
+- [x] 5.6 Playwright: "Opening the page from the edit page" and "A flat without entries". The scenarios that need entries get their Playwright tests in group 7, where entries can be logged through the form
 
 ## 6. Entry details and the receipt view
 
 - [ ] 6.1 Route `/properties/$propertyId/transactions/$transactionId` with a loader calling `getTransaction`
-- [ ] 6.2 `TransactionDetails.tsx`, as on the Design canvas ("Menon tiedot", "Tulon tiedot · ei kuittia", "Kirjauksen tiedot · jäsen"):
+- [ ] 6.2 The Entries page's rows link to the details
+- [ ] 6.3 `TransactionDetails.tsx`, as on the Design canvas ("Menon tiedot", "Tulon tiedot · ei kuittia", "Kirjauksen tiedot · jäsen"):
   - the amount, the chips, the details rows (flat, date, year summary row, logged by)
   - the receipt preview (an image, or a PDF tile opening the browser's viewer)
   - Download, and Edit for owners
-- [ ] 6.3 `ReceiptViewer.tsx`: the full-screen dialog with Close and Download, as on "Kuitti koko näytöllä"
-- [ ] 6.4 Messages in fi, then sv and en with the translate skill; the term-critic on the diff
-- [ ] 6.5 Component tests: income without a receipt, the member view, "You" versus a name
-- [ ] 6.6 Playwright:
+- [ ] 6.4 `ReceiptViewer.tsx`: the full-screen dialog with Close and Download, as on "Kuitti koko näytöllä"
+- [ ] 6.5 Messages in fi, then sv and en with the translate skill; the term-critic on the diff
+- [ ] 6.6 Component tests: income without a receipt, the member view, "You" versus a name
+- [ ] 6.7 Playwright:
   - "The details of an expense"
   - "An entry logged by a co-owner"
   - "A member downloads a receipt"
@@ -131,7 +128,9 @@
   - the field reasons
   - the quota alert ("Storage quota for receipts")
   - the flat choice
-- [ ] 7.7 Playwright:
+- [ ] 7.7 New entry on the Entries page for owners, linking to `/transactions/new?propertyId=…`
+- [ ] 7.8 Playwright:
+  - "Entries are grouped by month, newest first", "Choosing an earlier year" and "A member sees the entries but can't add them" (The entries page)
   - "Logging an annual repair"
   - "The chosen category shows its tax hint"
   - "Rent is not a category"

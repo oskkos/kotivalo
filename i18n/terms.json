@@ -121,7 +121,8 @@
           "quote": "2.4. Expenses for annual repairs per year (your share)"
         }
       ]
-    }
+    },
+    "codeNotes": "Category value `annual_repair` (expense, row 2.4)."
   },
   "attachment": {
     "code": "attachment",
@@ -329,6 +330,26 @@
     },
     "notes": "The code name stays capitalised; the Tax Administration's English says \"placed in reserve\", never \"capitalised\"."
   },
+  "category": {
+    "code": "category",
+    "definition": "The kind of an income or expense entry, chosen from a fixed list for the entry's type (income or expense); it decides the form 7H row.",
+    "notes": "The Tax Administration doesn't name a classification of entries; the form only has rows. Kategoria is the everyday UI word, chosen over luokka and laji, which are vaguer, and kululaji, which fits expenses only.",
+    "fi": {
+      "term": "kategoria",
+      "match": ["kategori\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "kategori",
+      "match": ["kategori\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "category",
+      "match": ["categor(y|ies)"],
+      "status": "proposed"
+    }
+  },
   "deductible": {
     "definition": "An expense that can be subtracted from rental income in taxation.",
     "showOriginal": true,
@@ -504,7 +525,7 @@
         }
       ]
     },
-    "notes": "The Tax Administration says kulut / kostnader for expenses in general and menot / utgifter for capital items (remontin kustannukset … vuosikorjauskuluihin ja perusparannusmenoihin). Which pair the UI uses is open until the entries screens (#32); the Finnish and Swedish stay proposed."
+    "notes": "The Tax Administration says kulut / kostnader for expenses in general and menot / utgifter for capital items (remontin kustannukset … vuosikorjauskuluihin ja perusparannusmenoihin). The UI uses meno / utgift (#32): it pairs with tulo / intäkt and is the Design canvas's word. The year summary (#34) names the form's rows as the form does (Muut kulut / Övriga kostnader). The Finnish and Swedish stay proposed. The category label Muu meno / Övrig utgift fills row 2.5 Muut kulut on purpose: the entry screens keep one pair of words."
   },
   "financing_charge": {
     "code": "financingCharge",
@@ -1315,6 +1336,58 @@
       "match": ["validity periods?"],
       "status": "proposed"
     }
+  },
+  "water_charge": {
+    "definition": "Water charges: paid by the landlord to the housing company (deductible, form 7H row 2.2 with the maintenance charges), or paid by the tenant to the landlord (rental income).",
+    "showOriginal": true,
+    "fi": {
+      "term": "vesimaksu",
+      "match": ["vesimaks\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://vero.fi/tietoa-verohallinnosta/yhteystiedot-ja-asiointi/lomakkeet/tayttoohjeet/7h-vuokratulot--osakehuoneistot-t%C3%A4ytt%C3%B6ohje/",
+          "quote": "2.2 Hoitovastikkeet ja vesimaksut / vuosi (ilmoita vain oma osuutesi)"
+        },
+        {
+          "source": "vero_fi",
+          "url": "https://vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/mika-on-vuokratuloa/",
+          "quote": "Vuokratuloa ovat vuokran lisäksi muut maksut, joita saat vuokralaiselta – esimerkiksi vesimaksu tai autopaikan vuokra."
+        }
+      ]
+    },
+    "sv": {
+      "term": "vattenavgift",
+      "match": ["vattenavgift\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://vero.fi/sv/skatteforvaltningen/kontakta-oss/blanketter/deklarationsanvisningar/7h-hyresinkomster--aktiel%C3%A4genheter/",
+          "quote": "2.2 Skötselvederlag och vattenavgifter/år (ange endast din egen andel)"
+        },
+        {
+          "source": "vero_sv",
+          "url": "https://vero.fi/sv/privatpersoner/egendom/hyresinkomster/vad-ar-hyresinkomst/",
+          "quote": "är utöver hyran också andra avgifter som du får av hyresgästen – till exempel vattenavgift och hyra för bilplats."
+        }
+      ]
+    },
+    "en": {
+      "term": "water charge",
+      "match": ["water charges?"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://vero.fi/en/About-us/contact-us/forms/filling-instructions/7h-rental-income-rental-apartments--instructions/",
+          "quote": "2.2 Maintenance charges and water charges per year (report only your share of the charges)"
+        }
+      ]
+    },
+    "codeNotes": "Category values `water_charge` (expense, paid to the housing company, row 2.2) and `tenant_water_charge` (income, paid by the tenant, row 2.1).",
+    "notes": "One word, two senses: the labels tell them apart (to the housing company / from the tenant). The Tax Administration's English pages also say \"money towards a water bill\" for the tenant's payment; the 7H form's \"water charges\" is used for both."
   },
   "year_summary": {
     "code": "yearSummary",
