@@ -11,6 +11,7 @@ import {
   getRecurringAmounts as get,
   setFinancingTreatment as setTreatment,
   setRecurringAmount as setAmount,
+  undoFinancingTreatment as undoTreatment,
   undoRecurringAmount as undo,
   type RecurringAmountDeps,
 } from './recurring-amounts.server'
@@ -70,4 +71,10 @@ export const setFinancingTreatment = createServerFn({ method: 'POST' })
       treatment: data.treatment,
       from: data.from,
     }),
+  )
+
+export const undoFinancingTreatment = createServerFn({ method: 'POST' })
+  .validator(propertyRefInput)
+  .handler(async ({ data }) =>
+    undoTreatment(await recurringAmountDeps(), data.propertyId),
   )

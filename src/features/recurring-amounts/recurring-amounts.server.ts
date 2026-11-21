@@ -166,8 +166,7 @@ export async function undoRecurringAmount(
   }
   const periods = (await deps.amounts.forProperty(propertyId)).amounts[kind]
   const latest = periods.at(-1)
-  const previous = periods.at(-2)
-  if (!latest || !previous) {
+  if (!latest) {
     return { ok: false, reason: 'amount_nothing_to_undo' }
   }
   const applied = await deps.amounts.undoLatestAmount({
@@ -175,7 +174,7 @@ export async function undoRecurringAmount(
     actorId: deps.userId,
     kind,
     latestStart: latest.validFrom,
-    previousStart: previous.validFrom,
+    previousStart: periods.at(-2)?.validFrom ?? null,
   })
   if (!applied) {
     return changedMeanwhile
@@ -217,6 +216,35 @@ export async function setFinancingTreatment(
     propertyId,
     from: change.from,
     corrected: change.from === latestStart,
+  })
+  return { ok: true }
+}
+
+export async function undoFinancingTreatment(
+  deps: RecurringAmountDeps,
+  propertyId: string,
+): Promise<{ ok: true } | Failure> {
+  const refused = await roleCheck(deps, propertyId)
+  if (refused) {
+    return refused
+  }
+  const { treatments } = await deps.amounts.forProperty(propertyId)
+  const latest = treatments.at(-1)
+  if (!latest) {
+    return { ok: false, reason: 'treatment_nothing_to_undo' }
+  }
+  const applied = await deps.amounts.undoLatestTreatment({
+    propertyId,
+    actorId: deps.userId,
+    latestStart: latest.validFrom,
+    previousStart: treatments.at(-2)?.validFrom ?? null,
+  })
+  if (!applied) {
+    return changedMeanwhile
+  }
+  deps.log.info('financing_treatment.undone', {
+    propertyId,
+    from: latest.validFrom,
   })
   return { ok: true }
 }
