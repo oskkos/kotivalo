@@ -44,6 +44,13 @@ function EditPropertyRoute() {
       headerAction={
         <>
           <IconLink
+            to="/properties/$propertyId/transactions"
+            params={{ propertyId: id }}
+            aria-label={m.transactions_title()}
+          >
+            <ReceiptIcon />
+          </IconLink>
+          <IconLink
             to="/properties/$propertyId/amounts"
             params={{ propertyId: id }}
             aria-label={m.amounts_title()}
@@ -64,6 +71,25 @@ function EditPropertyRoute() {
 }
 
 const IconLink = createLink(IconButton)
+
+function ReceiptIcon() {
+  return (
+    <svg
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M6 3 H18 V21 L15 19 L12 21 L9 19 L6 21 Z" />
+      <path d="M9 8 H15 M9 12 H15 M9 16 H12" />
+    </svg>
+  )
+}
 
 function EuroIcon() {
   return (

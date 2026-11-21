@@ -4,8 +4,10 @@ import {
   formatArea,
   formatDate,
   formatDay,
+  formatDayMonth,
   formatMoney,
   formatMoneyChange,
+  formatMonth,
   formatPercentChange,
   formatPercentNumber,
   formatShare,
@@ -118,5 +120,25 @@ describe('formatPercentChange', () => {
     ['sv', -6.98, '−7\u00a0%'],
   ] as const)('%s: %d is %s', (locale, percent, expected) => {
     expect(formatPercentChange(percent, locale)).toBe(expected)
+  })
+})
+
+describe('formatMonth', () => {
+  test('a month heading starts with a capital letter', () => {
+    expect(formatMonth(2026, 11, 'fi')).toBe('Marraskuu 2026')
+    expect(formatMonth(2026, 11, 'sv')).toBe('November 2026')
+    expect(formatMonth(2026, 1, 'en')).toBe('January 2026')
+  })
+})
+
+describe('formatDayMonth', () => {
+  test('a date without its year', () => {
+    expect(formatDayMonth('2026-11-12', 'fi')).toBe('12.11.')
+    expect(formatDayMonth('2026-11-03', 'sv')).toBe('3.11')
+    expect(formatDayMonth('2026-11-12', 'en')).toBe('12/11')
+  })
+
+  test('a malformed date throws', () => {
+    expect(() => formatDayMonth('2026-02-30', 'fi')).toThrow(RangeError)
   })
 })

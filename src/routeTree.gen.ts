@@ -24,6 +24,7 @@ import { Route as AuthedPropertiesPropertyIdSharingRouteImport } from './routes/
 import { Route as AuthedPropertiesPropertyIdAmountsIndexRouteImport } from './routes/_authed/properties/$propertyId/amounts/index'
 import { Route as AuthedPropertiesPropertyIdAmountsKindRouteImport } from './routes/_authed/properties/$propertyId/amounts/$kind'
 import { Route as AuthedPropertiesPropertyIdAmountsTreatmentRouteImport } from './routes/_authed/properties/$propertyId/amounts/treatment'
+import { Route as AuthedPropertiesPropertyIdTransactionsIndexRouteImport } from './routes/_authed/properties/$propertyId/transactions/index'
 
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
@@ -104,6 +105,12 @@ const AuthedPropertiesPropertyIdAmountsTreatmentRoute =
     path: '/properties/$propertyId/amounts/treatment',
     getParentRoute: () => AuthedRoute,
   } as any)
+const AuthedPropertiesPropertyIdTransactionsIndexRoute =
+  AuthedPropertiesPropertyIdTransactionsIndexRouteImport.update({
+    id: '/properties/$propertyId/transactions/',
+    path: '/properties/$propertyId/transactions/',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
@@ -120,6 +127,7 @@ export interface FileRoutesByFullPath {
   '/properties/$propertyId/amounts/$kind': typeof AuthedPropertiesPropertyIdAmountsKindRoute
   '/properties/$propertyId/amounts/treatment': typeof AuthedPropertiesPropertyIdAmountsTreatmentRoute
   '/properties/$propertyId/amounts/': typeof AuthedPropertiesPropertyIdAmountsIndexRoute
+  '/properties/$propertyId/transactions/': typeof AuthedPropertiesPropertyIdTransactionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/offline': typeof OfflineRoute
@@ -136,6 +144,7 @@ export interface FileRoutesByTo {
   '/properties/$propertyId/amounts/$kind': typeof AuthedPropertiesPropertyIdAmountsKindRoute
   '/properties/$propertyId/amounts/treatment': typeof AuthedPropertiesPropertyIdAmountsTreatmentRoute
   '/properties/$propertyId/amounts': typeof AuthedPropertiesPropertyIdAmountsIndexRoute
+  '/properties/$propertyId/transactions': typeof AuthedPropertiesPropertyIdTransactionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -154,6 +163,7 @@ export interface FileRoutesById {
   '/_authed/properties/$propertyId/amounts/$kind': typeof AuthedPropertiesPropertyIdAmountsKindRoute
   '/_authed/properties/$propertyId/amounts/treatment': typeof AuthedPropertiesPropertyIdAmountsTreatmentRoute
   '/_authed/properties/$propertyId/amounts/': typeof AuthedPropertiesPropertyIdAmountsIndexRoute
+  '/_authed/properties/$propertyId/transactions/': typeof AuthedPropertiesPropertyIdTransactionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -172,6 +182,7 @@ export interface FileRouteTypes {
     | '/properties/$propertyId/amounts/$kind'
     | '/properties/$propertyId/amounts/treatment'
     | '/properties/$propertyId/amounts/'
+    | '/properties/$propertyId/transactions/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/offline'
@@ -188,6 +199,7 @@ export interface FileRouteTypes {
     | '/properties/$propertyId/amounts/$kind'
     | '/properties/$propertyId/amounts/treatment'
     | '/properties/$propertyId/amounts'
+    | '/properties/$propertyId/transactions'
   id:
     | '__root__'
     | '/_authed'
@@ -205,6 +217,7 @@ export interface FileRouteTypes {
     | '/_authed/properties/$propertyId/amounts/$kind'
     | '/_authed/properties/$propertyId/amounts/treatment'
     | '/_authed/properties/$propertyId/amounts/'
+    | '/_authed/properties/$propertyId/transactions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -323,6 +336,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedPropertiesPropertyIdAmountsTreatmentRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/properties/$propertyId/transactions/': {
+      id: '/_authed/properties/$propertyId/transactions/'
+      path: '/properties/$propertyId/transactions'
+      fullPath: '/properties/$propertyId/transactions/'
+      preLoaderRoute: typeof AuthedPropertiesPropertyIdTransactionsIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
@@ -336,6 +356,7 @@ interface AuthedRouteChildren {
   AuthedPropertiesPropertyIdAmountsKindRoute: typeof AuthedPropertiesPropertyIdAmountsKindRoute
   AuthedPropertiesPropertyIdAmountsTreatmentRoute: typeof AuthedPropertiesPropertyIdAmountsTreatmentRoute
   AuthedPropertiesPropertyIdAmountsIndexRoute: typeof AuthedPropertiesPropertyIdAmountsIndexRoute
+  AuthedPropertiesPropertyIdTransactionsIndexRoute: typeof AuthedPropertiesPropertyIdTransactionsIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
@@ -352,6 +373,8 @@ const AuthedRouteChildren: AuthedRouteChildren = {
     AuthedPropertiesPropertyIdAmountsTreatmentRoute,
   AuthedPropertiesPropertyIdAmountsIndexRoute:
     AuthedPropertiesPropertyIdAmountsIndexRoute,
+  AuthedPropertiesPropertyIdTransactionsIndexRoute:
+    AuthedPropertiesPropertyIdTransactionsIndexRoute,
 }
 
 const AuthedRouteWithChildren =
