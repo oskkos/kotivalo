@@ -42,20 +42,20 @@
 
 ## 3. Server functions
 
-- [ ] 3.1 `features/transactions/transactions.server.ts`:
+- [x] 3.1 `features/transactions/transactions.server.ts`:
   - list (year, years, totals, role)
   - details
   - the new entry options (owned flats)
   - create, update and delete
   - each write checks access (`property_not_found`), the owner role (`sharing_owner_only`) and the date against the first ownership start
   - the receipt is handled in the order of design.md ("The receipt is uploaded with the save"), with the file deleted again if the database write fails, and old files deleted after an edit or delete
-- [ ] 3.2 `features/transactions/functions.ts`:
+- [x] 3.2 `features/transactions/functions.ts`:
   - `getTransactions`, `getTransaction`, `getNewTransactionOptions`
   - `createTransaction` and `updateTransaction`, POST with `FormData`
   - `deleteTransaction`
   - each with its session check
-- [ ] 3.3 Log the events of design.md ("Logging"), ids only
-- [ ] 3.4 Workers tests, named after the scenarios:
+- [x] 3.3 Log the events of design.md ("Logging"), ids only
+- [x] 3.4 Workers tests, named after the scenarios:
   - "Logging an annual repair"
   - "A member can't log an entry", "A member can't edit an entry", "A member can't delete an entry"
   - "A file that isn't an image or a PDF is refused" and "A file over 10 MB is refused", each with nothing in storage afterwards
