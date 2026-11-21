@@ -76,4 +76,4 @@
 
 ## 8. Archive
 
-- [ ] 8.1 `openspec archive track-recurring-amounts`; check that the spec's Purpose is filled in; commit as `docs(openspec): archive track-recurring-amounts`
+- [x] 8.1 `openspec archive track-recurring-amounts`; check that the spec's Purpose is filled in; commit as `docs(openspec): archive track-recurring-amounts`
