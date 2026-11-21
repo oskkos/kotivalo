@@ -1,11 +1,17 @@
-import { createFileRoute, notFound, useRouter } from '@tanstack/react-router'
+import Button from '@mui/material/Button'
+import {
+  createFileRoute,
+  createLink,
+  notFound,
+  useRouter,
+} from '@tanstack/react-router'
 import { NotFoundView } from '#/components/NotFoundView'
 import { getTransaction } from '#/features/transactions/functions'
 import { TransactionDetails } from '#/features/transactions/TransactionDetails'
 import { m } from '#/paraglide/messages.js'
 
 export const Route = createFileRoute(
-  '/_authed/properties/$propertyId/transactions/$transactionId',
+  '/_authed/properties/$propertyId/transactions/$transactionId/',
 )({
   loader: async ({ params }) => {
     const result = await getTransaction({
@@ -31,6 +37,8 @@ export const Route = createFileRoute(
   ),
 })
 
+const ButtonLink = createLink(Button)
+
 function TransactionRoute() {
   const { entry, property, role, loggedByYou } = Route.useLoaderData()
   const router = useRouter()
@@ -40,6 +48,16 @@ function TransactionRoute() {
       property={property}
       role={role}
       loggedByYou={loggedByYou}
+      editAction={
+        <ButtonLink
+          to="/properties/$propertyId/transactions/$transactionId/edit"
+          params={{ propertyId: property.id, transactionId: entry.id }}
+          variant="contained"
+          sx={{ minHeight: 52, borderRadius: 999 }}
+        >
+          {m.transactions_edit()}
+        </ButtonLink>
+      }
       onBack={() => {
         void router.navigate({
           to: '/properties/$propertyId/transactions',

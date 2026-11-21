@@ -20,15 +20,17 @@ import { TextField } from '#/components/form/TextField'
 import type { Property } from '#/features/properties/property'
 import { clientLog } from '#/lib/client-log'
 import { parseFiDate, type IsoDate } from '#/lib/dates'
-import { formatDate, formatFileSize } from '#/lib/format'
+import { formatAmountInput, formatDate, formatFileSize } from '#/lib/format'
 import { failureReason } from '#/lib/network-error'
 import { reasonText, type AlertReason, type FieldReason } from '#/lib/reasons'
 import { m } from '#/paraglide/messages.js'
-import type { TransactionCategory, TransactionType } from '#/server/db/schema'
+import type { TransactionCategory } from '#/server/db/schema'
 import { colors, radii } from '#/theme/tokens'
 import { CATEGORIES, categoriesOf } from './categories'
-import { createTransaction } from './functions'
+import { DeleteDialog } from './DeleteDialog'
+import { createTransaction, updateTransaction } from './functions'
 import { categoryLabel } from './labels'
+import type { TransactionDetails } from './transaction.repository.server'
 import { prepareReceipt, RECEIPT_ACCEPT, ReceiptProblem } from './resize-image'
 import { typedNote, typedTransactionAmount } from './schemas'
 
@@ -43,6 +45,10 @@ interface Props {
   /** After saving: reload and go to the flat's entries for that year. */
   onSaved: (saved: { propertyId: string; date: IsoDate }) => Promise<void>
   onClose: () => void
+  /** The entry being edited; without it the form logs a new one. */
+  editing?: TransactionDetails
+  /** After deleting the edited entry. */
+  onDeleted?: () => Promise<void>
 }
 
 export const CATEGORY_HINTS: Record<TransactionCategory, () => string> = {
@@ -231,7 +237,11 @@ function FlatPicker(props: {
 
 export function TransactionForm(props: Props) {
   const [flatId, setFlatId] = useState(props.initialFlatId)
+  const editing = props.editing
   const [receipt, setReceipt] = useState<File>()
+  // The edited entry's own receipt, until it is removed or replaced.
+  const [kept, setKept] = useState(editing?.receipt ?? null)
+  const [deleting, setDeleting] = useState(false)
   const [reasons, setReasons] = useState<
     Partial<Record<FieldName, FieldReason>>
   >({})
@@ -247,11 +257,11 @@ export function TransactionForm(props: Props) {
 
   const form = useForm({
     defaultValues: {
-      type: 'expense' as TransactionType,
-      category: 'annual_repair' as TransactionCategory,
-      amount: '',
-      date: formatDate(props.today),
-      note: '',
+      type: editing?.type ?? 'expense',
+      category: editing?.category ?? 'annual_repair',
+      amount: editing ? formatAmountInput(editing.amount) : '',
+      date: formatDate(editing?.date ?? props.today),
+      note: editing?.note ?? '',
     },
     onSubmit: async ({ value }) => {
       setAlert(undefined)
@@ -279,7 +289,16 @@ export function TransactionForm(props: Props) {
         if (receipt) {
           data.set('receipt', await prepareReceipt(receipt))
         }
-        const result = await createTransaction({ data })
+        if (editing) {
+          data.set('transactionId', editing.id)
+          data.set(
+            'receiptAction',
+            receipt ? 'replace' : editing.receipt && !kept ? 'remove' : 'keep',
+          )
+        }
+        const result = editing
+          ? await updateTransaction({ data })
+          : await createTransaction({ data })
         if (result.ok) {
           await props.onSaved({ propertyId: flatId, date: date ?? props.today })
           return
@@ -338,7 +357,7 @@ export function TransactionForm(props: Props) {
             component="h1"
             sx={{ fontSize: 18 }}
           >
-            {m.transactions_new()}
+            {editing ? m.transactions_edit_title() : m.transactions_new()}
           </Typography>
           {props.pickFlat ? null : (
             <Typography variant="body2" color="text.secondary" noWrap>
@@ -592,7 +611,48 @@ export function TransactionForm(props: Props) {
               e.target.value = ''
             }}
           />
-          {receipt ? (
+          {kept && !receipt ? (
+            <Stack
+              direction="row"
+              sx={{
+                alignItems: 'center',
+                gap: 1.5,
+                bgcolor: 'background.paper',
+                border: `1px solid ${colors.cardBorder}`,
+                borderRadius: `${String(radii.tile)}px`,
+                py: 1.25,
+                pl: 1.75,
+                pr: 1,
+              }}
+            >
+              <Stack sx={{ flex: 1, minWidth: 0 }}>
+                <Typography noWrap sx={{ fontSize: 14, fontWeight: 900 }}>
+                  {kept.filename}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {formatFileSize(kept.size)}
+                </Typography>
+              </Stack>
+              <Button
+                variant="text"
+                color="inherit"
+                disabled={submitting}
+                onClick={() => fileInputRef.current?.click()}
+                sx={{ textDecoration: 'underline' }}
+              >
+                {m.transactions_replace_receipt()}
+              </Button>
+              <IconButton
+                aria-label={m.transactions_remove_receipt()}
+                disabled={submitting}
+                onClick={() => {
+                  setKept(null)
+                }}
+              >
+                <Icon path={CLOSE} size={20} />
+              </IconButton>
+            </Stack>
+          ) : receipt ? (
             <Stack
               direction="row"
               sx={{
@@ -658,6 +718,19 @@ export function TransactionForm(props: Props) {
           />
         </Stack>
         {alert === undefined ? null : <ReasonAlert reason={alert} />}
+        {editing ? (
+          <Button
+            variant="text"
+            color="error"
+            disabled={submitting}
+            onClick={() => {
+              setDeleting(true)
+            }}
+            sx={{ alignSelf: 'flex-start' }}
+          >
+            {m.transactions_delete()}
+          </Button>
+        ) : null}
       </Stack>
       <Box
         component="footer"
@@ -677,11 +750,23 @@ export function TransactionForm(props: Props) {
           loading={submitting}
           sx={{ minHeight: 56, borderRadius: 999, fontSize: 17 }}
         >
-          {income
-            ? m.transactions_save_income()
-            : m.transactions_save_expense()}
+          {editing
+            ? m.transactions_save_changes()
+            : income
+              ? m.transactions_save_income()
+              : m.transactions_save_expense()}
         </Button>
       </Box>
+      {editing ? (
+        <DeleteDialog
+          open={deleting}
+          entry={editing}
+          onClose={() => {
+            setDeleting(false)
+          }}
+          onDeleted={props.onDeleted ?? (() => Promise.resolve())}
+        />
+      ) : null}
     </Stack>
   )
 }

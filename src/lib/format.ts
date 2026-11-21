@@ -167,3 +167,12 @@ export function formatFileSize(bytes: number, locale: Locale = getLocale()) {
     maximumFractionDigits: megabytes ? 1 : 0,
   }).format(megabytes ? bytes / (1024 * 1024) : Math.max(1, bytes / 1024))
 }
+
+/** Cents as an amount to edit in a field, without grouping: "1234,50". */
+export function formatAmountInput(cents: number, locale: Locale = getLocale()) {
+  return new Intl.NumberFormat(NUMBER_LOCALES[locale], {
+    minimumFractionDigits: 2,
+    maximumFractionDigits: 2,
+    useGrouping: false,
+  }).format(cents / 100)
+}
