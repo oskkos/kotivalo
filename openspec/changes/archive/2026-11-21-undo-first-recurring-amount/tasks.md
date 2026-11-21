@@ -20,5 +20,5 @@
 
 ## 3. Archive
 
-- [ ] 3.1 `pnpm check:traceability` and the full test suite pass; the design canvas needs no new board (the dialogs follow VastikePeru)
-- [ ] 3.2 `openspec archive undo-first-recurring-amount`; rename the test "The only period can't be undone" to "Nothing to undo is refused"; check the spec's Purpose
+- [x] 3.1 `pnpm check:traceability` and the full test suite pass; the design canvas needs no new board (the dialogs follow VastikePeru)
+- [x] 3.2 `openspec archive undo-first-recurring-amount`; rename the test "The only period can't be undone" to "Nothing to undo is refused"; check the spec's Purpose

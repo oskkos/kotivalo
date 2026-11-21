@@ -225,9 +225,7 @@ describe('Undoing the latest rent or charge change', () => {
     ])
   })
 
-  // Renamed to "Nothing to undo is refused" when the change is archived:
-  // the main spec still names the scenario this way.
-  test("The only period can't be undone", async () => {
+  test('Nothing to undo is refused', async () => {
     expect(await undoRecurringAmount(deps('annika'), flat, 'rent')).toEqual({
       ok: false,
       reason: 'amount_nothing_to_undo',
