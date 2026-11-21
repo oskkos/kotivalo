@@ -9,7 +9,7 @@ Rent, the maintenance charge and the financing charge change over time: rent goe
   - The page opens from a new button in the edit page's header, next to Ownership and sharing.
   - When the flat details page (#33) comes, its menu opens the same page.
 - **Changing an amount.** An owner sets the first amount, or a new one, from a date.
-  - The date may be in the future (an announced increase), but not before the flat's first ownership period, and not before the latest change. A new amount on the latest change's own date corrects it.
+  - The date may be in the future (an announced increase), but not before the month the flat's first ownership period starts in, and not before the latest change. A new amount on the latest change's own date corrects it.
   - The form shows the current amount, the difference, and its effect on that year (e.g. "In 2027 adds €156 to deductible expenses, 12 months").
   - It also shows the amount's change history.
 - **Undoing the latest change.** An owner can undo the latest change of an amount that has more than one period, which makes the previous amount current again.

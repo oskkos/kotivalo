@@ -11,13 +11,13 @@
 
 ## 2. Period calculations
 
-- [ ] 2.1 `features/recurring-amounts/periods.ts`:
+- [x] 2.1 `features/recurring-amounts/periods.ts`:
   - `validateAmountDate`: `amount_date_not_month_start`, `amount_date_before_ownership`, `amount_date_too_early`
   - `amountInMonth`, `monthlyAmounts`
   - `currentAndUpcoming`
   - `yearEffect`: difference per month, percentage, the year's total and its number of months
   - `accumulatedCapitalised`
-- [ ] 2.2 Unit tests named after the scenarios of "Rent and charges are recorded as monthly periods" and "Accumulated capitalised financing charges", plus the boundaries: the month before the first period, a change in January and in December, a treatment change mid-year, months without a treatment
+- [x] 2.2 Unit tests named after the scenarios of "Rent and charges are recorded as monthly periods" and "Accumulated capitalised financing charges", plus the boundaries: the month before the first period, a change in January and in December, a treatment change mid-year, months without a treatment
 
 ## 3. Server functions
 

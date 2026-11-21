@@ -41,7 +41,7 @@ Everyone with access to a flat SHALL be able to open its Rent and charges page f
 - **THEN** he sees the amounts and the treatment, and no button to set or change them
 
 ### Requirement: Setting a rent or charge
-An owner of a flat SHALL be able to set its rent, maintenance charge or financing charge from a date: the first amount, or a new one. The date SHALL be the first of a month, SHALL NOT be before the start of the flat's first ownership period, and SHALL NOT be before the start of that amount's latest period. It MAY be in the future. An amount dated on the latest period's own start SHALL correct that period's amount instead of starting a new period. The form SHALL show the amount's change history, newest first, and, when an amount is already set, the current amount, the difference per month and its effect on the year the change starts in. A member SHALL NOT be able to set amounts.
+An owner of a flat SHALL be able to set its rent, maintenance charge or financing charge from a date: the first amount, or a new one. The date SHALL be the first of a month, SHALL NOT be before the month in which the flat's first ownership period starts, and SHALL NOT be before the start of that amount's latest period. It MAY be in the future. An amount dated on the latest period's own start SHALL correct that period's amount instead of starting a new period. The form SHALL show the amount's change history, newest first, and, when an amount is already set, the current amount, the difference per month and its effect on the year the change starts in. A member SHALL NOT be able to set amounts.
 
 #### Scenario: Setting the first rent of a flat
 - **WHEN** Annika, owner since `2025-03-01`, sets the rent to `890` from `1.3.2025`
