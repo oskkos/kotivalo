@@ -11,12 +11,12 @@
 
 ## 2. Undo buttons and the dialog
 
-- [ ] 2.1 Move the undo dialog out of `AmountForm.tsx` into `UndoDialog.tsx`: title, text and the action as props; saving state, the reason alert and the client log stay in the dialog
-- [ ] 2.2 `AmountForm.tsx`: show "Undo the latest change" whenever the amount has a period; for the only period the dialog says the amount is removed and can be set again
-- [ ] 2.3 `TreatmentForm.tsx`: "Undo the latest change" under the history whenever a treatment is set, with the dialog naming the treatment that stays in force or saying the treatment is removed
-- [ ] 2.4 Messages for the dialog texts in fi, then sv and en with the translate skill
-- [ ] 2.5 Component tests for both forms: the button shows with one period, the dialog's two texts, undoing calls the server function and reloads
-- [ ] 2.6 Playwright tests in `e2e/recurring-amounts.spec.ts`: "Undoing the only rent" (undo, then set from the right date) and "Undoing the latest treatment change" › "Undoing a treatment change"
+- [x] 2.1 Move the undo dialog out of `AmountForm.tsx` into `UndoDialog.tsx`: title, text and the action as props; saving state, the reason alert and the client log stay in the dialog
+- [x] 2.2 `AmountForm.tsx`: show "Undo the latest change" whenever the amount has a period; for the only period the dialog says the amount is removed and can be set again
+- [x] 2.3 `TreatmentForm.tsx`: "Undo the latest change" under the history whenever a treatment is set, with the dialog naming the treatment that stays in force or saying the treatment is removed
+- [x] 2.4 Messages for the dialog texts in fi, then sv and en with the translate skill
+- [x] 2.5 Component tests for both forms: the button shows with one period, the dialog's two texts, undoing calls the server function and reloads
+- [x] 2.6 Playwright tests in `e2e/recurring-amounts.spec.ts`: "Undoing the only rent" (undo, then set from the right date) and "Undoing the latest treatment change" › "Undoing a treatment change"
 
 ## 3. Archive
 

@@ -5,11 +5,6 @@
 // "Undoing the latest rent or charge change").
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
-import Dialog from '@mui/material/Dialog'
-import DialogActions from '@mui/material/DialogActions'
-import DialogContent from '@mui/material/DialogContent'
-import DialogContentText from '@mui/material/DialogContentText'
-import DialogTitle from '@mui/material/DialogTitle'
 import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
@@ -35,6 +30,7 @@ import { setRecurringAmount, undoRecurringAmount } from './functions'
 import { periodOn, yearEffect, type Period } from './periods'
 import type { RecurringAmountsView } from './recurring-amounts.server'
 import { monthStartDate, typedAmount } from './schemas'
+import { UndoButton, UndoDialog } from './UndoDialog'
 
 interface Props {
   propertyId: string
@@ -153,7 +149,7 @@ export function effectText(
 
 function History(props: {
   periods: readonly Period<number>[]
-  onUndo: (() => void) | undefined
+  onUndo: () => void
 }) {
   return (
     <Stack component="section" sx={{ gap: 0.75 }}>
@@ -193,90 +189,8 @@ function History(props: {
           </Box>
         ))}
       </Box>
-      {props.onUndo ? (
-        <Button
-          variant="text"
-          color="inherit"
-          onClick={props.onUndo}
-          sx={{ alignSelf: 'flex-start', textDecoration: 'underline' }}
-        >
-          {m.amounts_undo()}
-        </Button>
-      ) : null}
+      <UndoButton onClick={props.onUndo} />
     </Stack>
-  )
-}
-
-function UndoDialog(props: {
-  open: boolean
-  onClose: () => void
-  propertyId: string
-  kind: RecurringAmountKind
-  latest: Period<number>
-  previous: Period<number>
-  onDone: () => Promise<void>
-}) {
-  const [alert, setAlert] = useState<AlertReason>()
-  const [busy, setBusy] = useState(false)
-
-  async function undo() {
-    setAlert(undefined)
-    setBusy(true)
-    try {
-      const result = await undoRecurringAmount({
-        data: { propertyId: props.propertyId, kind: props.kind },
-      })
-      if (result.ok) {
-        await props.onDone()
-      } else {
-        setAlert(result.reason)
-      }
-    } catch (error) {
-      clientLog.error('recurring_amount.undo_failed', {}, error)
-      setAlert(failureReason(error))
-    } finally {
-      setBusy(false)
-    }
-  }
-
-  return (
-    <Dialog
-      open={props.open}
-      onClose={props.onClose}
-      aria-labelledby="amount-undo-title"
-    >
-      <DialogTitle
-        id="amount-undo-title"
-        sx={{ fontSize: 20, fontWeight: 900, lineHeight: 1.3 }}
-      >
-        {m.amounts_undo_title({ date: formatDate(props.latest.validFrom) })}
-      </DialogTitle>
-      <DialogContent>
-        <Stack sx={{ gap: 1.5 }}>
-          <DialogContentText>
-            {m.amounts_undo_text({
-              amount: formatMoney(props.previous.value),
-              date: formatDate(props.previous.validFrom),
-            })}
-          </DialogContentText>
-          {alert === undefined ? null : <ReasonAlert reason={alert} />}
-        </Stack>
-      </DialogContent>
-      <DialogActions>
-        <Button variant="text" color="inherit" onClick={props.onClose}>
-          {m.amounts_dialog_cancel()}
-        </Button>
-        <Button
-          color="error"
-          loading={busy}
-          onClick={() => {
-            void undo()
-          }}
-        >
-          {m.amounts_undo_confirm()}
-        </Button>
-      </DialogActions>
-    </Dialog>
   )
 }
 
@@ -464,13 +378,9 @@ export function AmountForm(props: Props) {
         {latest ? (
           <History
             periods={periods}
-            onUndo={
-              previous
-                ? () => {
-                    setUndoing(true)
-                  }
-                : undefined
-            }
+            onUndo={() => {
+              setUndoing(true)
+            }}
           />
         ) : null}
       </Stack>
@@ -501,16 +411,23 @@ export function AmountForm(props: Props) {
           )}
         </form.Subscribe>
       </Box>
-      {latest && previous ? (
+      {latest ? (
         <UndoDialog
           open={undoing}
           onClose={() => {
             setUndoing(false)
           }}
-          propertyId={propertyId}
-          kind={kind}
-          latest={latest}
-          previous={previous}
+          title={m.amounts_undo_title({ date: formatDate(latest.validFrom) })}
+          text={
+            previous
+              ? m.amounts_undo_text({
+                  amount: formatMoney(previous.value),
+                  date: formatDate(previous.validFrom),
+                })
+              : m.amounts_undo_only_text()
+          }
+          undo={() => undoRecurringAmount({ data: { propertyId, kind } })}
+          failureEvent="recurring_amount.undo_failed"
           onDone={props.onDone}
         />
       ) : null}
