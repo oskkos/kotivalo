@@ -172,4 +172,4 @@
 
 ## 10. Archive
 
-- [ ] 10.1 `openspec archive track-transactions`; check that the specs' Purpose sections are filled in; commit as `docs(openspec): archive track-transactions`
+- [x] 10.1 `openspec archive track-transactions`; check that the specs' Purpose sections are filled in; commit as `docs(openspec): archive track-transactions`
