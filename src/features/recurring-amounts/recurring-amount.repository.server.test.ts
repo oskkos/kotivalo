@@ -164,6 +164,51 @@ describe('The recurring amount repository', () => {
     expect(await amounts('maintenance_charge')).toHaveLength(2)
   })
 
+  test('undoing the only period leaves the amount unset', async () => {
+    await set('2025-03-01', 20500, null)
+    await set('2025-03-01', 89000, null, 'rent')
+    expect(
+      await repo.undoLatestAmount({
+        propertyId: flat,
+        actorId: 'annika',
+        kind: 'maintenance_charge',
+        latestStart: '2025-03-01',
+        previousStart: null,
+      }),
+    ).toBe(true)
+    expect(await amounts('maintenance_charge')).toEqual([])
+    expect(await amounts('rent')).toHaveLength(1)
+  })
+
+  test('undoing the only period does not apply after a new one was added', async () => {
+    await set('2025-03-01', 20500, null)
+    await set('2026-01-01', 21400, '2025-03-01')
+    expect(
+      await repo.undoLatestAmount({
+        propertyId: flat,
+        actorId: 'annika',
+        kind: 'maintenance_charge',
+        latestStart: '2025-03-01',
+        previousStart: null,
+      }),
+    ).toBe(false)
+    expect(await amounts('maintenance_charge')).toHaveLength(2)
+  })
+
+  test('a member can not undo the only period', async () => {
+    await set('2025-03-01', 20500, null)
+    expect(
+      await repo.undoLatestAmount({
+        propertyId: flat,
+        actorId: 'jussi',
+        kind: 'maintenance_charge',
+        latestStart: '2025-03-01',
+        previousStart: null,
+      }),
+    ).toBe(false)
+    expect(await amounts('maintenance_charge')).toHaveLength(1)
+  })
+
   test('the treatment is recorded as periods', async () => {
     const treat = (
       from: '2025-03-01' | '2027-01-01',
@@ -186,6 +231,44 @@ describe('The recurring amount repository', () => {
       { validFrom: '2025-03-01', validTo: '2026-12-31', value: 'capitalised' },
       { validFrom: '2027-01-01', validTo: null, value: 'capitalised' },
     ])
+  })
+
+  test('undoing the treatment reopens the previous period, then unsets it', async () => {
+    const treat = (
+      propertyId: string,
+      from: '2025-03-01' | '2027-01-01',
+      latestStart: '2025-03-01' | null,
+    ) =>
+      repo.setTreatment({
+        propertyId,
+        actorId: 'annika',
+        treatment: 'capitalised',
+        from,
+        latestStart,
+      })
+    await treat(flat, '2025-03-01', null)
+    await treat(flat, '2027-01-01', '2025-03-01')
+    await treat(other, '2025-03-01', null)
+    const undo = (
+      latestStart: '2025-03-01' | '2027-01-01',
+      previousStart: '2025-03-01' | null,
+      actorId = 'annika',
+    ) =>
+      repo.undoLatestTreatment({
+        propertyId: flat,
+        actorId,
+        latestStart,
+        previousStart,
+      })
+    expect(await undo('2027-01-01', '2025-03-01', 'jussi')).toBe(false)
+    expect(await undo('2025-03-01', null)).toBe(false)
+    expect(await undo('2027-01-01', '2025-03-01')).toBe(true)
+    expect((await repo.forProperty(flat)).treatments).toEqual([
+      { validFrom: '2025-03-01', validTo: null, value: 'capitalised' },
+    ])
+    expect(await undo('2025-03-01', null)).toBe(true)
+    expect((await repo.forProperty(flat)).treatments).toEqual([])
+    expect((await repo.forProperty(other)).treatments).toHaveLength(1)
   })
 
   test('deleting a flat deletes its periods', async () => {

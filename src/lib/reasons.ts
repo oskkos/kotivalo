@@ -52,6 +52,7 @@ export type AlertReason =
   | 'ownership_nothing_to_undo'
   | 'ownership_invalid'
   | 'amount_nothing_to_undo'
+  | 'treatment_nothing_to_undo'
   /** The amounts changed since they were read; the page reloads them. */
   | 'amount_changed'
   /** A request never reached the server: offline or cancelled. */
@@ -175,6 +176,10 @@ const texts: Record<Reason, () => ReasonText> = {
   amount_nothing_to_undo: () => ({
     title: m.reason_amount_nothing_to_undo_title(),
     text: m.reason_amount_nothing_to_undo(),
+  }),
+  treatment_nothing_to_undo: () => ({
+    title: m.reason_treatment_nothing_to_undo_title(),
+    text: m.reason_treatment_nothing_to_undo(),
   }),
   amount_changed: () => ({
     title: m.reason_amount_changed_title(),

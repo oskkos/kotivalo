@@ -14,6 +14,7 @@ import {
   getRecurringAmounts,
   setFinancingTreatment,
   setRecurringAmount,
+  undoFinancingTreatment,
   undoRecurringAmount,
   type RecurringAmountDeps,
 } from './recurring-amounts.server'
@@ -205,8 +206,28 @@ describe('Undoing the latest rent or charge change', () => {
     ])
   })
 
+  test('Undoing the only rent', async () => {
+    await set('rent', 89000, '2025-06-01')
+    expect(await undoRecurringAmount(deps('annika'), flat, 'rent')).toEqual({
+      ok: true,
+    })
+    expect(logLines).toEqual([
+      expect.objectContaining({
+        event: 'recurring_amount.undone',
+        kind: 'rent',
+        from: '2025-06-01',
+      }),
+    ])
+    expect((await view()).amounts.rent).toEqual([])
+    expect(await set('rent', 89000, '2025-03-01')).toEqual({ ok: true })
+    expect((await view()).amounts.rent).toEqual([
+      { validFrom: '2025-03-01', validTo: null, value: 89000 },
+    ])
+  })
+
+  // Renamed to "Nothing to undo is refused" when the change is archived:
+  // the main spec still names the scenario this way.
   test("The only period can't be undone", async () => {
-    await set('rent', 89000, '2025-03-01')
     expect(await undoRecurringAmount(deps('annika'), flat, 'rent')).toEqual({
       ok: false,
       reason: 'amount_nothing_to_undo',
@@ -264,5 +285,68 @@ describe('The financing charge treatment', () => {
         from: '2024-12-01',
       }),
     ).toEqual({ ok: false, reason: 'amount_date_before_ownership' })
+  })
+})
+
+describe('Undoing the latest treatment change', () => {
+  const treat = (
+    treatment: 'capitalised' | 'income_recognised',
+    from: string,
+  ) => setFinancingTreatment(deps('annika'), flat, { treatment, from })
+
+  test('Undoing a treatment change', async () => {
+    await treat('capitalised', '2025-03-01')
+    await treat('income_recognised', '2027-01-01')
+    expect(await undoFinancingTreatment(deps('annika'), flat)).toEqual({
+      ok: true,
+    })
+    expect(logLines).toEqual([
+      expect.objectContaining({
+        level: 'info',
+        event: 'financing_treatment.undone',
+        propertyId: flat,
+        from: '2027-01-01',
+      }),
+    ])
+    expect((await view()).treatments).toEqual([
+      { validFrom: '2025-03-01', validTo: null, value: 'capitalised' },
+    ])
+  })
+
+  test('Undoing the only treatment', async () => {
+    await set('financing_charge', 8000, '2025-03-01')
+    await treat('capitalised', '2025-03-01')
+    expect((await view()).capitalised).toBe(21 * 8000)
+    expect(await undoFinancingTreatment(deps('annika'), flat)).toEqual({
+      ok: true,
+    })
+    const seen = await view()
+    expect(seen.treatments).toEqual([])
+    expect(seen.capitalised).toBe(0)
+  })
+
+  test('No treatment to undo is refused', async () => {
+    expect(await undoFinancingTreatment(deps('annika'), flat)).toEqual({
+      ok: false,
+      reason: 'treatment_nothing_to_undo',
+    })
+    expect(logLines).toEqual([])
+  })
+
+  test("A member can't undo the treatment", async () => {
+    await treat('capitalised', '2025-03-01')
+    expect(await undoFinancingTreatment(deps('jussi'), flat)).toEqual({
+      ok: false,
+      reason: 'sharing_owner_only',
+    })
+    expect((await view()).treatments).toHaveLength(1)
+  })
+
+  test('someone without access gets "not found"', async () => {
+    await treat('capitalised', '2025-03-01')
+    expect(await undoFinancingTreatment(deps('liisa'), flat)).toEqual({
+      ok: false,
+      reason: 'property_not_found',
+    })
   })
 })

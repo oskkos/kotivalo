@@ -34,6 +34,14 @@ export interface RecurringAmounts {
   treatments: Period<FinancingTreatment>[]
 }
 
+/** An undo's expectation: the latest and previous periods' starts as read. */
+interface Undo {
+  propertyId: string
+  actorId: string
+  latestStart: IsoDate
+  previousStart: IsoDate | null
+}
+
 /** A write's expectation: the latest period's start as read, or none. */
 interface Expected {
   propertyId: string
@@ -198,31 +206,33 @@ export function recurringAmountRepository(db: Db) {
     },
 
     /**
-     * Deletes the latest period and makes the previous one current again.
-     * `latestStart` and `previousStart` are the periods the caller read.
+     * Deletes the latest period and makes the previous one current again;
+     * with no previous period (`previousStart` null) the amount is no longer
+     * set. `latestStart` and `previousStart` are the periods the caller read.
      * Returns whether it applied.
      */
-    async undoLatestAmount(undo: {
-      propertyId: string
-      actorId: string
-      kind: RecurringAmountKind
-      latestStart: IsoDate
-      previousStart: IsoDate
-    }): Promise<boolean> {
+    async undoLatestAmount(
+      undo: Undo & { kind: RecurringAmountKind },
+    ): Promise<boolean> {
       const { propertyId, kind, latestStart, previousStart } = undo
       const scope = amountScope(propertyId, kind)
-      const results = await atomically(db, [
-        db
-          .delete(recurringAmounts)
-          .where(
-            and(
-              scope,
-              eq(recurringAmounts.validFrom, latestStart),
-              isNull(recurringAmounts.validTo),
-              isOwner(undo.actorId, propertyId),
-            ),
-          )
-          .returning({ id: recurringAmounts.id }),
+      const remove = db
+        .delete(recurringAmounts)
+        .where(
+          and(
+            scope,
+            eq(recurringAmounts.validFrom, latestStart),
+            isNull(recurringAmounts.validTo),
+            isOwner(undo.actorId, propertyId),
+          ),
+        )
+        .returning({ id: recurringAmounts.id })
+      if (previousStart === null) {
+        const [removed] = await atomically(db, [remove])
+        return removed.length > 0
+      }
+      const [removed] = await atomically(db, [
+        remove,
         db
           .update(recurringAmounts)
           .set({ validTo: null })
@@ -242,7 +252,7 @@ export function recurringAmountRepository(db: Db) {
             ),
           ),
       ])
-      return results[0].length > 0
+      return removed.length > 0
     },
 
     /** Sets the financing charge treatment from `from`, like setAmount. */
@@ -333,6 +343,49 @@ export function recurringAmountRepository(db: Db) {
         insert,
       ])
       return inserted.length > 0
+    },
+
+    /** Undoes the latest treatment change, like undoLatestAmount. */
+    async undoLatestTreatment(undo: Undo): Promise<boolean> {
+      const { propertyId, latestStart, previousStart } = undo
+      const scope = eq(financingTreatments.propertyId, propertyId)
+      const remove = db
+        .delete(financingTreatments)
+        .where(
+          and(
+            scope,
+            eq(financingTreatments.validFrom, latestStart),
+            isNull(financingTreatments.validTo),
+            isOwner(undo.actorId, propertyId),
+          ),
+        )
+        .returning({ id: financingTreatments.id })
+      if (previousStart === null) {
+        const [removed] = await atomically(db, [remove])
+        return removed.length > 0
+      }
+      const [removed] = await atomically(db, [
+        remove,
+        db
+          .update(financingTreatments)
+          .set({ validTo: null })
+          .where(
+            and(
+              scope,
+              eq(financingTreatments.validFrom, previousStart),
+              eq(financingTreatments.validTo, dayBefore(latestStart)),
+              notExists(
+                db
+                  .select({ one: sql`1` })
+                  .from(financingTreatments)
+                  .where(
+                    and(scope, eq(financingTreatments.validFrom, latestStart)),
+                  ),
+              ),
+            ),
+          ),
+      ])
+      return removed.length > 0
     },
   }
 }

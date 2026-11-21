@@ -1,13 +1,13 @@
 ## 1. Undoing the only amount and the treatment on the server
 
-- [ ] 1.1 `recurring-amount.repository.server.ts`:
+- [x] 1.1 `recurring-amount.repository.server.ts`:
   - `undoLatestAmount` takes `previousStart: IsoDate | null`; with null it only deletes the open latest period
   - new `undoLatestTreatment`, the same for `financing_treatments`
   - Workers tests: the only period is deleted, a period added meanwhile makes it not apply, other flats and kinds are untouched, a member's undo doesn't apply
-- [ ] 1.2 `recurring-amounts.server.ts`: `undoRecurringAmount` refuses only when there are no periods; new `undoFinancingTreatment` with access and owner checks, `treatment_nothing_to_undo`, `amount_changed` on a race, and `financing_treatment.undone` logged at info (`propertyId`, `from`)
-- [ ] 1.3 `functions.ts`: `undoFinancingTreatment` server function; `schemas.ts`: its input (`propertyRefInput`)
-- [ ] 1.4 `src/lib/reasons.ts`: the alert `treatment_nothing_to_undo`. Messages in fi, then sv and en with the translate skill; rewrite `reason_amount_nothing_to_undo` (no longer "correct it by setting a new amount") and widen `reason_amount_changed` to cover the treatment
-- [ ] 1.5 Workers tests named after the scenarios: "Undoing the only rent", "Undoing a treatment change", "Undoing the only treatment", "No treatment to undo is refused", "A member can't undo the treatment", the logged event. The test "The only period can't be undone" keeps its name until the archive commit and checks undoing a rent that has no periods
+- [x] 1.2 `recurring-amounts.server.ts`: `undoRecurringAmount` refuses only when there are no periods; new `undoFinancingTreatment` with access and owner checks, `treatment_nothing_to_undo`, `amount_changed` on a race, and `financing_treatment.undone` logged at info (`propertyId`, `from`)
+- [x] 1.3 `functions.ts`: `undoFinancingTreatment` server function; `schemas.ts`: its input (`propertyRefInput`)
+- [x] 1.4 `src/lib/reasons.ts`: the alert `treatment_nothing_to_undo`. Messages in fi, then sv and en with the translate skill; rewrite `reason_amount_nothing_to_undo` (no longer "correct it by setting a new amount") and widen `reason_amount_changed` to cover the treatment
+- [x] 1.5 Workers tests named after the scenarios: "Undoing the only rent", "Undoing a treatment change", "Undoing the only treatment", "No treatment to undo is refused", "A member can't undo the treatment", the logged event. The test "The only period can't be undone" keeps its name until the archive commit and checks undoing a rent that has no periods
 
 ## 2. Undo buttons and the dialog
 
