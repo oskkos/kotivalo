@@ -1,0 +1,622 @@
+{
+  "access": {
+    "code": "access",
+    "codeNotes": "Per property, by invitation. Tables property_access, property_invitations; roles owner, member",
+    "definition": "The right to see a flat in Kotivalo and edit its details, given by an invitation.",
+    "fi": { "term": "pääsy", "match": ["pääsy\\p{L}*"], "status": "proposed" },
+    "sv": {
+      "term": "åtkomst",
+      "match": ["åtkomst\\p{L}*"],
+      "avoid": ["tillgång\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": { "term": "access", "match": ["access\\p{L}*"], "status": "proposed" }
+  },
+  "account": {
+    "definition": "A user's sign-in identity in Kotivalo: email address, display name and language.",
+    "fi": { "term": "tili", "match": ["tili\\p{L}*"], "status": "proposed" },
+    "sv": { "term": "konto", "match": ["kont\\p{L}*"], "status": "proposed" },
+    "en": { "term": "account", "match": ["accounts?"], "status": "proposed" }
+  },
+  "acquisition_cost": {
+    "code": "acquisitionCost",
+    "codeNotes": "Capitalised financing charges add to it",
+    "definition": "What the owner paid for the flat, used to compute the capital gain when it is sold.",
+    "showOriginal": true,
+    "fi": {
+      "term": "hankintameno",
+      "match": ["hankintamen\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "anskaffningsutgift",
+      "match": ["anskaffningsutgift\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "acquisition cost",
+      "match": ["acquisition costs?"],
+      "status": "proposed"
+    }
+  },
+  "attachment": {
+    "code": "attachment",
+    "codeNotes": "E.g. a tenancy contract",
+    "definition": "A file kept with a tenancy, such as the signed contract.",
+    "fi": {
+      "term": "liite",
+      "match": ["liite(ttä)?", "liittee\\p{L}*", "liitteit\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": { "term": "bilaga", "match": ["bilag\\p{L}*"], "status": "proposed" },
+    "en": {
+      "term": "attachment",
+      "match": ["attachments?"],
+      "status": "proposed"
+    }
+  },
+  "borrower": {
+    "code": "borrower",
+    "codeNotes": "Borrowers have a debt share (basis points, a validity period)",
+    "definition": "An owner who is liable for a loan on the flat, with a share of the debt.",
+    "fi": {
+      "term": "lainanottaja",
+      "match": ["lainanottaj\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "låntagare",
+      "match": ["låntagar\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": { "term": "borrower", "match": ["borrowers?"], "status": "proposed" }
+  },
+  "capitalised": {
+    "code": "capitalised",
+    "codeNotes": "Financing charge treatment, a validity period",
+    "definition": "Financing charges the housing company has put into a fund for loan repayments: not income for the landlord, but added to the flat's acquisition cost.",
+    "showOriginal": true,
+    "fi": {
+      "term": "rahastoitu",
+      "match": ["rahastoi\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "fonderat",
+      "match": ["fonder\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "capitalised",
+      "match": ["capitali[sz]\\p{L}*"],
+      "status": "proposed"
+    }
+  },
+  "deposit": {
+    "code": "deposit",
+    "definition": "Money the tenant pays at the start of a tenancy as security for the rent and the flat's condition.",
+    "notes": "The Swedish term follows the Swedish text of the Finnish Act on Residential Leases, not Sweden's usage.",
+    "fi": {
+      "term": "vakuus",
+      "match": ["vakuu(s|de\\p{L}*|tta|ks\\p{L}*)"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "säkerhet",
+      "match": ["säkerhet\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": { "term": "deposit", "match": ["deposits?"], "status": "proposed" }
+  },
+  "deposit_return": {
+    "code": "depositReturn",
+    "definition": "Paying the deposit back to the tenant after the tenancy ends, in full or with deductions.",
+    "fi": {
+      "term": "vakuuden palautus",
+      "match": ["vakuuden palau\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "återbetalning av säkerheten",
+      "match": ["återbetalning\\p{L}* av säkerhet\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "deposit return",
+      "match": ["deposit returns?"],
+      "status": "proposed"
+    }
+  },
+  "estate": {
+    "code": "estate",
+    "definition": "The estate of a deceased person, which can own a flat or a share of one until it is divided.",
+    "showOriginal": true,
+    "fi": {
+      "term": "kuolinpesä",
+      "match": ["kuolinpe[sr]\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "dödsbo",
+      "match": ["dödsbo\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": { "term": "estate", "match": ["estates?"], "status": "proposed" }
+  },
+  "expense": {
+    "code": "expense",
+    "codeNotes": "transaction type",
+    "definition": "Money spent on a flat, such as charges and repairs.",
+    "fi": {
+      "term": "meno",
+      "match": ["meno(t|n|ja|jen|ista|ihin|a)?"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "utgift",
+      "match": ["utgift\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": { "term": "expense", "match": ["expenses?"], "status": "proposed" }
+  },
+  "financing_charge": {
+    "code": "financingCharge",
+    "definition": "A monthly charge the housing company collects for its loan repayments.",
+    "showOriginal": true,
+    "fi": {
+      "term": "rahoitusvastike",
+      "match": ["rahoitusvastik\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "finansieringsvederlag",
+      "match": ["finansieringsvederlag\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "financing charge",
+      "match": ["financing charges?"],
+      "status": "proposed"
+    }
+  },
+  "housing_company": {
+    "code": "housingCompany",
+    "definition": "The limited liability housing company whose shares give the right to occupy a flat.",
+    "fi": {
+      "term": "taloyhtiö",
+      "match": ["taloyhti\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "husbolag",
+      "match": ["husbolag\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "housing company",
+      "match": ["housing compan(y|ies)"],
+      "status": "proposed"
+    }
+  },
+  "income": {
+    "code": "income",
+    "codeNotes": "transaction type",
+    "definition": "Money a flat brings in, mainly rent.",
+    "fi": {
+      "term": "tulo",
+      "match": ["tulo(t|n|ja|jen|ista|ihin|a)?"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "intäkt",
+      "match": ["intäkt\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": { "term": "income", "match": ["income"], "status": "proposed" }
+  },
+  "income_recognised": {
+    "code": "incomeRecognised",
+    "codeNotes": "Financing charge treatment, a validity period",
+    "definition": "Financing charges the housing company has recorded as its income: the landlord can deduct them as expenses.",
+    "showOriginal": true,
+    "fi": {
+      "term": "tuloutettu",
+      "match": ["tulout\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "intäktsfört",
+      "match": ["intäktsför\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "income-recognised",
+      "match": ["income[- ]recogni[sz]\\p{L}*", "recogni[sz]\\p{L}* as income"],
+      "status": "proposed"
+    }
+  },
+  "interest": {
+    "code": "interest",
+    "codeNotes": "Part of a loan payment; deductible",
+    "definition": "The interest part of a loan payment, deductible from rental income.",
+    "fi": {
+      "term": "korko",
+      "match": ["kor(ko|on|koa|ot|koja|kojen)"],
+      "status": "proposed"
+    },
+    "sv": { "term": "ränta", "match": ["ränt\\p{L}*"], "status": "proposed" },
+    "en": { "term": "interest", "match": ["interest"], "status": "proposed" }
+  },
+  "invitation": {
+    "code": "invitation",
+    "codeNotes": "Table property_invitations",
+    "definition": "An emailed invitation that gives its recipient access to one flat once accepted.",
+    "notes": "The Finnish and Swedish patterns cover the verb too (kutsua, bjuda in), since sentences switch between the noun and the verb.",
+    "fi": { "term": "kutsu", "match": ["kutsu\\p{L}*"], "status": "proposed" },
+    "sv": {
+      "term": "inbjudan",
+      "match": ["inbjud\\p{L}*", "bjud\\p{L}* in"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "invitation",
+      "match": ["invit\\p{L}*"],
+      "status": "proposed"
+    }
+  },
+  "landlord": {
+    "definition": "A person who lets a flat to a tenant; Kotivalo's user.",
+    "fi": {
+      "term": "vuokranantaja",
+      "match": ["vuokranantaj\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "hyresvärd",
+      "match": ["hyresvärd\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": { "term": "landlord", "match": ["landlords?"], "status": "proposed" }
+  },
+  "loan": {
+    "code": "loan",
+    "codeNotes": "Per property",
+    "definition": "A loan taken to buy or renovate a flat.",
+    "fi": {
+      "term": "laina",
+      "match": ["lain(a|an|aa|at|oja|ojen|oista|oihin|asta)"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "lån",
+      "match": ["lån(et|en|ets|ens)?"],
+      "status": "proposed"
+    },
+    "en": { "term": "loan", "match": ["loans?"], "status": "proposed" }
+  },
+  "loan_payment": {
+    "code": "loanPayment",
+    "codeNotes": "Per loan and year: interest (deductible), principal (not deductible)",
+    "definition": "What was paid on a loan in a year, split into interest and principal.",
+    "fi": {
+      "term": "lainanmaksu",
+      "match": ["lainanmaks\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "lånebetalning",
+      "match": ["lånebetalning\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "loan payment",
+      "match": ["loan payments?"],
+      "status": "proposed"
+    }
+  },
+  "maintenance_charge": {
+    "code": "maintenanceCharge",
+    "definition": "A monthly charge the housing company collects for upkeep; a deductible expense for the landlord.",
+    "showOriginal": true,
+    "fi": {
+      "term": "hoitovastike",
+      "match": ["hoitovastik\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "skötselvederlag",
+      "match": ["skötselvederlag\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "maintenance charge",
+      "match": ["maintenance charges?"],
+      "status": "proposed"
+    }
+  },
+  "member": {
+    "code": "member",
+    "codeNotes": "property_access role; a 0 % share",
+    "definition": "Someone with access to a flat but no ownership share: sees the flat and can edit its details.",
+    "fi": { "term": "jäsen", "match": ["jäsen\\p{L}*"], "status": "proposed" },
+    "sv": {
+      "term": "medlem",
+      "match": ["medlem\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": { "term": "member", "match": ["members?"], "status": "proposed" }
+  },
+  "notice": {
+    "code": "notice",
+    "codeNotes": "noticeDate, noticeGivenBy",
+    "definition": "Ending a tenancy by notice, given by the landlord or the tenant.",
+    "fi": {
+      "term": "irtisanominen",
+      "match": ["irtisano\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "uppsägning",
+      "match": ["uppsäg\\p{L}*", "säg\\p{L}* upp"],
+      "status": "proposed"
+    },
+    "en": { "term": "notice", "match": ["notice"], "status": "proposed" }
+  },
+  "owner": {
+    "code": "owner",
+    "codeNotes": "property_access role; a share above 0 %",
+    "definition": "Someone with an ownership share above 0 % in a flat.",
+    "fi": {
+      "term": "omistaja",
+      "match": ["omistaj\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "ägare",
+      "match": ["ägar\\p{L}*", "delägar\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "owner",
+      "match": ["owners?", "co-owners?"],
+      "status": "proposed"
+    }
+  },
+  "ownership": {
+    "definition": "Who owns a flat and in what shares, over time.",
+    "fi": {
+      "term": "omistus",
+      "match": ["omistu(s|ks)\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "ägande",
+      "match": ["ägande\\p{L}*", "ägar\\p{L}*", "ägd\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "ownership",
+      "match": ["ownership", "owned"],
+      "status": "proposed"
+    }
+  },
+  "ownership_period": {
+    "code": "ownership period",
+    "codeNotes": "Table ownership_periods: one row per owner and period",
+    "definition": "A validity period during which a flat's ownership shares stay the same.",
+    "fi": {
+      "term": "omistusjakso",
+      "match": ["omistusjaks\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "ägarperiod",
+      "match": ["ägarperiod\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "ownership period",
+      "match": ["ownership periods?"],
+      "status": "proposed"
+    }
+  },
+  "principal": {
+    "code": "principal",
+    "codeNotes": "Part of a loan payment; not deductible",
+    "definition": "The part of a loan payment that pays the loan down; not deductible.",
+    "fi": {
+      "term": "lyhennys",
+      "match": ["lyhenny\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "amortering",
+      "match": ["amorter\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": { "term": "principal", "match": ["principal"], "status": "proposed" }
+  },
+  "property": {
+    "code": "property",
+    "codeNotes": "One rental unit; also covers a house. Table properties",
+    "definition": "A rental unit tracked in Kotivalo: a flat, or a house.",
+    "fi": {
+      "term": "asunto",
+      "match": ["asun[nt]o\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "bostad",
+      "match": ["bost[aä]d\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "flat",
+      "match": ["flats?"],
+      "avoid": ["apartments?"],
+      "status": "proposed"
+    }
+  },
+  "receipt": {
+    "code": "receipt",
+    "definition": "A photo or PDF of a receipt, kept with an expense.",
+    "fi": {
+      "term": "kuitti",
+      "match": ["kuit(ti|in|tia|it|teja|tien|eista|tiin|ille|ista)"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "kvitto",
+      "match": ["kvitt(o|on|ot|ona|ots)"],
+      "status": "proposed"
+    },
+    "en": { "term": "receipt", "match": ["receipts?"], "status": "proposed" }
+  },
+  "recurring_amount": {
+    "code": "recurringAmount",
+    "codeNotes": "Rent and charges over time, as validity periods",
+    "definition": "A rent or charge that repeats every month and changes only from a given date.",
+    "fi": {
+      "term": "toistuva summa",
+      "match": ["toistuv\\p{L}* summ\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "återkommande belopp",
+      "match": ["återkommande belopp\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "recurring amount",
+      "match": ["recurring amounts?"],
+      "status": "proposed"
+    }
+  },
+  "rent": {
+    "code": "rent",
+    "definition": "What the tenant pays the landlord for the flat, usually monthly.",
+    "fi": {
+      "term": "vuokra",
+      "match": ["vuokr(a|an|aa|at|ia|ien|ista|ille|ana|aan|asta|alle)"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "hyra",
+      "match": ["hyr(a|an|or|orna|ans|ornas)"],
+      "status": "proposed"
+    },
+    "en": { "term": "rent", "match": ["rents?"], "status": "proposed" }
+  },
+  "share": {
+    "code": "share",
+    "codeNotes": "Basis points (5000 = 50 %), per ownership_periods row; shares add up to exactly 10000",
+    "definition": "An owner's part of a flat in per cent.",
+    "fi": { "term": "osuus", "match": ["osuu\\p{L}*"], "status": "proposed" },
+    "sv": { "term": "andel", "match": ["andel\\p{L}*"], "status": "proposed" },
+    "en": { "term": "share", "match": ["shares?"], "status": "proposed" }
+  },
+  "sharing": {
+    "definition": "Giving other people access to a flat by invitation.",
+    "fi": {
+      "term": "jakaminen",
+      "match": ["jakami\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "delning",
+      "match": ["delning\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": { "term": "sharing", "match": ["sharing"], "status": "proposed" }
+  },
+  "tenancy": {
+    "code": "tenancy",
+    "definition": "A lease between a landlord and a tenant for a flat, open-ended or fixed-term.",
+    "fi": {
+      "term": "vuokrasuhde",
+      "match": ["vuokrasuh[dt]\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "hyresförhållande",
+      "match": ["hyresförhållande\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "tenancy",
+      "match": ["tenanc(y|ies)"],
+      "status": "proposed"
+    }
+  },
+  "tenant": {
+    "code": "tenant",
+    "definition": "A person who rents a flat.",
+    "fi": {
+      "term": "vuokralainen",
+      "match": ["vuokralai\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "hyresgäst",
+      "match": ["hyresgäst\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": { "term": "tenant", "match": ["tenants?"], "status": "proposed" }
+  },
+  "transaction": {
+    "code": "transaction",
+    "codeNotes": "income or expense. Not to be confused with a database transaction",
+    "definition": "One logged income or expense with its amount, date and flat.",
+    "fi": {
+      "term": "kirjaus",
+      "match": ["kirjau(s|ks)\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "registrering",
+      "match": ["registrering\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": { "term": "entry", "match": ["entr(y|ies)"], "status": "proposed" }
+  },
+  "validity_period": {
+    "code": "validity period",
+    "codeNotes": "validFrom / validTo, columns valid_from / valid_to",
+    "definition": "The dates from which, and until which, a time-bound fact holds: rent, charges, shares, tenancies.",
+    "fi": {
+      "term": "voimassaolojakso",
+      "match": ["voimassaolojaks\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "giltighetsperiod",
+      "match": ["giltighetsperiod\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "validity period",
+      "match": ["validity periods?"],
+      "status": "proposed"
+    }
+  },
+  "year_summary": {
+    "code": "yearSummary",
+    "codeNotes": "Computed, never stored",
+    "definition": "A flat's income and expenses for a year, split by owner, as the figures for each owner's tax return.",
+    "fi": {
+      "term": "vuosiyhteenveto",
+      "match": ["vuosiyhteenve[dt]\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "årssammandrag",
+      "match": ["årssammandrag\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "year summary",
+      "match": ["year summar(y|ies)"],
+      "status": "proposed"
+    }
+  }
+}

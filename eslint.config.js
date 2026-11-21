@@ -246,11 +246,12 @@ export default defineConfig([
     languageOptions: { globals: globals.node },
   },
 
-  // Translation keys stay in alphabetical order, so a new message has one
-  // place to go and the three languages line up. Only the top level: a
-  // message's variants keep their own order. `eslint --fix` sorts them.
+  // Translation keys, terms and sources stay in alphabetical order, so a new
+  // one has one place to go and the three languages line up. Only the top
+  // level: a message's variants keep their own order. `eslint --fix` sorts
+  // them.
   {
-    files: ['messages/*.json'],
+    files: ['messages/*.json', 'i18n/*.json'],
     extends: [eslintJsonc.configs['flat/base']],
     rules: {
       'jsonc/sort-keys': [
