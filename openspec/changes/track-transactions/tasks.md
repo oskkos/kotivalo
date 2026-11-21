@@ -1,15 +1,15 @@
 ## 1. Tables and repository
 
-- [ ] 1.1 Add `transactions` and `receipts` to `src/server/db/schema.ts` as in design.md ("Two tables"): the type and category text enums, `cents()`, `isoDate()`, `instant()`, the cascades, the unique `transaction_id` and the indexes
-- [ ] 1.2 `pnpm db:generate`; commit the migration
-- [ ] 1.3 `features/transactions/transaction.repository.server.ts`:
+- [x] 1.1 Add `transactions` and `receipts` to `src/server/db/schema.ts` as in design.md ("Two tables"): the type and category text enums, `cents()`, `isoDate()`, `instant()`, the cascades, the unique `transaction_id` and the indexes
+- [x] 1.2 `pnpm db:generate`; commit the migration
+- [x] 1.3 `features/transactions/transaction.repository.server.ts`:
   - `forPropertyYear(propertyId, year)`: the year's entries, newest first, each with whether it has a receipt
   - `years(propertyId)`: the years that have entries
   - `get(transactionId)`: the entry, its flat, its author's name and its receipt
   - `create`, `update` and `delete`, with the receipt row inserted, replaced or removed in the same `atomically` batch
   - `receiptForAccess(receiptId)`: the receipt with its entry's property id
   - `storageUsage(userId)`: bytes and file count over `receipts.uploaded_by`
-- [ ] 1.4 Workers tests for the repository:
+- [x] 1.4 Workers tests for the repository:
   - newest first within a year
   - other flats and years are left out
   - one receipt per entry
