@@ -13,7 +13,7 @@ import paraglide from '@inlang/paraglide-js/eslint'
 import eslintJsonc from 'eslint-plugin-jsonc'
 
 // Brand name and other strings that are never translated.
-const UNTRANSLATED = ['kotivalo', 'Kotivalo']
+const UNTRANSLATED = ['kotivalo', 'Kotivalo', '€']
 const untranslatedRe = `/^\\s*(${UNTRANSLATED.join('|')})?\\s*$/`
 
 // "No hard-coded text" (CLAUDE.md, i18n): all UI copy comes from Paraglide

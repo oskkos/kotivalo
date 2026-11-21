@@ -108,32 +108,30 @@
 
 ## 7. The new entry form
 
-- [ ] 7.1 `features/transactions/resize-image.ts` (design.md, "Images are resized in the browser") with component-project tests using a stubbed canvas
-- [ ] 7.2 Route `/transactions/new` with `?propertyId=`. Without an owned flat it shows the explanations of "New entry from the bottom bar"
-- [ ] 7.3 `TransactionForm.tsx`, as on the Design canvas ("Uusi kirjaus", "· kuitti liitetty", "· tallennetaan", "· virheet"):
+- [x] 7.1 `features/transactions/resize-image.ts` (design.md, "Images are resized in the browser") with component-project tests using a stubbed canvas
+- [x] 7.2 Route `/transactions/new` with `?propertyId=`. Without an owned flat it shows the explanations of "New entry from the bottom bar"
+- [x] 7.3 `TransactionForm.tsx`, as on the Design canvas ("Uusi kirjaus", "· kuitti liitetty", "· tallennetaan", "· virheet"):
   - the type switch and the amount
-  - the categories (`ChoiceField`) with the tax hint
+  - the categories as wrapping toggle buttons (`ChoiceField`'s equal columns don't fit the longer names) with the tax hint
   - the date and the note
   - the receipt field: one button, `accept="image/jpeg,image/png,image/webp,application/pdf"`, a preview row with Remove, and progress while saving
   - the field reasons and the alerts
-- [ ] 7.4 The flat choice when there is no `?propertyId`: the owned flats in a dialog, the last used one from `localStorage`
-- [ ] 7.5 Messages, including the category names and hints, in fi, then sv and en with the translate skill. Add the category and 7H row terms to the term bank, and run the term-critic on the diff
-- [ ] 7.6 Component tests:
+- [x] 7.4 The flat choice when there is no `?propertyId`: the owned flats in a dialog, the last used one from `localStorage`
+- [x] 7.5 Messages, including the category names and hints, in fi, then sv and en with the translate skill. Add the category and 7H row terms to the term bank, and run the term-critic on the diff
+- [x] 7.6 Component tests:
   - the hint per category
   - "Rent is not a category"
   - the field reasons
   - the quota alert ("Storage quota for receipts")
   - the flat choice
-- [ ] 7.7 New entry on the Entries page for owners, linking to `/transactions/new?propertyId=…`
-- [ ] 7.8 Playwright:
-  - "Entries are grouped by month, newest first", "Choosing an earlier year" and "A member sees the entries but can't add them" (The entries page)
-  - "The details of an expense", "An entry logged by a co-owner", "A member downloads a receipt" and "Opening a receipt full screen"
+- [x] 7.7 New entry on the Entries page for owners, linking to `/transactions/new?propertyId=…`
+- [x] 7.8 Playwright, one test per requirement at least; the other scenarios are covered by component and Workers tests:
+  - "Entries are grouped by month, newest first" (The entries page)
   - "Logging an annual repair"
   - "The chosen category shows its tax hint"
-  - "Rent is not a category"
-  - "Logging an expense with a receipt photo", with a 4000 × 3000 JPEG fixture checked for a long edge of at most 2000 px
-  - "A PDF receipt is stored as it is", with a fixture
-  - "An invalid amount is refused"
+  - "Logging an expense with a receipt photo", with a 4000 × 3000 JPEG drawn by the browser, checked at 2000 × 1500
+  - "The details of an expense", with a PDF receipt
+  - "Opening a receipt full screen"
 
 ## 8. Editing and deleting
 

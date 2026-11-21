@@ -87,6 +87,9 @@ function Icon(props: { path: string; size?: number; label?: string }) {
 
 const TextLink = createLink(Link)
 const RowLink = createLink(Link)
+const ButtonLink = createLink(Button)
+
+const PLUS = 'M12 5 V19 M5 12 H19'
 
 const BACK = 'M15 5 L8 12 L15 19'
 const UP = 'M7 17 L17 7 M9 7 H17 V15'
@@ -335,6 +338,31 @@ export function TransactionsPage(props: Props) {
           </Typography>
         )}
       </Stack>
+      {isOwner ? (
+        <Box
+          component="footer"
+          sx={{
+            position: 'sticky',
+            bottom: 0,
+            px: 2.5,
+            pt: 1.5,
+            pb: 3.5,
+            bgcolor: 'background.default',
+            borderTop: `1px solid ${colors.cardBorder}`,
+          }}
+        >
+          <ButtonLink
+            to="/transactions/new"
+            search={{ propertyId: view.property.id }}
+            variant="contained"
+            fullWidth
+            startIcon={<Icon path={PLUS} size={20} />}
+            sx={{ minHeight: 56, borderRadius: 999, fontSize: 17 }}
+          >
+            {m.transactions_new()}
+          </ButtonLink>
+        </Box>
+      ) : null}
     </Stack>
   )
 }

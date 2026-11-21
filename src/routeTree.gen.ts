@@ -17,6 +17,7 @@ import { Route as AuthedAccountRouteImport } from './routes/_authed/account'
 import { Route as AuthedWelcomeRouteImport } from './routes/_authed/welcome'
 import { Route as ApiLogRouteImport } from './routes/api/log'
 import { Route as AuthedPropertiesNewRouteImport } from './routes/_authed/properties/new'
+import { Route as AuthedTransactionsNewRouteImport } from './routes/_authed/transactions/new'
 import { Route as ApiReceiptsReceiptIdRouteImport } from './routes/api/receipts/$receiptId'
 import { Route as ApiTestInboxRouteImport } from './routes/api/test/inbox'
 import { Route as AuthedPropertiesPropertyIdEditRouteImport } from './routes/_authed/properties/$propertyId/edit'
@@ -64,6 +65,11 @@ const ApiLogRoute = ApiLogRouteImport.update({
 const AuthedPropertiesNewRoute = AuthedPropertiesNewRouteImport.update({
   id: '/properties/new',
   path: '/properties/new',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedTransactionsNewRoute = AuthedTransactionsNewRouteImport.update({
+  id: '/transactions/new',
+  path: '/transactions/new',
   getParentRoute: () => AuthedRoute,
 } as any)
 const ApiReceiptsReceiptIdRoute = ApiReceiptsReceiptIdRouteImport.update({
@@ -127,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof AuthedWelcomeRoute
   '/api/log': typeof ApiLogRoute
   '/properties/new': typeof AuthedPropertiesNewRoute
+  '/transactions/new': typeof AuthedTransactionsNewRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
   '/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
@@ -145,6 +152,7 @@ export interface FileRoutesByTo {
   '/api/log': typeof ApiLogRoute
   '/': typeof AuthedIndexRoute
   '/properties/new': typeof AuthedPropertiesNewRoute
+  '/transactions/new': typeof AuthedTransactionsNewRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
   '/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
@@ -165,6 +173,7 @@ export interface FileRoutesById {
   '/api/log': typeof ApiLogRoute
   '/_authed/': typeof AuthedIndexRoute
   '/_authed/properties/new': typeof AuthedPropertiesNewRoute
+  '/_authed/transactions/new': typeof AuthedTransactionsNewRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
   '/_authed/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
@@ -185,6 +194,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/api/log'
     | '/properties/new'
+    | '/transactions/new'
     | '/api/receipts/$receiptId'
     | '/api/test/inbox'
     | '/properties/$propertyId/edit'
@@ -203,6 +213,7 @@ export interface FileRouteTypes {
     | '/api/log'
     | '/'
     | '/properties/new'
+    | '/transactions/new'
     | '/api/receipts/$receiptId'
     | '/api/test/inbox'
     | '/properties/$propertyId/edit'
@@ -222,6 +233,7 @@ export interface FileRouteTypes {
     | '/api/log'
     | '/_authed/'
     | '/_authed/properties/new'
+    | '/_authed/transactions/new'
     | '/api/receipts/$receiptId'
     | '/api/test/inbox'
     | '/_authed/properties/$propertyId/edit'
@@ -300,6 +312,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedPropertiesNewRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/transactions/new': {
+      id: '/_authed/transactions/new'
+      path: '/transactions/new'
+      fullPath: '/transactions/new'
+      preLoaderRoute: typeof AuthedTransactionsNewRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/api/receipts/$receiptId': {
       id: '/api/receipts/$receiptId'
       path: '/api/receipts/$receiptId'
@@ -371,6 +390,7 @@ interface AuthedRouteChildren {
   AuthedWelcomeRoute: typeof AuthedWelcomeRoute
   AuthedIndexRoute: typeof AuthedIndexRoute
   AuthedPropertiesNewRoute: typeof AuthedPropertiesNewRoute
+  AuthedTransactionsNewRoute: typeof AuthedTransactionsNewRoute
   AuthedPropertiesPropertyIdEditRoute: typeof AuthedPropertiesPropertyIdEditRoute
   AuthedPropertiesPropertyIdSharingRoute: typeof AuthedPropertiesPropertyIdSharingRoute
   AuthedPropertiesPropertyIdAmountsKindRoute: typeof AuthedPropertiesPropertyIdAmountsKindRoute
@@ -385,6 +405,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedWelcomeRoute: AuthedWelcomeRoute,
   AuthedIndexRoute: AuthedIndexRoute,
   AuthedPropertiesNewRoute: AuthedPropertiesNewRoute,
+  AuthedTransactionsNewRoute: AuthedTransactionsNewRoute,
   AuthedPropertiesPropertyIdEditRoute: AuthedPropertiesPropertyIdEditRoute,
   AuthedPropertiesPropertyIdSharingRoute:
     AuthedPropertiesPropertyIdSharingRoute,

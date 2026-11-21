@@ -95,7 +95,7 @@ describe('Viewing and downloading a receipt', () => {
     expect(new Uint8Array(await response.arrayBuffer())).toEqual(bytes)
   })
 
-  test('A user without access can’t open a receipt', async () => {
+  test("A user without access can't open a receipt", async () => {
     const response = await respond('outsider')
     expect(response.status).toBe(404)
     expect(await response.text()).toBe('Not found')

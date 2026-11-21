@@ -183,7 +183,7 @@ describe('The transaction repository', () => {
     expect(await repo.receiptForAccess('missing')).toBeNull()
   })
 
-  test('the storage usage counts only the user’s own uploads', async () => {
+  test("the storage usage counts only the user's own uploads", async () => {
     await repo.create('annika', flat, repair, receipt('receipts/a', 1000), now)
     await repo.create('annika', flat, repair, receipt('receipts/b', 2500), now)
     await repo.create('jussi', flat, repair, receipt('receipts/c', 4000), now)
