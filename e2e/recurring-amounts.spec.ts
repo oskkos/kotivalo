@@ -183,3 +183,72 @@ test.describe('Undoing the latest rent or charge change', () => {
     await expect(charge.getByText(/: €226.00\/month/)).toHaveCount(0)
   })
 })
+
+/** On the Rent and charges page: sets the treatment via its form. */
+async function setTreatment(page: Page, treatment: string, from: string) {
+  await page
+    .getByRole('button', {
+      name: /^(Set|Change): Treatment by the housing company$/,
+    })
+    .click()
+  await waitForHydration(page)
+  await page.getByRole('button', { name: treatment }).click()
+  await page.getByRole('textbox', { name: 'Valid from' }).fill(from)
+  await page.getByRole('button', { name: 'Save' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Rent and charges' }),
+  ).toBeVisible()
+}
+
+test.describe('The financing charge treatment', () => {
+  test('Setting the treatment for the first time', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await openAmounts(page, id)
+
+    await setTreatment(page, 'Placed in reserve', '01/03/2025')
+
+    const financing = section(page, 'Financing charge')
+    await expect(financing.getByText('Placed in reserve')).toBeVisible()
+    await expect(
+      financing.getByText(/^From 01\/03\/2025 · added to the acquisition cost/),
+    ).toBeVisible()
+  })
+
+  test('A new treatment keeps the history', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await openAmounts(page, id)
+    await setTreatment(page, 'Placed in reserve', '01/03/2025')
+    await setTreatment(page, 'Recorded as revenue', `01/01/${String(nextYear)}`)
+
+    await page
+      .getByRole('button', { name: 'Change: Treatment by the housing company' })
+      .click()
+    const history = page
+      .getByRole('list', { name: 'History' })
+      .getByRole('listitem')
+    await expect(history.nth(0)).toHaveText(
+      `From 01/01/${String(nextYear)}Recorded as revenue`,
+    )
+    await expect(history.nth(1)).toHaveText('From 01/03/2025Placed in reserve')
+  })
+})
+
+test.describe('Accumulated capitalised financing charges', () => {
+  test('Only capitalised months count', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await openAmounts(page, id)
+    // Capitalised from March to December 2025 (10 months of €80), then
+    // income-recognised: €800 whenever the test runs from 2026 on.
+    await setAmount(page, 'Financing charge', '80', '01/03/2025')
+    await setAmount(page, 'Financing charge', '86', '01/01/2026')
+    await setTreatment(page, 'Placed in reserve', '01/03/2025')
+    await setTreatment(page, 'Recorded as revenue', '01/01/2026')
+
+    await expect(
+      page.getByText(
+        '€800.00 of financing charges has been added to the acquisition cost so far.',
+        { exact: false },
+      ),
+    ).toBeVisible()
+  })
+})

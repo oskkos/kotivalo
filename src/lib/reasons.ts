@@ -31,6 +31,7 @@ export type FieldReason =
   | 'amount_date_not_month_start'
   | 'amount_date_before_ownership'
   | 'amount_date_too_early'
+  | 'treatment_required'
 
 /** Errors about the whole action, shown as an alert with a title. */
 export type AlertReason =
@@ -106,6 +107,7 @@ const texts: Record<Reason, () => ReasonText> = {
     text: m.reason_amount_date_before_ownership(),
   }),
   amount_date_too_early: () => ({ text: m.reason_amount_date_too_early() }),
+  treatment_required: () => ({ text: m.reason_treatment_required() }),
   code_expired: () => ({
     title: m.reason_code_expired_title(),
     text: m.reason_code_expired(),
