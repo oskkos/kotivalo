@@ -54,6 +54,20 @@ async function raisedCharge(page: Page) {
 }
 
 test.describe('The rent and charges page', () => {
+  test('Opening the page from the edit page', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await page.goto(`/properties/${id}/edit`)
+    await waitForHydration(page)
+
+    await page.getByRole('link', { name: 'Rent and charges' }).click()
+
+    await expect(page).toHaveURL(new RegExp(`/properties/${id}/amounts$`))
+    await expect(
+      page.getByRole('heading', { name: 'Rent and charges' }),
+    ).toBeVisible()
+    await expect(page.getByText('Kuusikuja 3 B 12')).toBeVisible()
+  })
+
   test('A flat without amounts', async ({ page }) => {
     const id = await ownerWithFlat(page)
     await openAmounts(page, id)

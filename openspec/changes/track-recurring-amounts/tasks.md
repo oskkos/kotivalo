@@ -67,12 +67,12 @@
 
 ## 7. Opening the page from the edit page
 
-- [ ] 7.1 Add the "Vuokra ja vastikkeet" icon link to the edit page's header, next to Ownership and sharing, with its message in three languages
-- [ ] 7.2 Playwright for "Opening the page from the edit page"
-- [ ] 7.3 Docs:
+- [x] 7.1 Add the "Vuokra ja vastikkeet" icon link to the edit page's header, next to Ownership and sharing, with its message in three languages
+- [x] 7.2 Playwright for "Opening the page from the edit page"
+- [x] 7.3 Docs:
   - CLAUDE.md "Current state": rent and charges
   - CONCEPT.md: tick the generating-recurring-entries question (computed on the fly) and the translations question (done in #57); change the data model rows of `recurring_amounts` and `financing_treatments` to `valid_from`, `valid_to`
-- [ ] 7.4 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
+- [x] 7.4 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
 
 ## 8. Archive
 
