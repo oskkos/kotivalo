@@ -141,10 +141,10 @@ async function storeReceipt(
           : 'receipt_unsupported_type',
     }
   }
+  // A first check, so a full quota stores no file; the write checks again.
   const usage = await deps.transactions.storageUsage(deps.userId)
   if (!fitsQuota(usage, checked.size)) {
-    deps.log.warn('transaction.quota_exceeded', { propertyId })
-    return { ok: false, reason: 'storage_quota_full' }
+    return quotaFull(deps, propertyId)
   }
   const key = newFileKey('receipts')
   await deps.storage.put(key, upload.bytes, checked.contentType)
@@ -157,6 +157,14 @@ async function storeReceipt(
       filename: receiptFilename(upload.filename, checked.contentType),
     },
   }
+}
+
+function quotaFull(
+  deps: TransactionDeps,
+  propertyId: string,
+): Failure<'storage_quota_full'> {
+  deps.log.warn('transaction.quota_exceeded', { propertyId })
+  return { ok: false, reason: 'storage_quota_full' }
 }
 
 /** Deletes stored files; a failure leaves an orphan and is logged. */
@@ -342,7 +350,9 @@ export async function createTransaction(
     (created) => created !== null,
   )
   if (id === null) {
-    return ownerOnly
+    return receipt && (await roleCheck(deps, propertyId)) === undefined
+      ? quotaFull(deps, propertyId)
+      : ownerOnly
   }
   deps.log.info('transaction.created', {
     propertyId,
@@ -400,7 +410,11 @@ export async function updateTransaction(
     (updated) => updated.applied,
   )
   if (!result.applied) {
-    return entryNotFound
+    const stillThere =
+      receipt !== undefined &&
+      (await roleCheck(deps, propertyId)) === undefined &&
+      (await deps.transactions.get(transactionId))?.propertyId === propertyId
+    return stillThere ? quotaFull(deps, propertyId) : entryNotFound
   }
   await deleteFiles(deps, result.removedKeys)
   const hadReceipt = existing.receipt !== null

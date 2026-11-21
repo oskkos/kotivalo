@@ -310,6 +310,31 @@ describe('Storage quota for receipts', () => {
     ).toEqual({ ok: false, reason: 'storage_quota_full' })
   })
 
+  test('the write itself refuses a receipt over the quota', async () => {
+    await recordUploads('annika', 999, 1)
+    // Both checks before the writes see 999 files; only one write fits.
+    const results = await Promise.all([
+      createTransaction(deps('annika'), flat, repair, jpeg()),
+      createTransaction(deps('annika'), flat, repair, jpeg()),
+    ])
+    expect(results.map((result) => result.ok).sort()).toEqual([false, true])
+    expect(results).toContainEqual({ ok: false, reason: 'storage_quota_full' })
+    expect(await fileKeys()).toHaveLength(1)
+  })
+
+  test('a replacement over the quota changes nothing', async () => {
+    const id = await created()
+    await recordUploads('annika', 1, 524_287_000)
+    expect(
+      await updateTransaction(deps('annika'), flat, id, repair, {
+        action: 'replace',
+        upload: jpeg(2000),
+      }),
+    ).toEqual({ ok: false, reason: 'storage_quota_full' })
+    expect((await details(id)).receipt?.size).toBe(1000)
+    expect(await fileKeys()).toHaveLength(1)
+  })
+
   test('Another owner’s files don’t count', async () => {
     await recordUploads('jussi', 1000, 1)
     expect(

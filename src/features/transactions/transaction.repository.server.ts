@@ -2,7 +2,18 @@
 // one atomically() batch and carry the owner check in their statements, so a
 // role lost between the read and the write changes nothing. The caller stores
 // and deletes the receipt files; this module returns the keys it removed.
-import { and, count, desc, eq, exists, gte, lte, sql, sum } from 'drizzle-orm'
+import {
+  and,
+  count,
+  desc,
+  eq,
+  exists,
+  gte,
+  lte,
+  ne,
+  sql,
+  sum,
+} from 'drizzle-orm'
 import type { IsoDate } from '#/lib/dates'
 import {
   properties,
@@ -13,6 +24,7 @@ import {
   type TransactionCategory,
   type TransactionType,
 } from '#/server/db/schema'
+import { STORAGE_QUOTA } from '#/server/files/quota'
 import { atomically, type Db } from '#/server/platform/db.server'
 
 export interface TransactionFields {
@@ -82,6 +94,29 @@ export function transactionRepository(db: Db) {
       isOwner(actorId, propertyId),
     )
 
+  /**
+   * One more file of `size` bytes fits the actor's storage quota, not
+   * counting the receipt of `replacing`. Inside the write, so parallel
+   * uploads can't all pass a check made before them.
+   */
+  const fitsQuota = (actorId: string, size: number, replacing?: string) => {
+    const own = and(
+      eq(receipts.uploadedBy, actorId),
+      replacing === undefined
+        ? undefined
+        : ne(receipts.transactionId, replacing),
+    )
+    const used = db
+      .select({ bytes: sql`coalesce(sum(${receipts.size}), 0)` })
+      .from(receipts)
+      .where(own)
+    const files = db.select({ files: count() }).from(receipts).where(own)
+    return and(
+      sql`(${used}) + ${size} <= ${STORAGE_QUOTA.bytes}`,
+      sql`(${files}) + 1 <= ${STORAGE_QUOTA.files}`,
+    )
+  }
+
   /** Inserts a receipt for an entry that exists in the actor's flat. */
   const insertReceipt = (
     actorId: string,
@@ -103,7 +138,12 @@ export function transactionRepository(db: Db) {
           createdAt: sql<number>`${now.getTime()}`.as('created_at'),
         })
         .from(transactions)
-        .where(ownedEntry(actorId, propertyId, transactionId)),
+        .where(
+          and(
+            ownedEntry(actorId, propertyId, transactionId),
+            fitsQuota(actorId, receipt.size, transactionId),
+          ),
+        ),
     )
 
   return {
@@ -187,7 +227,10 @@ export function transactionRepository(db: Db) {
       }
     },
 
-    /** Logs an entry, with its receipt; null when the actor isn't an owner. */
+    /**
+     * Logs an entry, with its receipt. Null when the actor isn't an owner or
+     * the receipt doesn't fit their storage quota; nothing is written then.
+     */
     async create(
       actorId: string,
       propertyId: string,
@@ -216,7 +259,11 @@ export function transactionRepository(db: Db) {
             })
             .from(properties)
             .where(
-              and(eq(properties.id, propertyId), isOwner(actorId, propertyId)),
+              and(
+                eq(properties.id, propertyId),
+                isOwner(actorId, propertyId),
+                receipt ? fitsQuota(actorId, receipt.size) : undefined,
+              ),
             ),
         )
         .returning({ id: transactions.id })
@@ -232,7 +279,8 @@ export function transactionRepository(db: Db) {
     },
 
     /**
-     * Updates an entry of the flat and its receipt. Returns whether it
+     * Updates an entry of the flat and its receipt; a replacement that
+     * doesn't fit the storage quota changes nothing. Returns whether it
      * applied and the keys of the receipt files it removed, which the caller
      * deletes from storage.
      */
@@ -244,10 +292,15 @@ export function transactionRepository(db: Db) {
       change: ReceiptChange,
       now: Date,
     ): Promise<{ applied: boolean; removedKeys: string[] }> {
+      // A replacement must fit the quota, or nothing changes.
+      const fits =
+        change.kind === 'replace'
+          ? fitsQuota(actorId, change.receipt.size, transactionId)
+          : undefined
       const update = db
         .update(transactions)
         .set({ ...fields, updatedAt: now })
-        .where(ownedEntry(actorId, propertyId, transactionId))
+        .where(and(ownedEntry(actorId, propertyId, transactionId), fits))
         .returning({ id: transactions.id })
       if (change.kind === 'keep') {
         const [updated] = await atomically(db, [update])
@@ -264,6 +317,7 @@ export function transactionRepository(db: Db) {
                 .from(transactions)
                 .where(ownedEntry(actorId, propertyId, transactionId)),
             ),
+            fits,
           ),
         )
         .returning({ key: receipts.key })
