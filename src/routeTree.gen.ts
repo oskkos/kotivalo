@@ -17,6 +17,7 @@ import { Route as AuthedAccountRouteImport } from './routes/_authed/account'
 import { Route as AuthedWelcomeRouteImport } from './routes/_authed/welcome'
 import { Route as ApiLogRouteImport } from './routes/api/log'
 import { Route as AuthedPropertiesNewRouteImport } from './routes/_authed/properties/new'
+import { Route as ApiReceiptsReceiptIdRouteImport } from './routes/api/receipts/$receiptId'
 import { Route as ApiTestInboxRouteImport } from './routes/api/test/inbox'
 import { Route as AuthedPropertiesPropertyIdEditRouteImport } from './routes/_authed/properties/$propertyId/edit'
 import { Route as AuthedPropertiesPropertyIdSharingRouteImport } from './routes/_authed/properties/$propertyId/sharing'
@@ -63,6 +64,11 @@ const AuthedPropertiesNewRoute = AuthedPropertiesNewRouteImport.update({
   path: '/properties/new',
   getParentRoute: () => AuthedRoute,
 } as any)
+const ApiReceiptsReceiptIdRoute = ApiReceiptsReceiptIdRouteImport.update({
+  id: '/api/receipts/$receiptId',
+  path: '/api/receipts/$receiptId',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiTestInboxRoute = ApiTestInboxRouteImport.update({
   id: '/api/test/inbox',
   path: '/api/test/inbox',
@@ -107,6 +113,7 @@ export interface FileRoutesByFullPath {
   '/welcome': typeof AuthedWelcomeRoute
   '/api/log': typeof ApiLogRoute
   '/properties/new': typeof AuthedPropertiesNewRoute
+  '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
   '/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
   '/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/api/log': typeof ApiLogRoute
   '/': typeof AuthedIndexRoute
   '/properties/new': typeof AuthedPropertiesNewRoute
+  '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
   '/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
   '/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/api/log': typeof ApiLogRoute
   '/_authed/': typeof AuthedIndexRoute
   '/_authed/properties/new': typeof AuthedPropertiesNewRoute
+  '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
   '/_authed/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
   '/_authed/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
@@ -156,6 +165,7 @@ export interface FileRouteTypes {
     | '/welcome'
     | '/api/log'
     | '/properties/new'
+    | '/api/receipts/$receiptId'
     | '/api/test/inbox'
     | '/properties/$propertyId/edit'
     | '/properties/$propertyId/sharing'
@@ -171,6 +181,7 @@ export interface FileRouteTypes {
     | '/api/log'
     | '/'
     | '/properties/new'
+    | '/api/receipts/$receiptId'
     | '/api/test/inbox'
     | '/properties/$propertyId/edit'
     | '/properties/$propertyId/sharing'
@@ -187,6 +198,7 @@ export interface FileRouteTypes {
     | '/api/log'
     | '/_authed/'
     | '/_authed/properties/new'
+    | '/api/receipts/$receiptId'
     | '/api/test/inbox'
     | '/_authed/properties/$propertyId/edit'
     | '/_authed/properties/$propertyId/sharing'
@@ -200,6 +212,7 @@ export interface RootRouteChildren {
   OfflineRoute: typeof OfflineRoute
   SignInRoute: typeof SignInRoute
   ApiLogRoute: typeof ApiLogRoute
+  ApiReceiptsReceiptIdRoute: typeof ApiReceiptsReceiptIdRoute
   ApiTestInboxRoute: typeof ApiTestInboxRoute
 }
 
@@ -260,6 +273,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/properties/new'
       preLoaderRoute: typeof AuthedPropertiesNewRouteImport
       parentRoute: typeof AuthedRoute
+    }
+    '/api/receipts/$receiptId': {
+      id: '/api/receipts/$receiptId'
+      path: '/api/receipts/$receiptId'
+      fullPath: '/api/receipts/$receiptId'
+      preLoaderRoute: typeof ApiReceiptsReceiptIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/test/inbox': {
       id: '/api/test/inbox'
@@ -342,6 +362,7 @@ const rootRouteChildren: RootRouteChildren = {
   OfflineRoute: OfflineRoute,
   SignInRoute: SignInRoute,
   ApiLogRoute: ApiLogRoute,
+  ApiReceiptsReceiptIdRoute: ApiReceiptsReceiptIdRoute,
   ApiTestInboxRoute: ApiTestInboxRoute,
 }
 export const routeTree = rootRouteImport

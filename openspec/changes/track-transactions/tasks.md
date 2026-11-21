@@ -70,8 +70,8 @@
 
 ## 4. Serving receipts
 
-- [ ] 4.1 Server route `src/routes/api/receipts/$receiptId.ts`: session, `receiptForAccess`, the access check, `storage.get`, `fileResponse()` inline or with `?download=1` as an attachment; 404 for everything else
-- [ ] 4.2 Workers tests:
+- [x] 4.1 Server route `src/routes/api/receipts/$receiptId.ts`: session, `receiptForAccess`, the access check, `storage.get`, `fileResponse()` inline or with `?download=1` as an attachment; 404 for everything else
+- [x] 4.2 Workers tests:
   - "A user without access can't open a receipt"
   - a visitor who is not signed in gets 404
   - a missing file gets 404
