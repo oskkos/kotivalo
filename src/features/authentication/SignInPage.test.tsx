@@ -73,7 +73,7 @@ describe('Sign-in page', () => {
   test.each([
     ['limit_reached', 'Too many attempts'],
     ['email_quota', "Codes can't be sent right now"],
-    ['email_busy', 'Sending is busy'],
+    ['email_busy', 'Email sending is busy'],
     ['email_failed', 'Sending failed'],
   ] as const)(
     'shows %s as an alert on the email step',
@@ -115,7 +115,7 @@ describe('Sign-in page', () => {
     const field = screen.getByLabelText('Sign-in code')
     expect(field).toHaveAttribute('aria-invalid', 'true')
     expect(field).toHaveAccessibleDescription(
-      "The code isn't right. Check the code and try again.",
+      'That code is wrong. Check it and try again.',
     )
     expect(onSignedIn).not.toHaveBeenCalled()
   })

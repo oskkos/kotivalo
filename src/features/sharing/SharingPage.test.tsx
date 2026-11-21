@@ -257,7 +257,7 @@ describe('Sharing page as a member', () => {
     ).not.toBeInTheDocument()
     expect(
       screen.getByText(
-        'Only owners can invite people, remove access and change the ownership.',
+        'Only owners can invite people, remove access and change ownership.',
       ),
     ).toBeInTheDocument()
   })
