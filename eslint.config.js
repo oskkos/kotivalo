@@ -10,6 +10,7 @@ import globals from 'globals'
 import vitest from '@vitest/eslint-plugin'
 import playwright from 'eslint-plugin-playwright'
 import paraglide from '@inlang/paraglide-js/eslint'
+import eslintJsonc from 'eslint-plugin-jsonc'
 
 // Brand name and other strings that are never translated.
 const UNTRANSLATED = ['kotivalo', 'Kotivalo']
@@ -61,6 +62,8 @@ const cloudflareOnlyInPlatformExceptTests = {
   ...cloudflareOnlyInPlatform,
   group: ['cloudflare:*', '!cloudflare:test', '!cloudflare:workers'],
 }
+// JavaScript and TypeScript; JSON files get their own block below.
+const CODE = ['**/*.{js,mjs,cjs,ts,mts,tsx}']
 const PLATFORM = ['src/server/platform/**']
 const TESTS = ['src/**/*.test.{ts,tsx}', 'src/test/**', 'scripts/**/*.test.ts']
 const DRIZZLE_ALLOWED = [
@@ -81,10 +84,13 @@ export default defineConfig([
     'worker-configuration.d.ts',
   ]),
 
-  js.configs.recommended,
-  tseslint.configs.strictTypeChecked,
-  tseslint.configs.stylisticTypeChecked,
   {
+    files: CODE,
+    extends: [
+      js.configs.recommended,
+      tseslint.configs.strictTypeChecked,
+      tseslint.configs.stylisticTypeChecked,
+    ],
     languageOptions: {
       parserOptions: {
         projectService: { allowDefaultProject: ['*.js'] },
@@ -240,11 +246,25 @@ export default defineConfig([
     languageOptions: { globals: globals.node },
   },
 
+  // Translation keys stay in alphabetical order, so a new message has one
+  // place to go and the three languages line up. Only the top level: a
+  // message's variants keep their own order. `eslint --fix` sorts them.
+  {
+    files: ['messages/*.json'],
+    extends: [eslintJsonc.configs['flat/base']],
+    rules: {
+      'jsonc/sort-keys': [
+        'error',
+        { pathPattern: '^$', order: { type: 'asc', natural: false } },
+      ],
+    },
+  },
+
   // Last: turn off rules that conflict with Prettier.
   prettier,
 
   // Braces around every if/else/loop body, so Prettier puts the body on its
   // own line. eslint-config-prettier turns curly off, but "all" is safe with
   // Prettier, so it is enabled after it.
-  { rules: { curly: ['error', 'all'] } },
+  { files: CODE, rules: { curly: ['error', 'all'] } },
 ])

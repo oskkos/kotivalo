@@ -12,7 +12,7 @@ pre-commit:
   piped: true
   commands:
     eslint:
-      glob: '*.{js,ts,tsx}'
+      glob: '*.{js,ts,tsx,json}'
       run: pnpm exec eslint --fix --no-warn-ignored {staged_files}
       stage_fixed: true
     prettier:
