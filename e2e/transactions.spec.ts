@@ -213,3 +213,88 @@ test.describe('Viewing and downloading a receipt', () => {
     await expect(dialog).toBeHidden()
   })
 })
+
+/** Opens the only entry's details from the Entries page, then Edit. */
+async function editOnlyEntry(page: Page) {
+  await page.getByRole('listitem').getByRole('link').click()
+  await page.getByRole('link', { name: 'Edit' }).click()
+  await waitForHydration(page)
+}
+
+const receiptSrc = (page: Page) =>
+  page
+    .getByRole('button', { name: 'Open the receipt full screen' })
+    .locator('img')
+    .getAttribute('src')
+
+test.describe('Editing an entry', () => {
+  test('Correcting the amount', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await logEntry(page, id, {
+      category: 'Annual repair',
+      amount: '145,50',
+      date: `12/11/${lastYear}`,
+      note: 'Putkimies',
+    })
+    await editOnlyEntry(page)
+
+    await page.getByRole('textbox', { name: 'Amount' }).fill('154,50')
+    await page.getByRole('button', { name: 'Save changes' }).click()
+
+    await expect(page.getByRole('heading', { name: 'Expense' })).toBeVisible()
+    await expect(page.getByText('-€154.50')).toBeVisible()
+    await expect(page.getByText('Putkimies')).toBeVisible()
+  })
+
+  test('Replacing the receipt deletes the old file', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await logEntry(page, id, {
+      category: 'Annual repair',
+      amount: '145,50',
+      date: `12/11/${lastYear}`,
+      receipt: await jpegPhoto(page, 800, 600),
+    })
+    await page.getByRole('listitem').getByRole('link').click()
+    const oldSrc = await receiptSrc(page)
+    await page.getByRole('link', { name: 'Edit' }).click()
+    await waitForHydration(page)
+
+    await page
+      .getByLabel('Take a photo or choose a file')
+      .setInputFiles(await jpegPhoto(page, 600, 800))
+    await page.getByRole('button', { name: 'Save changes' }).click()
+
+    await expect(page.getByRole('heading', { name: 'Expense' })).toBeVisible()
+    const newSrc = await receiptSrc(page)
+    expect(newSrc).not.toBe(oldSrc)
+    expect((await page.request.get(oldSrc ?? '')).status()).toBe(404)
+    expect((await page.request.get(newSrc ?? '')).status()).toBe(200)
+  })
+})
+
+test.describe('Deleting an entry', () => {
+  test('Deleting an entry with its receipt', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await logEntry(page, id, {
+      category: 'Annual repair',
+      amount: '145,50',
+      date: `12/11/${lastYear}`,
+      receipt: await jpegPhoto(page, 800, 600),
+    })
+    await page.getByRole('listitem').getByRole('link').click()
+    const src = await receiptSrc(page)
+    await page.getByRole('link', { name: 'Edit' }).click()
+    await waitForHydration(page)
+
+    await page.getByRole('button', { name: 'Delete entry' }).click()
+    await page
+      .getByRole('dialog', { name: 'Delete this entry?' })
+      .getByRole('button', { name: 'Delete' })
+      .click()
+
+    await expect(
+      page.getByRole('heading', { name: `No entries for ${lastYear}` }),
+    ).toBeVisible()
+    expect((await page.request.get(src ?? '')).status()).toBe(404)
+  })
+})

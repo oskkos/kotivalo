@@ -6,8 +6,13 @@ import { TransactionForm } from './TransactionForm'
 // jsdom's browser language is English, so the form is in English.
 const createTransaction =
   vi.fn<(input: { data: FormData }) => Promise<unknown>>()
+const updateTransaction =
+  vi.fn<(input: { data: FormData }) => Promise<unknown>>()
+const deleteTransaction = vi.fn<(input: unknown) => Promise<unknown>>()
 vi.mock('./functions', () => ({
   createTransaction: (input: { data: FormData }) => createTransaction(input),
+  updateTransaction: (input: { data: FormData }) => updateTransaction(input),
+  deleteTransaction: (input: unknown) => deleteTransaction(input),
 }))
 
 const flat = (id: string, streetAddress: string) => ({
@@ -42,6 +47,8 @@ const hint = () => screen.getByRole('status')
 
 beforeEach(() => {
   createTransaction.mockReset()
+  updateTransaction.mockReset()
+  deleteTransaction.mockReset()
 })
 
 describe('Entry categories', () => {
@@ -169,6 +176,107 @@ describe('New entry from the bottom bar', () => {
       expect(onSaved).toHaveBeenCalledWith(
         expect.objectContaining({ propertyId: 'p' }),
       )
+    })
+  })
+})
+
+const entry = {
+  id: 't1',
+  propertyId: 'k',
+  type: 'expense' as const,
+  category: 'annual_repair' as const,
+  amount: 14550,
+  date: '2026-11-12',
+  note: 'Putkimies',
+  createdBy: { id: 'annika', name: 'Annika' },
+  createdAt: new Date(Date.UTC(2026, 10, 12)),
+  receipt: {
+    id: 'r1',
+    contentType: 'image/jpeg',
+    size: 421_888,
+    filename: 'kuitti_hana.jpg',
+    createdAt: new Date(Date.UTC(2026, 10, 12)),
+  },
+}
+
+function setupEdit() {
+  const user = userEvent.setup()
+  const onSaved = vi.fn(() => Promise.resolve())
+  const onDeleted = vi.fn(() => Promise.resolve())
+  render(
+    <TransactionForm
+      flats={[kuusikuja]}
+      initialFlatId="k"
+      pickFlat={false}
+      today="2026-11-21"
+      editing={entry}
+      onSaved={onSaved}
+      onDeleted={onDeleted}
+      onClose={vi.fn()}
+    />,
+  )
+  return { user, onSaved, onDeleted }
+}
+
+describe('Editing an entry', () => {
+  test('the form starts from the entry and keeps its receipt', async () => {
+    updateTransaction.mockResolvedValue({ ok: true })
+    const { user, onSaved } = setupEdit()
+    expect(screen.getByRole('heading', { name: 'Edit entry' })).toBeVisible()
+    expect(screen.getByRole('textbox', { name: 'Amount' })).toHaveValue(
+      '145.50',
+    )
+    expect(screen.getByText('kuitti_hana.jpg')).toBeVisible()
+    await user.clear(screen.getByRole('textbox', { name: 'Amount' }))
+    await user.type(screen.getByRole('textbox', { name: 'Amount' }), '154.50')
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+    await waitFor(() => {
+      expect(onSaved).toHaveBeenCalled()
+    })
+    const data = updateTransaction.mock.calls[0]?.[0].data ?? new FormData()
+    expect(data.get('amount')).toBe('154.50')
+    expect(data.get('transactionId')).toBe('t1')
+    expect(data.get('receiptAction')).toBe('keep')
+  })
+
+  test('removing the receipt sends remove', async () => {
+    updateTransaction.mockResolvedValue({ ok: true })
+    const { user } = setupEdit()
+    await user.click(screen.getByRole('button', { name: 'Remove the receipt' }))
+    await user.click(screen.getByRole('button', { name: 'Save changes' }))
+    await waitFor(() => {
+      expect(updateTransaction).toHaveBeenCalled()
+    })
+    const data = updateTransaction.mock.calls[0]?.[0].data ?? new FormData()
+    expect(data.get('receiptAction')).toBe('remove')
+  })
+})
+
+describe('Deleting an entry', () => {
+  test('Cancelling keeps the entry', async () => {
+    const { user } = setupEdit()
+    await user.click(screen.getByRole('button', { name: 'Delete entry' }))
+    const dialog = screen.getByRole('dialog', { name: 'Delete this entry?' })
+    expect(dialog).toHaveTextContent(
+      'Expense €145.50 (12/11/2026) and its receipt will be deleted permanently.',
+    )
+    await user.click(screen.getByRole('button', { name: 'Cancel' }))
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).toBeNull()
+    })
+    expect(deleteTransaction).not.toHaveBeenCalled()
+  })
+
+  test('confirming deletes the entry', async () => {
+    deleteTransaction.mockResolvedValue({ ok: true })
+    const { user, onDeleted } = setupEdit()
+    await user.click(screen.getByRole('button', { name: 'Delete entry' }))
+    await user.click(screen.getByRole('button', { name: 'Delete' }))
+    await waitFor(() => {
+      expect(onDeleted).toHaveBeenCalled()
+    })
+    expect(deleteTransaction).toHaveBeenCalledWith({
+      data: { propertyId: 'k', transactionId: 't1' },
     })
   })
 })

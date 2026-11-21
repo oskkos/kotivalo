@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { areaCases, dateCases, moneyCases } from './format.cases'
 import {
+  formatAmountInput,
   formatArea,
   formatDate,
   formatDay,
@@ -151,5 +152,12 @@ describe('formatFileSize', () => {
     expect(formatFileSize(421_888, 'sv')).toBe('412 kB')
     expect(formatFileSize(2_411_725, 'en')).toBe('2.3 MB')
     expect(formatFileSize(100, 'en')).toBe('1 kB')
+  })
+})
+
+describe('formatAmountInput', () => {
+  test('an amount to edit, without grouping', () => {
+    expect(formatAmountInput(123450, 'fi')).toBe('1234,50')
+    expect(formatAmountInput(14550, 'en')).toBe('145.50')
   })
 })

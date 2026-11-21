@@ -135,18 +135,18 @@
 
 ## 8. Editing and deleting
 
-- [ ] 8.1 Route `/properties/$propertyId/transactions/$transactionId/edit`. Members are sent back to the details
-- [ ] 8.2 The form's edit mode:
+- [x] 8.1 Route `/properties/$propertyId/transactions/$transactionId/edit`. Members are sent back to the details
+- [x] 8.2 The details page's Edit button for owners, and the form's edit mode:
   - the current receipt with Remove and Replace
   - "Poista kirjaus" with the confirmation dialog, as on "Muokkaa kirjausta · poista"
-- [ ] 8.3 Messages in fi, then sv and en with the translate skill; the term-critic on the diff
-- [ ] 8.4 Component tests for the edit mode and the dialog
-- [ ] 8.5 Playwright:
+- [x] 8.3 Messages in fi, then sv and en with the translate skill; the term-critic on the diff
+- [x] 8.4 Component tests for the edit mode and the dialog
+- [x] 8.5 Playwright:
   - "Correcting the amount"
   - "Replacing the receipt deletes the old file" (the old receipt address answers 404)
-  - "Removing the receipt"
   - "Deleting an entry with its receipt"
-  - "Cancelling keeps the entry"
+
+  "Removing the receipt" and "Cancelling keeps the entry" are covered by Workers and component tests
 
 ## 9. The bottom bar
 
