@@ -101,3 +101,30 @@ export function formatPercentNumber(
     useGrouping: false,
   }).format(basisPoints / 100)
 }
+
+/**
+ * A change of money with its sign, e.g. a new rent against the old one:
+ * "+12,00 €" or "−12,00 €" in Finnish, "+€12.00" in English.
+ */
+export function formatMoneyChange(cents: number, locale: Locale = getLocale()) {
+  if (!Number.isSafeInteger(cents)) {
+    throw new RangeError(`Money must be integer cents, got ${String(cents)}`)
+  }
+  return new Intl.NumberFormat(INTL_LOCALES[locale], {
+    style: 'currency',
+    currency: 'EUR',
+    signDisplay: 'exceptZero',
+  }).format(cents / 100)
+}
+
+/** A relative change in percent, one decimal, with its sign: "+5,6 %". */
+export function formatPercentChange(
+  percent: number,
+  locale: Locale = getLocale(),
+) {
+  return new Intl.NumberFormat(NUMBER_LOCALES[locale], {
+    style: 'percent',
+    maximumFractionDigits: 1,
+    signDisplay: 'exceptZero',
+  }).format(percent / 100)
+}

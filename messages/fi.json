@@ -15,8 +15,120 @@
   "amounts_capitalised_total": "Hankintamenoon lisätty rahoitusvastikkeita {amount} tähän päivään mennessä. Summa huomioidaan, kun asunto myydään.",
   "amounts_change": "Muuta",
   "amounts_charge_hint": "Taloyhtiön kuukausivastike",
+  "amounts_dialog_cancel": "Peru",
+  "amounts_effect_acquisition_down": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "Vuonna {year} vähentää hankintamenoa {amount} ({months} kk)",
+        "monthsPlural=other": "Vuonna {year} vähentää hankintamenoa {amount} ({months} kk)"
+      }
+    }
+  ],
+  "amounts_effect_acquisition_up": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "Vuonna {year} lisää hankintamenoa {amount} ({months} kk)",
+        "monthsPlural=other": "Vuonna {year} lisää hankintamenoa {amount} ({months} kk)"
+      }
+    }
+  ],
+  "amounts_effect_expense_down": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "Vuonna {year} vähentää vähennettäviä menoja {amount} ({months} kk)",
+        "monthsPlural=other": "Vuonna {year} vähentää vähennettäviä menoja {amount} ({months} kk)"
+      }
+    }
+  ],
+  "amounts_effect_expense_up": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "Vuonna {year} lisää vähennettäviä menoja {amount} ({months} kk)",
+        "monthsPlural=other": "Vuonna {year} lisää vähennettäviä menoja {amount} ({months} kk)"
+      }
+    }
+  ],
+  "amounts_effect_neutral": "Muutos näkyy vuosiyhteenvedossa alkupäivästä lähtien.",
+  "amounts_effect_rent_down": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "Vuonna {year} vähentää vuokratuloja {amount} ({months} kk)",
+        "monthsPlural=other": "Vuonna {year} vähentää vuokratuloja {amount} ({months} kk)"
+      }
+    }
+  ],
+  "amounts_effect_rent_up": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "Vuonna {year} lisää vuokratuloja {amount} ({months} kk)",
+        "monthsPlural=other": "Vuonna {year} lisää vuokratuloja {amount} ({months} kk)"
+      }
+    }
+  ],
   "amounts_financing_charge": "Rahoitusvastike",
   "amounts_footnote": "Vuosiyhteenveto laskee vuokrat ja vastikkeet kuukausittain näistä summista. Muutos tulee voimaan valitusta päivästä, eikä vanhoja summia kirjoiteta yli.",
+  "amounts_form_amount": "Summa (€/kk)",
+  "amounts_form_change_financing_charge": "Muuta rahoitusvastiketta",
+  "amounts_form_change_maintenance_charge": "Muuta hoitovastiketta",
+  "amounts_form_change_rent": "Muuta vuokraa",
+  "amounts_form_close": "Sulje",
+  "amounts_form_current": "Nykyinen",
+  "amounts_form_from": "Voimassa alkaen",
+  "amounts_form_hint_charge": "Vuosiyhteenveto laskee vastikkeen kuukausittain alkupäivästä lähtien.",
+  "amounts_form_hint_first": "Alkupäivä on yleensä vuokrasopimuksen tai omistuksen alku. Summa muuttuu aina kuukauden alusta.",
+  "amounts_form_hint_rent": "Tarkista vuokrankorotuksen ehto ja ilmoitusaika vuokrasopimuksesta.",
+  "amounts_form_history": "Muutoshistoria",
+  "amounts_form_latest_upcoming": "Tuleva",
+  "amounts_form_new": "Uusi summa (€/kk)",
+  "amounts_form_page_title": "{title} – Kotivalo",
+  "amounts_form_save_change": "Tallenna muutos",
+  "amounts_form_save_first": "Tallenna",
+  "amounts_form_saving": "Tallennetaan…",
+  "amounts_form_set_financing_charge": "Aseta rahoitusvastike",
+  "amounts_form_set_maintenance_charge": "Aseta hoitovastike",
+  "amounts_form_set_rent": "Aseta vuokra",
   "amounts_from": "{date} alkaen",
   "amounts_maintenance_charge": "Hoitovastike",
   "amounts_member_note": "Vain omistajat voivat muuttaa summia.",
@@ -33,6 +145,10 @@
   "amounts_treatment_income_recognised_note": "vähennetään vuokratulosta",
   "amounts_treatment_label": "Käsittely taloyhtiössä",
   "amounts_treatment_not_set_note": "Isännöitsijä tietää, tuloutetaanko vai rahastoidaanko vastike.",
+  "amounts_undo": "Peru viimeisin muutos",
+  "amounts_undo_confirm": "Peru muutos",
+  "amounts_undo_text": "Voimaan jää edellinen summa {amount} ({date} alkaen).",
+  "amounts_undo_title": "Perutaanko {date} alkava summa?",
   "amounts_upcoming": "{date} alkaen {amount}",
   "app_tagline": "Valoa vuokranantajan arkeen",
   "date_placeholder": "pp.kk.vvvv",

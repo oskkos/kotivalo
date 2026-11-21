@@ -46,16 +46,16 @@
 
 ## 5. Setting and undoing an amount
 
-- [ ] 5.1 Route `/properties/$propertyId/amounts/$kind` (`rent`, `maintenance-charge`, `financing-charge`). Members are sent back to the page
-- [ ] 5.2 `AmountForm.tsx`:
+- [x] 5.1 Route `/properties/$propertyId/amounts/$kind` (`rent`, `maintenance-charge`, `financing-charge`). Members are sent back to the page
+- [x] 5.2 `AmountForm.tsx`:
   - the first-amount variant
   - the change variant: the current amount, the new one, the difference and the year's effect
   - the date field with its reasons
   - the history, newest first
   - "Peru viimeisin muutos" with a confirmation dialog when there is more than one period
-- [ ] 5.3 Messages in fi, then sv and en with the translate skill
-- [ ] 5.4 Component tests for the effect line per kind and treatment, the field reasons and the undo dialog
-- [ ] 5.5 Playwright for "The current amount and an upcoming change", "Setting the first rent of a flat", "Raising the maintenance charge from next year", "The change form shows the effect on the year" and "Undoing a charge increase"
+- [x] 5.3 Messages in fi, then sv and en with the translate skill
+- [x] 5.4 Component tests for the effect line per kind and treatment, the field reasons and the undo dialog
+- [x] 5.5 Playwright for "The current amount and an upcoming change", "Setting the first rent of a flat", "Raising the maintenance charge from next year", "The change form shows the effect on the year" and "Undoing a charge increase"
 
 ## 6. Financing charge treatment
 

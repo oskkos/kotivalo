@@ -15,8 +15,120 @@
   "amounts_capitalised_total": "{amount} of financing charges has been added to the acquisition cost so far. It counts when the flat is sold.",
   "amounts_change": "Change",
   "amounts_charge_hint": "The housing company's monthly charge",
+  "amounts_dialog_cancel": "Cancel",
+  "amounts_effect_acquisition_down": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "In {year}, the acquisition cost goes down by {amount} over {months} month",
+        "monthsPlural=other": "In {year}, the acquisition cost goes down by {amount} over {months} months"
+      }
+    }
+  ],
+  "amounts_effect_acquisition_up": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "In {year}, the acquisition cost goes up by {amount} over {months} month",
+        "monthsPlural=other": "In {year}, the acquisition cost goes up by {amount} over {months} months"
+      }
+    }
+  ],
+  "amounts_effect_expense_down": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "In {year}, deductible expenses go down by {amount} over {months} month",
+        "monthsPlural=other": "In {year}, deductible expenses go down by {amount} over {months} months"
+      }
+    }
+  ],
+  "amounts_effect_expense_up": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "In {year}, deductible expenses go up by {amount} over {months} month",
+        "monthsPlural=other": "In {year}, deductible expenses go up by {amount} over {months} months"
+      }
+    }
+  ],
+  "amounts_effect_neutral": "The change shows in the year summary from the start date.",
+  "amounts_effect_rent_down": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "In {year}, rental income goes down by {amount} over {months} month",
+        "monthsPlural=other": "In {year}, rental income goes down by {amount} over {months} months"
+      }
+    }
+  ],
+  "amounts_effect_rent_up": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "In {year}, rental income goes up by {amount} over {months} month",
+        "monthsPlural=other": "In {year}, rental income goes up by {amount} over {months} months"
+      }
+    }
+  ],
   "amounts_financing_charge": "Financing charge",
   "amounts_footnote": "The year summary works out rent and charges month by month from these amounts. A change applies from the date you choose, and old amounts are never overwritten.",
+  "amounts_form_amount": "Amount (€/month)",
+  "amounts_form_change_financing_charge": "Change financing charge",
+  "amounts_form_change_maintenance_charge": "Change maintenance charge",
+  "amounts_form_change_rent": "Change rent",
+  "amounts_form_close": "Close",
+  "amounts_form_current": "Current",
+  "amounts_form_from": "Valid from",
+  "amounts_form_hint_charge": "The year summary counts the charge month by month from the start date.",
+  "amounts_form_hint_first": "The start date is usually when the lease or the ownership began. Amounts always change from the start of a month.",
+  "amounts_form_hint_rent": "Check the lease for when and how the rent may be raised.",
+  "amounts_form_history": "Change history",
+  "amounts_form_latest_upcoming": "Upcoming",
+  "amounts_form_new": "New amount (€/month)",
+  "amounts_form_page_title": "{title} – Kotivalo",
+  "amounts_form_save_change": "Save change",
+  "amounts_form_save_first": "Save",
+  "amounts_form_saving": "Saving…",
+  "amounts_form_set_financing_charge": "Set financing charge",
+  "amounts_form_set_maintenance_charge": "Set maintenance charge",
+  "amounts_form_set_rent": "Set rent",
   "amounts_from": "From {date}",
   "amounts_maintenance_charge": "Maintenance charge",
   "amounts_member_note": "Only owners can change the amounts.",
@@ -33,6 +145,10 @@
   "amounts_treatment_income_recognised_note": "deducted from rental income",
   "amounts_treatment_label": "Treatment by the housing company",
   "amounts_treatment_not_set_note": "The property manager knows whether the charge is recorded as revenue or placed in reserve.",
+  "amounts_undo": "Undo the latest change",
+  "amounts_undo_confirm": "Undo change",
+  "amounts_undo_text": "The previous amount, {amount} from {date}, applies again.",
+  "amounts_undo_title": "Undo the amount from {date}?",
   "amounts_upcoming": "From {date}: {amount}",
   "app_tagline": "Light for a landlord's everyday work",
   "date_placeholder": "dd/mm/yyyy",

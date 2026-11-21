@@ -15,8 +15,120 @@
   "amounts_capitalised_total": "Finansieringsvederlag för {amount} har lagts till anskaffningsutgiften hittills. Beloppet beaktas när bostaden säljs.",
   "amounts_change": "Ändra",
   "amounts_charge_hint": "Husbolagets månadsvederlag",
+  "amounts_dialog_cancel": "Avbryt",
+  "amounts_effect_acquisition_down": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "År {year} minskar anskaffningsutgiften med {amount} ({months} mån.)",
+        "monthsPlural=other": "År {year} minskar anskaffningsutgiften med {amount} ({months} mån.)"
+      }
+    }
+  ],
+  "amounts_effect_acquisition_up": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "År {year} ökar anskaffningsutgiften med {amount} ({months} mån.)",
+        "monthsPlural=other": "År {year} ökar anskaffningsutgiften med {amount} ({months} mån.)"
+      }
+    }
+  ],
+  "amounts_effect_expense_down": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "År {year} minskar de avdragbara utgifterna med {amount} ({months} mån.)",
+        "monthsPlural=other": "År {year} minskar de avdragbara utgifterna med {amount} ({months} mån.)"
+      }
+    }
+  ],
+  "amounts_effect_expense_up": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "År {year} ökar de avdragbara utgifterna med {amount} ({months} mån.)",
+        "monthsPlural=other": "År {year} ökar de avdragbara utgifterna med {amount} ({months} mån.)"
+      }
+    }
+  ],
+  "amounts_effect_neutral": "Ändringen syns i årssammandraget från startdatumet.",
+  "amounts_effect_rent_down": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "År {year} minskar hyresinkomsterna med {amount} ({months} mån.)",
+        "monthsPlural=other": "År {year} minskar hyresinkomsterna med {amount} ({months} mån.)"
+      }
+    }
+  ],
+  "amounts_effect_rent_up": [
+    {
+      "declarations": [
+        "input year",
+        "input amount",
+        "input months",
+        "local monthsPlural = months: plural"
+      ],
+      "selectors": ["monthsPlural"],
+      "match": {
+        "monthsPlural=one": "År {year} ökar hyresinkomsterna med {amount} ({months} mån.)",
+        "monthsPlural=other": "År {year} ökar hyresinkomsterna med {amount} ({months} mån.)"
+      }
+    }
+  ],
   "amounts_financing_charge": "Finansieringsvederlag",
   "amounts_footnote": "Årssammandraget räknar hyror och vederlag månad för månad utifrån de här beloppen. En ändring gäller från det valda datumet, och gamla belopp skrivs inte över.",
+  "amounts_form_amount": "Belopp (€/mån.)",
+  "amounts_form_change_financing_charge": "Ändra finansieringsvederlaget",
+  "amounts_form_change_maintenance_charge": "Ändra skötselvederlaget",
+  "amounts_form_change_rent": "Ändra hyran",
+  "amounts_form_close": "Stäng",
+  "amounts_form_current": "Nuvarande",
+  "amounts_form_from": "Gäller från",
+  "amounts_form_hint_charge": "Årssammandraget räknar vederlaget månad för månad från startdatumet.",
+  "amounts_form_hint_first": "Startdatumet är oftast början av hyresavtalet eller ägandet. Beloppet ändras alltid från början av en månad.",
+  "amounts_form_hint_rent": "Kontrollera villkoret för hyreshöjning och när den ska meddelas i hyresavtalet.",
+  "amounts_form_history": "Ändringshistorik",
+  "amounts_form_latest_upcoming": "Kommande",
+  "amounts_form_new": "Nytt belopp (€/mån.)",
+  "amounts_form_page_title": "{title} – Kotivalo",
+  "amounts_form_save_change": "Spara ändringen",
+  "amounts_form_save_first": "Spara",
+  "amounts_form_saving": "Sparar…",
+  "amounts_form_set_financing_charge": "Ange finansieringsvederlag",
+  "amounts_form_set_maintenance_charge": "Ange skötselvederlag",
+  "amounts_form_set_rent": "Ange hyra",
   "amounts_from": "Från {date}",
   "amounts_maintenance_charge": "Skötselvederlag",
   "amounts_member_note": "Bara ägarna kan ändra beloppen.",
@@ -33,6 +145,10 @@
   "amounts_treatment_income_recognised_note": "dras av från hyresinkomsten",
   "amounts_treatment_label": "Behandling i husbolaget",
   "amounts_treatment_not_set_note": "Disponenten vet om vederlaget intäktsförs eller fonderas.",
+  "amounts_undo": "Ångra den senaste ändringen",
+  "amounts_undo_confirm": "Ångra ändringen",
+  "amounts_undo_text": "Det tidigare beloppet {amount} (från {date}) gäller igen.",
+  "amounts_undo_title": "Ångra beloppet från {date}?",
   "amounts_upcoming": "Från {date}: {amount}",
   "app_tagline": "Ljus i hyresvärdens vardag",
   "date_placeholder": "dd.mm.åååå",
