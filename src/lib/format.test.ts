@@ -5,6 +5,7 @@ import {
   formatDate,
   formatDay,
   formatDayMonth,
+  formatFileSize,
   formatMoney,
   formatMoneyChange,
   formatMonth,
@@ -140,5 +141,15 @@ describe('formatDayMonth', () => {
 
   test('a malformed date throws', () => {
     expect(() => formatDayMonth('2026-02-30', 'fi')).toThrow(RangeError)
+  })
+})
+
+describe('formatFileSize', () => {
+  test('kilobytes under a megabyte, megabytes above', () => {
+    expect(formatFileSize(421_888, 'fi')).toBe('412 kt')
+    expect(formatFileSize(2_411_725, 'fi')).toBe('2,3 Mt')
+    expect(formatFileSize(421_888, 'sv')).toBe('412 kB')
+    expect(formatFileSize(2_411_725, 'en')).toBe('2.3 MB')
+    expect(formatFileSize(100, 'en')).toBe('1 kB')
   })
 })

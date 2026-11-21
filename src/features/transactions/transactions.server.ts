@@ -268,6 +268,8 @@ export async function getTransaction(
       role: PropertyRole
       property: Property
       entry: TransactionDetails
+      /** Whether the signed-in user logged it ("You"). */
+      loggedByYou: boolean
       /** Today in Finland, for the edit form's date check. */
       today: IsoDate
     }
@@ -290,6 +292,7 @@ export async function getTransaction(
     role,
     property,
     entry,
+    loggedByYou: entry.createdBy.id === deps.userId,
     today: isoDateInFinland(deps.now()),
   }
 }

@@ -86,6 +86,7 @@ function Icon(props: { path: string; size?: number; label?: string }) {
 }
 
 const TextLink = createLink(Link)
+const RowLink = createLink(Link)
 
 const BACK = 'M15 5 L8 12 L15 19'
 const UP = 'M7 17 L17 7 M9 7 H17 V15'
@@ -124,7 +125,10 @@ function EntryRow(props: {
       component="li"
       sx={{ borderTop: props.first ? 'none' : `1px solid ${colors.divider}` }}
     >
-      <Box
+      <RowLink
+        to="/properties/$propertyId/transactions/$transactionId"
+        params={{ propertyId: props.propertyId, transactionId: entry.id }}
+        underline="none"
         sx={{
           display: 'flex',
           alignItems: 'center',
@@ -167,7 +171,7 @@ function EntryRow(props: {
         >
           {signedAmount(entry)}
         </Typography>
-      </Box>
+      </RowLink>
     </Box>
   )
 }

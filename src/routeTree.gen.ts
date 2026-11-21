@@ -25,6 +25,7 @@ import { Route as AuthedPropertiesPropertyIdAmountsIndexRouteImport } from './ro
 import { Route as AuthedPropertiesPropertyIdAmountsKindRouteImport } from './routes/_authed/properties/$propertyId/amounts/$kind'
 import { Route as AuthedPropertiesPropertyIdAmountsTreatmentRouteImport } from './routes/_authed/properties/$propertyId/amounts/treatment'
 import { Route as AuthedPropertiesPropertyIdTransactionsIndexRouteImport } from './routes/_authed/properties/$propertyId/transactions/index'
+import { Route as AuthedPropertiesPropertyIdTransactionsTransactionIdRouteImport } from './routes/_authed/properties/$propertyId/transactions/$transactionId'
 
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
@@ -111,6 +112,12 @@ const AuthedPropertiesPropertyIdTransactionsIndexRoute =
     path: '/properties/$propertyId/transactions/',
     getParentRoute: () => AuthedRoute,
   } as any)
+const AuthedPropertiesPropertyIdTransactionsTransactionIdRoute =
+  AuthedPropertiesPropertyIdTransactionsTransactionIdRouteImport.update({
+    id: '/properties/$propertyId/transactions/$transactionId',
+    path: '/properties/$propertyId/transactions/$transactionId',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
@@ -126,6 +133,7 @@ export interface FileRoutesByFullPath {
   '/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
   '/properties/$propertyId/amounts/$kind': typeof AuthedPropertiesPropertyIdAmountsKindRoute
   '/properties/$propertyId/amounts/treatment': typeof AuthedPropertiesPropertyIdAmountsTreatmentRoute
+  '/properties/$propertyId/transactions/$transactionId': typeof AuthedPropertiesPropertyIdTransactionsTransactionIdRoute
   '/properties/$propertyId/amounts/': typeof AuthedPropertiesPropertyIdAmountsIndexRoute
   '/properties/$propertyId/transactions/': typeof AuthedPropertiesPropertyIdTransactionsIndexRoute
 }
@@ -143,6 +151,7 @@ export interface FileRoutesByTo {
   '/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
   '/properties/$propertyId/amounts/$kind': typeof AuthedPropertiesPropertyIdAmountsKindRoute
   '/properties/$propertyId/amounts/treatment': typeof AuthedPropertiesPropertyIdAmountsTreatmentRoute
+  '/properties/$propertyId/transactions/$transactionId': typeof AuthedPropertiesPropertyIdTransactionsTransactionIdRoute
   '/properties/$propertyId/amounts': typeof AuthedPropertiesPropertyIdAmountsIndexRoute
   '/properties/$propertyId/transactions': typeof AuthedPropertiesPropertyIdTransactionsIndexRoute
 }
@@ -162,6 +171,7 @@ export interface FileRoutesById {
   '/_authed/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
   '/_authed/properties/$propertyId/amounts/$kind': typeof AuthedPropertiesPropertyIdAmountsKindRoute
   '/_authed/properties/$propertyId/amounts/treatment': typeof AuthedPropertiesPropertyIdAmountsTreatmentRoute
+  '/_authed/properties/$propertyId/transactions/$transactionId': typeof AuthedPropertiesPropertyIdTransactionsTransactionIdRoute
   '/_authed/properties/$propertyId/amounts/': typeof AuthedPropertiesPropertyIdAmountsIndexRoute
   '/_authed/properties/$propertyId/transactions/': typeof AuthedPropertiesPropertyIdTransactionsIndexRoute
 }
@@ -181,6 +191,7 @@ export interface FileRouteTypes {
     | '/properties/$propertyId/sharing'
     | '/properties/$propertyId/amounts/$kind'
     | '/properties/$propertyId/amounts/treatment'
+    | '/properties/$propertyId/transactions/$transactionId'
     | '/properties/$propertyId/amounts/'
     | '/properties/$propertyId/transactions/'
   fileRoutesByTo: FileRoutesByTo
@@ -198,6 +209,7 @@ export interface FileRouteTypes {
     | '/properties/$propertyId/sharing'
     | '/properties/$propertyId/amounts/$kind'
     | '/properties/$propertyId/amounts/treatment'
+    | '/properties/$propertyId/transactions/$transactionId'
     | '/properties/$propertyId/amounts'
     | '/properties/$propertyId/transactions'
   id:
@@ -216,6 +228,7 @@ export interface FileRouteTypes {
     | '/_authed/properties/$propertyId/sharing'
     | '/_authed/properties/$propertyId/amounts/$kind'
     | '/_authed/properties/$propertyId/amounts/treatment'
+    | '/_authed/properties/$propertyId/transactions/$transactionId'
     | '/_authed/properties/$propertyId/amounts/'
     | '/_authed/properties/$propertyId/transactions/'
   fileRoutesById: FileRoutesById
@@ -343,6 +356,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedPropertiesPropertyIdTransactionsIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/properties/$propertyId/transactions/$transactionId': {
+      id: '/_authed/properties/$propertyId/transactions/$transactionId'
+      path: '/properties/$propertyId/transactions/$transactionId'
+      fullPath: '/properties/$propertyId/transactions/$transactionId'
+      preLoaderRoute: typeof AuthedPropertiesPropertyIdTransactionsTransactionIdRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
@@ -355,6 +375,7 @@ interface AuthedRouteChildren {
   AuthedPropertiesPropertyIdSharingRoute: typeof AuthedPropertiesPropertyIdSharingRoute
   AuthedPropertiesPropertyIdAmountsKindRoute: typeof AuthedPropertiesPropertyIdAmountsKindRoute
   AuthedPropertiesPropertyIdAmountsTreatmentRoute: typeof AuthedPropertiesPropertyIdAmountsTreatmentRoute
+  AuthedPropertiesPropertyIdTransactionsTransactionIdRoute: typeof AuthedPropertiesPropertyIdTransactionsTransactionIdRoute
   AuthedPropertiesPropertyIdAmountsIndexRoute: typeof AuthedPropertiesPropertyIdAmountsIndexRoute
   AuthedPropertiesPropertyIdTransactionsIndexRoute: typeof AuthedPropertiesPropertyIdTransactionsIndexRoute
 }
@@ -371,6 +392,8 @@ const AuthedRouteChildren: AuthedRouteChildren = {
     AuthedPropertiesPropertyIdAmountsKindRoute,
   AuthedPropertiesPropertyIdAmountsTreatmentRoute:
     AuthedPropertiesPropertyIdAmountsTreatmentRoute,
+  AuthedPropertiesPropertyIdTransactionsTransactionIdRoute:
+    AuthedPropertiesPropertyIdTransactionsTransactionIdRoute,
   AuthedPropertiesPropertyIdAmountsIndexRoute:
     AuthedPropertiesPropertyIdAmountsIndexRoute,
   AuthedPropertiesPropertyIdTransactionsIndexRoute:

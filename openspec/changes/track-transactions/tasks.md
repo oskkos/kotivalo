@@ -95,20 +95,16 @@
 
 ## 6. Entry details and the receipt view
 
-- [ ] 6.1 Route `/properties/$propertyId/transactions/$transactionId` with a loader calling `getTransaction`
-- [ ] 6.2 The Entries page's rows link to the details
-- [ ] 6.3 `TransactionDetails.tsx`, as on the Design canvas ("Menon tiedot", "Tulon tiedot · ei kuittia", "Kirjauksen tiedot · jäsen"):
+- [x] 6.1 Route `/properties/$propertyId/transactions/$transactionId` with a loader calling `getTransaction`
+- [x] 6.2 The Entries page's rows link to the details
+- [x] 6.3 `TransactionDetails.tsx`, as on the Design canvas ("Menon tiedot", "Tulon tiedot · ei kuittia", "Kirjauksen tiedot · jäsen"):
   - the amount, the chips, the details rows (flat, date, year summary row, logged by)
   - the receipt preview (an image, or a PDF tile opening the browser's viewer)
-  - Download, and Edit for owners
-- [ ] 6.4 `ReceiptViewer.tsx`: the full-screen dialog with Close and Download, as on "Kuitti koko näytöllä"
-- [ ] 6.5 Messages in fi, then sv and en with the translate skill; the term-critic on the diff
-- [ ] 6.6 Component tests: income without a receipt, the member view, "You" versus a name
-- [ ] 6.7 Playwright:
-  - "The details of an expense"
-  - "An entry logged by a co-owner"
-  - "A member downloads a receipt"
-  - "Opening a receipt full screen"
+  - Download; Edit for owners comes in group 8 with the edit route
+- [x] 6.4 `ReceiptViewer.tsx`: the full-screen dialog with Close and Download, as on "Kuitti koko näytöllä"
+- [x] 6.5 Messages in fi, then sv and en with the translate skill; the term-critic on the diff
+- [x] 6.6 Component tests: income without a receipt, the member view, "You" versus a name
+- [x] 6.7 The Playwright tests of "Entry details" and "Viewing and downloading a receipt" need entries, so they come in group 7 with the form
 
 ## 7. The new entry form
 
@@ -131,6 +127,7 @@
 - [ ] 7.7 New entry on the Entries page for owners, linking to `/transactions/new?propertyId=…`
 - [ ] 7.8 Playwright:
   - "Entries are grouped by month, newest first", "Choosing an earlier year" and "A member sees the entries but can't add them" (The entries page)
+  - "The details of an expense", "An entry logged by a co-owner", "A member downloads a receipt" and "Opening a receipt full screen"
   - "Logging an annual repair"
   - "The chosen category shows its tax hint"
   - "Rent is not a category"
