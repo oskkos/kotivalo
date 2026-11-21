@@ -27,6 +27,10 @@ export type FieldReason =
   | 'ownership_shares_total'
   | 'ownership_no_owner'
   | 'floor_area_invalid'
+  | 'amount_invalid'
+  | 'amount_date_not_month_start'
+  | 'amount_date_before_ownership'
+  | 'amount_date_too_early'
 
 /** Errors about the whole action, shown as an alert with a title. */
 export type AlertReason =
@@ -46,6 +50,9 @@ export type AlertReason =
   | 'sharing_owner_only'
   | 'ownership_nothing_to_undo'
   | 'ownership_invalid'
+  | 'amount_nothing_to_undo'
+  /** The amounts changed since they were read; the page reloads them. */
+  | 'amount_changed'
   /** A request never reached the server: offline or cancelled. */
   | 'network'
   /** A request failed in a way the app doesn't expect (a server error). */
@@ -91,6 +98,14 @@ const texts: Record<Reason, () => ReasonText> = {
   ownership_shares_total: () => ({ text: m.reason_ownership_shares_total() }),
   ownership_no_owner: () => ({ text: m.reason_ownership_no_owner() }),
   floor_area_invalid: () => ({ text: m.reason_floor_area_invalid() }),
+  amount_invalid: () => ({ text: m.reason_amount_invalid() }),
+  amount_date_not_month_start: () => ({
+    text: m.reason_amount_date_not_month_start(),
+  }),
+  amount_date_before_ownership: () => ({
+    text: m.reason_amount_date_before_ownership(),
+  }),
+  amount_date_too_early: () => ({ text: m.reason_amount_date_too_early() }),
   code_expired: () => ({
     title: m.reason_code_expired_title(),
     text: m.reason_code_expired(),
@@ -154,6 +169,14 @@ const texts: Record<Reason, () => ReasonText> = {
   ownership_invalid: () => ({
     title: m.reason_ownership_invalid_title(),
     text: m.reason_ownership_invalid(),
+  }),
+  amount_nothing_to_undo: () => ({
+    title: m.reason_amount_nothing_to_undo_title(),
+    text: m.reason_amount_nothing_to_undo(),
+  }),
+  amount_changed: () => ({
+    title: m.reason_amount_changed_title(),
+    text: m.reason_amount_changed(),
   }),
   network: () => ({
     title: m.reason_network_title(),
