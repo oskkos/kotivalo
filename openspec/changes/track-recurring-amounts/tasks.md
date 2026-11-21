@@ -34,15 +34,15 @@
 
 ## 4. The Rent and charges page
 
-- [ ] 4.1 Route `/properties/$propertyId/amounts` with a loader calling `getRecurringAmounts`, and a page title
-- [ ] 4.2 `RecurringAmountsPage.tsx`, as on the Design canvas:
+- [x] 4.1 Route `/properties/$propertyId/amounts` with a loader calling `getRecurringAmounts`, and a page title
+- [x] 4.2 `RecurringAmountsPage.tsx`, as on the Design canvas:
   - a card each for the rent, maintenance charge and financing charge, with the amount, its start date or "Ei asetettu", and the upcoming change
   - the treatment row on the financing charge card
   - the accumulated capitalised line when above zero
   - the "Aseta" or "Muuta" buttons for owners only
-- [ ] 4.3 Messages in fi, then sv and en with the translate skill
-- [ ] 4.4 Component tests for the empty state, the upcoming change, the accumulated line and the member view
-- [ ] 4.5 Playwright, by URL: "A flat without amounts", "The current amount and an upcoming change" (amounts set through the server functions), "A member sees the amounts but can't change them"
+- [x] 4.3 Messages in fi, then sv and en with the translate skill
+- [x] 4.4 Component tests for the empty state, the upcoming change, the accumulated line and the member view
+- [x] 4.5 Playwright, by URL: "A flat without amounts" and "A member sees the amounts but can't change them". "The current amount and an upcoming change" gets its Playwright test in group 5, where amounts can be set through the form
 
 ## 5. Setting and undoing an amount
 
@@ -55,7 +55,7 @@
   - "Peru viimeisin muutos" with a confirmation dialog when there is more than one period
 - [ ] 5.3 Messages in fi, then sv and en with the translate skill
 - [ ] 5.4 Component tests for the effect line per kind and treatment, the field reasons and the undo dialog
-- [ ] 5.5 Playwright for "Setting the first rent of a flat", "Raising the maintenance charge from next year", "The change form shows the effect on the year" and "Undoing a charge increase"
+- [ ] 5.5 Playwright for "The current amount and an upcoming change", "Setting the first rent of a flat", "Raising the maintenance charge from next year", "The change form shows the effect on the year" and "Undoing a charge increase"
 
 ## 6. Financing charge treatment
 

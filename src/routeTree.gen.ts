@@ -20,6 +20,7 @@ import { Route as AuthedPropertiesNewRouteImport } from './routes/_authed/proper
 import { Route as ApiTestInboxRouteImport } from './routes/api/test/inbox'
 import { Route as AuthedPropertiesPropertyIdEditRouteImport } from './routes/_authed/properties/$propertyId/edit'
 import { Route as AuthedPropertiesPropertyIdSharingRouteImport } from './routes/_authed/properties/$propertyId/sharing'
+import { Route as AuthedPropertiesPropertyIdAmountsIndexRouteImport } from './routes/_authed/properties/$propertyId/amounts/index'
 
 const AuthedRoute = AuthedRouteImport.update({
   id: '/_authed',
@@ -77,6 +78,12 @@ const AuthedPropertiesPropertyIdSharingRoute =
     path: '/properties/$propertyId/sharing',
     getParentRoute: () => AuthedRoute,
   } as any)
+const AuthedPropertiesPropertyIdAmountsIndexRoute =
+  AuthedPropertiesPropertyIdAmountsIndexRouteImport.update({
+    id: '/properties/$propertyId/amounts/',
+    path: '/properties/$propertyId/amounts/',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthedIndexRoute
@@ -89,6 +96,7 @@ export interface FileRoutesByFullPath {
   '/api/test/inbox': typeof ApiTestInboxRoute
   '/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
   '/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
+  '/properties/$propertyId/amounts/': typeof AuthedPropertiesPropertyIdAmountsIndexRoute
 }
 export interface FileRoutesByTo {
   '/offline': typeof OfflineRoute
@@ -101,6 +109,7 @@ export interface FileRoutesByTo {
   '/api/test/inbox': typeof ApiTestInboxRoute
   '/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
   '/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
+  '/properties/$propertyId/amounts': typeof AuthedPropertiesPropertyIdAmountsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -115,6 +124,7 @@ export interface FileRoutesById {
   '/api/test/inbox': typeof ApiTestInboxRoute
   '/_authed/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
   '/_authed/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
+  '/_authed/properties/$propertyId/amounts/': typeof AuthedPropertiesPropertyIdAmountsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -129,6 +139,7 @@ export interface FileRouteTypes {
     | '/api/test/inbox'
     | '/properties/$propertyId/edit'
     | '/properties/$propertyId/sharing'
+    | '/properties/$propertyId/amounts/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/offline'
@@ -141,6 +152,7 @@ export interface FileRouteTypes {
     | '/api/test/inbox'
     | '/properties/$propertyId/edit'
     | '/properties/$propertyId/sharing'
+    | '/properties/$propertyId/amounts'
   id:
     | '__root__'
     | '/_authed'
@@ -154,6 +166,7 @@ export interface FileRouteTypes {
     | '/api/test/inbox'
     | '/_authed/properties/$propertyId/edit'
     | '/_authed/properties/$propertyId/sharing'
+    | '/_authed/properties/$propertyId/amounts/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -243,6 +256,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedPropertiesPropertyIdSharingRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/properties/$propertyId/amounts/': {
+      id: '/_authed/properties/$propertyId/amounts/'
+      path: '/properties/$propertyId/amounts'
+      fullPath: '/properties/$propertyId/amounts/'
+      preLoaderRoute: typeof AuthedPropertiesPropertyIdAmountsIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
   }
 }
 
@@ -253,6 +273,7 @@ interface AuthedRouteChildren {
   AuthedPropertiesNewRoute: typeof AuthedPropertiesNewRoute
   AuthedPropertiesPropertyIdEditRoute: typeof AuthedPropertiesPropertyIdEditRoute
   AuthedPropertiesPropertyIdSharingRoute: typeof AuthedPropertiesPropertyIdSharingRoute
+  AuthedPropertiesPropertyIdAmountsIndexRoute: typeof AuthedPropertiesPropertyIdAmountsIndexRoute
 }
 
 const AuthedRouteChildren: AuthedRouteChildren = {
@@ -263,6 +284,8 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedPropertiesPropertyIdEditRoute: AuthedPropertiesPropertyIdEditRoute,
   AuthedPropertiesPropertyIdSharingRoute:
     AuthedPropertiesPropertyIdSharingRoute,
+  AuthedPropertiesPropertyIdAmountsIndexRoute:
+    AuthedPropertiesPropertyIdAmountsIndexRoute,
 }
 
 const AuthedRouteWithChildren =
