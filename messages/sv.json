@@ -342,6 +342,8 @@
   "reason_tenancy_cancel_later_tenancy": "Bostaden har ett senare hyresförhållande, så det här hyresförhållandets upphörande kan inte ångras.",
   "reason_tenancy_cancel_later_tenancy_title": "Upphörandet kan inte ångras",
   "reason_tenancy_contract_made_in_future": "Dagen då avtalet ingicks kan inte vara i framtiden.",
+  "reason_tenancy_correction_conflicts_ending": "Det rättade hyresförhållandet passar inte ihop med det registrerade upphörandet. Ångra upphörandet först, rätta hyresförhållandet och registrera sedan upphörandet på nytt.",
+  "reason_tenancy_correction_conflicts_ending_title": "Rättelsen passar inte ihop med upphörandet",
   "reason_tenancy_due_day_invalid": "Förfallodagen är en dag i månaden, 1–31. Om månaden inte har den dagen är förfallodagen månadens sista dag.",
   "reason_tenancy_end_after_term": "Det tidsbestämda hyresförhållandet upphör ändå när hyrestiden går ut. Välj en tidigare dag.",
   "reason_tenancy_end_before_notice": "Sista hyresdagen kan inte vara före uppsägningsdagen.",

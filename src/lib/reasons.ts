@@ -82,6 +82,7 @@ export type AlertReason =
   | 'tenancy_not_ending'
   | 'tenancy_already_ended'
   | 'tenancy_cancel_later_tenancy'
+  | 'tenancy_correction_conflicts_ending'
   /** The amounts changed since they were read; the page reloads them. */
   | 'amount_changed'
   /** A request never reached the server: offline or cancelled. */
@@ -287,6 +288,10 @@ const texts: Record<Reason, () => ReasonText> = {
   tenancy_cancel_later_tenancy: () => ({
     title: m.reason_tenancy_cancel_later_tenancy_title(),
     text: m.reason_tenancy_cancel_later_tenancy(),
+  }),
+  tenancy_correction_conflicts_ending: () => ({
+    title: m.reason_tenancy_correction_conflicts_ending_title(),
+    text: m.reason_tenancy_correction_conflicts_ending(),
   }),
   amount_changed: () => ({
     title: m.reason_amount_changed_title(),
