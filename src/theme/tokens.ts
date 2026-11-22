@@ -15,6 +15,7 @@ export const colors = {
   // cream and white.
   placeholder: '#7A6B8A',
   onPlumMuted: '#E9DDF2', // secondary text on plum
+  onPlumTint: '#493A55', // chips on plum: cream at 14 % over plum
 
   // Errors (Design canvas: SignInErrors). Always with an icon and text, never
   // colour alone.

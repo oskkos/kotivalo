@@ -232,7 +232,7 @@ function Hero(props: { view: FlatDetails }) {
             minHeight: 36,
             px: 1.5,
             borderRadius: 999,
-            bgcolor: 'rgba(255,247,234,0.14)',
+            bgcolor: colors.onPlumTint,
             color: 'primary.contrastText',
             fontSize: 13,
             fontWeight: 800,

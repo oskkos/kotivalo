@@ -24,6 +24,7 @@ const textPairs: [string, string, string][] = [
   ['placeholder on cream', colors.placeholder, colors.cream],
   ['cream on plum', colors.cream, colors.plum],
   ['muted text on plum', colors.onPlumMuted, colors.plum],
+  ['cream on a chip on plum', colors.cream, colors.onPlumTint],
   ['yellow on plum', colors.yellow, colors.plum],
   ['error text on cream', colors.error, colors.cream],
   ['error text on white', colors.error, colors.white],
