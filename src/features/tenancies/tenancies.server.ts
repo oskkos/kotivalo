@@ -321,6 +321,24 @@ export async function updateTenancy(
   if (problem) {
     return fail(problem)
   }
+  // A recorded ending must still fit the corrected contract: its type, start,
+  // contract date (the landlord's notice period) and term.
+  if (
+    existing.noticeGivenBy !== null &&
+    existing.noticeDate !== null &&
+    validTo !== null &&
+    validateEnding(
+      fields,
+      {
+        noticeGivenBy: existing.noticeGivenBy,
+        noticeDate: existing.noticeDate,
+        lastDay: validTo,
+      },
+      today(deps),
+    )
+  ) {
+    return fail('tenancy_correction_conflicts_ending')
+  }
   const updated = await deps.tenancies.update(
     deps.userId,
     propertyId,

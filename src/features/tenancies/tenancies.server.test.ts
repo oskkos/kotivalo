@@ -477,6 +477,65 @@ describe('correcting a tenancy', () => {
       noticeGivenBy: 'tenant',
     })
   })
+
+  test('a correction must still fit a recorded ending', async () => {
+    const id = await addId(aino)
+    await endTenancy(deps(), flat, id, tenantNotice)
+    const refused = { ok: false, reason: 'tenancy_correction_conflicts_ending' }
+    // A fixed term can't have the tenant's notice, nor end after its term.
+    expect(
+      await updateTenancy(deps(), flat, id, {
+        ...aino,
+        contractType: 'fixed_term',
+        termEnd: '2026-11-30',
+      }),
+    ).toEqual(refused)
+    // The notice can't come before the corrected start.
+    expect(
+      await updateTenancy(deps(), flat, id, {
+        ...aino,
+        contractMade: '2026-11-23',
+        validFrom: '2026-11-23',
+      }),
+    ).toEqual({ ok: false, reason: 'tenancy_contract_made_in_future' })
+    now = new Date(Date.UTC(2026, 10, 25, 10, 0, 0))
+    expect(
+      await updateTenancy(deps(), flat, id, {
+        ...aino,
+        contractMade: '2026-11-23',
+        validFrom: '2026-11-23',
+      }),
+    ).toEqual(refused)
+    expect((await view()).tenancies[0]).toMatchObject({
+      contractType: 'open_ended',
+      validFrom: '2025-03-01',
+      validTo: '2026-12-31',
+    })
+  })
+
+  test("a landlord's notice must keep its period after a correction", async () => {
+    // A contract made after 2026-10-01, under two years: 3 months.
+    const renewed = { ...aino, contractMade: '2026-10-15' }
+    const id = await addId(renewed)
+    await endTenancy(deps(), flat, id, {
+      noticeGivenBy: 'landlord',
+      noticeDate: '2026-11-22',
+      lastDay: '2027-02-28',
+    })
+    // Made before 2026-10-01 and over a year: 6 months, so it no longer fits.
+    expect(
+      await updateTenancy(deps(), flat, id, {
+        ...renewed,
+        contractMade: '2025-02-12',
+      }),
+    ).toEqual({ ok: false, reason: 'tenancy_correction_conflicts_ending' })
+    expect(
+      await updateTenancy(deps(), flat, id, {
+        ...renewed,
+        tenantName: 'Aino Kivi',
+      }),
+    ).toEqual({ ok: true })
+  })
 })
 
 describe('reading tenancies', () => {
