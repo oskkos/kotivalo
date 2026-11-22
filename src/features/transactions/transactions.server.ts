@@ -122,6 +122,7 @@ async function storeReceipt(
   deps: TransactionDeps,
   propertyId: string,
   upload: Upload,
+  replacing?: string,
 ): Promise<
   { ok: true; receipt: ReceiptFields } | Failure<FieldReason | AlertReason>
 > {
@@ -142,7 +143,8 @@ async function storeReceipt(
     }
   }
   // A first check, so a full quota stores no file; the write checks again.
-  const usage = await deps.transactions.storageUsage(deps.userId)
+  // A replaced receipt doesn't count, as in the write.
+  const usage = await deps.transactions.storageUsage(deps.userId, replacing)
   if (!fitsQuota(usage, checked.size)) {
     return quotaFull(deps, propertyId)
   }
@@ -388,7 +390,12 @@ export async function updateTransaction(
   }
   let receipt: ReceiptFields | undefined
   if (update.action === 'replace') {
-    const stored = await storeReceipt(deps, propertyId, update.upload)
+    const stored = await storeReceipt(
+      deps,
+      propertyId,
+      update.upload,
+      transactionId,
+    )
     if (!stored.ok) {
       return stored
     }

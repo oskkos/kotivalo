@@ -335,6 +335,19 @@ describe('Storage quota for receipts', () => {
     expect(await fileKeys()).toHaveLength(1)
   })
 
+  test('a replacement at the file count is allowed', async () => {
+    const id = await created()
+    // With the entry's own receipt, the user has the full 1000 files.
+    await recordUploads('annika', 999, 1)
+    expect(
+      await updateTransaction(deps('annika'), flat, id, repair, {
+        action: 'replace',
+        upload: jpeg(2000),
+      }),
+    ).toEqual({ ok: true })
+    expect((await details(id)).receipt?.size).toBe(2000)
+  })
+
   test("Another owner's files don't count", async () => {
     await recordUploads('jussi', 1000, 1)
     expect(

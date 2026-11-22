@@ -404,13 +404,22 @@ export function transactionRepository(db: Db) {
     },
 
     /** The bytes and number of receipt files the user has uploaded. */
+    /** The user's stored receipts, not counting the receipt of `replacing`. */
     async storageUsage(
       userId: string,
+      replacing?: string,
     ): Promise<{ bytes: number; files: number }> {
       const [row] = await db
         .select({ bytes: sum(receipts.size), files: count() })
         .from(receipts)
-        .where(eq(receipts.uploadedBy, userId))
+        .where(
+          and(
+            eq(receipts.uploadedBy, userId),
+            replacing === undefined
+              ? undefined
+              : ne(receipts.transactionId, replacing),
+          ),
+        )
       return { bytes: Number(row.bytes ?? 0), files: row.files }
     },
   }
