@@ -40,6 +40,20 @@ export type FieldReason =
   | 'receipt_unsupported_type'
   | 'receipt_too_large'
   | 'receipt_unreadable'
+  | 'tenant_name_required'
+  | 'tenant_name_too_long'
+  | 'tenant_phone_too_long'
+  | 'tenancy_overlaps'
+  | 'tenancy_start_before_ownership'
+  | 'tenancy_contract_made_in_future'
+  | 'tenancy_end_before_start'
+  | 'tenancy_due_day_invalid'
+  | 'tenancy_notice_in_future'
+  | 'tenancy_notice_before_start'
+  | 'tenancy_end_before_notice'
+  | 'tenancy_end_before_notice_period'
+  | 'tenancy_end_after_term'
+  | 'tenancy_fixed_term_notice'
 
 /** Errors about the whole action, shown as an alert with a title. */
 export type AlertReason =
@@ -63,6 +77,11 @@ export type AlertReason =
   | 'treatment_nothing_to_undo'
   | 'transaction_not_found'
   | 'storage_quota_full'
+  | 'tenancy_not_found'
+  | 'tenancy_already_ending'
+  | 'tenancy_not_ending'
+  | 'tenancy_already_ended'
+  | 'tenancy_cancel_later_tenancy'
   /** The amounts changed since they were read; the page reloads them. */
   | 'amount_changed'
   /** A request never reached the server: offline or cancelled. */
@@ -139,6 +158,36 @@ const texts: Record<Reason, () => ReasonText> = {
   }),
   receipt_too_large: () => ({ text: m.reason_receipt_too_large() }),
   receipt_unreadable: () => ({ text: m.reason_receipt_unreadable() }),
+  tenant_name_required: () => ({ text: m.reason_tenant_name_required() }),
+  tenant_name_too_long: () => ({ text: m.reason_tenant_name_too_long() }),
+  tenant_phone_too_long: () => ({ text: m.reason_tenant_phone_too_long() }),
+  tenancy_overlaps: () => ({ text: m.reason_tenancy_overlaps() }),
+  tenancy_start_before_ownership: () => ({
+    text: m.reason_tenancy_start_before_ownership(),
+  }),
+  tenancy_contract_made_in_future: () => ({
+    text: m.reason_tenancy_contract_made_in_future(),
+  }),
+  tenancy_end_before_start: () => ({
+    text: m.reason_tenancy_end_before_start(),
+  }),
+  tenancy_due_day_invalid: () => ({ text: m.reason_tenancy_due_day_invalid() }),
+  tenancy_notice_in_future: () => ({
+    text: m.reason_tenancy_notice_in_future(),
+  }),
+  tenancy_notice_before_start: () => ({
+    text: m.reason_tenancy_notice_before_start(),
+  }),
+  tenancy_end_before_notice: () => ({
+    text: m.reason_tenancy_end_before_notice(),
+  }),
+  tenancy_end_before_notice_period: () => ({
+    text: m.reason_tenancy_end_before_notice_period(),
+  }),
+  tenancy_end_after_term: () => ({ text: m.reason_tenancy_end_after_term() }),
+  tenancy_fixed_term_notice: () => ({
+    text: m.reason_tenancy_fixed_term_notice(),
+  }),
   code_expired: () => ({
     title: m.reason_code_expired_title(),
     text: m.reason_code_expired(),
@@ -218,6 +267,26 @@ const texts: Record<Reason, () => ReasonText> = {
   storage_quota_full: () => ({
     title: m.reason_storage_quota_full_title(),
     text: m.reason_storage_quota_full(),
+  }),
+  tenancy_not_found: () => ({
+    title: m.reason_tenancy_not_found_title(),
+    text: m.reason_tenancy_not_found(),
+  }),
+  tenancy_already_ending: () => ({
+    title: m.reason_tenancy_already_ending_title(),
+    text: m.reason_tenancy_already_ending(),
+  }),
+  tenancy_not_ending: () => ({
+    title: m.reason_tenancy_not_ending_title(),
+    text: m.reason_tenancy_not_ending(),
+  }),
+  tenancy_already_ended: () => ({
+    title: m.reason_tenancy_already_ended_title(),
+    text: m.reason_tenancy_already_ended(),
+  }),
+  tenancy_cancel_later_tenancy: () => ({
+    title: m.reason_tenancy_cancel_later_tenancy_title(),
+    text: m.reason_tenancy_cancel_later_tenancy(),
   }),
   amount_changed: () => ({
     title: m.reason_amount_changed_title(),

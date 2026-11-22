@@ -51,3 +51,32 @@ export function dayBefore(date: IsoDate): IsoDate {
   ]
   return new Date(Date.UTC(year, month - 1, day - 1)).toISOString().slice(0, 10)
 }
+
+/** The last day of a month given as `YYYY-MM`: `2027-02` → `2027-02-28`. */
+export function lastDayOfMonth(month: string): IsoDate {
+  const [year, monthNumber] = month.split('-').map(Number) as [number, number]
+  return new Date(Date.UTC(year, monthNumber, 0)).toISOString().slice(0, 10)
+}
+
+/** A month `YYYY-MM` moved by whole months: `2026-11` + 6 → `2027-05`. */
+export function addMonths(month: string, months: number): string {
+  const [year, monthNumber] = month.split('-').map(Number) as [number, number]
+  return new Date(Date.UTC(year, monthNumber - 1 + months, 1))
+    .toISOString()
+    .slice(0, 7)
+}
+
+/**
+ * A date moved by whole years; 29 February becomes 28 February in a common
+ * year: `2024-02-29` + 1 → `2025-02-28`.
+ */
+export function addYears(date: IsoDate, years: number): IsoDate {
+  const [year, month, day] = date.split('-').map(Number) as [
+    number,
+    number,
+    number,
+  ]
+  const target = `${String(year + years).padStart(4, '0')}-${String(month).padStart(2, '0')}`
+  const last = Number(lastDayOfMonth(target).slice(8))
+  return `${target}-${String(Math.min(day, last)).padStart(2, '0')}`
+}
