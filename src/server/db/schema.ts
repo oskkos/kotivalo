@@ -347,3 +347,53 @@ export const receipts = sqliteTable(
   },
   (t) => [index('receipts_uploaded_by_idx').on(t.uploadedBy)],
 )
+
+/** A tenancy's contract (openspec: tenancies). */
+export const CONTRACT_TYPES = ['open_ended', 'fixed_term'] as const
+export type ContractType = (typeof CONTRACT_TYPES)[number]
+
+/**
+ * How a tenancy was ended (openspec: tenancies): by the tenant's or the
+ * landlord's notice, by agreement, or with a court's permission (a fixed
+ * term ended early).
+ */
+export const NOTICE_GIVERS = ['tenant', 'landlord', 'agreed', 'court'] as const
+export type NoticeGiver = (typeof NOTICE_GIVERS)[number]
+
+/**
+ * A flat's tenancies (openspec: tenancies), each a period: `valid_to` is the
+ * last day (the fixed term's end, or the last rent day once ended), null
+ * while an open-ended tenancy runs. `term_end` keeps a fixed term's end so
+ * that cancelling an early ending restores it. A flat's tenancies never
+ * overlap. The tenant's details are a third party's personal data: never
+ * logged.
+ */
+export const tenancies = sqliteTable(
+  'tenancies',
+  {
+    id: id(),
+    propertyId: text('property_id')
+      .notNull()
+      .references(() => properties.id, { onDelete: 'cascade' }),
+    tenantName: text('tenant_name').notNull(),
+    tenantPhone: text('tenant_phone'),
+    tenantEmail: text('tenant_email'),
+    contractType: text('contract_type', { enum: CONTRACT_TYPES }).notNull(),
+    /** Decides the landlord's notice period (CONCEPT.md §4.2). */
+    contractMade: isoDate('contract_made').notNull(),
+    ...validity(),
+    /** A fixed term's end; null for an open-ended tenancy. */
+    termEnd: isoDate('term_end'),
+    /** Day of the month, 1–31; the month's last day in shorter months. */
+    dueDay: integer('due_day', { mode: 'number' }).notNull(),
+    noticeGivenBy: text('notice_given_by', { enum: NOTICE_GIVERS }),
+    /** The date notice was received, or the ending agreed or permitted. */
+    noticeDate: isoDate('notice_date'),
+    createdBy: text('created_by')
+      .notNull()
+      .references(() => user.id),
+    createdAt: instant('created_at').notNull(),
+    updatedAt: instant('updated_at').notNull(),
+  },
+  (t) => [index('tenancies_property_idx').on(t.propertyId, t.validFrom)],
+)

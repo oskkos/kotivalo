@@ -43,6 +43,13 @@
       "when": 1795275501552,
       "tag": "0005_transactions",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1795343958102,
+      "tag": "0006_tenancies",
+      "breakpoints": true
     }
   ]
 }
