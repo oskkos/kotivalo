@@ -44,4 +44,4 @@
 ## 5. Archive
 
 - [x] 5.1 `pnpm check:traceability` and the full test suite pass
-- [ ] 5.2 `openspec archive refine-tenancy-history` as the PR's last commit
+- [x] 5.2 `openspec archive refine-tenancy-history` as the PR's last commit
