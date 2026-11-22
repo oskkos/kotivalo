@@ -34,7 +34,7 @@ A user SHALL be able to edit the street address, postcode, city, room count and 
 - **THEN** the fields show those values, with Kaksio selected
 
 ### Requirement: Listing flats
-The page `/` SHALL list the flats the user has access to, sorted by street address in the user's language's alphabetical order, with the number of flats. Each card SHALL show the street address, the city, the room count, the floor area, the current owners with their shares, the user themselves as "You", owners with larger shares first, and the flat's tenancy status ("Tenancy statuses"): *Let* with the tenant's name, *Notice given* with the last rent day and the tenant's name, or *Vacant*. A member's card SHALL add that the flat is shared with them. Selecting a card SHALL open that flat's details page ("The flat details page").
+The page `/` SHALL list the flats the user has access to, sorted by street address in the user's language's alphabetical order, with the number of flats, after this month's rent summary ("The rent summary on the flats list"). Each card SHALL show the street address, the city, the room count, the floor area, the current owners with their shares, the user themselves as "You", owners with larger shares first, the flat's tenancy status ("Tenancy statuses"): *Let* with the tenant's name, *Notice given* with the last rent day and the tenant's name, or *Vacant*, and this month's rent status ("The rent status on a flat's card"). A member's card SHALL add that the flat is shared with them. Selecting a card SHALL open that flat's details page ("The flat details page").
 
 #### Scenario: Flats are listed by street address
 - **WHEN** a user has added `Rantatie 15 C 21` and then `Koivupolku 7 A 4`

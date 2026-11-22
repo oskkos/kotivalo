@@ -19,5 +19,5 @@
 
 ## 4. Archive
 
-- [ ] 4.1 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
-- [ ] 4.2 `openspec archive rent-status-on-flats-list` as the last commit
+- [x] 4.1 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
+- [x] 4.2 `openspec archive rent-status-on-flats-list` as the last commit
