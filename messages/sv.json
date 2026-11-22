@@ -405,6 +405,7 @@
   "reason_treatment_required": "Välj behandling.",
   "reason_unexpected": "Försök igen om en stund.",
   "reason_unexpected_title": "Något gick fel",
+  "rent_month_back_to_payments": "Tillbaka till hyresbetalningarna",
   "rent_month_delete_label": "Ta bort betalningen på {amount}, {date}",
   "rent_month_due": "Förfallodag {date}",
   "rent_month_expected": "Hyra",

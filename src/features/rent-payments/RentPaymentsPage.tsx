@@ -79,17 +79,27 @@ const BACK = 'M15 5 L8 12 L15 19'
 const NEXT = 'M9 5 L16 12 L9 19'
 const ALERT = 'M12 3 L22 20 H2 Z M12 10 V14 M12 17 V17.01'
 
-/** The years to choose from: those in which a tenancy ran, newest first. */
-export function rentYears(tenancies: readonly Tenancy[], today: string) {
+/**
+ * The years to choose from: those in which a tenancy ran or rent was paid
+ * (rent paid in advance can fall before the tenancy), newest first.
+ */
+export function rentYears(
+  tenancies: readonly Tenancy[],
+  payments: readonly Pick<RentPayment, 'paidOn'>[],
+  today: string,
+) {
   const current = Number(today.slice(0, 4))
+  const paidIn = new Set(payments.map((p) => Number(p.paidOn.slice(0, 4))))
   const first = Math.min(
     current,
     ...tenancies.map((t) => Number(t.validFrom.slice(0, 4))),
+    ...paidIn,
   )
   const years: number[] = []
   for (let year = current; year >= first; year--) {
     const to = year === current ? monthOf(today) : `${String(year)}-12`
     if (
+      paidIn.has(year) ||
       tenancies.some((t) => tenancyMonths(t, `${String(year)}-01`, to).length)
     ) {
       years.push(year)
@@ -153,7 +163,7 @@ export function monthList(rows: readonly RentMonth[]): string {
 
 export function RentPaymentsPage(props: Props) {
   const { view } = props
-  const years = rentYears(view.tenancies, view.today)
+  const years = rentYears(view.tenancies, view.payments, view.today)
   const currentYear = Number(view.today.slice(0, 4))
   const year = props.year ?? currentYear
   const data = {
@@ -285,60 +295,64 @@ export function RentPaymentsPage(props: Props) {
                 </Typography>
               </Stack>
             ) : null}
-            <Box
-              component="ul"
-              aria-label={m.rent_payments_months()}
-              sx={{
-                ...card,
-                m: 0,
-                p: 0,
-                listStyle: 'none',
-                overflow: 'hidden',
-              }}
-            >
-              {rows.map((row, i) => (
-                <Box
-                  key={`${row.month}-${row.tenancy.id}`}
-                  component="li"
-                  sx={{
-                    borderTop: i === 0 ? 'none' : `1px solid ${colors.divider}`,
-                  }}
-                >
-                  <RowLink
-                    to="/properties/$propertyId/rent/$tenancyId/$month"
-                    params={{
-                      propertyId: props.propertyId,
-                      tenancyId: row.tenancy.id,
-                      month: row.month,
-                    }}
-                    underline="none"
+            {rows.length > 0 ? (
+              <Box
+                component="ul"
+                aria-label={m.rent_payments_months()}
+                sx={{
+                  ...card,
+                  m: 0,
+                  p: 0,
+                  listStyle: 'none',
+                  overflow: 'hidden',
+                }}
+              >
+                {rows.map((row, i) => (
+                  <Box
+                    key={`${row.month}-${row.tenancy.id}`}
+                    component="li"
                     sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1.5,
-                      minHeight: 60,
-                      pl: 2,
-                      pr: 1.5,
-                      py: 0.75,
-                      color: 'text.primary',
+                      borderTop:
+                        i === 0 ? 'none' : `1px solid ${colors.divider}`,
                     }}
                   >
-                    <Stack sx={{ flex: 1, minWidth: 0 }}>
-                      <Typography sx={{ fontSize: 15, fontWeight: 900 }}>
-                        {formatMonthName(row.month)}
-                      </Typography>
-                      <Typography variant="body2" color="text.secondary">
-                        {showTenant
-                          ? `${row.tenancy.tenantName} · ${rowDetail(row)}`
-                          : rowDetail(row)}
-                      </Typography>
-                    </Stack>
-                    <StatusChip status={row.status} text={shortStatus(row)} />
-                    <Icon path={NEXT} size={18} />
-                  </RowLink>
-                </Box>
-              ))}
-            </Box>
+                    <RowLink
+                      to="/properties/$propertyId/rent/$tenancyId/$month"
+                      params={{
+                        propertyId: props.propertyId,
+                        tenancyId: row.tenancy.id,
+                        month: row.month,
+                      }}
+                      search={{ year }}
+                      underline="none"
+                      sx={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 1.5,
+                        minHeight: 60,
+                        pl: 2,
+                        pr: 1.5,
+                        py: 0.75,
+                        color: 'text.primary',
+                      }}
+                    >
+                      <Stack sx={{ flex: 1, minWidth: 0 }}>
+                        <Typography sx={{ fontSize: 15, fontWeight: 900 }}>
+                          {formatMonthName(row.month)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          {showTenant
+                            ? `${row.tenancy.tenantName} · ${rowDetail(row)}`
+                            : rowDetail(row)}
+                        </Typography>
+                      </Stack>
+                      <StatusChip status={row.status} text={shortStatus(row)} />
+                      <Icon path={NEXT} size={18} />
+                    </RowLink>
+                  </Box>
+                ))}
+              </Box>
+            ) : null}
           </>
         )}
       </Stack>
