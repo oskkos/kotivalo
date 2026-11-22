@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import {
+  currentTenancy,
   dueDate,
   flatStatus,
   tenancyStatus,
@@ -104,5 +105,13 @@ describe('Tenancy dates and details', () => {
     expect(dueDate(31, '2027-02')).toBe('2027-02-28')
     expect(dueDate(31, '2027-04')).toBe('2027-04-30')
     expect(dueDate(5, '2027-02')).toBe('2027-02-05')
+  })
+})
+
+describe('the current tenancy', () => {
+  test('is the running one, else the next to start', () => {
+    expect(currentTenancy([fixedTerm, ended], '2026-12-01')).toBe(ended)
+    expect(currentTenancy([fixedTerm, ended], '2027-01-01')).toBe(fixedTerm)
+    expect(currentTenancy([ended], '2027-01-01')).toBeNull()
   })
 })

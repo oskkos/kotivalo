@@ -61,12 +61,12 @@
 
 ## 5. The tenancy page and the edit page card
 
-- [ ] 5.1 Route `/properties/$propertyId/tenancy` with a loader calling `getTenancies`, and a page title
-- [ ] 5.2 `TenancyPage.tsx`, as on the Design canvas ("Vuokrasuhde", "· irtisanottu", "· vapaa"): the tenant, the status chip, call and email links, the details rows, earlier tenancies, the vacant prompt; the owner's buttons come with their routes in groups 6 and 7
-- [ ] 5.3 The tenancy card at the top of the edit page ("Muokkaa asuntoa · vuokrasuhdekortti"), linking to the page; the edit page's loader gets the card's summary
-- [ ] 5.4 Messages in fi, then sv and en with the translate skill; the term-critic on the diff
-- [ ] 5.5 Component tests: the statuses on the page, the vacant state with and without history, the member view, a tenancy without phone or email
-- [ ] 5.6 Playwright: "A vacant flat offers to add a tenant" for a new flat (no history). The scenarios that need tenancies get their Playwright tests in group 6, where tenancies can be added through the form
+- [x] 5.1 Route `/properties/$propertyId/tenancy` with a loader calling `getTenancies`, and a page title
+- [x] 5.2 `TenancyPage.tsx`, as on the Design canvas ("Vuokrasuhde", "· irtisanottu", "· vapaa"): the tenant, the status chip, call and email links, the details rows, earlier tenancies, the vacant prompt; the owner's buttons come with their routes in groups 6 and 7
+- [x] 5.3 The tenancy card at the top of the edit page ("Muokkaa asuntoa · vuokrasuhdekortti"), linking to the page; the edit page's loader gets the card's summary
+- [x] 5.4 Messages in fi, then sv and en with the translate skill; the term-critic on the diff
+- [x] 5.5 Component tests: the statuses on the page, the vacant state with and without history, the member view, a tenancy without phone or email
+- [x] 5.6 Playwright: "A vacant flat offers to add a tenant" for a new flat (no history). The scenarios that need tenancies get their Playwright tests in group 6, where tenancies can be added through the form
 
 ## 6. Adding and correcting a tenant
 

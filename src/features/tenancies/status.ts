@@ -98,3 +98,15 @@ export function dueDate(dueDay: number, month: string): IsoDate {
   const day = Math.min(dueDay, Number(last.slice(8)))
   return `${month}-${String(day).padStart(2, '0')}`
 }
+
+/**
+ * The tenancy a flat's page shows: the one running on `today`, or else the
+ * next one to start; null when there is neither.
+ */
+export function currentTenancy<T extends StatusTenancy>(
+  tenancies: readonly T[],
+  today: IsoDate,
+): T | null {
+  const status = flatStatus(tenancies, today)
+  return status.kind === 'vacant' ? status.next : status.tenancy
+}

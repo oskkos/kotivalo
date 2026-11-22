@@ -11,6 +11,7 @@ const textPairs: [string, string, string][] = [
   ['text on yellow (accent buttons)', colors.plum, colors.yellow],
   ['text on yellow tint (chips)', colors.plum, colors.yellowTint],
   ['text on lavender tint', colors.plum, colors.lavenderTint],
+  ['text on green tint (chips)', colors.plum, colors.greenTint],
   ['text on lavender', colors.plum, colors.lavender],
   ['text on sand (segmented control)', colors.plum, colors.sand],
   ['secondary text on cream', colors.plumMuted, colors.cream],

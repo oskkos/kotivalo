@@ -895,7 +895,13 @@
     },
     "sv": {
       "term": "uppsägning",
-      "match": ["uppsäg\\p{L}*", "säg\\p{L}* upp"],
+      "match": [
+        "uppsäg\\p{L}*",
+        "säg\\p{L}* upp",
+        "uppsag(?:d|t|da|ts)",
+        "uppsades",
+        "sa(?:de|des|gt|gts)? upp"
+      ],
       "status": "verified",
       "sources": [
         {
