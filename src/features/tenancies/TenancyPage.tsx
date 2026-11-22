@@ -31,6 +31,10 @@ interface Props {
   addAction?: ReactNode
   /** Owners only: the actions for the current tenancy. */
   currentActions?: (tenancy: Tenancy) => ReactNode
+  /** Owners only: wraps another tenancy's row, e.g. in a link to its form. */
+  otherRow?: (tenancy: Tenancy, row: ReactNode) => ReactNode
+  /** Owners only: adding an earlier tenancy while the flat has a current one. */
+  earlierAction?: ReactNode
 }
 
 const card = {
@@ -355,40 +359,50 @@ export function TenancyPage(props: Props) {
               component="ul"
               sx={{ ...card, m: 0, px: 2, py: 0, listStyle: 'none' }}
             >
-              {others.map((tenancy, i) => (
-                <Stack
-                  key={tenancy.id}
-                  component="li"
-                  direction="row"
-                  sx={{
-                    alignItems: 'center',
-                    gap: 1.5,
-                    minHeight: 56,
-                    borderTop: i === 0 ? 'none' : `1px solid ${colors.divider}`,
-                  }}
-                >
-                  <Stack sx={{ flex: 1, minWidth: 0 }}>
-                    <Typography sx={{ fontSize: 14, fontWeight: 900 }}>
-                      {tenancy.tenantName}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {m.tenancy_other_line({
-                        dates: datesLabel(tenancy.validFrom, tenancy.validTo),
-                        contract: contractLabel[tenancy.contractType](),
-                      })}
+              {others.map((tenancy, i) => {
+                const row = (
+                  <Stack
+                    direction="row"
+                    sx={{ alignItems: 'center', gap: 1.5, minHeight: 56 }}
+                  >
+                    <Stack sx={{ flex: 1, minWidth: 0 }}>
+                      <Typography sx={{ fontSize: 14, fontWeight: 900 }}>
+                        {tenancy.tenantName}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {m.tenancy_other_line({
+                          dates: datesLabel(tenancy.validFrom, tenancy.validTo),
+                          contract: contractLabel[tenancy.contractType](),
+                        })}
+                      </Typography>
+                    </Stack>
+                    <Typography
+                      variant="body2"
+                      sx={{ fontWeight: 800, color: 'text.secondary' }}
+                    >
+                      {statusLabel(tenancyStatus(tenancy, view.today))}
                     </Typography>
                   </Stack>
-                  <Typography
-                    variant="body2"
-                    sx={{ fontWeight: 800, color: 'text.secondary' }}
+                )
+                return (
+                  <Box
+                    key={tenancy.id}
+                    component="li"
+                    sx={{
+                      borderTop:
+                        i === 0 ? 'none' : `1px solid ${colors.divider}`,
+                    }}
                   >
-                    {statusLabel(tenancyStatus(tenancy, view.today))}
-                  </Typography>
-                </Stack>
-              ))}
+                    {owner && props.otherRow
+                      ? props.otherRow(tenancy, row)
+                      : row}
+                  </Box>
+                )
+              })}
             </Box>
           </Stack>
         ) : null}
+        {owner && current ? props.earlierAction : null}
         {owner ? null : (
           <Typography variant="body2" color="text.secondary">
             {m.tenancy_member_note()}

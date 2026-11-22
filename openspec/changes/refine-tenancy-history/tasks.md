@@ -28,10 +28,10 @@
 
 ## 3. The Tenancy page: earlier tenancies and no ending before the start
 
-- [ ] 3.1 `TenancyPage`: an `otherAction` render prop for the other tenancies; the route links each to its correction form for owners
-- [ ] 3.2 "Add an earlier tenancy" for owners under the other tenancies while the flat has a current tenancy; its messages in fi, sv and en
-- [ ] 3.3 The route offers no "End tenancy" while the status is `starts`
-- [ ] 3.4 Playwright: "Adding an earlier tenancy from the tenancy page", "Correcting an earlier tenancy from the list", "A tenancy that hasn't started can't be ended"; extend "A member sees the tenancy but can't change it" with the other tenancies not opening a form
+- [x] 3.1 `TenancyPage`: an `otherAction` render prop for the other tenancies; the route links each to its correction form for owners
+- [x] 3.2 "Add an earlier tenancy" for owners under the other tenancies while the flat has a current tenancy; its messages in fi, sv and en
+- [x] 3.3 The route offers no "End tenancy" while the status is `starts`
+- [x] 3.4 Playwright: "Adding an earlier tenancy from the tenancy page", "Correcting an earlier tenancy from the list", "A tenancy that hasn't started can't be ended"; extend "A member sees the tenancy but can't change it" with the other tenancies not opening a form
 
 ## 4. Removing a tenancy from the correction form
 
