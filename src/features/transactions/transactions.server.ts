@@ -133,7 +133,10 @@ async function storeReceipt(
     if (!(error instanceof UploadError)) {
       throw error
     }
-    deps.log.warn('receipt.refused', { propertyId, problem: error.problem })
+    deps.log.warn('transaction.receipt_refused', {
+      propertyId,
+      problem: error.problem,
+    })
     return {
       ok: false,
       reason:
@@ -178,7 +181,7 @@ async function deleteFiles(
     try {
       await deps.storage.delete(key)
     } catch (error) {
-      deps.log.error('receipt.delete_failed', { key }, error)
+      deps.log.error('transaction.receipt_delete_failed', { key }, error)
     }
   }
 }
@@ -209,7 +212,7 @@ export interface TransactionsView {
   role: PropertyRole
   property: Property
   year: number
-  /** The current year and the years with entries, newest first. */
+  /** The current year, the year shown and the years with entries, newest first. */
   years: number[]
   /** The year's entries, newest first. */
   entries: TransactionRow[]
@@ -246,7 +249,8 @@ export async function getTransactions(
     deps.transactions.forPropertyYear(propertyId, year),
     deps.transactions.years(propertyId),
   ])
-  const years = [...new Set([currentYear, ...withEntries])].sort(
+  // The year shown is always among them, also once its last entry is gone.
+  const years = [...new Set([currentYear, year, ...withEntries])].sort(
     (a, b) => b - a,
   )
   return {
