@@ -22,6 +22,7 @@ import {
   getTenancies as getList,
   getTenancy as getOne,
   listTenancyStatuses as listStatuses,
+  removeTenancy as remove,
   updateTenancy as update,
   type TenancyDeps,
 } from './tenancies.server'
@@ -66,8 +67,8 @@ export const getTenancy = createServerFn({ method: 'GET' })
 export const createTenancy = createServerFn({ method: 'POST' })
   .validator(createTenancyInput)
   .handler(async ({ data }) => {
-    const { propertyId, rent, ...fields } = data
-    return create(await tenancyDeps(), propertyId, fields, rent)
+    const { propertyId, rent, ending, ...fields } = data
+    return create(await tenancyDeps(), propertyId, fields, rent, ending)
   })
 
 export const updateTenancy = createServerFn({ method: 'POST' })
@@ -88,6 +89,12 @@ export const cancelTenancyEnding = createServerFn({ method: 'POST' })
   .validator(tenancyRefInput)
   .handler(async ({ data }) =>
     cancel(await tenancyDeps(), data.propertyId, data.tenancyId),
+  )
+
+export const removeTenancy = createServerFn({ method: 'POST' })
+  .validator(tenancyRefInput)
+  .handler(async ({ data }) =>
+    remove(await tenancyDeps(), data.propertyId, data.tenancyId),
   )
 
 export const listTenancyStatuses = createServerFn({ method: 'GET' }).handler(

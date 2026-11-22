@@ -1,5 +1,10 @@
 import { describe, expect, test } from 'vitest'
-import { check, pendingProblems, type TestCase } from './check.ts'
+import {
+  blockingProblems,
+  check,
+  pendingProblems,
+  type TestCase,
+} from './check.ts'
 import type { Requirement } from './spec.ts'
 
 const requirement = (
@@ -155,5 +160,28 @@ describe('pendingProblems', () => {
   test('is empty when the changes add no problems', () => {
     const main = [p('Add a flat', 'no Playwright test')]
     expect(pendingProblems(main, main)).toEqual([])
+  })
+})
+
+describe('blockingProblems', () => {
+  const p = (requirement: string, message: string) => ({
+    capability: 'property',
+    requirement,
+    message,
+  })
+
+  test('keeps the problems that remain with the changes applied', () => {
+    const main = [p('Add a flat', 'no Playwright test')]
+    expect(blockingProblems(main, main)).toEqual(main)
+  })
+
+  test('drops a gap that an active change removes', () => {
+    const main = [
+      p('Add a flat', 'no Playwright test'),
+      p('Set the rent', 'scenario "Too early" has no test'),
+    ]
+    expect(
+      blockingProblems(main, [p('Add a flat', 'no Playwright test')]),
+    ).toEqual([p('Add a flat', 'no Playwright test')])
   })
 })

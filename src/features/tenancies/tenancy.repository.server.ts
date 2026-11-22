@@ -8,6 +8,7 @@ import {
   desc,
   eq,
   exists,
+  gt,
   gte,
   inArray,
   isNotNull,
@@ -140,8 +141,11 @@ export function tenancyRepository(db: Db) {
     propertyId: string,
     fields: TenancyFields,
     now: Date,
+    ending?: Ending,
   ) {
     const id = crypto.randomUUID()
+    // The last day: a recorded ending's, else the fixed term's end.
+    const validTo = ending?.lastDay ?? fields.termEnd
     const statement = db
       .insert(tenancies)
       .select(
@@ -163,11 +167,15 @@ export function tenancyRepository(db: Db) {
               'contract_made',
             ),
             validFrom: sql<string>`${fields.validFrom}`.as('valid_from'),
-            validTo: sql<string | null>`${fields.termEnd}`.as('valid_to'),
+            validTo: sql<string | null>`${validTo}`.as('valid_to'),
             termEnd: sql<string | null>`${fields.termEnd}`.as('term_end'),
             dueDay: sql<number>`${fields.dueDay}`.as('due_day'),
-            noticeGivenBy: sql<null>`null`.as('notice_given_by'),
-            noticeDate: sql<null>`null`.as('notice_date'),
+            noticeGivenBy: sql<NoticeGiver | null>`${
+              ending?.noticeGivenBy ?? null
+            }`.as('notice_given_by'),
+            noticeDate: sql<string | null>`${ending?.noticeDate ?? null}`.as(
+              'notice_date',
+            ),
             createdBy: sql<string>`${actorId}`.as('created_by'),
             createdAt: sql<number>`${now.getTime()}`.as('created_at'),
             updatedAt: sql<number>`${now.getTime()}`.as('updated_at'),
@@ -177,7 +185,7 @@ export function tenancyRepository(db: Db) {
             and(
               eq(properties.id, propertyId),
               isOwner(actorId, propertyId),
-              noOverlap(propertyId, fields.validFrom, fields.termEnd),
+              noOverlap(propertyId, fields.validFrom, validTo),
             ),
           ),
       )
@@ -238,6 +246,8 @@ export function tenancyRepository(db: Db) {
       rent:
         (Omit<Expected, 'propertyId' | 'actorId'> & { amount: number }) | null,
       now: Date,
+      /** An ending recorded with the tenancy, for an earlier one. */
+      ending?: Ending,
     ): Promise<
       | { outcome: 'created'; id: string }
       | { outcome: 'overlaps' }
@@ -248,6 +258,7 @@ export function tenancyRepository(db: Db) {
         propertyId,
         fields,
         now,
+        ending,
       )
       if (rent === null) {
         const [inserted] = await atomically(db, [statement])
@@ -371,6 +382,30 @@ export function tenancyRepository(db: Db) {
           .returning({ id: tenancies.id }),
       ])
       return updated.length > 0
+    },
+
+    /**
+     * Removes a tenancy that starts after `today`. False when it has started,
+     * isn't the flat's or the actor isn't an owner.
+     */
+    async removeNotStarted(
+      actorId: string,
+      propertyId: string,
+      tenancyId: string,
+      today: IsoDate,
+    ): Promise<boolean> {
+      const [removed] = await atomically(db, [
+        db
+          .delete(tenancies)
+          .where(
+            and(
+              ownTenancy(actorId, propertyId, tenancyId),
+              gt(tenancies.validFrom, today),
+            ),
+          )
+          .returning({ id: tenancies.id }),
+      ])
+      return removed.length > 0
     },
 
     /**

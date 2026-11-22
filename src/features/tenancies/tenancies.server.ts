@@ -20,8 +20,10 @@ import type { NoticeGiver, PropertyRole } from '#/server/db/schema'
 import type { Logger } from '#/server/log/log'
 import { validateEnding } from './notice'
 import { validateTenancyDates } from './rules'
+import { rentAsked } from './rent'
 import { flatStatus } from './status'
 import type {
+  Ending,
   Tenancy,
   TenancyFields,
   TenancyRepository,
@@ -222,8 +224,10 @@ export async function createTenancy(
   deps: TenancyDeps,
   propertyId: string,
   fields: TenancyFields,
-  /** The monthly rent in cents as entered. */
-  rent: number,
+  /** The monthly rent in cents as entered; absent when it isn't asked. */
+  rent: number | undefined,
+  /** An earlier tenancy's ending, recorded with it. */
+  ending?: Ending,
 ): Promise<
   { ok: true; tenancyId: string } | Failure<FieldReason | AlertReason>
 > {
@@ -239,21 +243,31 @@ export async function createTenancy(
   if (start === undefined) {
     return notFound
   }
-  const problem = validateTenancyDates(
-    { ...fields, validTo: fields.termEnd },
-    { today: today(deps), ownershipStart: start, others },
-  )
+  const day = today(deps)
+  // The ending first: its reasons say more than the overlap or the end
+  // before the start that a wrong ending would also cause.
+  const problem =
+    (ending ? validateEnding(fields, ending, day) : undefined) ??
+    validateTenancyDates(
+      { ...fields, validTo: ending?.lastDay ?? fields.termEnd },
+      { today: day, ownershipStart: start, others },
+    )
   if (problem) {
     return fail(problem)
   }
   const rents = amounts.amounts.rent
+  const asked = rentAsked(rents, fields.validFrom)
+  if (asked && rent === undefined) {
+    return fail('amount_invalid')
+  }
   const inEffect = periodOn(rents, fields.validFrom)?.value
   let rentWrite: {
     latestStart: IsoDate | null
     from: IsoDate
     amount: number
   } | null = null
-  if (rent !== inEffect) {
+  // Before the latest rent period the rent stays on its own page.
+  if (asked && rent !== undefined && rent !== inEffect) {
     const from = `${monthOf(fields.validFrom)}-01`
     const latestStart = rents.at(-1)?.validFrom
     const rentProblem = validateAmountDate(from, {
@@ -271,6 +285,7 @@ export async function createTenancy(
     fields,
     rentWrite,
     deps.now(),
+    ending,
   )
   if (created.outcome === 'overlaps') {
     return refusal(deps, propertyId, fail('tenancy_overlaps'))
@@ -285,6 +300,7 @@ export async function createTenancy(
     propertyId,
     tenancyId: created.id,
     contractType: fields.contractType,
+    ended: ending !== undefined,
   })
   if (rentWrite) {
     deps.log.info('recurring_amount.set', {
@@ -398,6 +414,44 @@ export async function endTenancy(
     tenancyId,
     noticeGivenBy: ending.noticeGivenBy,
   })
+  return { ok: true }
+}
+
+/** Removes a tenancy that hasn't started, e.g. when the tenant withdrew. */
+export async function removeTenancy(
+  deps: TenancyDeps,
+  propertyId: string,
+  tenancyId: string,
+): Promise<{ ok: true } | Failure> {
+  const refused = await roleCheck(deps, propertyId)
+  if (refused) {
+    return refused
+  }
+  const existing = await deps.tenancies.get(tenancyId)
+  if (existing?.propertyId !== propertyId) {
+    return tenancyNotFound
+  }
+  const day = today(deps)
+  if (existing.validFrom <= day) {
+    return fail('tenancy_already_started')
+  }
+  const removed = await deps.tenancies.removeNotStarted(
+    deps.userId,
+    propertyId,
+    tenancyId,
+    day,
+  )
+  if (!removed) {
+    const now = await deps.tenancies.get(tenancyId)
+    return refusal(
+      deps,
+      propertyId,
+      now?.propertyId === propertyId
+        ? fail('tenancy_already_started')
+        : tenancyNotFound,
+    )
+  }
+  deps.log.info('tenancy.removed', { propertyId, tenancyId })
   return { ok: true }
 }
 

@@ -15,6 +15,7 @@ import {
   getTenancies,
   getTenancy,
   listTenancyStatuses,
+  removeTenancy,
   updateTenancy,
   type TenancyDeps,
 } from './tenancies.server'
@@ -99,6 +100,32 @@ async function view(userId = 'annika') {
   return result
 }
 
+/** Makes `flat` a flat owned since `since`, with a rent from `rentFrom`. */
+async function flatOwnedSince(since: string, rentFrom: string) {
+  flat = (
+    await propertyRepository(db).create(
+      'annika',
+      {
+        streetAddress: 'Koivupolku 7 A 4',
+        postcode: '33100',
+        city: 'Tampere',
+        roomCount: 1,
+        floorArea: 310,
+      },
+      now,
+      since,
+    )
+  ).id
+  await setRent(89000, rentFrom)
+}
+
+const pekka: TenancyFields = {
+  ...aino,
+  tenantName: 'Pekka Virtanen',
+  contractMade: '2023-05-15',
+  validFrom: '2023-06-01',
+}
+
 const tenantNotice = {
   noticeGivenBy: 'tenant' as const,
   noticeDate: '2026-11-22',
@@ -171,6 +198,54 @@ describe('Adding a tenant', () => {
     })
   })
 
+  test('Adding an earlier tenancy with its ending', async () => {
+    await flatOwnedSince('2022-06-12', '2025-03-01')
+    await addId(aino)
+    expect(
+      await createTenancy(deps(), flat, pekka, undefined, {
+        noticeGivenBy: 'tenant',
+        noticeDate: '2025-01-20',
+        lastDay: '2025-02-28',
+      }),
+    ).toMatchObject({ ok: true })
+    expect((await view()).tenancies[1]).toMatchObject({
+      tenantName: 'Pekka Virtanen',
+      validTo: '2025-02-28',
+      noticeGivenBy: 'tenant',
+      noticeDate: '2025-01-20',
+    })
+  })
+
+  test('The ending of an earlier tenancy follows the notice rules', async () => {
+    await flatOwnedSince('2022-06-12', '2025-03-01')
+    // Made before 2026-10-01 and over a year on the notice date: 6 months.
+    expect(
+      await createTenancy(deps(), flat, pekka, undefined, {
+        noticeGivenBy: 'landlord',
+        noticeDate: '2025-01-10',
+        lastDay: '2025-02-28',
+      }),
+    ).toEqual({ ok: false, reason: 'tenancy_end_before_notice_period' })
+    expect((await view()).tenancies).toEqual([])
+  })
+
+  test("The ending can't be recorded for a tenancy that hasn't started", async () => {
+    expect(
+      await createTenancy(
+        deps(),
+        flat,
+        fixedTerm('2027-01-01', '2027-12-31'),
+        89000,
+        {
+          noticeGivenBy: 'agreed',
+          noticeDate: '2026-11-20',
+          lastDay: '2026-12-31',
+        },
+      ),
+    ).toEqual({ ok: false, reason: 'tenancy_notice_before_start' })
+    expect((await view()).tenancies).toEqual([])
+  })
+
   test("A member can't add a tenant", async () => {
     expect(await add(aino, 89000, 'jussi')).toEqual({
       ok: false,
@@ -231,6 +306,15 @@ describe('Tenancy dates and details', () => {
     ])
   })
 
+  test('An earlier open-ended tenancy without its ending is refused', async () => {
+    await flatOwnedSince('2022-06-12', '2025-03-01')
+    await addId(aino)
+    expect(await createTenancy(deps(), flat, pekka, undefined)).toEqual({
+      ok: false,
+      reason: 'tenancy_overlaps',
+    })
+  })
+
   test('A tenancy before the ownership is refused', async () => {
     expect(
       await add({
@@ -274,14 +358,34 @@ describe('The rent of a new tenancy', () => {
     ])
   })
 
-  test('A rent for an earlier month than the latest change is refused', async () => {
+  test('A tenancy starting before the latest rent period leaves the rent alone', async () => {
+    await flatOwnedSince('2022-06-12', '2025-01-01')
+    expect((await createTenancy(deps(), flat, pekka, undefined)).ok).toBe(true)
+    expect(await rents()).toEqual([
+      { validFrom: '2025-01-01', validTo: null, value: 89000 },
+    ])
+  })
+
+  test('a rent sent for a tenancy before the latest rent period is ignored', async () => {
     await setRent(92000, '2027-03-01')
-    expect(await add(fixedTerm('2027-01-01', '2027-12-31'), 91000)).toEqual({
-      ok: false,
-      reason: 'amount_date_too_early',
-    })
+    expect((await add(fixedTerm('2027-01-01', '2027-12-31'), 91000)).ok).toBe(
+      true,
+    )
+    expect((await rents()).map((period) => period.value)).toEqual([
+      89000, 92000,
+    ])
+  })
+
+  test('a rent asked but missing is refused', async () => {
+    expect(
+      await createTenancy(
+        deps(),
+        flat,
+        fixedTerm('2027-01-01', '2027-12-31'),
+        undefined,
+      ),
+    ).toEqual({ ok: false, reason: 'amount_invalid' })
     expect((await view()).tenancies).toEqual([])
-    expect(await rents()).toHaveLength(2)
   })
 
   test('An unchanged rent leaves the periods alone', async () => {
@@ -401,7 +505,61 @@ describe('Ending a fixed-term tenancy early', () => {
   })
 })
 
+describe("Removing a tenancy that hasn't started", () => {
+  test('Removing a tenancy whose tenant withdrew', async () => {
+    const id = await addId(fixedTerm('2027-01-01', '2027-12-31'), 91000)
+    const before = await rents()
+    expect(await removeTenancy(deps(), flat, id)).toEqual({ ok: true })
+    expect((await view()).tenancies).toEqual([])
+    expect(await rents()).toEqual(before)
+    expect(capture.lines.at(-1)).toMatchObject({
+      event: 'tenancy.removed',
+      tenancyId: id,
+    })
+  })
+
+  test("A started tenancy can't be removed", async () => {
+    const id = await addId(fixedTerm('2026-11-22', '2027-11-21'))
+    expect(await removeTenancy(deps(), flat, id)).toEqual({
+      ok: false,
+      reason: 'tenancy_already_started',
+    })
+    expect((await view()).tenancies).toHaveLength(1)
+  })
+
+  test("A member can't remove a tenancy", async () => {
+    const id = await addId(fixedTerm('2027-01-01', '2027-12-31'))
+    expect(await removeTenancy(deps('jussi'), flat, id)).toEqual({
+      ok: false,
+      reason: 'sharing_owner_only',
+    })
+    expect((await view()).tenancies).toHaveLength(1)
+  })
+})
+
 describe('Cancelling an ending', () => {
+  test("A later tenancy after the original term doesn't prevent cancelling", async () => {
+    const id = await addId(fixedTerm('2027-01-01', '2027-12-31'))
+    now = new Date(Date.UTC(2027, 5, 10, 10, 0, 0))
+    expect(
+      await endTenancy(deps(), flat, id, {
+        noticeGivenBy: 'agreed',
+        noticeDate: '2027-06-10',
+        lastDay: '2027-06-30',
+      }),
+    ).toEqual({ ok: true })
+    await addId({
+      ...aino,
+      contractMade: '2027-06-01',
+      validFrom: '2028-02-01',
+    })
+    now = new Date(Date.UTC(2027, 5, 15, 10, 0, 0))
+    expect(await cancelTenancyEnding(deps(), flat, id)).toEqual({ ok: true })
+    expect((await view()).tenancies.find((t) => t.id === id)?.validTo).toBe(
+      '2027-12-31',
+    )
+  })
+
   test("Cancelling the tenant's notice", async () => {
     const id = await addId(aino)
     await endTenancy(deps(), flat, id, tenantNotice)
@@ -479,30 +637,7 @@ describe('Correcting a tenancy', () => {
     )
   })
 
-  test("A member can't correct a tenancy", async () => {
-    const id = await addId(aino)
-    expect(
-      await updateTenancy(deps('jussi'), flat, id, {
-        ...aino,
-        tenantPhone: '040 765 4321',
-      }),
-    ).toEqual({ ok: false, reason: 'sharing_owner_only' })
-  })
-})
-
-describe('correcting a tenancy', () => {
-  test('a correction keeps a recorded ending', async () => {
-    const id = await addId(aino)
-    await endTenancy(deps(), flat, id, tenantNotice)
-    await updateTenancy(deps(), flat, id, { ...aino, tenantName: 'Aino Kivi' })
-    expect((await view()).tenancies[0]).toMatchObject({
-      tenantName: 'Aino Kivi',
-      validTo: '2026-12-31',
-      noticeGivenBy: 'tenant',
-    })
-  })
-
-  test('a correction must still fit a recorded ending', async () => {
+  test('A correction must fit a recorded ending', async () => {
     const id = await addId(aino)
     await endTenancy(deps(), flat, id, tenantNotice)
     const refused = { ok: false, reason: 'tenancy_correction_conflicts_ending' }
@@ -534,6 +669,29 @@ describe('correcting a tenancy', () => {
       contractType: 'open_ended',
       validFrom: '2025-03-01',
       validTo: '2026-12-31',
+    })
+  })
+
+  test("A member can't correct a tenancy", async () => {
+    const id = await addId(aino)
+    expect(
+      await updateTenancy(deps('jussi'), flat, id, {
+        ...aino,
+        tenantPhone: '040 765 4321',
+      }),
+    ).toEqual({ ok: false, reason: 'sharing_owner_only' })
+  })
+})
+
+describe('correcting a tenancy', () => {
+  test('a correction keeps a recorded ending', async () => {
+    const id = await addId(aino)
+    await endTenancy(deps(), flat, id, tenantNotice)
+    await updateTenancy(deps(), flat, id, { ...aino, tenantName: 'Aino Kivi' })
+    expect((await view()).tenancies[0]).toMatchObject({
+      tenantName: 'Aino Kivi',
+      validTo: '2026-12-31',
+      noticeGivenBy: 'tenant',
     })
   })
 

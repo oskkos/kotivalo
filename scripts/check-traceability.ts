@@ -4,7 +4,9 @@
 //
 // The main specs (openspec/specs/) block. Active changes are reported as
 // pending, so a proposal can be committed before its tests; archiving the
-// change moves its specs into the main specs, where they block. A change
+// change moves its specs into the main specs, where they block. A main-spec
+// gap that an active change removes (a scenario it drops or renames) doesn't
+// block, so the implementation can land before the archive. A change
 // whose tasks are all done but that is not archived blocks too.
 //
 // Usage: pnpm check:traceability
@@ -19,7 +21,12 @@ import {
 import { tmpdir } from 'node:os'
 import { join, relative } from 'node:path'
 import { allTasksDone } from './traceability/changes.ts'
-import { check, pendingProblems, type TestCase } from './traceability/check.ts'
+import {
+  blockingProblems,
+  check,
+  pendingProblems,
+  type TestCase,
+} from './traceability/check.ts'
 import {
   applyDelta,
   parseDelta,
@@ -161,11 +168,11 @@ const mainSpecs = readSpecs()
 const changes = activeChanges()
 const requirements = [...mainSpecs.values()].flat()
 const tests = [...vitestTests(), ...playwrightTests()]
-const problems = check(requirements, tests)
-const pending = pendingProblems(
-  problems,
-  check(withChanges(mainSpecs, changes), tests),
-)
+const mainProblems = check(requirements, tests)
+const changedProblems = check(withChanges(mainSpecs, changes), tests)
+const problems = blockingProblems(mainProblems, changedProblems)
+const pending = pendingProblems(mainProblems, changedProblems)
+const superseded = mainProblems.length - problems.length
 const unarchived = unarchivedDoneChanges(changes)
 
 const scenarios = requirements.reduce((n, r) => n + r.scenarios.length, 0)
@@ -180,6 +187,11 @@ if (pending.length > 0) {
     console.log(`  · ${p.capability} › ${p.requirement}: ${p.message}`)
   }
   console.log('')
+}
+if (superseded > 0) {
+  console.log(
+    `${String(superseded)} main-spec gap(s) removed by active changes, not blocking.\n`,
+  )
 }
 for (const change of unarchived) {
   console.error(

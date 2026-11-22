@@ -312,6 +312,72 @@ describe('The tenancy repository', () => {
     ).toEqual([])
   })
 
+  test('an earlier tenancy with its ending goes in before a later one', async () => {
+    await repo.create('annika', flat, aino, now)
+    const pekka = {
+      ...aino,
+      tenantName: 'Pekka Virtanen',
+      validFrom: '2023-06-01',
+    }
+    // Without the ending it runs indefinitely and overlaps Aino's.
+    expect(await repo.createWithRent('annika', flat, pekka, null, now)).toEqual(
+      {
+        outcome: 'overlaps',
+      },
+    )
+    const ending = {
+      noticeGivenBy: 'tenant' as const,
+      noticeDate: '2025-01-20',
+      lastDay: '2025-02-28',
+    }
+    const added = await repo.createWithRent(
+      'annika',
+      flat,
+      pekka,
+      null,
+      now,
+      ending,
+    )
+    expect(added.outcome).toBe('created')
+    expect((await repo.forProperty(flat))[1]).toMatchObject({
+      tenantName: 'Pekka Virtanen',
+      validTo: '2025-02-28',
+      noticeGivenBy: 'tenant',
+      noticeDate: '2025-01-20',
+    })
+    // The ending's last day is the end for the overlap.
+    expect(
+      await repo.createWithRent('annika', flat, pekka, null, now, {
+        ...ending,
+        lastDay: '2025-03-01',
+      }),
+    ).toEqual({ outcome: 'overlaps' })
+  })
+
+  test('only a tenancy that has not started can be removed, by an owner', async () => {
+    const id =
+      (await repo.create(
+        'annika',
+        flat,
+        fixed('2027-01-01', '2027-12-31'),
+        now,
+      )) ?? ''
+    expect(await repo.removeNotStarted('matti', flat, id, '2026-11-22')).toBe(
+      false,
+    )
+    expect(await repo.removeNotStarted('annika', other, id, '2026-11-22')).toBe(
+      false,
+    )
+    expect(await repo.removeNotStarted('annika', flat, id, '2027-01-01')).toBe(
+      false,
+    )
+    expect(await repo.get(id)).not.toBeNull()
+    expect(await repo.removeNotStarted('annika', flat, id, '2026-12-31')).toBe(
+      true,
+    )
+    expect(await repo.get(id)).toBeNull()
+  })
+
   test('deleting a flat deletes its tenancies', async () => {
     await repo.create('annika', flat, aino, now)
     await env.DB.prepare('DELETE FROM properties WHERE id = ?').bind(flat).run()

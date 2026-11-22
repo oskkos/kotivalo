@@ -339,6 +339,8 @@
   "reason_tenancy_already_ended_title": "The tenancy has already ended",
   "reason_tenancy_already_ending": "An ending is already recorded for the tenancy. Cancel it first to record another.",
   "reason_tenancy_already_ending_title": "An ending is already recorded",
+  "reason_tenancy_already_started": "The tenancy has already started, so it can't be removed. You can correct its details or end it.",
+  "reason_tenancy_already_started_title": "The tenancy has already started",
   "reason_tenancy_cancel_later_tenancy": "The flat has a later tenancy, so this tenancy's ending can't be cancelled.",
   "reason_tenancy_cancel_later_tenancy_title": "The ending can't be cancelled",
   "reason_tenancy_contract_made_in_future": "The date the contract was made can't be in the future.",

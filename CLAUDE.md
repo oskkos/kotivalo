@@ -223,6 +223,7 @@ The term bank `i18n/terms.json` is the glossary: one entry per domain term, with
 - `pnpm check:traceability` (`scripts/check-traceability.ts`) enforces this. It lists tests with `vitest list` and `playwright test --list` without running them. Skipped and todo tests don't count. The scenario test can be in Vitest or Playwright, nested describes are fine, and tests without a spec counterpart (harness and smoke tests) are allowed.
   - The main specs (`openspec/specs/`) block.
   - Active changes in `openspec/changes/` are checked with their delta specs applied, but their gaps are only reported as pending.
+  - A main-spec scenario that an active change removes or renames doesn't block, so its test can go in the implementation commit that changes the behaviour.
   - A change whose `tasks.md` is fully checked but not archived blocks.
 - **One PR per change, in this commit order:**
   1. The proposal, alone, once the user has reviewed it: `docs(openspec): propose <change>`.

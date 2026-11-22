@@ -339,6 +339,8 @@
   "reason_tenancy_already_ended_title": "Hyresförhållandet har redan upphört",
   "reason_tenancy_already_ending": "Hyresförhållandets upphörande har redan registrerats. Ångra det först om du vill registrera ett annat.",
   "reason_tenancy_already_ending_title": "Upphörandet har redan registrerats",
+  "reason_tenancy_already_started": "Hyresförhållandet har redan börjat, så det kan inte tas bort. Du kan rätta uppgifterna eller avsluta det.",
+  "reason_tenancy_already_started_title": "Hyresförhållandet har redan börjat",
   "reason_tenancy_cancel_later_tenancy": "Bostaden har ett senare hyresförhållande, så det här hyresförhållandets upphörande kan inte ångras.",
   "reason_tenancy_cancel_later_tenancy_title": "Upphörandet kan inte ångras",
   "reason_tenancy_contract_made_in_future": "Dagen då avtalet ingicks kan inte vara i framtiden.",
