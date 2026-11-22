@@ -471,6 +471,7 @@
   "rent_payments_year": "År",
   "rent_row_due": "Förfallodag {date}",
   "rent_row_late": "Förfallodag {date} · inga registrerade betalningar",
+  "rent_row_nothing_to_pay": "Månadens hyra är {amount}",
   "rent_row_paid": "{amount} · betald {date}",
   "rent_row_partly_paid": "{paid} / {expected} · {missing} saknas",
   "rent_row_rent_not_set": "Ingen hyra är angiven för månaden",
@@ -489,6 +490,7 @@
       }
     }
   ],
+  "rent_status_nothing_to_pay": "Inget att betala",
   "rent_status_paid": "Betald {date}",
   "rent_status_partly_paid": "Delvis betald",
   "rent_status_rent_not_set": "Hyran är inte angiven",

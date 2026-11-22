@@ -38,6 +38,7 @@ export type RentStatus =
   | { kind: 'partly_paid'; missing: number }
   | { kind: 'late'; days: number }
   | { kind: 'due'; on: IsoDate }
+  | { kind: 'nothing_to_pay' }
   | { kind: 'rent_not_set' }
 
 const later = (a: IsoDate, b: IsoDate): IsoDate => (a > b ? a : b)
@@ -89,6 +90,10 @@ export function monthStatus(month: {
   const { expected, payments, today } = month
   if (expected === undefined) {
     return { kind: 'rent_not_set' }
+  }
+  // A rent of 0 € is never late; a payment still shows the month as paid.
+  if (expected === 0 && payments.length === 0) {
+    return { kind: 'nothing_to_pay' }
   }
   if (payments.length > 0) {
     const paid = payments.reduce((sum, payment) => sum + payment.amount, 0)

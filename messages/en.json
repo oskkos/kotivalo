@@ -471,6 +471,7 @@
   "rent_payments_year": "Year",
   "rent_row_due": "Due {date}",
   "rent_row_late": "Due {date} · no payments recorded",
+  "rent_row_nothing_to_pay": "The month's rent is {amount}",
   "rent_row_paid": "{amount} · paid {date}",
   "rent_row_partly_paid": "{paid} / {expected} · {missing} outstanding",
   "rent_row_rent_not_set": "No rent is set for the month",
@@ -489,6 +490,7 @@
       }
     }
   ],
+  "rent_status_nothing_to_pay": "Nothing to pay",
   "rent_status_paid": "Paid {date}",
   "rent_status_partly_paid": "Partly paid",
   "rent_status_rent_not_set": "Rent not set",

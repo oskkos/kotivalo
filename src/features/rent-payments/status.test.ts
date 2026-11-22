@@ -132,6 +132,24 @@ describe('The rent status of a month', () => {
     ).toBe('paid')
   })
 
+  test('A rent of 0 € is never late', () => {
+    expect(status([], '2026-11-22', 0)).toEqual({ kind: 'nothing_to_pay' })
+    expect(
+      monthsNotFullyPaid({
+        tenancies: [aino],
+        rentPeriods: rent(['2025-03-01', null, 0]),
+        payments: [],
+        today: '2026-11-22',
+      }),
+    ).toEqual([])
+  })
+
+  test('a payment in a month without rent shows it as paid', () => {
+    expect(
+      status([pay('2026-11', 100, '2026-11-03')], '2026-11-22', 0),
+    ).toEqual({ kind: 'paid', on: '2026-11-03' })
+  })
+
   test('The due date in the first month is no earlier than the start', () => {
     const starting = { ...aino, validFrom: '2026-11-15' }
     const due = rentDueDate(starting, '2026-11')

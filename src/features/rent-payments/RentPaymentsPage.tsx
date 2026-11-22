@@ -108,6 +108,7 @@ function shortStatus(row: RentMonth): string {
     case 'late':
       return m.rent_short_late()
     case 'due':
+    case 'nothing_to_pay':
       return statusText(row.status)
     case 'rent_not_set':
       return m.rent_short_rent_not_set()
@@ -133,6 +134,8 @@ function rowDetail(row: RentMonth): string {
       return m.rent_row_late({ date: formatDayMonth(row.dueDate) })
     case 'due':
       return m.rent_row_due({ date: formatDayMonth(row.dueDate) })
+    case 'nothing_to_pay':
+      return m.rent_row_nothing_to_pay({ amount: formatMoney(0) })
     case 'rent_not_set':
       return m.rent_row_rent_not_set()
   }
