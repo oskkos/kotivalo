@@ -59,7 +59,7 @@ describe('PropertyList', () => {
     ])
     expect(within(cards[0] ?? document.body).getByRole('link')).toHaveAttribute(
       'href',
-      '/properties/a/edit',
+      '/properties/a',
     )
   })
 

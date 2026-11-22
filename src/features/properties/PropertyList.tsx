@@ -58,7 +58,7 @@ export function PropertyCard({
   const ownership = ownershipLine(owners)
   return (
     <Link
-      to="/properties/$propertyId/edit"
+      to="/properties/$propertyId"
       params={{ propertyId: property.id }}
       style={{ display: 'block', color: 'inherit', textDecoration: 'none' }}
     >

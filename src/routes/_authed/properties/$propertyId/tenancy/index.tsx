@@ -53,7 +53,7 @@ function TenancyRoute() {
         address={view.property.streetAddress}
         onBack={() => {
           void router.navigate({
-            to: '/properties/$propertyId/edit',
+            to: '/properties/$propertyId',
             params: { propertyId },
           })
         }}

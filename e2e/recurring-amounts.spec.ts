@@ -31,12 +31,17 @@ async function raisedCharge(page: Page) {
 }
 
 test.describe('The rent and charges page', () => {
-  test('Opening the page from the edit page', async ({ page }) => {
+  test('Opening the rent and charges page from the details page', async ({
+    page,
+  }) => {
     const id = await ownerWithFlat(page)
-    await page.goto(`/properties/${id}/edit`)
+    await page.goto(`/properties/${id}`)
     await waitForHydration(page)
 
-    await page.getByRole('link', { name: 'Rent and charges' }).click()
+    await page
+      .getByRole('region', { name: 'Rent and charges' })
+      .getByRole('link', { name: 'Change' })
+      .click()
 
     await expect(page).toHaveURL(new RegExp(`/properties/${id}/amounts$`))
     await expect(

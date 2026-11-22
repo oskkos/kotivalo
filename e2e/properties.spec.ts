@@ -63,6 +63,7 @@ test.describe('Editing a flat', () => {
     await signIn(page, uniqueEmail('muokkaus'))
     await addFlat(page, kuusikuja)
     await card(page, 'Kuusikuja 3 B 12').getByRole('link').click()
+    await page.getByRole('link', { name: 'Edit flat' }).click()
     await expect(
       page.getByRole('heading', { level: 1, name: 'Edit flat' }),
     ).toBeVisible()
@@ -72,10 +73,8 @@ test.describe('Editing a flat', () => {
     await page.getByRole('textbox', { name: 'Floor area (m²)' }).fill('49')
     await page.getByRole('button', { name: 'Save flat' }).click()
 
-    await expect(page).toHaveURL(/\/$/)
-    await expect(card(page, 'Kuusikuja 3 B 12')).toContainText(
-      'Tampere · 2 rooms 49 m²',
-    )
+    await expect(page).toHaveURL(/\/properties\/[^/]+$/)
+    await expect(page.getByText('2 rooms · 49 m²')).toBeVisible()
   })
 
   test('The edit form shows the current details', async ({ page }) => {
@@ -106,16 +105,22 @@ test.describe('Listing flats', () => {
       /^Rantatie 15 C 21/,
     ])
   })
+})
 
-  test('Selecting a flat opens its edit form', async ({ page }) => {
-    await card(page, 'Koivupolku 7 A 4').getByRole('link').click()
+test.describe('The flat details page', () => {
+  test('Selecting a flat opens its details page', async ({ page }) => {
+    await signIn(page, uniqueEmail('tiedot'))
+    await addFlat(page, kuusikuja)
+    await card(page, 'Kuusikuja 3 B 12').getByRole('link').click()
 
     await expect(
-      page.getByRole('heading', { level: 1, name: 'Edit flat' }),
+      page.getByRole('heading', { level: 1, name: 'Flat details' }),
     ).toBeVisible()
     await expect(
-      page.getByRole('textbox', { name: 'Street address' }),
-    ).toHaveValue('Koivupolku 7 A 4')
+      page.getByRole('heading', { name: 'Kuusikuja 3 B 12' }),
+    ).toBeVisible()
+    await expect(page.getByText('33100 Tampere')).toBeVisible()
+    await expect(page.getByText('2 rooms · 48.5 m²')).toBeVisible()
   })
 })
 

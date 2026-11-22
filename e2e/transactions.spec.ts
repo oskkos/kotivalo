@@ -61,12 +61,15 @@ test.describe('The entries page', () => {
     ).toContainText('Insurance')
   })
 
-  test('Opening the page from the edit page', async ({ page }) => {
+  test('Opening the entries page from the details page', async ({ page }) => {
     const id = await ownerWithFlat(page)
-    await page.goto(`/properties/${id}/edit`)
+    await page.goto(`/properties/${id}`)
     await waitForHydration(page)
 
-    await page.getByRole('link', { name: 'Entries' }).click()
+    await page
+      .getByRole('region', { name: 'Latest entries' })
+      .getByRole('link', { name: 'All' })
+      .click()
 
     await expect(page).toHaveURL(new RegExp(`/properties/${id}/transactions$`))
     await expect(

@@ -16,8 +16,10 @@ import { inbox, signIn, uniqueEmail, waitForHydration } from './support/sign-in'
 test.describe('Inviting a user to a flat', () => {
   test('Inviting an address sends an invitation', async ({ page }) => {
     const id = await ownerWithFlat(page)
-    await page.goto(`/properties/${id}/edit`)
-    await page.getByRole('link', { name: 'Ownership and sharing' }).click()
+    await page.goto(`/properties/${id}`)
+    await waitForHydration(page)
+    await page.getByRole('button', { name: 'More actions' }).click()
+    await page.getByRole('menuitem', { name: 'Ownership and sharing' }).click()
     await expect(page).toHaveURL(`/properties/${id}/sharing`)
     await waitForHydration(page)
 
@@ -223,10 +225,11 @@ test.describe('Flats are shown only to users with access', () => {
     const { jussi } = await accepted(page, browser)
 
     await card(jussi, kuusikuja.streetAddress).getByRole('link').click()
+    await jussi.getByRole('link', { name: 'Edit flat' }).click()
     await waitForHydration(jussi)
     await jussi.getByRole('textbox', { name: 'Floor area (m²)' }).fill('49')
     await jussi.getByRole('button', { name: 'Save flat' }).click()
-    await expect(jussi).toHaveURL('/')
+    await expect(jussi).toHaveURL(/\/properties\/[^/]+$/)
 
     await page.goto('/')
     // The area has a no-break space before m².
