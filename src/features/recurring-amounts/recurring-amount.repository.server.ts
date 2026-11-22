@@ -9,6 +9,7 @@ import {
   eq,
   exists,
   gte,
+  inArray,
   isNull,
   lt,
   notExists,
@@ -175,6 +176,34 @@ export function recurringAmountRepository(db: Db) {
   }
 
   return {
+    /** The rent periods of the flats by flat id, oldest first. */
+    async rentFor(
+      propertyIds: string[],
+    ): Promise<Partial<Record<string, Period<number>[]>>> {
+      if (propertyIds.length === 0) {
+        return {}
+      }
+      const rows = await db
+        .select()
+        .from(recurringAmounts)
+        .where(
+          and(
+            inArray(recurringAmounts.propertyId, propertyIds),
+            eq(recurringAmounts.kind, 'rent'),
+          ),
+        )
+        .orderBy(asc(recurringAmounts.validFrom))
+      const rents: Partial<Record<string, Period<number>[]>> = {}
+      for (const row of rows) {
+        ;(rents[row.propertyId] ??= []).push({
+          validFrom: row.validFrom,
+          validTo: row.validTo,
+          value: row.amount,
+        })
+      }
+      return rents
+    },
+
     async forProperty(propertyId: string): Promise<RecurringAmounts> {
       const [amountRows, treatmentRows] = await Promise.all([
         db

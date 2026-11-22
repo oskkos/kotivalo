@@ -5,9 +5,9 @@
 
 ## 2. The server function
 
-- [ ] 2.1 `recurringAmountRepository(db).rentFor(propertyIds)` and `rentPaymentRepository(db).forMonth(propertyIds, month)`, each one statement, with Workers tests (other flats and other months left out, no ids gives nothing)
-- [ ] 2.2 `rent-payments.server.ts`: `listRentThisMonth(deps)`: the user's flats with `listForUser`, today in Finland, the tenancies running this month, the rent periods and this month's payments by flat; `functions.ts` exposes it with its session check
-- [ ] 2.3 Workers tests: an owner's and a member's flats included, a stranger's flat left out, a tenancy that ended earlier this month included, one that ended last month left out
+- [x] 2.1 `recurringAmountRepository(db).rentFor(propertyIds)` and `rentPaymentRepository(db).forMonth(propertyIds, month)`, each one statement, with Workers tests (other flats and other months left out, no ids gives nothing)
+- [x] 2.2 `rent-payments.server.ts`: `listRentThisMonth(deps)`: the user's flats with `listForUser`, today in Finland, the tenancies running this month, the rent periods and this month's payments by flat; `functions.ts` exposes it with its session check
+- [x] 2.3 Workers tests: an owner's and a member's flats included, a stranger's flat left out, a tenancy that ended earlier this month included, one that ended last month left out
 
 ## 3. The summary and the chips on the flats list
 

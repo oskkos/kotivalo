@@ -150,6 +150,29 @@ describe('The rent payment repository', () => {
     expect(await repo.forProperty(other)).toHaveLength(1)
   })
 
+  test("reads several flats' payments for one month, leaving other months and flats out", async () => {
+    await repo.record('annika', flat, payment('2026-11'), now)
+    await repo.record('annika', flat, payment('2026-11', 1000), now)
+    await repo.record('annika', flat, payment('2026-10'), now)
+    await repo.record(
+      'annika',
+      other,
+      { ...payment('2026-11'), tenancyId: otherTenancy },
+      now,
+    )
+    const rows = await repo.forMonth([flat], '2026-11')
+    expect(rows).toHaveLength(2)
+    expect(rows).toContainEqual({
+      propertyId: flat,
+      tenancyId: tenancy,
+      month: '2026-11',
+      amount: 1000,
+      paidOn: '2026-11-04',
+    })
+    expect(await repo.forMonth([flat, other], '2026-11')).toHaveLength(3)
+    expect(await repo.forMonth([], '2026-11')).toEqual([])
+  })
+
   test('an owner deletes a payment', async () => {
     const id = await repo.record('annika', flat, payment('2026-11'), now)
     expect(await repo.remove('annika', flat, id ?? '')).toBe(true)
