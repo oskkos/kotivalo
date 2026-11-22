@@ -261,16 +261,13 @@ export async function createTenancy(
     rentWrite,
     deps.now(),
   )
-  if (created.id === null) {
+  if (created.outcome === 'overlaps') {
     return refusal(deps, propertyId, fail('tenancy_overlaps'))
   }
-  if (rentWrite && !created.rentApplied) {
-    // Another write changed the rent between the read and this save.
-    await deps.tenancies.delete(created.id)
-    deps.log.warn('tenancy.rent_conflict', {
-      propertyId,
-      tenancyId: created.id,
-    })
+  if (created.outcome === 'rent_changed') {
+    // Another write changed the rent between the read and this save, so the
+    // batch took the tenancy out again.
+    deps.log.warn('tenancy.rent_conflict', { propertyId })
     return changedMeanwhile
   }
   deps.log.info('tenancy.created', {

@@ -270,7 +270,7 @@ describe('The tenancy repository', () => {
       rent,
       now,
     )
-    expect(refused).toEqual({ id: null, rentApplied: false })
+    expect(refused).toEqual({ outcome: 'overlaps' })
     expect((await rents.forProperty(flat)).amounts.rent).toHaveLength(1)
 
     const added = await repo.createWithRent(
@@ -280,7 +280,7 @@ describe('The tenancy repository', () => {
       null,
       now,
     )
-    expect(added.id).not.toBeNull()
+    expect(added.outcome).toBe('created')
 
     await emptyTables('tenancies')
     const both = await repo.createWithRent(
@@ -290,14 +290,14 @@ describe('The tenancy repository', () => {
       rent,
       now,
     )
-    expect(both.rentApplied).toBe(true)
+    expect(both.outcome).toBe('created')
     expect((await rents.forProperty(flat)).amounts.rent).toEqual([
       { validFrom: '2025-03-01', validTo: '2026-12-31', value: 89000 },
       { validFrom: '2027-01-01', validTo: null, value: 91000 },
     ])
   })
 
-  test('a stale rent leaves the tenancy in and reports the rent not applied', async () => {
+  test('a stale rent leaves neither the tenancy nor the rent', async () => {
     const result = await repo.createWithRent(
       'annika',
       flat,
@@ -305,8 +305,11 @@ describe('The tenancy repository', () => {
       { latestStart: '2024-01-01', from: '2025-03-01', amount: 89000 },
       now,
     )
-    expect(result.id).not.toBeNull()
-    expect(result.rentApplied).toBe(false)
+    expect(result).toEqual({ outcome: 'rent_changed' })
+    expect(await repo.forProperty(flat)).toEqual([])
+    expect(
+      (await recurringAmountRepository(db).forProperty(flat)).amounts.rent,
+    ).toEqual([])
   })
 
   test('deleting a flat deletes its tenancies', async () => {

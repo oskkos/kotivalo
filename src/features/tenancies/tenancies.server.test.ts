@@ -294,6 +294,30 @@ describe('The rent of a new tenancy', () => {
   })
 })
 
+describe('the rent of a new tenancy', () => {
+  test('a rent changed meanwhile saves neither the tenancy nor the rent', async () => {
+    const read = await recurringAmountRepository(db).forProperty(flat)
+    // Another owner changes the rent after this save read it.
+    await setRent(95000, '2026-01-01')
+    const stale = {
+      ...recurringAmountRepository(db),
+      forProperty: () => Promise.resolve(read),
+    }
+    expect(
+      await createTenancy(
+        { ...deps(), amounts: stale },
+        flat,
+        fixedTerm('2027-01-15', '2027-12-31'),
+        91000,
+      ),
+    ).toEqual({ ok: false, reason: 'amount_changed' })
+    expect((await view()).tenancies).toEqual([])
+    expect((await rents()).map((period) => period.value)).toEqual([
+      89000, 95000,
+    ])
+  })
+})
+
 describe('Ending a tenancy', () => {
   test('The tenant gives notice', async () => {
     const id = await addId(aino)
