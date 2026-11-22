@@ -1,7 +1,7 @@
 # recurring-amounts Specification
 
 ## Purpose
-A flat's rent, maintenance charge and financing charge as monthly validity periods from the first of a month, the financing charge treatment (income-recognised or capitalised) as periods, the Rent and charges page opened from the edit page, setting and undoing amounts and the treatment (owners only; undoing the only period leaves it unset), and the monthly amounts and capitalised total computed from the periods, never stored. Rent per tenancy (#30), payment status (#25), entries (#32) and the year summary (#34) come later.
+A flat's rent, maintenance charge and financing charge as monthly validity periods from the first of a month, the financing charge treatment (income-recognised or capitalised) as periods, the Rent and charges page opened from the flat details page, setting and undoing amounts and the treatment (owners only; undoing the only period leaves it unset), and the monthly amounts and capitalised total computed from the periods, never stored. Rent per tenancy (#30), payment status (#25), entries (#32) and the year summary (#34) come later.
 ## Requirements
 ### Requirement: Rent and charges are recorded as monthly periods
 A flat's rent, maintenance charge and financing charge SHALL each be a sequence of periods, each with a monthly amount in cents, a start date and an end date (open for the current one). Every start date SHALL be the first day of a month. Periods of the same kind SHALL follow each other without gaps or overlaps. A new amount SHALL end the previous period on the last day of the month before it starts, and a recorded period SHALL NOT be changed except by the corrections in "Setting a rent or charge" and "Undoing the latest rent or charge change". A month's amount SHALL be that of the period containing the month's first day, and a month before the first period SHALL have no amount. An amount SHALL be from 0 to 99 999,99 € with at most two decimals.
@@ -25,10 +25,10 @@ A flat's rent, maintenance charge and financing charge SHALL each be a sequence 
 - **THEN** it is refused with the reason `amount_invalid`, and nothing is stored
 
 ### Requirement: The rent and charges page
-Everyone with access to a flat SHALL be able to open its Rent and charges page from a button in the header of the flat's edit page. The page SHALL show, for the rent, the maintenance charge and the financing charge, the amount in effect today with its start date, or that it is not set, and the next upcoming change if there is one. The financing charge SHALL also show its current treatment, or that it is not set. Only owners SHALL see the buttons to set or change them.
+Everyone with access to a flat SHALL be able to open its Rent and charges page from the rent and charges on the flat's details page ("The flat details page") and from its menu. The page SHALL show, for the rent, the maintenance charge and the financing charge, the amount in effect today with its start date, or that it is not set, and the next upcoming change if there is one. The financing charge SHALL also show its current treatment, or that it is not set. Only owners SHALL see the buttons to set or change them.
 
-#### Scenario: Opening the page from the edit page
-- **WHEN** Annika, owner of `Kuusikuja 3 B 12`, opens its edit page and chooses "Vuokra ja vastikkeet" in the header
+#### Scenario: Opening the rent and charges page from the details page
+- **WHEN** Annika, owner of `Kuusikuja 3 B 12`, opens its details page and chooses "Muuta" next to its rent and charges
 - **THEN** the Rent and charges page of `Kuusikuja 3 B 12` opens
 
 #### Scenario: A flat without amounts

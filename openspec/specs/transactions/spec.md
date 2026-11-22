@@ -1,7 +1,7 @@
 # transactions Specification
 
 ## Purpose
-A flat's logged income and expenses with an optional receipt (photo or PDF): the category that decides the form 7H row and deductibility, the Entries page opened from the edit page, details with the receipt full screen, editing and deleting (owners only), receipts served after an access check, a storage quota per user, and the new entry form opened from the bottom bar. Rent and the monthly charges are periods (recurring-amounts), not entries; the year summary (#34) comes later.
+A flat's logged income and expenses with an optional receipt (photo or PDF): the category that decides the form 7H row and deductibility, the Entries page opened from the flat details page, details with the receipt full screen, editing and deleting (owners only), receipts served after an access check, a storage quota per user, and the new entry form opened from the bottom bar. Rent and the monthly charges are periods (recurring-amounts), not entries; the year summary (#34) comes later.
 ## Requirements
 ### Requirement: Logging an entry
 An owner of a flat SHALL be able to log an entry for it: an income or an expense, with an amount, a category of that type, a date and an optional note. The amount SHALL be from 0,01 to 99 999,99 € with at most two decimals, and SHALL be stored as positive cents; the type tells income from expense. The date SHALL NOT be in the future and SHALL NOT be before the start of the flat's first ownership period. The note SHALL be at most 200 characters (`transaction_note_too_long`). The entry SHALL record the user who logged it. Opened from a flat's Entries page, the form SHALL be for that flat and SHALL NOT ask for it. A member SHALL NOT be able to log entries.
@@ -46,10 +46,10 @@ Each entry SHALL have one category from its type's list (design.md, "Categories"
 - **THEN** it is refused with the reason `transaction_category_invalid`, and nothing is stored
 
 ### Requirement: The entries page
-Everyone with access to a flat SHALL be able to open its Entries page from a button in the header of the flat's edit page. The page SHALL show one year at a time, the current year first, with a choice of the current year and the years that have entries. For the chosen year it SHALL show the total income and the total expenses of its entries, and the entries grouped by month, newest first, each with its category, date, note, signed amount and whether it has a receipt. The page SHALL say that rent and the monthly charges are computed from their amounts and are not logged. Owners SHALL see a New entry button; members SHALL NOT.
+Everyone with access to a flat SHALL be able to open its Entries page from the latest entries on the flat's details page ("The flat details page") and from its menu. The page SHALL show one year at a time, the current year first, with a choice of the current year and the years that have entries. For the chosen year it SHALL show the total income and the total expenses of its entries, and the entries grouped by month, newest first, each with its category, date, note, signed amount and whether it has a receipt. The page SHALL say that rent and the monthly charges are computed from their amounts and are not logged. Owners SHALL see a New entry button; members SHALL NOT.
 
-#### Scenario: Opening the page from the edit page
-- **WHEN** Annika, owner of `Kuusikuja 3 B 12`, opens its edit page and chooses "Kirjaukset" in the header
+#### Scenario: Opening the entries page from the details page
+- **WHEN** Annika, owner of `Kuusikuja 3 B 12`, opens its details page and chooses "Kaikki" next to its latest entries
 - **THEN** the Entries page of `Kuusikuja 3 B 12` opens
 
 #### Scenario: Entries are grouped by month, newest first
