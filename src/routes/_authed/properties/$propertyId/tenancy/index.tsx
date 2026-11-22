@@ -1,6 +1,14 @@
-import { createFileRoute, notFound, useRouter } from '@tanstack/react-router'
+import Button from '@mui/material/Button'
+import Stack from '@mui/material/Stack'
+import {
+  createFileRoute,
+  createLink,
+  notFound,
+  useRouter,
+} from '@tanstack/react-router'
 import { NotFoundView } from '#/components/NotFoundView'
 import { getTenancies } from '#/features/tenancies/functions'
+import { tenancyStatus } from '#/features/tenancies/status'
 import { TenancyPage } from '#/features/tenancies/TenancyPage'
 import { m } from '#/paraglide/messages.js'
 
@@ -26,6 +34,8 @@ export const Route = createFileRoute(
   ),
 })
 
+const ButtonLink = createLink(Button)
+
 function TenancyRoute() {
   const view = Route.useLoaderData()
   const { propertyId } = Route.useParams()
@@ -40,6 +50,37 @@ function TenancyRoute() {
           params: { propertyId },
         })
       }}
+      addAction={
+        <ButtonLink
+          to="/properties/$propertyId/tenancy/new"
+          params={{ propertyId }}
+          sx={{ minHeight: 48, px: 2.5 }}
+        >
+          {m.tenancy_add()}
+        </ButtonLink>
+      }
+      currentActions={(tenancy) => (
+        <Stack sx={{ gap: 1 }}>
+          <ButtonLink
+            to="/properties/$propertyId/tenancy/$tenancyId/edit"
+            params={{ propertyId, tenancyId: tenancy.id }}
+            variant="outlined"
+            aria-label={m.tenancy_edit_label()}
+            sx={{ minHeight: 48 }}
+          >
+            {m.tenancy_edit()}
+          </ButtonLink>
+          {tenancyStatus(tenancy, view.today).kind === 'notice_given' ? (
+            <ButtonLink
+              to="/properties/$propertyId/tenancy/new"
+              params={{ propertyId }}
+              sx={{ minHeight: 48 }}
+            >
+              {m.tenancy_add_next()}
+            </ButtonLink>
+          ) : null}
+        </Stack>
+      )}
     />
   )
 }

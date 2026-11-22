@@ -1,0 +1,67 @@
+// Tenancies from Playwright, through the app's own form. The app is in
+// English (the browser's language).
+import { expect, type Page } from '@playwright/test'
+import { waitForHydration } from './sign-in'
+
+export interface TenantDetails {
+  name: string
+  phone?: string
+  email?: string
+  /** Fixed-term when given, as typed. */
+  termEnd?: string
+  /** As typed (dd/mm/yyyy). */
+  start: string
+  /** As typed; the form's default (the start) otherwise. */
+  contractMade?: string
+  /** As typed; the rent in effect on the start date otherwise. */
+  rent?: string
+  dueDay?: string
+}
+
+/** Adds a tenant through the form and lands on the Tenancy page. */
+export async function addTenant(
+  page: Page,
+  flatId: string,
+  tenant: TenantDetails,
+) {
+  await page.goto(`/properties/${flatId}/tenancy/new`)
+  await waitForHydration(page)
+  await page.getByRole('textbox', { name: 'Name' }).fill(tenant.name)
+  if (tenant.phone !== undefined) {
+    await page.getByRole('textbox', { name: 'Phone' }).fill(tenant.phone)
+  }
+  if (tenant.email !== undefined) {
+    await page.getByRole('textbox', { name: 'Email' }).fill(tenant.email)
+  }
+  if (tenant.termEnd !== undefined) {
+    await page.getByRole('button', { name: 'Fixed-term' }).click()
+  }
+  await page.getByRole('textbox', { name: 'Starts' }).fill(tenant.start)
+  if (tenant.termEnd !== undefined) {
+    await page.getByRole('textbox', { name: 'Ends' }).fill(tenant.termEnd)
+  }
+  if (tenant.contractMade !== undefined) {
+    await page
+      .getByRole('textbox', { name: 'Contract made' })
+      .fill(tenant.contractMade)
+  }
+  if (tenant.rent !== undefined) {
+    await page
+      .getByRole('textbox', { name: 'Monthly rent (€)' })
+      .fill(tenant.rent)
+  }
+  await page
+    .getByRole('textbox', { name: 'Due day' })
+    .fill(tenant.dueDay ?? '5')
+  await page.getByRole('button', { name: 'Save tenant' }).click()
+  await expect(page).toHaveURL(new RegExp(`/properties/${flatId}/tenancy$`))
+}
+
+export const aino: TenantDetails = {
+  name: 'Aino Koski',
+  phone: '040 123 4567',
+  email: 'aino@example.com',
+  contractMade: '12/02/2025',
+  start: '01/03/2025',
+  rent: '890',
+}

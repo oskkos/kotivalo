@@ -70,13 +70,13 @@
 
 ## 6. Adding and correcting a tenant
 
-- [ ] 6.1 Routes `/properties/$propertyId/tenancy/new` and `/properties/$propertyId/tenancy/$tenancyId/edit`; members are sent back to the Tenancy page
-- [ ] 6.2 `TenancyForm.tsx`, as on the Design canvas ("Uusi vuokralainen", "· virheet"): the previous tenancy's summary, name, phone, email, the contract type, contract made (following the start until edited), start, the fixed term's end, the rent (from the rent in effect on the start date; not in the correction mode) and the due day, with the field reasons
-- [ ] 6.3 Add tenant and Edit on the Tenancy page for owners
-- [ ] 6.4 Messages in fi, then sv and en with the translate skill. Add fixed-term, open-ended, contract made, due day and vacant to the term bank where they are domain terms, and run the term-critic on the diff
-- [ ] 6.5 Component tests: "Contract made defaults to the start date", "The form shows the rent in effect on the start date", the fixed term's end shown only for fixed-term, the field reasons, the correction mode without the rent
-- [ ] 6.6 `e2e/support/tenancies.ts`: `addTenant(page, flatId, details)` through the form
-- [ ] 6.7 Playwright:
+- [x] 6.1 Routes `/properties/$propertyId/tenancy/new` and `/properties/$propertyId/tenancy/$tenancyId/edit`; members are sent back to the Tenancy page
+- [x] 6.2 `TenancyForm.tsx`, as on the Design canvas ("Uusi vuokralainen", "· virheet"): the previous tenancy's summary, name, phone, email, the contract type, contract made (following the start until edited), start, the fixed term's end, the rent (from the rent in effect on the start date; not in the correction mode) and the due day, with the field reasons
+- [x] 6.3 Add tenant and Edit on the Tenancy page for owners
+- [x] 6.4 Messages in fi, then sv and en with the translate skill. Add fixed-term, open-ended, contract made, due day and vacant to the term bank where they are domain terms, and run the term-critic on the diff
+- [x] 6.5 Component tests: "Contract made defaults to the start date", "The form shows the rent in effect on the start date", the fixed term's end shown only for fixed-term, the field reasons, the correction mode without the rent
+- [x] 6.6 `e2e/support/tenancies.ts`: `addTenant(page, flatId, details)` through the form
+- [x] 6.7 Playwright:
   - "Adding an open-ended tenancy" and "Adding a fixed-term tenancy"
   - "Opening the tenancy page from the edit page" and "The edit page shows the tenancy card"
   - "A member sees the tenancy but can't change it"
