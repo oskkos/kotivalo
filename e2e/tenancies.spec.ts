@@ -239,6 +239,44 @@ test.describe('The rent of a new tenancy', () => {
   })
 })
 
+test.describe("Removing a tenancy that hasn't started", () => {
+  test('Removing a tenancy whose tenant withdrew', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, {
+      name: 'Mikko Lehtinen',
+      start: `01/01/${nextYear}`,
+      termEnd: `31/12/${nextYear}`,
+      contractMade: new Date().toLocaleDateString('en-GB'),
+      rent: '910',
+    })
+    await waitForHydration(page)
+    await page.getByRole('link', { name: 'Edit the tenancy' }).click()
+    await page.getByRole('button', { name: 'Remove tenancy' }).click()
+    const dialog = page.getByRole('dialog', { name: 'Remove the tenancy?' })
+    await expect(dialog).toContainText('Mikko Lehtinen')
+    await dialog.getByRole('button', { name: 'Remove', exact: true }).click()
+
+    await expect(page).toHaveURL(new RegExp(`/properties/${id}/tenancy$`))
+    await expect(
+      page.getByRole('heading', { name: 'The flat is vacant' }),
+    ).toBeVisible()
+    await expect(page.getByText('Mikko Lehtinen')).toHaveCount(0)
+  })
+
+  test('a started tenancy offers no removal', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await waitForHydration(page)
+    await page.getByRole('link', { name: 'Edit the tenancy' }).click()
+    await expect(page.getByRole('textbox', { name: 'Name' })).toHaveValue(
+      'Aino Koski',
+    )
+    await expect(
+      page.getByRole('button', { name: 'Remove tenancy' }),
+    ).toHaveCount(0)
+  })
+})
+
 test.describe('Correcting a tenancy', () => {
   test("Correcting the tenant's phone number", async ({ page }) => {
     const id = await ownerWithFlat(page)

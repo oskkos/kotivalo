@@ -4,8 +4,10 @@ import {
   redirect,
   useRouter,
 } from '@tanstack/react-router'
+import { useState } from 'react'
 import { NotFoundView } from '#/components/NotFoundView'
 import { getTenancy } from '#/features/tenancies/functions'
+import { RemoveTenancyDialog } from '#/features/tenancies/RemoveTenancyDialog'
 import { TenancyForm } from '#/features/tenancies/TenancyForm'
 import { m } from '#/paraglide/messages.js'
 
@@ -40,7 +42,7 @@ export const Route = createFileRoute(
 })
 
 function EditTenancyRoute() {
-  const { tenancy, property } = Route.useLoaderData()
+  const { tenancy, property, today } = Route.useLoaderData()
   const { propertyId } = Route.useParams()
   const router = useRouter()
   const toPage = () =>
@@ -48,18 +50,44 @@ function EditTenancyRoute() {
       to: '/properties/$propertyId/tenancy',
       params: { propertyId },
     })
+  const [removing, setRemoving] = useState(false)
   return (
-    <TenancyForm
-      propertyId={propertyId}
-      address={property.streetAddress}
-      editing={tenancy}
-      onSaved={async () => {
-        await router.invalidate()
-        await toPage()
-      }}
-      onClose={() => {
-        void toPage()
-      }}
-    />
+    <>
+      <TenancyForm
+        propertyId={propertyId}
+        address={property.streetAddress}
+        editing={tenancy}
+        onSaved={async () => {
+          await router.invalidate()
+          await toPage()
+        }}
+        onClose={() => {
+          void toPage()
+        }}
+        onRemove={
+          // Only before its start day (openspec: tenancies, "Removing a
+          // tenancy that hasn't started").
+          tenancy.validFrom > today
+            ? () => {
+                setRemoving(true)
+              }
+            : undefined
+        }
+      />
+      {removing ? (
+        <RemoveTenancyDialog
+          propertyId={propertyId}
+          tenancy={tenancy}
+          open
+          onClose={() => {
+            setRemoving(false)
+          }}
+          onDone={async () => {
+            await router.invalidate()
+            await toPage()
+          }}
+        />
+      ) : null}
+    </>
   )
 }

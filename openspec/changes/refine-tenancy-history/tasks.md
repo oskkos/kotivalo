@@ -35,13 +35,13 @@
 
 ## 4. Removing a tenancy from the correction form
 
-- [ ] 4.1 A confirmation dialog for removing, like the entry delete dialog
-- [ ] 4.2 `TenancyForm` (correcting): "Remove tenancy" while the tenancy hasn't started; after removing, the Tenancy page
-- [ ] 4.3 Messages in fi, then sv and en with the translate skill
-- [ ] 4.4 Playwright: "Removing a tenancy whose tenant withdrew"
-- [ ] 4.5 CLAUDE.md: the current state mentions removing a tenancy that hasn't started and recording an earlier tenancy's ending
+- [x] 4.1 A confirmation dialog for removing, like the entry delete dialog
+- [x] 4.2 `TenancyForm` (correcting): "Remove tenancy" while the tenancy hasn't started; after removing, the Tenancy page
+- [x] 4.3 Messages in fi, then sv and en with the translate skill
+- [x] 4.4 Playwright: "Removing a tenancy whose tenant withdrew"
+- [x] 4.5 CLAUDE.md: the current state mentions removing a tenancy that hasn't started and recording an earlier tenancy's ending
 
 ## 5. Archive
 
-- [ ] 5.1 `pnpm check:traceability` and the full test suite pass
+- [x] 5.1 `pnpm check:traceability` and the full test suite pass
 - [ ] 5.2 `openspec archive refine-tenancy-history` as the PR's last commit
