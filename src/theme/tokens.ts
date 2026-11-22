@@ -27,6 +27,7 @@ export const colors = {
   yellowTint: '#FFF0CC', // paid chips, hints
   yellowBorder: '#F2D58A', // invitation cards on the yellow tint
   lavenderTint: '#F1EAF6', // expense icons, notes
+  greenTint: '#E3F4E4', // let and active chips
   sand: '#F1E6D3', // segmented control track, pressed icon button
 
   // Lines

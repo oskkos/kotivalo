@@ -8,17 +8,26 @@ import {
 import { NotFoundView } from '#/components/NotFoundView'
 import { getProperty, updateProperty } from '#/features/properties/functions'
 import { PropertyForm } from '#/features/properties/PropertyForm'
+import { getTenancies } from '#/features/tenancies/functions'
+import { currentTenancy } from '#/features/tenancies/status'
+import { TenancyCard } from '#/features/tenancies/TenancyCard'
 import { formatTenths } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 
 export const Route = createFileRoute('/_authed/properties/$propertyId/edit')({
   loader: async ({ params }) => {
-    const result = await getProperty({ data: { id: params.propertyId } })
-    if (!result.ok) {
+    const [result, tenancies] = await Promise.all([
+      getProperty({ data: { id: params.propertyId } }),
+      getTenancies({ data: { propertyId: params.propertyId } }),
+    ])
+    if (!result.ok || !tenancies.ok) {
       // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router's not-found signal
       throw notFound()
     }
-    return result.property
+    return {
+      property: result.property,
+      tenancy: currentTenancy(tenancies.tenancies, tenancies.today),
+    }
   },
   head: () => ({ meta: [{ title: m.property_edit_page_title() }] }),
   component: EditPropertyRoute,
@@ -26,7 +35,7 @@ export const Route = createFileRoute('/_authed/properties/$propertyId/edit')({
 })
 
 function EditPropertyRoute() {
-  const property = Route.useLoaderData()
+  const { property, tenancy } = Route.useLoaderData()
   const router = useRouter()
   const toList = () => {
     void router.navigate({ to: '/' })
@@ -41,6 +50,7 @@ function EditPropertyRoute() {
         void router.invalidate().then(toList)
       }}
       onClose={toList}
+      aboveForm={<TenancyCard propertyId={property.id} tenancy={tenancy} />}
       headerAction={
         <>
           <IconLink

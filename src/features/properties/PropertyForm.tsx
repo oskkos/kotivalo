@@ -40,6 +40,8 @@ interface Props {
   onClose: () => void
   /** Icon buttons at the right of the header, e.g. to Sharing. */
   headerAction?: ReactNode
+  /** Shown above the form's sections, e.g. the tenancy card. */
+  aboveForm?: ReactNode
 }
 
 function CloseIcon() {
@@ -77,6 +79,7 @@ export function PropertyForm({
   onSaved,
   onClose,
   headerAction,
+  aboveForm,
 }: Props) {
   const [alert, setAlert] = useState<AlertReason>()
   const form = useForm({
@@ -143,6 +146,7 @@ export function PropertyForm({
         component="main"
         sx={{ flex: 1, gap: 2.25, px: 2.5, pt: 1, pb: 2.5 }}
       >
+        {aboveForm}
         <Section title={m.property_section_address()}>
           <form.Field name="streetAddress">
             {(field) => (

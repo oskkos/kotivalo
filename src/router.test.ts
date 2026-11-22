@@ -10,6 +10,7 @@ vi.mock('#/features/ownership/functions', () => ({}))
 vi.mock('#/features/account/functions', () => ({}))
 vi.mock('#/features/recurring-amounts/functions', () => ({}))
 vi.mock('#/features/transactions/functions', () => ({}))
+vi.mock('#/features/tenancies/functions', () => ({}))
 
 describe('Router', () => {
   test('registers the home and sign-in pages', () => {
