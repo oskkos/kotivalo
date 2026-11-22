@@ -30,8 +30,8 @@
 
 ## 4. Payments stay inside their tenancy
 
-- [ ] 4.1 `tenancies.server.ts` and the tenancy repository: correcting and ending refuse with `tenancy_has_payments_outside`, removing with `tenancy_has_payments`; the `UPDATE` and `DELETE` carry the `NOT EXISTS` condition of design.md
-- [ ] 4.2 Workers tests named after every scenario of "Payments stay inside their tenancy", and the existing tenancy tests still passing; the tenancy forms show the new alerts (component test)
+- [x] 4.1 `tenancies.server.ts` and the tenancy repository: correcting and ending refuse with `tenancy_has_payments_outside`, removing with `tenancy_has_payments`; the `UPDATE` and `DELETE` carry the `NOT EXISTS` condition of design.md
+- [x] 4.2 Workers tests named after every scenario of "Payments stay inside their tenancy", and the existing tenancy tests still passing; the tenancy forms show the new alerts (component test)
 
 ## 5. Flat details server function
 

@@ -66,3 +66,20 @@ export function validateTenancyDates(
   }
   return undefined
 }
+
+/**
+ * Whether any of these payment months (`YYYY-MM`) falls outside the months
+ * of a tenancy running `from`–`to` (none: indefinitely); payments stay
+ * inside their tenancy (openspec: rent-payments).
+ */
+export function paymentsOutside(
+  months: readonly string[],
+  from: IsoDate,
+  to: IsoDate | null,
+): boolean {
+  const first = from.slice(0, 7)
+  const last = to?.slice(0, 7)
+  return months.some(
+    (month) => month < first || (last !== undefined && month > last),
+  )
+}

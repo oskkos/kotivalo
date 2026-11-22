@@ -19,7 +19,7 @@ import type { AlertReason, FieldReason } from '#/lib/reasons'
 import type { NoticeGiver, PropertyRole } from '#/server/db/schema'
 import type { Logger } from '#/server/log/log'
 import { validateEnding } from './notice'
-import { validateTenancyDates } from './rules'
+import { paymentsOutside, validateTenancyDates } from './rules'
 import { rentAsked } from './rent'
 import { flatStatus } from './status'
 import type {
@@ -363,6 +363,10 @@ export async function updateTenancy(
   ) {
     return fail('tenancy_correction_conflicts_ending')
   }
+  const months = await deps.tenancies.paymentMonths(tenancyId)
+  if (paymentsOutside(months, fields.validFrom, validTo)) {
+    return fail('tenancy_has_payments_outside')
+  }
   const updated = await deps.tenancies.update(
     deps.userId,
     propertyId,
@@ -399,6 +403,10 @@ export async function endTenancy(
   if (problem) {
     return fail(problem)
   }
+  const months = await deps.tenancies.paymentMonths(tenancyId)
+  if (paymentsOutside(months, existing.validFrom, ending.lastDay)) {
+    return fail('tenancy_has_payments_outside')
+  }
   const ended = await deps.tenancies.end(
     deps.userId,
     propertyId,
@@ -434,6 +442,9 @@ export async function removeTenancy(
   const day = today(deps)
   if (existing.validFrom <= day) {
     return fail('tenancy_already_started')
+  }
+  if ((await deps.tenancies.paymentMonths(tenancyId)).length > 0) {
+    return fail('tenancy_has_payments')
   }
   const removed = await deps.tenancies.removeNotStarted(
     deps.userId,
