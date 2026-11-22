@@ -1,13 +1,13 @@
 ## 1. Table and repository
 
-- [ ] 1.1 Add `rent_payments` to `src/server/db/schema.ts` as in design.md ("`rent_payments` belongs to a tenancy and a month"): `id()`, the tenancy reference with cascade, `month` text, `cents()` amount, `isoDate()` `paid_on`, `created_by`, `instant()` `created_at`, the `(tenancy_id, month)` index
-- [ ] 1.2 `pnpm db:generate`; commit `migrations/0007_rent_payments.sql`
-- [ ] 1.3 `features/rent-payments/rent-payment.repository.server.ts`:
+- [x] 1.1 Add `rent_payments` to `src/server/db/schema.ts` as in design.md ("`rent_payments` belongs to a tenancy and a month"): `id()`, the tenancy reference with cascade, `month` text, `cents()` amount, `isoDate()` `paid_on`, `created_by`, `instant()` `created_at`, the `(tenancy_id, month)` index
+- [x] 1.2 `pnpm db:generate`; commit `migrations/0007_rent_payments.sql`
+- [x] 1.3 `features/rent-payments/rent-payment.repository.server.ts`:
   - `forProperty(propertyId)`: the payments of the flat's tenancies with the recorder's display name, by month then payment date
   - `record(...)`: one `INSERT … SELECT` conditioned on the user owning the flat, the tenancy belonging to it and the month being inside the tenancy's stored range
   - `remove(...)`: one `DELETE` conditioned on the owner role and the flat
-- [ ] 1.4 Workers tests for the repository: other flats left out; a member's or a stranger's write writes nothing; a month outside the tenancy writes nothing; removing a tenancy row removes its payments (cascade)
-- [ ] 1.5 CONCEPT.md: the `rent_payments` row of the data model as built
+- [x] 1.4 Workers tests for the repository: other flats left out; a member's or a stranger's write writes nothing; a month outside the tenancy writes nothing; removing a tenancy row removes its payments (cascade)
+- [x] 1.5 CONCEPT.md: the `rent_payments` row of the data model as built
 
 ## 2. Expected rent, statuses and reasons
 

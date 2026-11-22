@@ -404,3 +404,29 @@ export const tenancies = sqliteTable(
   },
   (t) => [index('tenancies_property_idx').on(t.propertyId, t.validFrom)],
 )
+
+/**
+ * Rent received for a month of a tenancy (openspec: rent-payments). `month`
+ * (`YYYY-MM`) is the rent's month, `paid_on` the day it was received, which
+ * decides its tax year. A month may have several payments. Never edited: a
+ * wrong one is deleted and recorded again. Payments stay inside their
+ * tenancy's months; text comparison of `month` orders it correctly.
+ */
+export const rentPayments = sqliteTable(
+  'rent_payments',
+  {
+    id: id(),
+    tenancyId: text('tenancy_id')
+      .notNull()
+      .references(() => tenancies.id, { onDelete: 'cascade' }),
+    month: text('month').notNull(),
+    /** Positive, in cents. */
+    amount: cents('amount').notNull(),
+    paidOn: isoDate('paid_on').notNull(),
+    createdBy: text('created_by')
+      .notNull()
+      .references(() => user.id),
+    createdAt: instant('created_at').notNull(),
+  },
+  (t) => [index('rent_payments_tenancy_month_idx').on(t.tenancyId, t.month)],
+)

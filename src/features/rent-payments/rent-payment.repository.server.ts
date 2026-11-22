@@ -1,0 +1,156 @@
+// Rent payments of a flat's tenancies (openspec: rent-payments). Each write
+// carries the owner check, the tenancy belonging to the flat and, for a new
+// payment, the month lying inside the tenancy, in its own statement, so a
+// role lost or a tenancy corrected between the read and the write changes
+// nothing. The server checks the same rules first to give the reason.
+import { and, asc, eq, exists, gte, isNull, lte, or, sql } from 'drizzle-orm'
+import { lastDayOfMonth, type IsoDate } from '#/lib/dates'
+import {
+  propertyAccess,
+  rentPayments,
+  tenancies,
+  user,
+} from '#/server/db/schema'
+import { atomically, type Db } from '#/server/platform/db.server'
+
+export interface RentPayment {
+  id: string
+  tenancyId: string
+  /** The rent's month, `YYYY-MM`. */
+  month: string
+  /** Cents. */
+  amount: number
+  paidOn: IsoDate
+  /** The display name of the user who recorded it. */
+  recordedBy: string
+}
+
+export interface NewRentPayment {
+  tenancyId: string
+  month: string
+  amount: number
+  paidOn: IsoDate
+}
+
+export function rentPaymentRepository(db: Db) {
+  /** The actor owns the flat: the check inside each write. */
+  const isOwner = (actorId: string, propertyId: string) =>
+    exists(
+      db
+        .select({ one: sql`1` })
+        .from(propertyAccess)
+        .where(
+          and(
+            eq(propertyAccess.propertyId, propertyId),
+            eq(propertyAccess.userId, actorId),
+            eq(propertyAccess.role, 'owner'),
+          ),
+        ),
+    )
+
+  return {
+    /** The payments of the flat's tenancies, by month, then payment date. */
+    async forProperty(propertyId: string): Promise<RentPayment[]> {
+      return db
+        .select({
+          id: rentPayments.id,
+          tenancyId: rentPayments.tenancyId,
+          month: rentPayments.month,
+          amount: rentPayments.amount,
+          paidOn: rentPayments.paidOn,
+          recordedBy: user.name,
+        })
+        .from(rentPayments)
+        .innerJoin(tenancies, eq(tenancies.id, rentPayments.tenancyId))
+        .innerJoin(user, eq(user.id, rentPayments.createdBy))
+        .where(eq(tenancies.propertyId, propertyId))
+        .orderBy(
+          asc(rentPayments.month),
+          asc(rentPayments.paidOn),
+          asc(rentPayments.createdAt),
+        )
+    },
+
+    /**
+     * Records a payment. Null unless the actor owns the flat, the tenancy is
+     * the flat's and it runs in the payment's month.
+     */
+    async record(
+      actorId: string,
+      propertyId: string,
+      payment: NewRentPayment,
+      now: Date,
+    ): Promise<string | null> {
+      const id = crypto.randomUUID()
+      const firstDay = `${payment.month}-01`
+      const lastDay = lastDayOfMonth(payment.month)
+      const [inserted] = await atomically(db, [
+        db
+          .insert(rentPayments)
+          .select(
+            db
+              .select({
+                id: sql<string>`${id}`.as('id'),
+                tenancyId: tenancies.id,
+                month: sql<string>`${payment.month}`.as('month'),
+                amount: sql<number>`${payment.amount}`.as('amount'),
+                paidOn: sql<string>`${payment.paidOn}`.as('paid_on'),
+                createdBy: sql<string>`${actorId}`.as('created_by'),
+                createdAt: sql<number>`${now.getTime()}`.as('created_at'),
+              })
+              .from(tenancies)
+              .where(
+                and(
+                  eq(tenancies.id, payment.tenancyId),
+                  eq(tenancies.propertyId, propertyId),
+                  lte(tenancies.validFrom, lastDay),
+                  or(
+                    isNull(tenancies.validTo),
+                    gte(tenancies.validTo, firstDay),
+                  ),
+                  isOwner(actorId, propertyId),
+                ),
+              ),
+          )
+          .returning({ id: rentPayments.id }),
+      ])
+      return inserted[0]?.id ?? null
+    },
+
+    /**
+     * Deletes a payment. False unless the actor owns the flat and the
+     * payment belongs to one of its tenancies.
+     */
+    async remove(
+      actorId: string,
+      propertyId: string,
+      paymentId: string,
+    ): Promise<boolean> {
+      const [removed] = await atomically(db, [
+        db
+          .delete(rentPayments)
+          .where(
+            and(
+              eq(rentPayments.id, paymentId),
+              exists(
+                db
+                  .select({ one: sql`1` })
+                  .from(tenancies)
+                  .where(
+                    and(
+                      eq(tenancies.id, rentPayments.tenancyId),
+                      eq(tenancies.propertyId, propertyId),
+                    ),
+                  ),
+              ),
+              isOwner(actorId, propertyId),
+            ),
+          )
+          .returning({ id: rentPayments.id }),
+      ])
+      return removed.length > 0
+    },
+  }
+}
+
+export type RentPaymentRepository = ReturnType<typeof rentPaymentRepository>
