@@ -18,7 +18,7 @@ import { typedDate } from '#/features/ownership/schemas'
 import { periodOn, type Period } from '#/features/recurring-amounts/periods'
 import { typedAmount } from '#/features/recurring-amounts/schemas'
 import { clientLog } from '#/lib/client-log'
-import { parseFiDate } from '#/lib/dates'
+import { parseFiDate, type IsoDate } from '#/lib/dates'
 import { formatAmountInput, formatDate } from '#/lib/format'
 import { failureReason } from '#/lib/network-error'
 import type { AlertReason, FieldReason } from '#/lib/reasons'
@@ -41,8 +41,10 @@ interface Props {
   editing?: Tenancy
   /** Adding: the flat's rent periods, oldest first. */
   rents?: readonly Period<number>[]
-  /** Adding: the tenancy before the new one, if it is still to end. */
-  previous?: Tenancy | null
+  /** Adding: the flat's tenancies, newest first, for the previous one. */
+  tenancies?: readonly Tenancy[]
+  /** Adding: today in Finland. */
+  today?: IsoDate
   onSaved: () => Promise<void>
   onClose: () => void
 }
@@ -71,6 +73,27 @@ const FIELD_OF: Partial<Record<FieldReason, Field>> = {
   amount_invalid: 'rent',
   amount_date_too_early: 'rent',
   amount_date_before_ownership: 'rent',
+}
+
+/**
+ * The tenancy a new one follows, while it is still to end: the latest one
+ * ending before the start entered, or before one is entered, the flat's
+ * latest tenancy.
+ */
+export function previousTenancy(
+  tenancies: readonly Tenancy[],
+  start: IsoDate | undefined,
+  today: IsoDate | undefined,
+): Tenancy | undefined {
+  const before =
+    start === undefined
+      ? tenancies[0]
+      : tenancies.find((t) => t.validTo !== null && t.validTo < start)
+  return before?.validTo != null &&
+    today !== undefined &&
+    before.validTo >= today
+    ? before
+    : undefined
 }
 
 function CloseIcon() {
@@ -163,6 +186,8 @@ export function TenancyForm(props: Props) {
   })
 
   const contractType = useSelector(form.store, (s) => s.values.contractType)
+  const start = useSelector(form.store, (s) => parseFiDate(s.values.validFrom))
+  const previous = previousTenancy(props.tenancies ?? [], start, props.today)
   const clear = (field: Field) => () => {
     setReasons((current) => ({ ...current, [field]: undefined }))
   }
@@ -210,7 +235,7 @@ export function TenancyForm(props: Props) {
         component="main"
         sx={{ flex: 1, gap: 2.25, px: 2.5, pt: 1.25, pb: 2.5 }}
       >
-        {props.previous?.validTo ? (
+        {previous?.validTo ? (
           <Box
             sx={{
               bgcolor: 'background.paper',
@@ -223,8 +248,8 @@ export function TenancyForm(props: Props) {
             }}
           >
             {m.tenancy_form_previous({
-              name: props.previous.tenantName,
-              date: formatDate(props.previous.validTo),
+              name: previous.tenantName,
+              date: formatDate(previous.validTo),
             })}
           </Box>
         ) : null}

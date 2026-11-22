@@ -48,17 +48,13 @@ function NewTenancyRoute() {
       to: '/properties/$propertyId/tenancy',
       params: { propertyId },
     })
-  // The tenancy the new one follows, while it is still to end.
-  const previous =
-    options.tenancies.find(
-      (t) => t.validTo !== null && t.validTo >= options.today,
-    ) ?? null
   return (
     <TenancyForm
       propertyId={propertyId}
       address={options.property.streetAddress}
       rents={options.rents}
-      previous={previous}
+      tenancies={options.tenancies}
+      today={options.today}
       onSaved={async () => {
         await router.invalidate()
         await toPage()

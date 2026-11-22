@@ -2,7 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import type { Tenancy } from './tenancy.repository.server'
-import { TenancyForm } from './TenancyForm'
+import { previousTenancy, TenancyForm } from './TenancyForm'
 
 // jsdom's browser language is English, so the form is in English.
 const createTenancy = vi.fn<(input: { data: unknown }) => Promise<unknown>>()
@@ -152,5 +152,46 @@ describe('tenancy form', () => {
         contractMade: '12/02/2025',
       }) as unknown,
     })
+  })
+})
+
+describe('the previous tenancy in the new tenant form', () => {
+  const ending = {
+    ...aino,
+    validTo: '2026-12-31',
+    noticeGivenBy: 'tenant' as const,
+  }
+  const mikko: Tenancy = {
+    ...aino,
+    id: 't2',
+    tenantName: 'Mikko Lehtinen',
+    contractType: 'fixed_term',
+    validFrom: '2027-01-01',
+    termEnd: '2027-06-30',
+    validTo: '2027-06-30',
+  }
+  // Newest first, as the page loads them.
+  const flat = [mikko, ending]
+  const today = '2026-11-22'
+
+  test('is the latest tenancy ending before the start entered', () => {
+    expect(previousTenancy(flat, '2027-07-01', today)?.tenantName).toBe(
+      'Mikko Lehtinen',
+    )
+    expect(previousTenancy(flat, '2027-01-01', today)?.tenantName).toBe(
+      'Aino Koski',
+    )
+  })
+
+  test('is the latest tenancy before a start is entered', () => {
+    expect(previousTenancy(flat, undefined, today)?.tenantName).toBe(
+      'Mikko Lehtinen',
+    )
+  })
+
+  test('is none once it has ended, or for an earlier tenancy', () => {
+    expect(previousTenancy(flat, '2027-07-01', '2027-07-01')).toBeUndefined()
+    expect(previousTenancy(flat, '2024-01-01', today)).toBeUndefined()
+    expect(previousTenancy([aino], undefined, today)).toBeUndefined()
   })
 })
