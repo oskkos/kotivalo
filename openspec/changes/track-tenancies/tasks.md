@@ -18,17 +18,17 @@
 
 ## 2. Notice periods, statuses and date rules
 
-- [ ] 2.1 `src/lib/dates.ts`: `lastDayOfMonth`, `addMonths` on a month, `addYears` on a date, with unit tests (month ends, leap years)
-- [ ] 2.2 `features/tenancies/notice.ts` as in design.md ("Notice periods and statuses are pure functions"): `LANDLORD_RULE_CHANGE`, `noticePeriodMonths`, `earliestLastDay`, `validateEnding` (the landlord's limit only; fixed-term notice refused; notice in the future or before the start; last day before the notice; a fixed term's last day on or after the term's end)
-- [ ] 2.3 `features/tenancies/status.ts`: `tenancyStatus`, `flatStatus`, `dueDate`
-- [ ] 2.4 `features/tenancies/rules.ts`: `validateTenancyDates(tenancy, { today, ownershipStart, others })` for overlap, ownership start, contract made and the fixed term's end
-- [ ] 2.5 `features/tenancies/schemas.ts`, shared by the forms and the server: the name, phone, email, contract type, dates (`parseFiDate`), due day and rent (`parseDecimal`), with their reason codes
-- [ ] 2.6 Reason codes in `src/lib/reasons.ts`:
-  - field reasons: `tenant_name_required`, `tenant_name_too_long`, `tenant_phone_invalid`, `tenancy_overlaps`, `tenancy_start_before_ownership`, `tenancy_contract_made_in_future`, `tenancy_end_before_start`, `tenancy_due_day_invalid`, `tenancy_notice_in_future`, `tenancy_notice_before_start`, `tenancy_end_before_notice`, `tenancy_end_before_notice_period`, `tenancy_end_after_term`, `tenancy_fixed_term_notice`
-  - alerts: `tenancy_not_found`, `tenancy_already_ending`, `tenancy_not_ending`, `tenancy_already_ended`
+- [x] 2.1 `src/lib/dates.ts`: `lastDayOfMonth`, `addMonths` on a month, `addYears` on a date, with unit tests (month ends, leap years)
+- [x] 2.2 `features/tenancies/notice.ts` as in design.md ("Notice periods and statuses are pure functions"): `LANDLORD_RULE_CHANGE`, `noticePeriodMonths`, `earliestLastDay`, `validateEnding` (the landlord's limit only; fixed-term notice refused; notice in the future or before the start; last day before the notice; a fixed term's last day on or after the term's end)
+- [x] 2.3 `features/tenancies/status.ts`: `tenancyStatus`, `flatStatus`, `dueDate`
+- [x] 2.4 `features/tenancies/rules.ts`: `validateTenancyDates(tenancy, { today, ownershipStart, others })` for overlap, ownership start, contract made and the fixed term's end
+- [x] 2.5 `features/tenancies/schemas.ts`, shared by the forms and the server: the name, phone, email, contract type, dates (`parseFiDate`), due day and rent (`parseDecimal`), with their reason codes
+- [x] 2.6 Reason codes in `src/lib/reasons.ts`:
+  - field reasons: `tenant_name_required`, `tenant_name_too_long`, `tenant_phone_too_long`, `tenancy_overlaps`, `tenancy_start_before_ownership`, `tenancy_contract_made_in_future`, `tenancy_end_before_start`, `tenancy_due_day_invalid`, `tenancy_notice_in_future`, `tenancy_notice_before_start`, `tenancy_end_before_notice`, `tenancy_end_before_notice_period`, `tenancy_end_after_term`, `tenancy_fixed_term_notice`
+  - alerts: `tenancy_not_found`, `tenancy_already_ending`, `tenancy_not_ending`, `tenancy_already_ended`, `tenancy_cancel_later_tenancy`
 
   The messages in fi, then sv and en with the translate skill, then the term-critic on the diff
-- [ ] 2.7 Unit tests named after the scenarios:
+- [x] 2.7 Unit tests named after the scenarios:
   - every scenario of "Notice periods" and "Tenancy statuses"
   - "The due day falls on the last day of a short month"
   - the pure ones of "Tenancy dates and details": overlap (both directions, an open-ended one), "An earlier tenancy can be added afterwards", ownership start, contract made, the fixed term's end, invalid details

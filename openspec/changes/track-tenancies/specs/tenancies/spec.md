@@ -20,7 +20,7 @@ An owner of a flat SHALL be able to add a tenant to it from the Tenancy page: th
 - **THEN** it is refused with the reason `sharing_owner_only`, and nothing is stored
 
 ### Requirement: Tenancy dates and details
-A tenancy SHALL start and end on any day. The tenancies of a flat SHALL NOT overlap (`tenancy_overlaps`); a tenancy without an end runs indefinitely, so no tenancy can be added after it. An earlier tenancy MAY be added afterwards, before the others, to record the history. A tenancy SHALL NOT start before the start of the flat's first ownership period (`tenancy_start_before_ownership`). *Contract made* SHALL NOT be in the future (`tenancy_contract_made_in_future`). A fixed-term tenancy SHALL have an end date after its start (`tenancy_end_before_start`); an open-ended one SHALL have none until it is ended. The name SHALL NOT be empty (`tenant_name_required`) and SHALL be at most 100 characters (`tenant_name_too_long`); the phone number SHALL be at most 30 characters (`tenant_phone_invalid`); the email address, when given, SHALL be valid (`email_invalid`). The due day SHALL be a whole number from 1 to 31 (`tenancy_due_day_invalid`), and in a month with fewer days it SHALL be the month's last day.
+A tenancy SHALL start and end on any day. The tenancies of a flat SHALL NOT overlap (`tenancy_overlaps`); a tenancy without an end runs indefinitely, so no tenancy can be added after it. An earlier tenancy MAY be added afterwards, before the others, to record the history. A tenancy SHALL NOT start before the start of the flat's first ownership period (`tenancy_start_before_ownership`). *Contract made* SHALL NOT be in the future (`tenancy_contract_made_in_future`). A fixed-term tenancy SHALL have an end date after its start (`tenancy_end_before_start`); an open-ended one SHALL have none until it is ended. The name SHALL NOT be empty (`tenant_name_required`) and SHALL be at most 100 characters (`tenant_name_too_long`); the phone number SHALL be at most 30 characters (`tenant_phone_too_long`); the email address, when given, SHALL be valid (`email_invalid`). The due day SHALL be a whole number from 1 to 31 (`tenancy_due_day_invalid`), and in a month with fewer days it SHALL be the month's last day.
 
 **No Playwright test:** these are server-side rules and pure date calculations; Vitest covers them, and "Adding a tenant" and "Ending a tenancy" show reasons in the browser.
 
@@ -108,7 +108,7 @@ A tenancy's status on a given day SHALL be: *Starts* (with the start date) befor
 - **THEN** on `2027-06-01` it is *Ends 31.12.2027*, and on `2028-01-01` *Ended*
 
 ### Requirement: Notice periods
-The earliest last rent day SHALL be calculated from the notice date, who gave notice and the tenancy, by CONCEPT.md §4.2: the notice period runs from the last day of the month in which notice was given, and the last rent day is the last day of the month the period ends in. The tenant's notice period SHALL be 1 month. The landlord's SHALL be, for a contract made before `2026-10-01`, 6 months if the tenancy has lasted at least 1 year on the notice date and otherwise 3; and for a contract made on or after `2026-10-01`, 4 months if it has lasted at least 2 years and otherwise 3. Notice by agreement SHALL have no notice period.
+The earliest last rent day SHALL be calculated from the notice date, who gave notice and the tenancy, by CONCEPT.md §4.2: the notice period runs from the last day of the month in which notice was given, and the last rent day is the last day of the month the period ends in. The tenant's notice period SHALL be 1 month. The landlord's SHALL be, for a contract made before `2026-10-01`, 6 months if the tenancy has lasted at least 1 year on the notice date and otherwise 3; and for a contract made on or after `2026-10-01`, 4 months if it has lasted at least 2 years and otherwise 3. An agreed ending, a court's permission and another legal ground SHALL have no notice period.
 
 **No Playwright test:** a pure calculation; Vitest covers it, and "Ending a tenancy" shows the suggested date in the browser.
 
@@ -133,7 +133,7 @@ The earliest last rent day SHALL be calculated from the notice date, who gave no
 - **THEN** the notice period is 4 months, and the earliest last rent day is `2029-03-31`
 
 ### Requirement: Ending a tenancy
-An owner SHALL be able to end an open-ended tenancy that hasn't been ended: who gave notice (the tenant, the landlord or by agreement), the date notice was received and the last rent day. The last rent day SHALL default to the earliest date from "Notice periods", and the form SHALL explain the period. The notice date SHALL NOT be in the future (`tenancy_notice_in_future`) or before the tenancy's start (`tenancy_notice_before_start`), and the last rent day SHALL NOT be before the notice date (`tenancy_end_before_notice`). For the tenant's notice any later last rent day SHALL be accepted, because the contract may shorten the period or count it from mid-month. For the landlord's notice a last rent day before the earliest date SHALL be refused with the reason `tenancy_end_before_notice_period`. A tenancy already ended SHALL be refused with the reason `tenancy_already_ending`. A member SHALL NOT be able to end a tenancy.
+An owner SHALL be able to end an open-ended tenancy that hasn't been ended: who gave notice (the tenant, the landlord, by agreement, or another legal ground such as rescission or an estate's notice), the date notice was received and the last rent day. The last rent day SHALL default to the earliest date from "Notice periods", and the form SHALL explain the period. The notice date SHALL NOT be in the future (`tenancy_notice_in_future`) or before the tenancy's start (`tenancy_notice_before_start`), and the last rent day SHALL NOT be before the notice date (`tenancy_end_before_notice`). For the tenant's notice, an agreed ending and another legal ground, any last rent day on or after the notice date SHALL be accepted: the contract may shorten the tenant's period or count it from mid-month, and the app doesn't check the other grounds. For the landlord's notice a last rent day before the earliest date SHALL be refused with the reason `tenancy_end_before_notice_period`. A tenancy already ended SHALL be refused with the reason `tenancy_already_ending`. A member SHALL NOT be able to end a tenancy.
 
 #### Scenario: The tenant gives notice
 - **WHEN** today is `2026-11-22`, and Annika ends the tenancy of `Aino Koski`, notice given by the tenant on `22.11.2026`, keeping the suggested last rent day
@@ -160,18 +160,22 @@ An owner SHALL be able to end an open-ended tenancy that hasn't been ended: who 
 - **THEN** it is refused with the reason `sharing_owner_only`, and the tenancy is unchanged
 
 ### Requirement: Ending a fixed-term tenancy early
-A fixed-term tenancy SHALL end by itself on its end date, with no action. It SHALL NOT be ended by the tenant's or the landlord's notice (`tenancy_fixed_term_notice`). An owner SHALL be able to end it early by agreement or with a court's permission: the date it was agreed or permitted, which SHALL NOT be in the future (`tenancy_notice_in_future`), and a last rent day on or after it (`tenancy_end_before_notice`) and before the term's end (`tenancy_end_after_term`). The form SHALL say that the contract can't be ended by notice and show no notice period.
+A fixed-term tenancy SHALL end by itself on its end date, with no action. It SHALL NOT be ended by the tenant's or the landlord's ordinary notice (`tenancy_fixed_term_notice`). An owner SHALL be able to end it early by agreement, with a court's permission, or on another legal ground such as rescission or an estate's notice: the date it was agreed or permitted, which SHALL NOT be in the future (`tenancy_notice_in_future`), and a last rent day on or after it (`tenancy_end_before_notice`) and before the term's end (`tenancy_end_after_term`). The form SHALL say that the contract usually can't be ended by notice and show no notice period.
 
 #### Scenario: Ending a fixed term by agreement
 - **WHEN** a fixed-term tenancy runs from `2027-01-01` to `2027-12-31`, and Annika ends it by agreement on `15.5.2027` with the last rent day `30.6.2027`
 - **THEN** the Tenancy page shows "Irtisanottu · päättyy 30.6.2027"
+
+#### Scenario: Another legal ground ends a fixed term early
+- **WHEN** a fixed-term tenancy runs from `2027-01-01` to `2027-12-31`, and the owner records another legal ground (rescission) on `3.3.2027` with the last rent day `31.3.2027`
+- **THEN** the tenancy is ended with the last rent day `2027-03-31`
 
 #### Scenario: Notice on a fixed term is refused
 - **WHEN** an owner sends the tenant's notice for a fixed-term tenancy to the server
 - **THEN** it is refused with the reason `tenancy_fixed_term_notice`, and the tenancy is unchanged
 
 ### Requirement: Cancelling an ending
-An owner SHALL be able to cancel the ending of a tenancy before its last rent day has passed, after a confirmation. An open-ended tenancy SHALL then run with no end again, and a fixed-term tenancy SHALL end on its original term's end again. Cancelling SHALL be refused when the flat has a later tenancy (`tenancy_overlaps`), when the tenancy hasn't been ended (`tenancy_not_ending`) or when its last rent day has passed (`tenancy_already_ended`). A member SHALL NOT be able to cancel.
+An owner SHALL be able to cancel the ending of a tenancy before its last rent day has passed, after a confirmation. An open-ended tenancy SHALL then run with no end again, and a fixed-term tenancy SHALL end on its original term's end again. Cancelling SHALL be refused when the flat has a later tenancy (`tenancy_cancel_later_tenancy`), when the tenancy hasn't been ended (`tenancy_not_ending`) or when its last rent day has passed (`tenancy_already_ended`). A member SHALL NOT be able to cancel.
 
 #### Scenario: Cancelling the tenant's notice
 - **WHEN** today is `2026-11-25`, and the tenancy of `Aino Koski` ends on `2026-12-31` after the tenant's notice, and Annika cancels the ending
@@ -183,7 +187,7 @@ An owner SHALL be able to cancel the ending of a tenancy before its last rent da
 
 #### Scenario: Cancelling is refused when a new tenancy follows
 - **WHEN** a tenancy ends on `2026-12-31` and the next one starts on `2027-01-01`, and an owner cancels the first one's ending
-- **THEN** it is refused with the reason `tenancy_overlaps`
+- **THEN** it is refused with the reason `tenancy_cancel_later_tenancy`
 
 ### Requirement: Correcting a tenancy
 An owner SHALL be able to correct a tenancy's details: the name, phone, email, contract type, contract made, start, the fixed term's end and the due day, with the same checks as adding against the flat's other tenancies. The correction SHALL change the tenancy in place, without a history. The rent SHALL NOT be changed from this form; it stays on the Rent and charges page. A member SHALL NOT be able to correct a tenancy.

@@ -10,12 +10,12 @@ Landlords need to know who lives in each flat, on what contract, and when a tena
   - The rent field shows the flat's rent in effect on the start date (#31). A changed amount is saved as a new rent period, from the first day of the start month.
   - The due day is a day of the month, 1–31. In a shorter month it is the month's last day.
 - **The Tenancy page.** Opened from a card at the top of the flat's edit page. It shows the current tenant with their status, call and email links, the contract details and earlier tenancies, newest first. A vacant flat shows a prompt to add a tenant.
-- **Ending a tenancy.** An owner records who gave notice (the tenant, the landlord, or both by agreement), the date notice was received and the last rent day.
+- **Ending a tenancy.** An owner records who gave notice (the tenant, the landlord, both by agreement, or another legal ground such as rescission or an estate's notice), the date notice was received and the last rent day.
   - The last rent day defaults to the earliest date the law allows: the notice period runs from the last day of the month notice was given.
   - Tenant's notice: 1 month by law, but the contract may shorten it or count it from mid-month, so any date is allowed.
   - Landlord's notice: the legal minimum is a hard limit, because a term that shortens it is void (§52). Contracts made before 1.10.2026: 6 months once the tenancy has lasted 1 year, otherwise 3. Made on or after 1.10.2026: 4 months once it has lasted 2 years, otherwise 3.
-  - By agreement: any date on or after the notice date.
-  - A fixed-term tenancy ends by itself on its end date and can't be ended by notice. Earlier it ends only by agreement or with a court's permission.
+  - By agreement or on another legal ground: any date on or after the notice date.
+  - A fixed-term tenancy ends by itself on its end date and usually can't be ended by notice. Earlier it ends by agreement, with a court's permission, or on another legal ground (rescission, an estate's notice and the other cases of §51).
 - **Statuses.** *Let* until notice is given, *Notice given* until the last rent day, then *Vacant*. A fixed-term tenancy shows when it ends. Ending can be cancelled during the notice period. A new tenant can be added during the notice period, starting after the previous tenancy ends.
 - **Flats list.** Each card shows the tenancy status and the tenant's name. Paid and late come with rent payments (#33).
 - **Correcting a tenancy.** Owners edit a tenancy's details directly, with the same checks. A tenancy is a period itself, so its fields have no history of their own.
@@ -39,7 +39,7 @@ Not in this change:
 
 ## Impact
 
-- **Tables:** new `tenancies`: id, property id, tenant name, phone, email, contract type (`open_ended`, `fixed_term`), contract made, `valid_from` (start) and `valid_to` (the last day: the fixed term's end or the last rent day once ended; none while an open-ended tenancy runs), the fixed term's end, due day, notice given by (`tenant`, `landlord`, `agreed`, `court`), notice date, created by, created and updated at. It starts empty. `recurring_amounts` is unchanged; the rent is set through its repository.
+- **Tables:** new `tenancies`: id, property id, tenant name, phone, email, contract type (`open_ended`, `fixed_term`), contract made, `valid_from` (start) and `valid_to` (the last day: the fixed term's end or the last rent day once ended; none while an open-ended tenancy runs), the fixed term's end, due day, notice given by (`tenant`, `landlord`, `agreed`, `court`, `other`), notice date, created by, created and updated at. It starts empty. `recurring_amounts` is unchanged; the rent is set through its repository.
 - **Code:**
   - `features/tenancies/`:
     - the repository

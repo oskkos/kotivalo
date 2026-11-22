@@ -22,7 +22,7 @@ The Design canvas row "Vuokrasuhteet" has the screens, and the user approved its
 
 ### One table, the tenancy as a period
 
-`tenancies` uses `validity()`: `valid_from` is the start, and `valid_to` is the tenancy's last day: the fixed term's end, or the last rent day once it is ended, or null while an open-ended tenancy runs. The other columns are `id()`, `property_id`, `tenant_name`, `tenant_phone` and `tenant_email` (nullable), `contract_type` (`open_ended`, `fixed_term`), `contract_made` and `term_end` (`isoDate()`, `term_end` only for fixed-term), `due_day` (integer 1–31), `notice_given_by` (`tenant`, `landlord`, `agreed`, `court`, nullable) and `notice_date` (nullable), `created_by`, `created_at` and `updated_at` (`instant()`), and an index on `(property_id, valid_from)`.
+`tenancies` uses `validity()`: `valid_from` is the start, and `valid_to` is the tenancy's last day: the fixed term's end, or the last rent day once it is ended, or null while an open-ended tenancy runs. The other columns are `id()`, `property_id`, `tenant_name`, `tenant_phone` and `tenant_email` (nullable), `contract_type` (`open_ended`, `fixed_term`), `contract_made` and `term_end` (`isoDate()`, `term_end` only for fixed-term), `due_day` (integer 1–31), `notice_given_by` (`tenant`, `landlord`, `agreed`, `court`, `other`, nullable) and `notice_date` (nullable), `created_by`, `created_at` and `updated_at` (`instant()`), and an index on `(property_id, valid_from)`.
 
 - Overlap, statuses and "the tenancy running on a day" are then the same validity queries as the other periods.
 - `term_end` is kept separately so that cancelling an early end of a fixed term restores it.
@@ -35,7 +35,7 @@ The tenant's contact details stay in the tenancy row: there is no tenant entity 
 
 `features/tenancies/notice.ts`:
 
-- `noticePeriodMonths({ by, contractMade, start, noticeDate })`: 1 for the tenant; for the landlord 6 / 3 or 4 / 3 by `contractMade` against `LANDLORD_RULE_CHANGE = '2026-10-01'` and whether the tenancy has lasted 1 or 2 full years on the notice date; 0 for `agreed` and `court`.
+- `noticePeriodMonths({ by, contractMade, start, noticeDate })`: 1 for the tenant; for the landlord 6 / 3 or 4 / 3 by `contractMade` against `LANDLORD_RULE_CHANGE = '2026-10-01'` and whether the tenancy has lasted 1 or 2 full years on the notice date; 0 for `agreed`, `court` and `other`. `other` covers the legal grounds the app doesn't model (rescission §61, an estate's notice, the other cases of §51), so it is never blocked.
 - `earliestLastDay(...)`: the last day of the month `n` months after the notice date's month (the period runs from the month's last day, and adding whole months to a month end gives a month end).
 - `validateEnding(...)`: returns a reason or nothing, with the limit only for the landlord (§52(4): a term shortening the landlord's period is void, and one shortening the tenant's is allowed).
 
@@ -49,7 +49,7 @@ The form shows the rent in effect on the start date from the flat's rent periods
 
 The save is one `atomically()` batch: the tenancy insert (an `INSERT … SELECT` with the owner and overlap conditions), then the rent statements of `recurringAmountRepository` conditioned on the tenancy row existing. `setAmount` is split so that it can return its statements without running them (`rentStatements`), and the existing Rent and charges page keeps calling it as before.
 
-- The rent's own conditions (no period on or after the date, the latest period as the client saw it) can still fail after the tenancy row is in: then the server deletes the new tenancy and returns `amount_date_too_early`. Rare (another owner changing the rent at the same moment), and the result is the same as a refused save.
+- The rent's own conditions (no period on or after the date, the latest period as the client saw it) can still fail after the tenancy row is in: then the server deletes the new tenancy and returns `amount_changed`, the alert the Rent and charges page uses when the amounts changed meanwhile. Rare (another owner changing the rent at the same moment), and the result is the same as a refused save.
 - Alternative: a tenancy-specific rent column. Rejected: the year summary and the Rent and charges page already read the rent periods (#31), and two sources of rent would disagree.
 
 ### Overlap is checked against every tenancy of the flat

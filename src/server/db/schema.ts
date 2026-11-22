@@ -354,10 +354,17 @@ export type ContractType = (typeof CONTRACT_TYPES)[number]
 
 /**
  * How a tenancy was ended (openspec: tenancies): by the tenant's or the
- * landlord's notice, by agreement, or with a court's permission (a fixed
- * term ended early).
+ * landlord's notice, by agreement, with a court's permission (a fixed term
+ * ended early), or on another legal ground such as rescission or an
+ * estate's notice, which has no notice period the app checks.
  */
-export const NOTICE_GIVERS = ['tenant', 'landlord', 'agreed', 'court'] as const
+export const NOTICE_GIVERS = [
+  'tenant',
+  'landlord',
+  'agreed',
+  'court',
+  'other',
+] as const
 export type NoticeGiver = (typeof NOTICE_GIVERS)[number]
 
 /**

@@ -1,5 +1,12 @@
 import { describe, expect, test } from 'vitest'
-import { dayBefore, isoDateInFinland, parseFiDate } from './dates'
+import {
+  addMonths,
+  addYears,
+  dayBefore,
+  lastDayOfMonth,
+  isoDateInFinland,
+  parseFiDate,
+} from './dates'
 
 describe('parseFiDate', () => {
   test.each([
@@ -41,5 +48,34 @@ describe('dayBefore', () => {
     ['2026-01-01', '2025-12-31'],
   ])('the day before %s is %s', (date, before) => {
     expect(dayBefore(date)).toBe(before)
+  })
+})
+
+describe('month and year arithmetic', () => {
+  test.each([
+    ['2027-02', '2027-02-28'],
+    ['2028-02', '2028-02-29'],
+    ['2026-12', '2026-12-31'],
+    ['2027-04', '2027-04-30'],
+  ])('the last day of %s is %s', (month, last) => {
+    expect(lastDayOfMonth(month)).toBe(last)
+  })
+
+  test.each([
+    ['2026-11', 1, '2026-12'],
+    ['2026-11', 6, '2027-05'],
+    ['2026-11', 14, '2028-01'],
+    ['2027-01', -1, '2026-12'],
+  ])('%s moved by %i months is %s', (month, months, moved) => {
+    expect(addMonths(month, months)).toBe(moved)
+  })
+
+  test.each([
+    ['2025-03-01', 1, '2026-03-01'],
+    ['2024-02-29', 1, '2025-02-28'],
+    ['2024-02-29', 4, '2028-02-29'],
+    ['2026-10-31', 2, '2028-10-31'],
+  ])('%s moved by %i years is %s', (date, years, moved) => {
+    expect(addYears(date, years)).toBe(moved)
   })
 })
