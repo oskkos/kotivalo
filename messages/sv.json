@@ -429,6 +429,36 @@
   "rent_payment_delete_title": "Ta bort betalningen?",
   "rent_payment_dialog_title": "{rent} betald",
   "rent_payment_save": "Spara",
+  "rent_payments_empty": "Hyresbetalningar registreras när bostaden har en hyresgäst.",
+  "rent_payments_months": "Månader",
+  "rent_payments_page_title": "Hyresbetalningar – Kotivalo",
+  "rent_payments_received": "Mottagen hyra år {year}",
+  "rent_payments_received_note": "Enligt betalningsdagen, eftersom hyresinkomsten beskattas det år den tas emot.",
+  "rent_payments_title": "Hyresbetalningar",
+  "rent_payments_unpaid": [
+    {
+      "declarations": [
+        "input count",
+        "input months",
+        "local countPlural = count: plural"
+      ],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Hyran är inte registrerad som helt betald: {months}. Årssammandraget antar inte att den är betald.",
+        "countPlural=other": "Hyran är inte registrerad som helt betald för {count} månader: {months}. Årssammandraget antar inte att de är betalda."
+      }
+    }
+  ],
+  "rent_payments_year": "År",
+  "rent_row_due": "Förfallodag {date}",
+  "rent_row_late": "Förfallodag {date} · inga registrerade betalningar",
+  "rent_row_paid": "{amount} · betald {date}",
+  "rent_row_partly_paid": "{paid} / {expected} · {missing} saknas",
+  "rent_row_rent_not_set": "Ingen hyra är angiven för månaden",
+  "rent_short_late": "Försenad",
+  "rent_short_paid": "Betald",
+  "rent_short_partly_paid": "Delvis betald",
+  "rent_short_rent_not_set": "Inte angiven",
   "rent_status_due": "Förfaller {date}",
   "rent_status_late": [
     {

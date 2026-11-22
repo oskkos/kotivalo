@@ -429,6 +429,36 @@
   "rent_payment_delete_title": "Poistetaanko maksu?",
   "rent_payment_dialog_title": "{rent} maksettu",
   "rent_payment_save": "Tallenna",
+  "rent_payments_empty": "Vuokranmaksut kirjataan, kun asunnolla on vuokralainen.",
+  "rent_payments_months": "Kuukaudet",
+  "rent_payments_page_title": "Vuokranmaksut – Kotivalo",
+  "rent_payments_received": "Vuokraa saatu vuonna {year}",
+  "rent_payments_received_note": "Maksupäivän mukaan, sillä vuokratulo verotetaan sinä vuonna, jona se saadaan.",
+  "rent_payments_title": "Vuokranmaksut",
+  "rent_payments_unpaid": [
+    {
+      "declarations": [
+        "input count",
+        "input months",
+        "local countPlural = count: plural"
+      ],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Vuokraa ei ole kirjattu kokonaan maksetuksi: {months}. Vuosiyhteenveto ei oleta sitä maksetuksi.",
+        "countPlural=other": "Vuokraa ei ole kirjattu kokonaan maksetuksi {count} kuukaudelta: {months}. Vuosiyhteenveto ei oleta niitä maksetuiksi."
+      }
+    }
+  ],
+  "rent_payments_year": "Vuosi",
+  "rent_row_due": "Eräpäivä {date}",
+  "rent_row_late": "Eräpäivä {date} · ei kirjattuja maksuja",
+  "rent_row_paid": "{amount} · maksettu {date}",
+  "rent_row_partly_paid": "{paid} / {expected} · puuttuu {missing}",
+  "rent_row_rent_not_set": "Vuokraa ei ole asetettu kuukaudelle",
+  "rent_short_late": "Myöhässä",
+  "rent_short_paid": "Maksettu",
+  "rent_short_partly_paid": "Osittain maksettu",
+  "rent_short_rent_not_set": "Ei asetettu",
   "rent_status_due": "Erääntyy {date}",
   "rent_status_late": [
     {
