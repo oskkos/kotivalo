@@ -63,6 +63,29 @@ describe('PropertyList', () => {
     )
   })
 
+  test("shows the summary above the list and each card's statuses", () => {
+    render(
+      <PropertyList
+        properties={[
+          flat('a', 'Koivupolku 7 A 4'),
+          flat('b', 'Rantatie 15 C 21'),
+        ]}
+        statuses={{ a: <span>Let</span>, b: <span>Vacant</span> }}
+        rentStatuses={{ a: <span>Paid</span> }}
+        summary={<section aria-label="Summary" />}
+      />,
+    )
+    const [first, second] = screen.getAllByRole('listitem')
+    expect(first).toHaveTextContent('LetPaid')
+    expect(second).toHaveTextContent('Vacant')
+    expect(second).not.toHaveTextContent('Paid')
+    expect(
+      screen
+        .getByRole('region', { name: 'Summary' })
+        .compareDocumentPosition(screen.getByRole('list')),
+    ).toBe(Node.DOCUMENT_POSITION_FOLLOWING)
+  })
+
   test('says "1 flat" for one flat', () => {
     render(<PropertyList properties={[flat('a', 'Koivupolku 7 A 4')]} />)
     expect(screen.getByText('1 flat')).toBeInTheDocument()

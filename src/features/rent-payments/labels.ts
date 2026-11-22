@@ -5,11 +5,18 @@ import { formatDate, formatDayMonth } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 import type { RentStatus } from './status'
 
+type MonthNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
+
+const monthNumber = (month: string) => Number(month.slice(5, 7)) as MonthNumber
+
 /** "Marraskuun vuokra" for `2026-11`. */
 export function rentMonthTitle(month: string): string {
-  const number = Number(month.slice(5, 7)) as
-    1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12
-  return m.rent_month_title({ month: number })
+  return m.rent_month_title({ month: monthNumber(month) })
+}
+
+/** "Marraskuun vuokrat" for `2026-11`, the flats list's summary. */
+export function rentSummaryTitle(month: string): string {
+  return m.rent_summary_title({ month: monthNumber(month) })
 }
 
 /** The status as the rent card and the month page say it. */
@@ -27,6 +34,18 @@ export function statusText(status: RentStatus): string {
       return m.rent_status_nothing_to_pay()
     case 'rent_not_set':
       return m.rent_status_rent_not_set()
+  }
+}
+
+/** The status on a flat's card: paid and partly paid without the details. */
+export function cardStatusText(status: RentStatus): string {
+  switch (status.kind) {
+    case 'paid':
+      return m.rent_short_paid()
+    case 'partly_paid':
+      return m.rent_short_partly_paid()
+    default:
+      return statusText(status)
   }
 }
 

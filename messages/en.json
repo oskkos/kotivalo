@@ -495,6 +495,37 @@
   "rent_status_paid": "Paid {date}",
   "rent_status_partly_paid": "Partly paid",
   "rent_status_rent_not_set": "Rent not set",
+  "rent_summary_late": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Rent late for {count} flat",
+        "countPlural=other": "Rent late for {count} flats"
+      }
+    }
+  ],
+  "rent_summary_of_expected": "/ {expected} received",
+  "rent_summary_title": [
+    {
+      "declarations": ["input month"],
+      "selectors": ["month"],
+      "match": {
+        "month=1": "January rent",
+        "month=2": "February rent",
+        "month=3": "March rent",
+        "month=4": "April rent",
+        "month=5": "May rent",
+        "month=6": "June rent",
+        "month=7": "July rent",
+        "month=8": "August rent",
+        "month=9": "September rent",
+        "month=10": "October rent",
+        "month=11": "November rent",
+        "month=12": "December rent"
+      }
+    }
+  ],
   "room_count_1": "1 room",
   "room_count_2": "2 rooms",
   "room_count_3": "3 rooms",

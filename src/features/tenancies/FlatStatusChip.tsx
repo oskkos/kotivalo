@@ -30,7 +30,7 @@ export function FlatStatusChip(props: { status: CardTenancyStatus }) {
   return (
     <Stack
       direction="row"
-      sx={{ alignItems: 'center', gap: 1, flexWrap: 'wrap', mt: 0.5 }}
+      sx={{ alignItems: 'center', gap: 1, flexWrap: 'wrap' }}
     >
       <Box
         component="span"

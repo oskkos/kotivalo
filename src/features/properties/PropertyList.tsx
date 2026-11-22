@@ -1,6 +1,7 @@
 // The flats list, the home page (Design canvas: "Asunnot"): the header, the
-// title with the count, and a card per flat. Owners, rent status and the
-// monthly summary come with their own features.
+// title with the count, and a card per flat. Owners, the tenancy and rent
+// statuses and this month's rent summary come from their own features
+// through the slots.
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
@@ -22,6 +23,10 @@ interface Props {
   owners?: Readonly<Record<string, readonly CardOwner[]>>
   /** Each card's tenancy status by flat id, e.g. a chip. */
   statuses?: Readonly<Record<string, ReactNode>>
+  /** Each card's rent status by flat id, next to the tenancy status. */
+  rentStatuses?: Readonly<Partial<Record<string, ReactNode>>>
+  /** This month's rent summary, above the notices and the list. */
+  summary?: ReactNode
   /** The bottom navigation bar. */
   bottomNav?: ReactNode
   /** Shown above the list or the empty state, e.g. flat invitations. */
@@ -49,11 +54,14 @@ export function PropertyCard({
   property,
   owners = [],
   status,
+  rentStatus,
 }: {
   property: Property
   owners?: readonly CardOwner[] | undefined
   /** The tenancy status, e.g. a chip. */
   status?: ReactNode
+  /** This month's rent status, e.g. a chip. */
+  rentStatus?: ReactNode
 }) {
   const ownership = ownershipLine(owners)
   return (
@@ -108,7 +116,21 @@ export function PropertyCard({
               {ownership}
             </Typography>
           )}
-          {status}
+          {status || rentStatus ? (
+            <Stack
+              direction="row"
+              sx={{
+                alignItems: 'center',
+                columnGap: 1,
+                rowGap: 0.5,
+                flexWrap: 'wrap',
+                mt: 0.5,
+              }}
+            >
+              {status}
+              {rentStatus}
+            </Stack>
+          ) : null}
         </Stack>
       </Box>
     </Link>
@@ -185,6 +207,8 @@ export function PropertyList({
   properties,
   owners = {},
   statuses = {},
+  rentStatuses = {},
+  summary,
   bottomNav,
   notices,
 }: Props) {
@@ -203,6 +227,7 @@ export function PropertyList({
             </Typography>
           )}
         </Stack>
+        {summary}
         {notices}
         {properties.length === 0 ? (
           <EmptyState />
@@ -217,6 +242,7 @@ export function PropertyList({
                   property={property}
                   owners={owners[property.id]}
                   status={statuses[property.id]}
+                  rentStatus={rentStatuses[property.id]}
                 />
               </li>
             ))}

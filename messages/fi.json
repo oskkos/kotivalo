@@ -495,6 +495,37 @@
   "rent_status_paid": "Maksettu {date}",
   "rent_status_partly_paid": "Osittain maksettu",
   "rent_status_rent_not_set": "Vuokraa ei asetettu",
+  "rent_summary_late": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Vuokra myöhässä {count} asunnossa",
+        "countPlural=other": "Vuokra myöhässä {count} asunnossa"
+      }
+    }
+  ],
+  "rent_summary_of_expected": "/ {expected} saatu",
+  "rent_summary_title": [
+    {
+      "declarations": ["input month"],
+      "selectors": ["month"],
+      "match": {
+        "month=1": "Tammikuun vuokrat",
+        "month=2": "Helmikuun vuokrat",
+        "month=3": "Maaliskuun vuokrat",
+        "month=4": "Huhtikuun vuokrat",
+        "month=5": "Toukokuun vuokrat",
+        "month=6": "Kesäkuun vuokrat",
+        "month=7": "Heinäkuun vuokrat",
+        "month=8": "Elokuun vuokrat",
+        "month=9": "Syyskuun vuokrat",
+        "month=10": "Lokakuun vuokrat",
+        "month=11": "Marraskuun vuokrat",
+        "month=12": "Joulukuun vuokrat"
+      }
+    }
+  ],
   "room_count_1": "Yksiö",
   "room_count_2": "Kaksio",
   "room_count_3": "Kolmio",

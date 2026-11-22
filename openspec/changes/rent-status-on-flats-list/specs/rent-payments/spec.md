@@ -5,7 +5,7 @@ The flats list SHALL start with this month's rent summary across all the flats t
 
 #### Scenario: The summary adds up this month's rent of every flat
 - **WHEN** today is `2026-11-22`; `Kuusikuja 3 B 12` is let from `2025-03-01` with the rent 89000 cents and the due day 5, and November has no payments; `Koivupolku 7 A 4` is let from `2026-01-01` with the rent 64000 cents, and 64000 cents were paid for November on `2026-11-03`; `Rantatie 15 C 21` is vacant
-- **THEN** the flats list shows "Marraskuun vuokrat", "640,00 € / 1 530,00 € saatu" and "1 myöhässä"
+- **THEN** the flats list shows "Marraskuun vuokrat", "640,00 € / 1 530,00 € saatu" and "Vuokra myöhässä 1 asunnossa"
 
 #### Scenario: A shared flat counts with its whole rent
 - **WHEN** Annika and Jussi own `Kuusikuja 3 B 12` with 50 % each, its rent is 89000 cents, November has no payments, and Annika opens the flats list on `2026-11-22`
