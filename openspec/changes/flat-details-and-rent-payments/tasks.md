@@ -20,13 +20,13 @@
 
 ## 3. Rent payment server functions
 
-- [ ] 3.1 `features/rent-payments/rent-payments.server.ts`:
+- [x] 3.1 `features/rent-payments/rent-payments.server.ts`:
   - the rent payments view of a flat: role, today, tenancies, rent periods and all payments
   - the month view of a tenancy (the same data narrowed to the tenancy, `tenancy_not_found` when it isn't the flat's)
   - record: access (`property_not_found`), owner (`sharing_owner_only`), the tenancy (`tenancy_not_found`), `paid_on` not after today, the month inside the tenancy; logs `rent_payment.recorded` with ids
   - delete: access, owner, the payment belonging to the flat (`rent_payment_not_found`); logs `rent_payment.deleted`
-- [ ] 3.2 `features/rent-payments/functions.ts`: `getRentPayments`, `getRentMonth`, `recordRentPayment`, `deleteRentPayment`, each with its session check
-- [ ] 3.3 Workers tests named after the server-side scenarios: "A payment date in the future is refused", "A month outside the tenancy is refused", "A member can't record a payment", "A member can't delete a payment", plus a stranger refused as not found and the log lines asserted
+- [x] 3.2 `features/rent-payments/functions.ts`: `getRentPayments`, `getRentMonth`, `recordRentPayment`, `deleteRentPayment`, each with its session check
+- [x] 3.3 Workers tests named after the server-side scenarios: "A payment date in the future is refused", "A month outside the tenancy is refused", "A member can't record a payment", "A member can't delete a payment", plus a stranger refused as not found and the log lines asserted
 
 ## 4. Payments stay inside their tenancy
 
