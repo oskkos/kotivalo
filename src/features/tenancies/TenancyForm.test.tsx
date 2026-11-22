@@ -28,7 +28,12 @@ const aino: Tenancy = {
   noticeDate: null,
 }
 
-function setup(editing?: Tenancy) {
+const twoRents = [
+  { validFrom: '2025-03-01', validTo: '2026-12-31', value: 89000 },
+  { validFrom: '2027-01-01', validTo: null, value: 91000 },
+]
+
+function setup(editing?: Tenancy, rents = twoRents) {
   const user = userEvent.setup()
   const onSaved = vi.fn(() => Promise.resolve())
   render(
@@ -36,10 +41,8 @@ function setup(editing?: Tenancy) {
       propertyId="flat"
       address="Kuusikuja 3 B 12"
       editing={editing}
-      rents={[
-        { validFrom: '2025-03-01', validTo: '2026-12-31', value: 89000 },
-        { validFrom: '2027-01-01', validTo: null, value: 91000 },
-      ]}
+      rents={rents}
+      today="2026-11-22"
       onSaved={onSaved}
       onClose={vi.fn()}
     />,
@@ -64,12 +67,23 @@ describe('Adding a tenant', () => {
 
 describe('The rent of a new tenancy', () => {
   test('The form shows the rent in effect on the start date', async () => {
-    const { user } = setup()
-    await user.type(box('Starts'), '01/12/2026')
+    const { user } = setup(undefined, [
+      { validFrom: '2025-03-01', validTo: null, value: 89000 },
+    ])
+    await user.type(box('Starts'), '01/01/2027')
     expect(box('Monthly rent (€)')).toHaveValue('890.00')
-    await user.clear(box('Starts'))
+  })
+
+  test('the rent follows the start and is not asked before the latest rent period', async () => {
+    const { user } = setup()
     await user.type(box('Starts'), '01/01/2027')
     expect(box('Monthly rent (€)')).toHaveValue('910.00')
+    await user.clear(box('Starts'))
+    await user.type(box('Starts'), '01/12/2026')
+    expect(
+      screen.queryByRole('textbox', { name: 'Monthly rent (€)' }),
+    ).toBeNull()
+    expect(screen.getByText(/the rent isn't saved here/)).toBeInTheDocument()
   })
 })
 
@@ -193,5 +207,62 @@ describe('the previous tenancy in the new tenant form', () => {
     expect(previousTenancy(flat, '2027-07-01', '2027-07-01')).toBeUndefined()
     expect(previousTenancy(flat, '2024-01-01', today)).toBeUndefined()
     expect(previousTenancy([aino], undefined, today)).toBeUndefined()
+  })
+})
+
+describe('an earlier tenancy in the new tenant form', () => {
+  test('records the ending with the suggested last day', async () => {
+    createTenancy.mockResolvedValue({ ok: true, tenancyId: 't3' })
+    const { user, onSaved } = setup(undefined, [])
+    expect(
+      screen.queryByRole('checkbox', { name: /Notice has already been given/ }),
+    ).toBeNull()
+    await user.type(box('Name'), 'Pekka Virtanen')
+    await user.type(box('Starts'), '01/06/2023')
+    await user.type(box('Monthly rent (€)'), '850')
+    await user.type(box('Due day'), '5')
+    await user.click(
+      screen.getByRole('checkbox', { name: /Notice has already been given/ }),
+    )
+    await user.type(box('Notice date'), '20/01/2025')
+    // The tenant's notice: the last day of the following month.
+    expect(box('Last day of the tenancy')).toHaveValue('28/02/2025')
+    await user.click(screen.getByRole('button', { name: 'Save tenant' }))
+    await waitFor(() => {
+      expect(onSaved).toHaveBeenCalled()
+    })
+    expect(createTenancy).toHaveBeenCalledWith({
+      data: expect.objectContaining({
+        validFrom: '01/06/2023',
+        ending: {
+          noticeGivenBy: 'tenant',
+          noticeDate: '20/01/2025',
+          lastDay: '28/02/2025',
+        },
+      }) as unknown,
+    })
+  })
+
+  test("shows the server's reason under the last day", async () => {
+    createTenancy.mockResolvedValue({
+      ok: false,
+      reason: 'tenancy_end_before_notice_period',
+    })
+    const { user } = setup(undefined, [])
+    await user.type(box('Name'), 'Pekka Virtanen')
+    await user.type(box('Starts'), '01/06/2023')
+    await user.type(box('Monthly rent (€)'), '850')
+    await user.type(box('Due day'), '5')
+    await user.click(
+      screen.getByRole('checkbox', { name: /Notice has already been given/ }),
+    )
+    await user.click(screen.getByRole('button', { name: 'Landlord' }))
+    await user.type(box('Notice date'), '10/01/2025')
+    await user.clear(box('Last day of the tenancy'))
+    await user.type(box('Last day of the tenancy'), '28/02/2025')
+    await user.click(screen.getByRole('button', { name: 'Save tenant' }))
+    expect(
+      await screen.findByText(/landlord's notice period ends later/i),
+    ).toBeInTheDocument()
   })
 })

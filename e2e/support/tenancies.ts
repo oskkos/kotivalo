@@ -16,6 +16,15 @@ export interface TenantDetails {
   /** As typed; the rent in effect on the start date otherwise. */
   rent?: string
   dueDay?: string
+  /** An earlier tenancy's ending, recorded in the same form. */
+  ending?: {
+    /** The way's button, e.g. 'Tenant'; the first way otherwise. */
+    by?: string
+    /** As typed. */
+    noticeDate: string
+    /** As typed; the suggested last day otherwise. */
+    lastDay?: string
+  }
 }
 
 /** Adds a tenant through the form and lands on the Tenancy page. */
@@ -53,6 +62,21 @@ export async function addTenant(
   await page
     .getByRole('textbox', { name: 'Due day' })
     .fill(tenant.dueDay ?? '5')
+  if (tenant.ending) {
+    const { by, noticeDate, lastDay } = tenant.ending
+    await page
+      .getByRole('checkbox', { name: /Notice has already been given/ })
+      .check()
+    if (by !== undefined) {
+      await page.getByRole('button', { name: by, exact: true }).click()
+    }
+    await page.getByRole('textbox', { name: 'Notice date' }).fill(noticeDate)
+    if (lastDay !== undefined) {
+      await page
+        .getByRole('textbox', { name: 'Last day of the tenancy' })
+        .fill(lastDay)
+    }
+  }
   await page.getByRole('button', { name: 'Save tenant' }).click()
   await expect(page).toHaveURL(new RegExp(`/properties/${flatId}/tenancy$`))
 }

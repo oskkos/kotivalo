@@ -21,10 +21,10 @@
 
 ## 2. The new tenant form: the ending and the rent
 
-- [ ] 2.1 Move the end form's fields (who gave notice, notice date, last rent day with the suggested date and the period hint) into a component shared by `EndTenancyForm` and `TenancyForm`
-- [ ] 2.2 `TenancyForm` (adding): the ending section, shown when the start entered is before today, sent with the save; the rent field hidden when `rentAsked` is false, with a line that the rent is set on the Rent and charges page
-- [ ] 2.3 Messages for the section and the line in fi, then sv and en with the translate skill
-- [ ] 2.4 Component tests for the section and the hidden rent; Playwright: "Adding an earlier tenancy with its ending"
+- [x] 2.1 `features/tenancies/ending.tsx`, shared by `EndTenancyForm` and `TenancyForm`: the ways of ending and their picker, the notice date's label, the reasons under each date, the suggested last day and the hint. Each form keeps its own two date fields, because they belong to different TanStack forms
+- [x] 2.2 `TenancyForm` (adding): the ending section, shown when the start entered is before today, sent with the save; the rent field hidden when `rentAsked` is false, with a line that the rent is set on the Rent and charges page
+- [x] 2.3 Messages for the section and the line in fi, then sv and en with the translate skill
+- [x] 2.4 Component tests for the section and the hidden rent; Playwright: "Adding an earlier tenancy with its ending"
 
 ## 3. The Tenancy page: earlier tenancies and no ending before the start
 

@@ -54,6 +54,23 @@ test.describe('Adding a tenant', () => {
 
     await expect(page).toHaveURL(`/properties/${id}/tenancy/new`)
   })
+
+  test('Adding an earlier tenancy with its ending', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await addTenant(page, id, {
+      name: 'Pekka Virtanen',
+      start: '01/06/2023',
+      ending: { by: 'Tenant', noticeDate: '20/01/2025' },
+    })
+    // Aino's tenancy is still the current one; Pekka's ended before it.
+    await expect(
+      page.getByRole('heading', { name: 'Aino Koski' }),
+    ).toBeVisible()
+    const others = page.getByRole('region', { name: 'Other tenancies' })
+    await expect(others).toContainText('Pekka Virtanen')
+    await expect(others).toContainText('28/02/2025')
+  })
 })
 
 test.describe('The tenancy page', () => {
