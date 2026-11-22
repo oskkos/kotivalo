@@ -61,6 +61,8 @@ interface Props {
   today?: IsoDate
   onSaved: () => Promise<void>
   onClose: () => void
+  /** Correcting a tenancy that hasn't started: opens the removal dialog. */
+  onRemove?: () => void
 }
 
 type Field =
@@ -594,6 +596,16 @@ export function TenancyForm(props: Props) {
           </Section>
         ) : null}
         {alert === undefined ? null : <ReasonAlert reason={alert} />}
+        {editing && props.onRemove ? (
+          <Button
+            variant="text"
+            color="error"
+            onClick={props.onRemove}
+            sx={{ alignSelf: 'center', minHeight: 44 }}
+          >
+            {m.tenancy_remove()}
+          </Button>
+        ) : null}
       </Stack>
       <Box
         component="footer"
