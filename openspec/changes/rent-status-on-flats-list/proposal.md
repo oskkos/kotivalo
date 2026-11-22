@@ -4,7 +4,7 @@ Rent payments and the monthly rent status landed with the flat details page (#33
 
 ## What Changes
 
-- **A rent summary at the top of the flats list:** this month's rent received out of the rent expected, across all the flats the user has access to, and how many flats are late. "Marraskuun vuokrat · 640,00 € / 1 530,00 € saatu · 1 myöhässä".
+- **A rent summary at the top of the flats list:** this month's rent received out of the rent expected, across all the flats the user has access to, and how many flats are late. "Marraskuun vuokrat · 640,00 € / 1 530,00 € saatu · Vuokra myöhässä 1 asunnossa".
   - It counts each flat's whole rent, also for co-owned flats and for members, as the details page shows it (decided 22.11.2026).
   - The expected rent is the sum of this month's expected rent of every tenancy that runs in the month ("Expected rent of a month"): a month a tenancy starts or ends in counts by days, and when the tenant changes mid-month, both tenancies' parts count.
   - The received rent is the sum of the payments recorded for this month's rent of those tenancies, whatever their payment date.

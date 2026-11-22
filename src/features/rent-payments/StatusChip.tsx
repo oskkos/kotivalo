@@ -17,28 +17,34 @@ const tones: Record<StatusTone, { bg: string; icon: string }> = {
   lavender: { bg: colors.lavenderTint, icon: CLOCK },
 }
 
-export function StatusChip(props: { status: RentStatus; text?: string }) {
+export function StatusChip(props: {
+  status: RentStatus
+  text?: string
+  /** Smaller, for a flat's card on the flats list. */
+  small?: boolean
+}) {
   const tone = tones[statusTone(props.status)]
+  const small = props.small === true
   return (
     <Box
       component="span"
       sx={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: 0.75,
-        minHeight: 32,
-        px: 1.5,
+        gap: small ? 0.625 : 0.75,
+        minHeight: small ? 28 : 32,
+        px: small ? 1.25 : 1.5,
         borderRadius: 999,
         bgcolor: tone.bg,
-        fontSize: 13,
+        fontSize: small ? 12 : 13,
         fontWeight: 900,
         whiteSpace: 'nowrap',
         flexShrink: 0,
       }}
     >
       <svg
-        width="16"
-        height="16"
+        width={small ? 14 : 16}
+        height={small ? 14 : 16}
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"

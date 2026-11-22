@@ -11,11 +11,11 @@
 
 ## 3. The summary and the chips on the flats list
 
-- [ ] 3.1 `RentSummary.tsx` and `CardRentChip.tsx` as in design.md ("Components"); `PropertyList.tsx` gets the `summary` and `rentStatuses` slots; the route `/` loads `listRentThisMonth` and composes them
-- [ ] 3.2 fi, sv and en messages for the summary's title (a select by month), the amounts and the late count, with the translate skill and the term-critic on the diff
-- [ ] 3.3 Component tests for the summary and the chips (every chip text, no chip for a vacant flat or one starting later, no summary without rent)
-- [ ] 3.4 Playwright tests "The summary adds up this month's rent of every flat" and "A late month shows on the card", with dates relative to today so they don't age; the existing flats list tests still passing
-- [ ] 3.5 CLAUDE.md "Current state": the summary and the rent chips on the flats list
+- [x] 3.1 `RentSummary.tsx` and `CardRentChip.tsx` as in design.md ("Components"); `PropertyList.tsx` gets the `summary` and `rentStatuses` slots; the route `/` loads `listRentThisMonth` and composes them
+- [x] 3.2 fi, sv and en messages for the summary's title (a select by month), the amounts and the late count, with the translate skill and the term-critic on the diff
+- [x] 3.3 Component tests for the summary and the chips (every chip text, no chip for a vacant flat or one starting later, no summary without rent)
+- [x] 3.4 Playwright tests "The summary adds up this month's rent of every flat" and "A late month shows on the card", with dates relative to today so they don't age; the existing flats list tests still passing
+- [x] 3.5 CLAUDE.md "Current state": the summary and the rent chips on the flats list
 
 ## 4. Archive
 
