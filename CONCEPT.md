@@ -94,6 +94,8 @@ In practice there is rarely a new tenant ready when notice is given, so "change 
 - The owner marks a month's rent as paid with one tap. The amount defaults to the expected rent and the date to today; both can be changed.
 - A month can have several payments. Less than the expected rent shows as _Partly paid_ with the amount missing.
 - _Late_ is counted from the tenancy's due day, e.g. "10 days late".
+- The expected rent of a month that a tenancy starts or ends in is the month's rent in proportion to the days the tenancy runs, rounded to the cent (15.–30.11. is 16 of 30 days: 474,67 € of 890 €). It only drives the status; the owner records the amount actually paid. In a tenancy's first month the due date is no earlier than its start.
+- A month's payments are deleted and recorded again, not edited. Only owners record and delete them.
 - The year summary (#34) takes gross rent from the payments received in the year, by payment date. Months without a payment are shown as a warning ("rent for 3 months not marked"), never assumed paid.
 - A deposit is not income, but the part kept for unpaid rent or damage is rental income in the year it is kept ([Tax Administration](https://www.vero.fi/en/individuals/property/rental_income/what-is-considered-rental-income/)); the deposit return (#30) records it.
 - Rent is still not an entry (#32): the expected amount comes from the rent periods, and payments are their own records.

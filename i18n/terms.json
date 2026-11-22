@@ -1217,6 +1217,54 @@
       ]
     }
   },
+  "rent_payment": {
+    "code": "rentPayment",
+    "definition": "One payment of rent received for a month of a tenancy, recorded with its amount and payment date; a month may have several. Gross rent is taxed in the year it is received.",
+    "fi": {
+      "term": "vuokranmaksu",
+      "match": [
+        "vuokranmaksu(n|a|t|ja|jen|ssa|sta|un|lla|lta|lle|na|ksi|issa|ista|ihin|illa|ilta|ille|ina|iksi|ineen|si|nsa)?"
+      ],
+      "status": "derived",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/syventavat-vero-ohjeet/ohje-hakusivu/49336/vuokratulojen-verotus8/",
+          "quote": "vuokranantajan haltuun vuokranmaksun ja huoneiston hyvän hoidon turvaamiseksi"
+        }
+      ]
+    },
+    "sv": {
+      "term": "hyresbetalning",
+      "match": ["hyresbetalning(en|ens|ar|arna|ars|arnas)?"],
+      "status": "derived",
+      "sources": [
+        {
+          "source": "finlex",
+          "url": "https://www.finlex.fi/sv/lagstiftning/1995/481",
+          "quote": "Hyresgästen har rätt att få befrielse från hyresbetalningen eller skälig nedsättning av hyran"
+        },
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/Detaljerade_skatteanvisningar/anvisningar/49336/beskattning-av-hyresinkomster8/",
+          "quote": "som säkerhet för hyresbetalningen och god skötsel av lägenheten"
+        }
+      ]
+    },
+    "en": {
+      "term": "rent payment",
+      "match": ["rent payments?"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/individuals/property/rental_income/what-is-considered-rental-income/",
+          "quote": "unless the tenant later fails to make their rent payments and you need to keep the deposited money."
+        }
+      ]
+    },
+    "notes": "Derived, not verified: the sources use the words for paying rent as the tenant's obligation (a deposit securing the rent payment), while Kotivalo records each payment received. The Finnish law says \"vuokran maksaminen\" (chapter 4) and uses vuokranmaksu- in compounds such as vuokranmaksukausi and vuokranmaksupäivä; the match patterns list the endings so those compounds don't count as this term. A payment on its own (maksu, betalning, payment) is a generic word. Recording a payment uses the app's verb for recording (kirjata, registrera, record)."
+  },
   "rental_income": {
     "definition": "Rent and other payments a landlord gets from renting out a flat; taxed as capital income.",
     "showOriginal": true,

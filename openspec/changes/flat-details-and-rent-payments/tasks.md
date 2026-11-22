@@ -11,12 +11,12 @@
 
 ## 2. Expected rent, statuses and reasons
 
-- [ ] 2.1 `src/lib/dates.ts`: `daysInMonth(month)` and `daysBetween(a, b)`, with unit tests (leap years, month ends)
-- [ ] 2.2 `features/rent-payments/status.ts` as in design.md ("Expected rent and status are pure functions"): `expectedRent`, `rentDueDate`, `monthStatus`, `tenancyMonths`, `monthsNotFullyPaid`
-- [ ] 2.3 Unit tests named after every scenario of "Expected rent of a month", "The rent status of a month" and "Months not fully paid"
-- [ ] 2.4 `features/rent-payments/schemas.ts`: the amount (`parseDecimal`, 2 decimals, 1–10 000 000 cents), `paid_on`, `month` (`YYYY-MM`), shared by the dialog and the server, with schema unit tests
-- [ ] 2.5 Reason codes in `src/lib/reasons.ts`: field `rent_payment_amount_invalid`, `rent_payment_date_in_future`; alerts `rent_payment_month_outside_tenancy`, `rent_payment_not_found`, `tenancy_has_payments_outside`, `tenancy_has_payments`. Messages in fi, then sv and en with the translate skill (terms *vuokranmaksu*, *eräpäivä*, *osittain maksettu* as the skill decides), then the term-critic on the diff
-- [ ] 2.6 CONCEPT.md §4.2: the partial-month rule (by days, rounded to the cent) and the due date of the first month
+- [x] 2.1 `src/lib/dates.ts`: `daysInMonth(month)` and `daysBetween(a, b)`, with unit tests (leap years, month ends)
+- [x] 2.2 `features/rent-payments/status.ts` as in design.md ("Expected rent and status are pure functions"): `expectedRent`, `rentDueDate`, `monthStatus`, `tenancyMonths`, `monthsNotFullyPaid`
+- [x] 2.3 Unit tests named after every scenario of "Expected rent of a month", "The rent status of a month" and "Months not fully paid"
+- [x] 2.4 `features/rent-payments/schemas.ts`: the amount (`parseDecimal`, 2 decimals, 1–10 000 000 cents), `paid_on`, `month` (`YYYY-MM`), shared by the dialog and the server, with schema unit tests
+- [x] 2.5 Reason codes in `src/lib/reasons.ts`: field `rent_payment_amount_invalid`, `rent_payment_date_in_future`; alerts `rent_payment_month_outside_tenancy`, `rent_payment_not_found`, `tenancy_has_payments_outside`, `tenancy_has_payments`. Messages in fi, then sv and en with the translate skill (terms *vuokranmaksu*, *eräpäivä*, *osittain maksettu* as the skill decides), then the term-critic on the diff
+- [x] 2.6 CONCEPT.md §4.2: the partial-month rule (by days, rounded to the cent) and the due date of the first month
 
 ## 3. Rent payment server functions
 

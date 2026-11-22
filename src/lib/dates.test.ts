@@ -3,6 +3,8 @@ import {
   addMonths,
   addYears,
   dayBefore,
+  daysBetween,
+  daysInMonth,
   lastDayOfMonth,
   isoDateInFinland,
   parseFiDate,
@@ -77,5 +79,21 @@ describe('month and year arithmetic', () => {
     ['2026-10-31', 2, '2028-10-31'],
   ])('%s moved by %i years is %s', (date, years, moved) => {
     expect(addYears(date, years)).toBe(moved)
+  })
+})
+
+describe('day counts', () => {
+  test('days in a month, also in a leap year', () => {
+    expect(daysInMonth('2026-11')).toBe(30)
+    expect(daysInMonth('2027-01')).toBe(31)
+    expect(daysInMonth('2027-02')).toBe(28)
+    expect(daysInMonth('2028-02')).toBe(29)
+  })
+
+  test('days between two dates, across months and years', () => {
+    expect(daysBetween('2026-11-05', '2026-11-22')).toBe(17)
+    expect(daysBetween('2026-12-31', '2027-01-01')).toBe(1)
+    expect(daysBetween('2028-02-28', '2028-03-01')).toBe(2)
+    expect(daysBetween('2026-11-22', '2026-11-05')).toBe(-17)
   })
 })
