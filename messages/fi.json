@@ -439,6 +439,8 @@
   "tenancy_cancel_open": "{name} jatkaa vuokralaisena, ja vuokrasuhde on taas voimassa toistaiseksi.",
   "tenancy_cancel_title": "Perutaanko päättyminen?",
   "tenancy_card_details": "{contract} · {date} alkaen",
+  "tenancy_card_let": "Vuokrattu",
+  "tenancy_card_starts": "Vapaa · uusi vuokralainen {date} alkaen",
   "tenancy_card_vacant": "Vapaa",
   "tenancy_contract": "Sopimus",
   "tenancy_contract_fixed_term": "Määräaikainen",

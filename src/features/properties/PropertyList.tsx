@@ -20,6 +20,8 @@ interface Props {
   properties: readonly Property[]
   /** The current owners by flat id, for each card's ownership line. */
   owners?: Readonly<Record<string, readonly CardOwner[]>>
+  /** Each card's tenancy status by flat id, e.g. a chip. */
+  statuses?: Readonly<Record<string, ReactNode>>
   /** The bottom navigation bar. */
   bottomNav?: ReactNode
   /** Shown above the list or the empty state, e.g. flat invitations. */
@@ -46,9 +48,12 @@ function PlusIcon() {
 export function PropertyCard({
   property,
   owners = [],
+  status,
 }: {
   property: Property
   owners?: readonly CardOwner[] | undefined
+  /** The tenancy status, e.g. a chip. */
+  status?: ReactNode
 }) {
   const ownership = ownershipLine(owners)
   return (
@@ -103,6 +108,7 @@ export function PropertyCard({
               {ownership}
             </Typography>
           )}
+          {status}
         </Stack>
       </Box>
     </Link>
@@ -178,6 +184,7 @@ function Header(): ReactNode {
 export function PropertyList({
   properties,
   owners = {},
+  statuses = {},
   bottomNav,
   notices,
 }: Props) {
@@ -209,6 +216,7 @@ export function PropertyList({
                 <PropertyCard
                   property={property}
                   owners={owners[property.id]}
+                  status={statuses[property.id]}
                 />
               </li>
             ))}

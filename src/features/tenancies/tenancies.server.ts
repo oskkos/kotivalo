@@ -20,6 +20,7 @@ import type { NoticeGiver, PropertyRole } from '#/server/db/schema'
 import type { Logger } from '#/server/log/log'
 import { validateEnding } from './notice'
 import { validateTenancyDates } from './rules'
+import { flatStatus } from './status'
 import type {
   Tenancy,
   TenancyFields,
@@ -416,4 +417,40 @@ export async function cancelTenancyEnding(
   }
   deps.log.info('tenancy.ending_cancelled', { propertyId, tenancyId })
   return { ok: true }
+}
+
+/** A flat's tenancy status for its card on the flats list. */
+export type CardTenancyStatus =
+  | { kind: 'let'; tenantName: string }
+  | { kind: 'notice_given'; tenantName: string; on: IsoDate }
+  | { kind: 'vacant'; nextStart: IsoDate | null }
+
+/** The tenancy status of each of the user's flats, in one query. */
+export async function listTenancyStatuses(
+  deps: TenancyDeps,
+): Promise<Record<string, CardTenancyStatus>> {
+  const flats = await deps.properties.listForUser(deps.userId)
+  const day = today(deps)
+  const tenancies = await deps.tenancies.currentFor(
+    flats.map((flat) => flat.id),
+    day,
+  )
+  const statuses: Record<string, CardTenancyStatus> = {}
+  for (const flat of flats) {
+    const status = flatStatus(
+      tenancies.filter((t) => t.propertyId === flat.id),
+      day,
+    )
+    statuses[flat.id] =
+      status.kind === 'vacant'
+        ? { kind: 'vacant', nextStart: status.next?.validFrom ?? null }
+        : status.kind === 'let'
+          ? { kind: 'let', tenantName: status.tenancy.tenantName }
+          : {
+              kind: 'notice_given',
+              tenantName: status.tenancy.tenantName,
+              on: status.on,
+            }
+  }
+  return statuses
 }

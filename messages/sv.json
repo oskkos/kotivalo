@@ -439,6 +439,8 @@
   "tenancy_cancel_open": "{name} fortsätter som hyresgäst, och hyresförhållandet gäller igen tills vidare.",
   "tenancy_cancel_title": "Ångra upphörandet?",
   "tenancy_card_details": "{contract} · från {date}",
+  "tenancy_card_let": "Uthyrd",
+  "tenancy_card_starts": "Ledig · ny hyresgäst från {date}",
   "tenancy_card_vacant": "Ledig",
   "tenancy_contract": "Avtal",
   "tenancy_contract_fixed_term": "Tidsbestämt",

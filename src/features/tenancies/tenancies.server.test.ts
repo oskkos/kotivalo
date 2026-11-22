@@ -14,6 +14,7 @@ import {
   getNewTenancyOptions,
   getTenancies,
   getTenancy,
+  listTenancyStatuses,
   updateTenancy,
   type TenancyDeps,
 } from './tenancies.server'
@@ -540,5 +541,35 @@ describe('tenancy logging', () => {
     for (const secret of ['Aino', 'Koski', '040', 'aino@example.com']) {
       expect(text).not.toContain(secret)
     }
+  })
+})
+
+describe('tenancy statuses on the flats list', () => {
+  test('each flat of the user gets its status', async () => {
+    const id = await addId(aino)
+    await endTenancy(deps(), flat, id, tenantNotice)
+    const other = (
+      await propertyRepository(db).create(
+        'annika',
+        {
+          streetAddress: 'Koivupolku 7 A 4',
+          postcode: '33100',
+          city: 'Tampere',
+          roomCount: 1,
+          floorArea: 320,
+        },
+        now,
+        '2025-03-01',
+      )
+    ).id
+    expect(await listTenancyStatuses(deps())).toEqual({
+      [flat]: {
+        kind: 'notice_given',
+        tenantName: 'Aino Koski',
+        on: '2026-12-31',
+      },
+      [other]: { kind: 'vacant', nextStart: null },
+    })
+    expect(await listTenancyStatuses(deps('liisa'))).toEqual({})
   })
 })

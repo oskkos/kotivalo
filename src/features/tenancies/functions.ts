@@ -21,6 +21,7 @@ import {
   getNewTenancyOptions as newOptions,
   getTenancies as getList,
   getTenancy as getOne,
+  listTenancyStatuses as listStatuses,
   updateTenancy as update,
   type TenancyDeps,
 } from './tenancies.server'
@@ -88,3 +89,7 @@ export const cancelTenancyEnding = createServerFn({ method: 'POST' })
   .handler(async ({ data }) =>
     cancel(await tenancyDeps(), data.propertyId, data.tenancyId),
   )
+
+export const listTenancyStatuses = createServerFn({ method: 'GET' }).handler(
+  async () => listStatuses(await tenancyDeps()),
+)

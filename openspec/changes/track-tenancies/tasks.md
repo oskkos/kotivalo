@@ -99,9 +99,9 @@
 
 ## 8. Statuses on the flats list
 
-- [ ] 8.1 The flats list's loader gets each flat's status in one query (`currentFor`); `PropertyList.tsx` shows the status chip and the tenant's name, as on "Asunnot · vuokrasuhteen tila"
-- [ ] 8.2 Messages in fi, then sv and en with the translate skill; the term-critic on the diff
-- [ ] 8.3 Component tests for the three statuses; Playwright "The card shows the tenancy status"
+- [x] 8.1 The flats list's loader gets each flat's status in one query (`currentFor`); `PropertyList.tsx` shows the status chip and the tenant's name, as on "Asunnot · vuokrasuhteen tila"
+- [x] 8.2 Messages in fi, then sv and en with the translate skill; the term-critic on the diff
+- [x] 8.3 Component tests for the three statuses; Playwright "The card shows the tenancy status"
 
 ## 9. Docs and checks
 
