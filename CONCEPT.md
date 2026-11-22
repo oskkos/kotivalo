@@ -75,6 +75,20 @@ In practice there is rarely a new tenant ready when notice is given, so "change 
 1. **End tenancy.** The flat's status is _Notice given_ until the last rent day and _Vacant_ after that. The deposit return is logged later by default, once the final inspection is done.
 2. **Add tenant.** Possible at any time; the previous tenancy stays in the history.
 
+**Notice periods** ([Act on Residential Leases 481/1995](https://www.finlex.fi/fi/lainsaadanto/1995/481), as amended by 531/2026 in force 1.10.2026; #18). The app suggests the earliest legal end date; the user can choose a later one.
+
+- **Counting:** the notice period runs from the last day of the calendar month in which notice was given (§52), so an open-ended tenancy ends on the last day of a month. Tenant gives notice on 15.3. → the tenancy ends on 30.4.
+- **Tenant:** 1 month.
+- **Landlord**, depending on when the contract was made, because the amendment keeps the old §52(2) and (4) for contracts made before 1.10.2026 unless the parties agree otherwise:
+  - contract made on or after 1.10.2026: 4 months if the tenancy has lasted without a break for at least 2 years immediately before the notice, otherwise 3 months;
+  - contract made before 1.10.2026: 6 months if it has lasted at least 1 year, otherwise 3 months.
+- So a tenancy records the date the contract was made (_Contract made_, defaulting to the start date). Deriving the rule from the start date would be wrong for a contract signed before 1.10.2026 that starts after it.
+- The periods are minimums: a longer landlord's or shorter tenant's period may be agreed, the opposite is void (§52). The suggestion is therefore a lower bound, never a fixed value.
+- **Fixed-term** tenancies end when the term runs out and can't be ended by notice (§4, §51); earlier only by agreement or with a court's permission (§55). The End tenancy screen shows no notice-period hint for them. If the contract is first fixed-term and then open-ended, notice can end it at the earliest at the end of the fixed term (§4, contracts made on or after 1.10.2026).
+- **Notice date** means the date notice was received: notice is always in writing; the landlord's states the end date and the grounds and is delivered verifiably (§54, §13 a), and an electronic notice counts as received on the third day after the alert message.
+- **Moving day** (§68): the end date for contracts made on or after 1.10.2026; the next weekday after it for older contracts. Rent runs to the end date either way.
+- The app shows these as hints, not legal advice.
+
 ### 4.3 Financing charge: income-recognised or capitalised
 
 Each flat stores whether the housing company recognises the financing charge (rahoitusvastike) as income or capitalises it. The property manager can tell you.
@@ -153,7 +167,7 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 | `property_access`                            | property_id, user_id, role (`owner`, `member`)                                                                                                                      |
 | `property_invitations`                       | property_id, email, invited_by, created, expires (pending only; accepting adds `property_access`)                                                                   |
 | `ownership_periods`                          | property_id, user_id, share (basis points, > 0), valid_from, valid_to, reason (sale / gift / inheritance / division / other; none for the first period)             |
-| `tenancies`                                  | property_id, tenant, contact details, type, start, end, deposit, due day, notice given by, notice date                                                              |
+| `tenancies`                                  | property_id, tenant, contact details, type, contract made, start, end, deposit, due day, notice given by, notice date                                               |
 | `deposit_returns`                            | tenancy_id, amount returned, deduction, reason, date                                                                                                                |
 | `recurring_amounts`                          | property_id, kind (rent / maintenance charge / financing charge), amount, valid_from, valid_to                                                                      |
 | `financing_treatments`                       | property_id, treatment (income-recognised / capitalised), valid_from, valid_to                                                                                      |
@@ -193,7 +207,7 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 
 - [ ] Structure of form 7H and the per-flat breakdown
 - [ ] Treatment of the financing charge (income-recognised / capitalised)
-- [ ] Notice periods. In the sketch: tenant 1 month, landlord 3 months, or 6 months if the tenancy has lasted over a year.
+- [x] ~~Notice periods. In the sketch: tenant 1 month, landlord 3 months, or 6 months if the tenancy has lasted over a year.~~ Checked against the Act on Residential Leases, which changed on 1.10.2026: see §4.2 (#18). The End tenancy sketch's hint follows the old law and is updated with #30.
 - [ ] Capital income tax rate: 30 % applies only up to 30 000 € of capital income and 34 % above it. The flat 30 % in the year summary and the editable rate in Account understate the tax on larger income; decide whether to model the bracket.
 - [ ] Taxation of an estate of a deceased person
 - [ ] Tax consequences of ownership changes (transfer tax, capital gains)
