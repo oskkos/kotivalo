@@ -105,9 +105,9 @@
 
 ## 9. Docs and checks
 
-- [ ] 9.1 CONCEPT.md: the `tenancies` row of the data model (no deposit; the validity columns, `term_end`, `contract_made`)
-- [ ] 9.2 CLAUDE.md: the current state (`features/tenancies/`, notice periods in `notice.ts`) and the e2e helper `tenancies.ts`
-- [ ] 9.3 `pnpm check:traceability`, the full Vitest suite, Playwright, lint and typecheck pass
+- [x] 9.1 CONCEPT.md: the `tenancies` row of the data model (no deposit; the validity columns, `term_end`, `contract_made`)
+- [x] 9.2 CLAUDE.md: the current state (`features/tenancies/`, notice periods in `notice.ts`) and the e2e helper `tenancies.ts`
+- [x] 9.3 `pnpm check:traceability`, the full Vitest suite, Playwright, lint and typecheck pass
 
 ## 10. Archive
 
