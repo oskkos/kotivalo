@@ -48,7 +48,7 @@ The browser computes the statuses from raw data and the server's `today`, as the
 
 ### The details page reads through one server function
 
-`getFlatDetails(propertyId)` in `features/properties/` returns the property with its owners, the user's role, the tenancies, the recurring amounts and treatment periods, the payments, the three latest entries and `today`, after one access check. It calls the other features' `*.server.ts` loaders (tenancies, recurring amounts, transactions) with the same `deps`, so their access rules and shapes stay in one place.
+`getFlatDetails(propertyId)` in `features/properties/` returns the property with its owners, the user's role, the tenancies, the recurring amounts and treatment periods, the payments, the three latest entries and `today`, after one access check. After its one access check it reads through the other features' repositories (ownership, tenancies, recurring amounts, rent payments, and a new `transactionRepository.latest()`), not their `*.server.ts` loaders, because each loader would repeat the access check.
 
 - Alternative: the route loader calling five existing server functions in parallel, as the edit page does today. Rejected: five HTTP round trips on each client-side navigation, five session checks, and five places to handle "not found".
 
