@@ -1,0 +1,175 @@
+## ADDED Requirements
+
+### Requirement: Recording a rent payment
+An owner of a flat SHALL be able to record that rent was paid for a month of a tenancy: the amount and the payment date. The form SHALL open from the rent card on the flat details page (this month) and from a month's payments page, and SHALL show the month and the tenant. The amount SHALL default to the month's expected rent still missing ("Expected rent of a month"), or to empty when the rent is not set, and SHALL be more than 0 and at most 100 000 €, with at most two decimals, written with a comma or a point (`rent_payment_amount_invalid`). The payment date SHALL default to today and SHALL NOT be in the future (`rent_payment_date_in_future`); it MAY be before the month, for rent paid in advance. The month SHALL be a month in which the tenancy runs (`rent_payment_month_outside_tenancy`). A month MAY have several payments, and their total MAY exceed the expected rent. The payment SHALL record the user who recorded it. A member SHALL NOT be able to record payments.
+
+#### Scenario: Recording this month's rent from the details page
+- **WHEN** today is `2026-11-22`, `Aino Koski` rents `Kuusikuja 3 B 12` from `2025-03-01` with the due day 5 and the rent 89000 cents, and Annika chooses "Merkitse maksetuksi" on the details page and saves without changes
+- **THEN** a payment of 89000 cents for `2026-11` paid on `2026-11-22` is stored, and the rent card shows "Maksettu 22.11."
+
+#### Scenario: A smaller amount leaves the month partly paid
+- **WHEN** Annika records 50000 cents paid on `4.11.2026` for November
+- **THEN** the rent card shows "Osittain maksettu" and "puuttuu 390,00 €"
+
+#### Scenario: A second payment defaults to the missing amount
+- **WHEN** November has a payment of 50000 cents, and Annika opens the form again
+- **THEN** the amount shows `390,00`, and saving it makes the rent card show "Maksettu" with the second payment's date
+
+#### Scenario: A payment date in the future is refused
+- **WHEN** today is `2026-11-22`, and an owner records a payment dated `23.11.2026`
+- **THEN** the date field shows the reason `rent_payment_date_in_future`, and nothing is stored
+
+#### Scenario: An invalid amount is refused
+- **WHEN** an owner records the amount `0` or `890,555`
+- **THEN** the amount field shows the reason `rent_payment_amount_invalid`, and nothing is stored
+
+#### Scenario: A month outside the tenancy is refused
+- **WHEN** `Aino Koski`'s tenancy starts on `2025-03-01`, and an owner sends a payment for `2025-02` to the server
+- **THEN** it is refused with the reason `rent_payment_month_outside_tenancy`, and nothing is stored
+
+#### Scenario: A member can't record a payment
+- **WHEN** Jussi, a member of the flat, sends a payment to the server
+- **THEN** it is refused with the reason `sharing_owner_only`, and nothing is stored
+
+### Requirement: Deleting a rent payment
+An owner SHALL be able to delete a recorded payment from the month's payments page after a confirmation, for example to record it again with the right amount or date. Payments SHALL NOT be edited. A member SHALL NOT be able to delete payments.
+
+#### Scenario: Deleting a wrongly recorded payment
+- **WHEN** November's only payment is 89000 cents on `2026-11-03`, and Annika deletes it and confirms
+- **THEN** the month's payments page lists no payments, and the month's status is computed without it
+
+#### Scenario: A member can't delete a payment
+- **WHEN** Jussi, a member of the flat, sends deleting a payment to the server
+- **THEN** it is refused with the reason `sharing_owner_only`, and the payment stays
+
+### Requirement: Expected rent of a month
+A month's expected rent for a tenancy SHALL be the flat's rent in effect in that month ("Rent and charges are recorded as monthly periods"), in proportion to the days of the month the tenancy runs: the rent × the tenancy's days in the month ÷ the month's days, rounded to the nearest cent, halves up. For a month the tenancy runs in full it SHALL be the month's rent. When no rent is in effect in the month, the expected rent SHALL be unknown, and the month's status SHALL be *Rent not set*.
+
+**No Playwright test:** a pure calculation from the rent periods and the tenancy's dates; Vitest covers it, and the details page and the month's payments page show it in the browser tests of "The flat details page" and "The month's rent payments page".
+
+#### Scenario: A full month
+- **WHEN** the rent is 89000 cents from `2025-03-01`, and a tenancy runs from `2025-03-01` without an end
+- **THEN** the expected rent of `2026-11` is 89000 cents
+
+#### Scenario: A tenancy starting mid-month
+- **WHEN** the rent is 89000 cents, and a tenancy starts on `2026-11-15`
+- **THEN** the expected rent of `2026-11` is 47467 cents (16 of 30 days)
+
+#### Scenario: A tenancy ending mid-month
+- **WHEN** the rent is 89000 cents, and a tenancy's last rent day is `2027-01-14`
+- **THEN** the expected rent of `2027-01` is 40194 cents (14 of 31 days)
+
+#### Scenario: A rent change during the tenancy
+- **WHEN** the rent is 89000 cents from `2025-03-01` and 92000 cents from `2026-03-01`, and a tenancy runs from `2025-03-01`
+- **THEN** the expected rent of `2026-02` is 89000 cents and of `2026-03` 92000 cents
+
+#### Scenario: No rent set
+- **WHEN** a tenancy runs in `2026-11` and the flat has no rent period in effect in that month
+- **THEN** the expected rent is unknown, and the month's status is *Rent not set*
+
+### Requirement: The rent status of a month
+A month's rent status for a tenancy on a given day SHALL be computed, never stored, from its expected rent, its payments and its due date. The due date SHALL be the tenancy's due day in that month, the month's last day in a shorter month ("Tenancy dates and details"), and no earlier than the tenancy's start. The status SHALL be:
+- *Paid* (with the date of the latest payment) when the payments add up to at least the expected rent
+- *Partly paid* (with the missing amount) when there are payments adding up to less
+- *Late* (with the days since the due date) when there are no payments and the day is after the due date
+- *Due* (with the due date) when there are no payments and the day is on or before the due date
+- *Rent not set* when the expected rent is unknown, whatever the payments
+For a day before the tenancy starts, the flat details page SHALL show *No rent this month* with the tenancy's start instead.
+
+**No Playwright test:** a pure calculation from the expected rent, the payments and the day; Vitest covers it, and the details page shows the statuses in the browser tests of "The flat details page".
+
+#### Scenario: Due until the due date
+- **WHEN** the due day is 5, November has no payments, and the day is `2026-11-05`
+- **THEN** November is *Due 5.11.*
+
+#### Scenario: Late from the day after the due date
+- **WHEN** the due day is 5, November has no payments, and the day is `2026-11-22`
+- **THEN** November is *Late 17 days*
+
+#### Scenario: Partly paid
+- **WHEN** the expected rent is 89000 cents and November has a payment of 50000 cents
+- **THEN** November is *Partly paid*, 39000 cents missing
+
+#### Scenario: Paid in two payments
+- **WHEN** the expected rent is 89000 cents, and November has payments of 50000 cents on `2026-11-04` and 39000 cents on `2026-11-20`
+- **THEN** November is *Paid 20.11.*
+
+#### Scenario: Paid more than expected
+- **WHEN** the expected rent is 89000 cents and November has a payment of 90000 cents
+- **THEN** November is *Paid*
+
+#### Scenario: The due date in the first month is no earlier than the start
+- **WHEN** the due day is 5, a tenancy starts on `2026-11-15`, and the day is `2026-11-10`
+- **THEN** November's due date is `2026-11-15`, and on `2026-11-16` without payments it is *Late 1 day*
+
+#### Scenario: The due day in a shorter month
+- **WHEN** the due day is 31
+- **THEN** the due date of `2027-02` is `2027-02-28`
+
+### Requirement: Months not fully paid
+The months not fully paid of a flat on a given day SHALL be the months of its tenancies in the current and the previous calendar year, up to and including the current month, whose status on that day is *Late* or *Partly paid*. A month that is *Due* or *Rent not set* SHALL NOT count. The flat details page SHALL warn about these months other than the current one, and the rent payments page about those of the chosen year.
+
+**No Playwright test:** a pure selection of months by their status; Vitest covers it, and the warnings are shown in the browser tests of "The flat details page" and "The rent payments page".
+
+#### Scenario: Earlier months of this and last year count
+- **WHEN** today is `2026-01-20`, the due day is 5, December 2025 has no payments and January 2026 has none
+- **THEN** December 2025 and January 2026 are not fully paid, and the details page warns about December 2025
+
+#### Scenario: Months two years back don't count
+- **WHEN** today is `2026-11-22`, and a tenancy that ran in 2023 and 2024 has no payments
+- **THEN** none of its months are not fully paid
+
+#### Scenario: A month before its due date doesn't count
+- **WHEN** today is `2026-11-03`, the due day is 5, and November has no payments
+- **THEN** November is not counted
+
+### Requirement: The month's rent payments page
+Everyone with access to a flat SHALL be able to open a month's payments page for a tenancy from the rent card on the details page and from the rent payments page. It SHALL show the month, the tenant, the due date, the status, the expected rent, the total paid and the amount missing, and the payments with their amount, payment date and who recorded them. Owners SHALL see "Lisää maksu" and a delete button on each payment; members SHALL NOT.
+
+#### Scenario: The month's payments
+- **WHEN** November has a payment of 50000 cents on `2026-11-04` recorded by Annika, and Jussi opens the month's payments page
+- **THEN** it shows "Marraskuun vuokra", `Aino Koski`, the due date `5.11.2026`, "Osittain maksettu", the rent `890,00 €`, paid `500,00 €`, missing `390,00 €`, and the payment `500,00 €` paid `4.11.2026` recorded by Annika
+
+#### Scenario: A member sees the payments but can't change them
+- **WHEN** Jussi, a member of the flat, opens a month's payments page
+- **THEN** he sees the payments and no button to add or delete them
+
+### Requirement: The rent payments page
+Everyone with access to a flat SHALL be able to open its rent payments page from the flat details page. It SHALL show one year at a time, the current year first, with a choice of the current year and the earlier years in which a tenancy of the flat ran. For the chosen year it SHALL show the rent received in the year: the total of the payments of the flat's tenancies whose payment date is in that year, whatever month they are for. It SHALL list the months up to the current one in which a tenancy ran, newest first, each with its status and opening its payments page; a month in which two tenancies ran SHALL be listed once per tenancy with the tenant's name. It SHALL warn about the year's months not fully paid ("Months not fully paid"), and say that the year summary does not assume them paid.
+
+#### Scenario: Months newest first with their statuses
+- **WHEN** today is `2026-11-22`, `Aino Koski`'s tenancy runs from `2025-03-01` with the due day 5, every month to September 2026 is paid, October has no payments and November has 50000 cents
+- **THEN** the page shows 2026 with November "Osittain", October "Myöhässä" and September to January "Maksettu", and a warning about October and November
+
+#### Scenario: Rent is received in the year it is paid
+- **WHEN** December 2025's rent of 89000 cents was paid on `2026-01-02`, and the months January to September 2026 were paid in 2026, each 89000 cents
+- **THEN** 2026 shows the rent received `8 900,00 €`, and 2025 doesn't count December's payment
+
+#### Scenario: Two tenancies in the same month
+- **WHEN** `Pekka Virtanen`'s tenancy ended on `2025-02-14` and `Aino Koski`'s started on `2025-02-15`
+- **THEN** 2025 lists February twice, once with `Pekka Virtanen` and once with `Aino Koski`
+
+#### Scenario: A flat without tenancies
+- **WHEN** a user opens the rent payments page of a flat that has never had a tenancy
+- **THEN** the page says that rent payments are recorded once the flat has a tenant
+
+### Requirement: Payments stay inside their tenancy
+Recorded payments SHALL stay within the months of their tenancy. Correcting a tenancy's start or end ("Correcting a tenancy"), ending it ("Ending a tenancy", "Ending a fixed-term tenancy early") so that a month with payments would fall outside it SHALL be refused with the reason `tenancy_has_payments_outside`, and removing a tenancy that hasn't started but has payments ("Removing a tenancy that hasn't started") SHALL be refused with the reason `tenancy_has_payments`. Nothing SHALL change. The owner deletes those payments first.
+
+**No Playwright test:** server-side checks with the same forms and reason display as the tenancy forms' browser tests; Vitest covers them.
+
+#### Scenario: Ending before a paid month is refused
+- **WHEN** `Aino Koski`'s rent for `2027-01` was paid in advance, and an owner ends the tenancy with the last rent day `2026-12-31`
+- **THEN** it is refused with the reason `tenancy_has_payments_outside`, and the tenancy is unchanged
+
+#### Scenario: Correcting the start past a paid month is refused
+- **WHEN** `Aino Koski`'s tenancy starts on `2025-03-01` and March 2025 has a payment, and an owner corrects the start to `2025-04-01`
+- **THEN** it is refused with the reason `tenancy_has_payments_outside`, and the tenancy is unchanged
+
+#### Scenario: Moving the start within the paid month is allowed
+- **WHEN** March 2025 has a payment, and an owner corrects the start from `2025-03-01` to `2025-03-15`
+- **THEN** the correction is saved, and March's expected rent becomes 17 of 31 days
+
+#### Scenario: Removing a tenancy with payments is refused
+- **WHEN** `Mikko Lehtinen`'s tenancy starts on `2027-01-01` and January 2027 was paid in advance, and an owner removes it
+- **THEN** it is refused with the reason `tenancy_has_payments`, and the tenancy and the payment stay
