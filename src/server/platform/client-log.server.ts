@@ -5,6 +5,7 @@
 // that look like email addresses are replaced.
 import { z } from 'zod'
 import type { LogFields, Logger } from '#/server/log/log'
+import { readAtMost } from './body.server'
 import { addLogContext } from './log-context.server'
 
 export const CLIENT_LOG_LIMITS = {
@@ -59,43 +60,6 @@ export interface ClientLogDeps {
   userId: () => Promise<string | undefined>
 }
 
-/**
- * The body as text, or undefined once it passes `maxBytes`: a stated
- * Content-Length over the limit is refused unread, and a longer body is
- * cancelled as soon as it passes it.
- */
-async function readAtMost(
-  request: Request,
-  maxBytes: number,
-): Promise<string | undefined> {
-  const stated = Number(request.headers.get('content-length') ?? 0)
-  if (stated > maxBytes || request.body === null) {
-    return stated > maxBytes ? undefined : ''
-  }
-  const reader = request.body.getReader()
-  const chunks: Uint8Array[] = []
-  let size = 0
-  for (;;) {
-    const { done, value } = await reader.read()
-    if (done) {
-      break
-    }
-    size += value.byteLength
-    if (size > maxBytes) {
-      await reader.cancel()
-      return undefined
-    }
-    chunks.push(value)
-  }
-  const bytes = new Uint8Array(size)
-  let offset = 0
-  for (const chunk of chunks) {
-    bytes.set(chunk, offset)
-    offset += chunk.byteLength
-  }
-  return new TextDecoder().decode(bytes)
-}
-
 export async function clientLogResponse(
   request: Request,
   deps: ClientLogDeps,
@@ -125,7 +89,7 @@ export async function clientLogResponse(
   }
   let json: unknown
   try {
-    json = JSON.parse(body)
+    json = JSON.parse(new TextDecoder().decode(body))
   } catch {
     return refuse(400, 'not_json')
   }
