@@ -236,7 +236,7 @@ describe('Attaching a receipt', () => {
     expect(list.ok && list.entries).toEqual([])
     expect(logLines()).toContainEqual(
       expect.objectContaining({
-        event: 'receipt.refused',
+        event: 'transaction.receipt_refused',
         problem: 'unsupported_type',
       }),
     )
@@ -458,7 +458,7 @@ describe('Editing an entry', () => {
     expect(logLines()).toContainEqual(
       expect.objectContaining({
         level: 'error',
-        event: 'receipt.delete_failed',
+        event: 'transaction.receipt_delete_failed',
       }),
     )
   })
@@ -512,6 +512,24 @@ describe('The entries page', () => {
       '2026-11-03',
       '2026-10-28',
     ])
+  })
+
+  test('a year without entries left stays in the years', async () => {
+    const { ok } = await createTransaction(
+      deps('annika'),
+      flat,
+      { ...repair, date: '2025-05-02' },
+      null,
+    )
+    expect(ok).toBe(true)
+    const listed = await getTransactions(deps('annika'), flat, 2025)
+    const id = listed.ok ? (listed.entries[0]?.id ?? '') : ''
+    expect((await deleteTransaction(deps('annika'), flat, id)).ok).toBe(true)
+    expect(await getTransactions(deps('annika'), flat, 2025)).toMatchObject({
+      year: 2025,
+      years: [2026, 2025],
+      entries: [],
+    })
   })
 
   test('a user without access gets property_not_found', async () => {
