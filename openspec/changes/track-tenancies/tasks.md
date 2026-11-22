@@ -41,15 +41,15 @@
 
 ## 4. Server functions
 
-- [ ] 4.1 `features/tenancies/tenancies.server.ts`:
+- [x] 4.1 `features/tenancies/tenancies.server.ts`:
   - the Tenancy page (current, earlier, role, today, the rent in effect today)
   - the new tenant options (the rent periods, the ownership start, the flat's other tenancies for the form's checks)
   - the tenancy for correcting and for ending, with the earliest last day for each way of ending
   - create (with the rent when it changed, in one batch, and the compensating delete of design.md), update, end and cancel
   - each write checks access (`property_not_found`), the owner role (`sharing_owner_only`), the tenancy belonging to the flat (`tenancy_not_found`) and the rules of group 2
-- [ ] 4.2 `features/tenancies/functions.ts`: `getTenancies`, `getNewTenancyOptions`, `getTenancy`, `createTenancy`, `updateTenancy`, `endTenancy`, `cancelTenancyEnding`, each with its session check
-- [ ] 4.3 Log the events of design.md ("Logging"), ids only, never the tenant's details
-- [ ] 4.4 Workers tests, named after the scenarios:
+- [x] 4.2 `features/tenancies/functions.ts`: `getTenancies`, `getNewTenancyOptions`, `getTenancy`, `createTenancy`, `updateTenancy`, `endTenancy`, `cancelTenancyEnding`, each with its session check
+- [x] 4.3 Log the events of design.md ("Logging"), ids only, never the tenant's details
+- [x] 4.4 Workers tests, named after the scenarios:
   - "Adding an open-ended tenancy" and "Adding a fixed-term tenancy"
   - "A member can't add a tenant", "A member can't end a tenancy", "A member can't correct a tenancy"
   - "A tenancy overlapping the previous one is refused", "A new tenant can be added during the notice period", "A tenancy can't be added while one runs without an end", "A tenancy before the ownership is refused", "Contract made in the future is refused", "A fixed term ending before it starts is refused", "Invalid tenant details are refused"
