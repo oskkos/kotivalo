@@ -563,6 +563,41 @@
     },
     "notes": "The Tax Administration's main word is pääomavastike / kapitalvederlag (also the Limited Liability Housing Companies Act's, 3:3), with rahoitusvastike / finansieringsvederlag in brackets. Kotivalo uses rahoitusvastike, the word on housing company invoices, and the patterns accept both. The Tax Administration's English has no settled term (\"capital charges\", \"capital expenditure charges\", \"loan charge\"), so \"financing charge\" stays proposed until a fluent reviewer decides; the 7H instructions' \"capital charges\" is accepted by the pattern and is the main alternative. Once a reviewer decides, keep one English pattern and move the other to avoid."
   },
+  "fixed_term": {
+    "code": "fixedTerm",
+    "codeNotes": "Contract type value `fixed_term` (tenancies.contract_type); its end is tenancies.term_end.",
+    "definition": "A tenancy agreed to end on a set date; it ends by itself then and usually cannot be ended by notice.",
+    "fi": {
+      "term": "määräaikainen",
+      "match": ["määräaikai\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "finlex",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/1995/481",
+          "quote": "Vuokrasopimus on määräaikainen tai voimassa toistaiseksi."
+        }
+      ]
+    },
+    "sv": {
+      "term": "tidsbestämd",
+      "match": ["tidsbestäm\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "finlex",
+          "url": "https://www.finlex.fi/sv/lagstiftning/1995/481",
+          "quote": "Ett hyresavtal är tidsbestämt eller gäller tills vidare."
+        }
+      ]
+    },
+    "en": {
+      "term": "fixed-term",
+      "match": ["fixed[- ]terms?"],
+      "status": "proposed"
+    },
+    "notes": "The noun määräaika (the term itself, \"määräajan päättymispäivä\") is left out of the Finnish pattern; the Swedish messages name it den bestämda tiden or hyrestiden. The English pattern also matches the noun \"fixed term\", which is harmless because the check runs from the Finnish side."
+  },
   "housing_company": {
     "code": "housingCompany",
     "definition": "The limited liability housing company whose shares give the right to occupy a flat.",
@@ -923,7 +958,76 @@
         }
       ]
     },
-    "notes": "The notice period is irtisanomisaika / uppsägningstid / notice period (Act on Residential Leases §52)."
+    "notes": "The notice period is its own term, notice_period (irtisanomisaika / uppsägningstid / notice period)."
+  },
+  "notice_period": {
+    "codeNotes": "Calculated in features/tenancies/notice.ts (noticePeriodMonths, earliestLastDay); never stored.",
+    "definition": "The time from the end of the month notice is given to the end of the tenancy: 1 month for the tenant, 3, 4 or 6 months for the landlord (CONCEPT.md §4.2).",
+    "fi": {
+      "term": "irtisanomisaika",
+      "match": ["irtisanomisai\\p{L}*", "irtisanomisaj\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "finlex",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/1995/481",
+          "quote": "Vuokrasopimuksen irtisanomisaika alkaa kulua sen kalenterikuukauden viimeisestä päivästä, jonka aikana irtisanominen on suoritettu"
+        }
+      ]
+    },
+    "sv": {
+      "term": "uppsägningstid",
+      "match": ["uppsägningstid\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "finlex",
+          "url": "https://www.finlex.fi/sv/lagstiftning/1995/481",
+          "quote": "Uppsägningstiden i fråga om hyresavtal börjar löpa från den sista dagen i den kalendermånad, under vilken uppsägningen har skett"
+        }
+      ]
+    },
+    "en": {
+      "term": "notice period",
+      "match": ["notice periods?"],
+      "status": "proposed"
+    },
+    "code": "noticePeriod"
+  },
+  "open_ended": {
+    "code": "openEnded",
+    "codeNotes": "Contract type value `open_ended` (tenancies.contract_type); valid_to stays null until it is ended.",
+    "definition": "A tenancy in force until further notice; it ends by notice, agreement or another legal ground.",
+    "fi": {
+      "term": "toistaiseksi",
+      "match": ["toistaiseksi(?= voimassa)", "^toistaiseksi$"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "finlex",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/1995/481",
+          "quote": "Vuokrasopimus on määräaikainen tai voimassa toistaiseksi."
+        }
+      ]
+    },
+    "sv": {
+      "term": "tills vidare",
+      "match": ["gäll\\p{L}* tills vidare", "^tills vidare$"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "finlex",
+          "url": "https://www.finlex.fi/sv/lagstiftning/1995/481",
+          "quote": "Ett hyresavtal är tidsbestämt eller gäller tills vidare."
+        }
+      ]
+    },
+    "en": {
+      "term": "open-ended",
+      "match": ["open[- ]ended"],
+      "status": "proposed"
+    },
+    "notes": "The full phrases are toistaiseksi voimassa oleva / gäller tills vidare. The patterns match the legal phrase and the bare short label only, because toistaiseksi and tills vidare also mean \"for now\". Short UI labels use Toistaiseksi / Tills vidare / Open-ended."
   },
   "owner": {
     "code": "owner",
