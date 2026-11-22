@@ -285,6 +285,7 @@ export const TRANSACTION_CATEGORIES = [
   'tenant_water_charge',
   'other_income',
   'annual_repair',
+  'improvement',
   'water_charge',
   'insurance',
   'other_expense',

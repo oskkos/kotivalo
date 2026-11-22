@@ -55,9 +55,19 @@ export const CATEGORY_HINTS: Record<TransactionCategory, () => string> = {
   tenant_water_charge: () => m.transactions_hint_tenant_water_charge(),
   other_income: () => m.transactions_hint_other_income(),
   annual_repair: () => m.transactions_hint_annual_repair(),
+  improvement: () => m.transactions_hint_improvement(),
   water_charge: () => m.transactions_hint_water_charge(),
   insurance: () => m.transactions_hint_insurance(),
   other_expense: () => m.transactions_hint_other_expense(),
+}
+
+/** Whether the category is taxable, deductible or deducted later. */
+function taxTreatment(category: TransactionCategory): string {
+  const { type, row } = CATEGORIES[category]
+  if (type === 'income') {
+    return m.transactions_hint_taxable()
+  }
+  return row ? m.transactions_hint_deductible() : m.transactions_not_deducted()
 }
 
 const FIELD_OF: Partial<
@@ -99,6 +109,7 @@ const CLOSE = 'M6 6 L18 18 M18 6 L6 18'
 const CAMERA =
   'M4 8 H7 L9 5 H15 L17 8 H20 V19 H4 Z M15.2 13 a3.2 3.2 0 1 1 -6.4 0 a3.2 3.2 0 1 1 6.4 0'
 const CHECK = 'M5 12 L10 17 L19 7'
+const CLOCK = 'M12 7 V12 L15 14 M21 12 A9 9 0 1 1 3 12 A9 9 0 1 1 21 12'
 const CHEVRON = 'M9 5 L16 12 L9 19'
 
 function FieldReasonText(props: {
@@ -519,11 +530,13 @@ export function TransactionForm(props: Props) {
           }}
         >
           <Stack direction="row" sx={{ alignItems: 'center', gap: 0.75 }}>
-            <Icon path={CHECK} size={16} width={3} />
+            <Icon
+              path={CATEGORIES[category].row ? CHECK : CLOCK}
+              size={16}
+              width={CATEGORIES[category].row ? 3 : 2}
+            />
             <Typography sx={{ fontSize: 13, fontWeight: 900 }}>
-              {CATEGORIES[category].type === 'income'
-                ? m.transactions_hint_taxable()
-                : m.transactions_hint_deductible()}
+              {taxTreatment(category)}
             </Typography>
           </Stack>
           <Typography sx={{ fontSize: 13, fontWeight: 700, lineHeight: 1.4 }}>

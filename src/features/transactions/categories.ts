@@ -16,13 +16,21 @@ export type SummaryRow =
 
 export interface Category {
   type: TransactionType
-  row: SummaryRow
+  /**
+   * The row the entry's amount fills in the year it is paid, or null for an
+   * improvement, which is not deducted all at once: for a flat in a housing
+   * company a tenth a year in row 2.5 for 10 years from the year paid, or on
+   * sale (a building is depreciated from its acquisition cost instead). The
+   * year summary (#34) calculates it.
+   */
+  row: SummaryRow | null
 }
 
 export const CATEGORIES: Record<TransactionCategory, Category> = {
   tenant_water_charge: { type: 'income', row: 'gross_rent' },
   other_income: { type: 'income', row: 'gross_rent' },
   annual_repair: { type: 'expense', row: 'annual_repairs' },
+  improvement: { type: 'expense', row: null },
   water_charge: { type: 'expense', row: 'maintenance_and_water' },
   insurance: { type: 'expense', row: 'other_costs' },
   other_expense: { type: 'expense', row: 'other_costs' },

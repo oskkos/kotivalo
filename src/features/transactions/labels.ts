@@ -7,6 +7,7 @@ export const categoryLabel: Record<TransactionCategory, () => string> = {
   tenant_water_charge: () => m.transactions_category_tenant_water_charge(),
   other_income: () => m.transactions_category_other_income(),
   annual_repair: () => m.transactions_category_annual_repair(),
+  improvement: () => m.transactions_category_improvement(),
   water_charge: () => m.transactions_category_water_charge(),
   insurance: () => m.transactions_category_insurance(),
   other_expense: () => m.transactions_category_other_expense(),

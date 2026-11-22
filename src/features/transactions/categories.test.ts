@@ -9,6 +9,7 @@ describe('entry categories', () => {
     ])
     expect(categoriesOf('expense')).toEqual([
       'annual_repair',
+      'improvement',
       'water_charge',
       'insurance',
       'other_expense',
@@ -19,6 +20,8 @@ describe('entry categories', () => {
     expect(CATEGORIES.annual_repair.row).toBe('annual_repairs')
     expect(CATEGORIES.water_charge.row).toBe('maintenance_and_water')
     expect(CATEGORIES.insurance.row).toBe('other_costs')
+    // Depreciated a tenth a year or deducted on sale, never all at once.
+    expect(CATEGORIES.improvement.row).toBeNull()
     expect(
       categoriesOf('income').every(
         (category) => CATEGORIES[category].row === 'gross_rent',

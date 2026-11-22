@@ -145,9 +145,10 @@
     }
   },
   "basic_improvement": {
-    "definition": "An extension, alteration or modernisation of a flat; not deductible at once but depreciated.",
+    "codeNotes": "Category value `improvement` (expense; its amount fills no form 7H row as such). For a flat in a housing company that the owner pays: a tenth a year in row 2.5 for 10 years from the year paid, or deducted on sale. For a building (form 7K): added to the undepreciated acquisition cost and depreciated at 4 % a year (residential), or deducted on sale.",
+    "definition": "An extension, alteration or modernisation of a flat; not deducted at once, but depreciated or deducted on sale.",
     "showOriginal": true,
-    "notes": "The Swedish is \"ombyggnad\", not \"grundförbättring\", which the Tax Administration does not use.",
+    "notes": "The Swedish is \"ombyggnad\", not \"grundförbättring\", which the Tax Administration does not use. \"From the year paid\" rests on the Tax Administration's worked example (paid in 2025, the first tenth deducted from the 2025 rental income), not on a stated rule; the detailed guidance \"Vuokratulojen verotus\" was not checked. Work the housing company commissions comes through charges: deductible in the year paid if the capital charges are income-recognised.",
     "fi": {
       "term": "perusparannus",
       "match": ["perusparannu\\p{L}*"],
