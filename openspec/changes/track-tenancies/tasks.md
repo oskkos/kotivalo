@@ -36,8 +36,8 @@
 
 ## 3. The rent as statements
 
-- [ ] 3.1 Split `recurringAmountRepository.setAmount` so that `rentStatements(...)` returns its statements, optionally conditioned on a given row existing (design.md, "The rent is saved with the tenancy"); `setAmount` runs them as before
-- [ ] 3.2 The existing recurring-amounts tests pass unchanged; add a Workers test for the conditioned statements writing nothing when the condition row is missing
+- [x] 3.1 Split `recurringAmountRepository.setAmount` so that `rentStatements(...)` returns its statements, optionally conditioned on a given row existing (design.md, "The rent is saved with the tenancy"); `setAmount` runs them as before
+- [x] 3.2 The existing recurring-amounts tests pass unchanged; add a Workers test for the conditioned statements writing nothing when the condition row is missing
 
 ## 4. Server functions
 

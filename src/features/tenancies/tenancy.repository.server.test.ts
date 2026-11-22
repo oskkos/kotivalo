@@ -1,6 +1,7 @@
 import { env } from 'cloudflare:workers'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { propertyRepository } from '#/features/properties/property.repository.server'
+import { recurringAmountRepository } from '#/features/recurring-amounts/recurring-amount.repository.server'
 import { createDb } from '#/server/platform/db.server'
 import { addTestUser, emptyTables } from '#/test/users.server'
 import {
@@ -244,6 +245,68 @@ describe('The tenancy repository', () => {
       [other, '2027-01-01'],
     ])
     expect(await repo.currentFor([], '2026-11-22')).toEqual([])
+  })
+
+  test('the rent is set with a new tenancy, and only if the tenancy went in', async () => {
+    const rents = recurringAmountRepository(db)
+    await rents.setAmount({
+      propertyId: flat,
+      actorId: 'annika',
+      kind: 'rent',
+      latestStart: null,
+      from: '2025-03-01',
+      amount: 89000,
+    })
+    const rent = {
+      latestStart: '2025-03-01',
+      from: '2027-01-01',
+      amount: 91000,
+    }
+    await repo.create('annika', flat, aino, now)
+    const refused = await repo.createWithRent(
+      'annika',
+      flat,
+      fixed('2027-01-15', '2027-12-31'),
+      rent,
+      now,
+    )
+    expect(refused).toEqual({ id: null, rentApplied: false })
+    expect((await rents.forProperty(flat)).amounts.rent).toHaveLength(1)
+
+    const added = await repo.createWithRent(
+      'annika',
+      other,
+      fixed('2027-01-15', '2027-12-31'),
+      null,
+      now,
+    )
+    expect(added.id).not.toBeNull()
+
+    await emptyTables('tenancies')
+    const both = await repo.createWithRent(
+      'annika',
+      flat,
+      fixed('2027-01-15', '2027-12-31'),
+      rent,
+      now,
+    )
+    expect(both.rentApplied).toBe(true)
+    expect((await rents.forProperty(flat)).amounts.rent).toEqual([
+      { validFrom: '2025-03-01', validTo: '2026-12-31', value: 89000 },
+      { validFrom: '2027-01-01', validTo: null, value: 91000 },
+    ])
+  })
+
+  test('a stale rent leaves the tenancy in and reports the rent not applied', async () => {
+    const result = await repo.createWithRent(
+      'annika',
+      flat,
+      aino,
+      { latestStart: '2024-01-01', from: '2025-03-01', amount: 89000 },
+      now,
+    )
+    expect(result.id).not.toBeNull()
+    expect(result.rentApplied).toBe(false)
   })
 
   test('deleting a flat deletes its tenancies', async () => {
