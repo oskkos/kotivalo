@@ -29,6 +29,15 @@ describe('fileResponse', () => {
     ).toMatch(/^attachment;/)
   })
 
+  test("encodes the characters encodeURIComponent leaves, such as ' and ( )", () => {
+    const disposition = fileResponse(file(), {
+      filename: "Kesko's kuitti (1)*!.pdf",
+    }).headers.get('Content-Disposition')
+    expect(disposition).toBe(
+      `inline; filename="Kesko_s kuitti _1___.pdf"; filename*=UTF-8''Kesko%27s%20kuitti%20%281%29%2A%21.pdf`,
+    )
+  })
+
   test('encodes a non-ASCII file name and keeps the fallback safe', () => {
     const disposition = fileResponse(file(), {
       filename: 'kuitti "äö"\r\n.pdf',
