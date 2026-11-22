@@ -6,9 +6,12 @@ import {
   notFound,
   useRouter,
 } from '@tanstack/react-router'
+import { useState } from 'react'
 import { NotFoundView } from '#/components/NotFoundView'
 import { getTenancies } from '#/features/tenancies/functions'
+import { CancelEndingDialog } from '#/features/tenancies/CancelEndingDialog'
 import { tenancyStatus } from '#/features/tenancies/status'
+import type { Tenancy } from '#/features/tenancies/tenancy.repository.server'
 import { TenancyPage } from '#/features/tenancies/TenancyPage'
 import { m } from '#/paraglide/messages.js'
 
@@ -40,47 +43,89 @@ function TenancyRoute() {
   const view = Route.useLoaderData()
   const { propertyId } = Route.useParams()
   const router = useRouter()
+  const [cancelling, setCancelling] = useState<Tenancy>()
   return (
-    <TenancyPage
-      view={view}
-      address={view.property.streetAddress}
-      onBack={() => {
-        void router.navigate({
-          to: '/properties/$propertyId/edit',
-          params: { propertyId },
-        })
-      }}
-      addAction={
-        <ButtonLink
-          to="/properties/$propertyId/tenancy/new"
-          params={{ propertyId }}
-          sx={{ minHeight: 48, px: 2.5 }}
-        >
-          {m.tenancy_add()}
-        </ButtonLink>
-      }
-      currentActions={(tenancy) => (
-        <Stack sx={{ gap: 1 }}>
+    <>
+      <TenancyPage
+        view={view}
+        address={view.property.streetAddress}
+        onBack={() => {
+          void router.navigate({
+            to: '/properties/$propertyId/edit',
+            params: { propertyId },
+          })
+        }}
+        addAction={
           <ButtonLink
-            to="/properties/$propertyId/tenancy/$tenancyId/edit"
-            params={{ propertyId, tenancyId: tenancy.id }}
-            variant="outlined"
-            aria-label={m.tenancy_edit_label()}
-            sx={{ minHeight: 48 }}
+            to="/properties/$propertyId/tenancy/new"
+            params={{ propertyId }}
+            sx={{ minHeight: 48, px: 2.5 }}
           >
-            {m.tenancy_edit()}
+            {m.tenancy_add()}
           </ButtonLink>
-          {tenancyStatus(tenancy, view.today).kind === 'notice_given' ? (
-            <ButtonLink
-              to="/properties/$propertyId/tenancy/new"
-              params={{ propertyId }}
-              sx={{ minHeight: 48 }}
-            >
-              {m.tenancy_add_next()}
-            </ButtonLink>
-          ) : null}
-        </Stack>
-      )}
-    />
+        }
+        currentActions={(tenancy) => {
+          const status = tenancyStatus(tenancy, view.today)
+          return (
+            <Stack sx={{ gap: 1 }}>
+              <ButtonLink
+                to="/properties/$propertyId/tenancy/$tenancyId/edit"
+                params={{ propertyId, tenancyId: tenancy.id }}
+                variant="outlined"
+                aria-label={m.tenancy_edit_label()}
+                sx={{ minHeight: 48 }}
+              >
+                {m.tenancy_edit()}
+              </ButtonLink>
+              {tenancy.noticeGivenBy === null && status.kind !== 'ended' ? (
+                <ButtonLink
+                  to="/properties/$propertyId/tenancy/$tenancyId/end"
+                  params={{ propertyId, tenancyId: tenancy.id }}
+                  variant="outlined"
+                  sx={{ minHeight: 48 }}
+                >
+                  {m.tenancy_end_title()}
+                </ButtonLink>
+              ) : null}
+              {status.kind === 'notice_given' ? (
+                <>
+                  <ButtonLink
+                    to="/properties/$propertyId/tenancy/new"
+                    params={{ propertyId }}
+                    sx={{ minHeight: 48 }}
+                  >
+                    {m.tenancy_add_next()}
+                  </ButtonLink>
+                  <Button
+                    variant="text"
+                    color="inherit"
+                    onClick={() => {
+                      setCancelling(tenancy)
+                    }}
+                    sx={{ textDecoration: 'underline' }}
+                  >
+                    {m.tenancy_cancel()}
+                  </Button>
+                </>
+              ) : null}
+            </Stack>
+          )
+        }}
+      />
+      {cancelling ? (
+        <CancelEndingDialog
+          propertyId={propertyId}
+          tenancy={cancelling}
+          open
+          onClose={() => {
+            setCancelling(undefined)
+          }}
+          onDone={async () => {
+            setCancelling(undefined)
+            await router.invalidate()
+          }}
+        />
+      ) : null}
+    </>
   )
 }

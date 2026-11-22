@@ -148,3 +148,79 @@ test.describe('Correcting a tenancy', () => {
     ).toBeVisible()
   })
 })
+
+/** dd/mm/yyyy of a date, as the English UI writes it. */
+const typed = (date: Date) =>
+  `${String(date.getDate()).padStart(2, '0')}/${String(date.getMonth() + 1).padStart(2, '0')}/${String(date.getFullYear())}`
+
+/** The last day of next month: a month's notice given today. */
+const endOfNextMonth = () => {
+  const today = new Date()
+  return typed(new Date(today.getFullYear(), today.getMonth() + 2, 0))
+}
+
+test.describe('Ending a tenancy', () => {
+  test('The tenant gives notice', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await page.getByRole('link', { name: 'End tenancy' }).click()
+    await waitForHydration(page)
+    const lastDay = page.getByRole('textbox', {
+      name: 'Last day of the tenancy',
+    })
+    await expect(lastDay).toHaveValue(endOfNextMonth())
+    await page.getByRole('button', { name: 'End tenancy' }).click()
+    await expect(page).toHaveURL(new RegExp(`/properties/${id}/tenancy$`))
+    await expect(
+      page.getByText(`Notice given · ends ${endOfNextMonth()}`),
+    ).toBeVisible()
+    await expect(
+      page.getByText(`Tenant's notice, ${typed(new Date())}`),
+    ).toBeVisible()
+  })
+})
+
+test.describe('Ending a fixed-term tenancy early', () => {
+  test('Ending a fixed term by agreement', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    const year = new Date().getFullYear()
+    await addTenant(page, id, {
+      name: 'Mikko Lehtinen',
+      start: `01/01/${String(year)}`,
+      termEnd: `31/12/${String(year + 1)}`,
+      rent: '910',
+    })
+    await page.getByRole('link', { name: 'End tenancy' }).click()
+    await waitForHydration(page)
+    await expect(
+      page.getByRole('button', { name: 'By agreement' }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    await page
+      .getByRole('textbox', { name: 'Last day of the tenancy' })
+      .fill(endOfNextMonth())
+    await page.getByRole('button', { name: 'End tenancy' }).click()
+    await expect(page).toHaveURL(new RegExp(`/properties/${id}/tenancy$`))
+    await expect(
+      page.getByText(`Notice given · ends ${endOfNextMonth()}`),
+    ).toBeVisible()
+  })
+})
+
+test.describe('Cancelling an ending', () => {
+  test("Cancelling the tenant's notice", async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await page.getByRole('link', { name: 'End tenancy' }).click()
+    await waitForHydration(page)
+    await page.getByRole('button', { name: 'End tenancy' }).click()
+    await expect(page).toHaveURL(new RegExp(`/properties/${id}/tenancy$`))
+    await page.getByRole('button', { name: 'Cancel the ending' }).click()
+    await page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Cancel the ending' })
+      .click()
+    await expect(page.getByRole('dialog')).toHaveCount(0)
+    await expect(page.getByText('Active', { exact: true })).toBeVisible()
+    await expect(page.getByRole('link', { name: 'End tenancy' })).toBeVisible()
+  })
+})
