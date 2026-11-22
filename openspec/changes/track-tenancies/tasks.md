@@ -1,15 +1,15 @@
 ## 1. Table and repository
 
-- [ ] 1.1 Add `tenancies` to `src/server/db/schema.ts` as in design.md ("One table, the tenancy as a period"): `validity()`, the contract type and notice-given-by text enums, `isoDate()` for `contract_made` and `term_end`, `due_day`, the nullable contact and notice columns, `instant()` timestamps, the property cascade and the `(property_id, valid_from)` index
-- [ ] 1.2 `pnpm db:generate`; commit the migration
-- [ ] 1.3 `features/tenancies/tenancy.repository.server.ts`:
+- [x] 1.1 Add `tenancies` to `src/server/db/schema.ts` as in design.md ("One table, the tenancy as a period"): `validity()`, the contract type and notice-given-by text enums, `isoDate()` for `contract_made` and `term_end`, `due_day`, the nullable contact and notice columns, `instant()` timestamps, the property cascade and the `(property_id, valid_from)` index
+- [x] 1.2 `pnpm db:generate`; commit the migration
+- [x] 1.3 `features/tenancies/tenancy.repository.server.ts`:
   - `forProperty(propertyId)`: the flat's tenancies, newest first
   - `get(tenancyId)`: the tenancy with its property id
   - `currentFor(propertyIds)`: each flat's tenancies that haven't ended before today's caller-given date, for the flats list and the edit page card
   - `createStatements(...)`: the `INSERT … SELECT` with the owner and overlap conditions, returned for the caller's `atomically` batch, and `create(...)` running it alone
   - `update`, `end` and `cancelEnding`, each conditioned on the owner role, the expected state and no overlap
   - `delete(tenancyId)` for the compensating delete
-- [ ] 1.4 Workers tests for the repository:
+- [x] 1.4 Workers tests for the repository:
   - newest first; other flats left out
   - an overlapping insert or update writes nothing, also against an earlier tenancy
   - a member's write writes nothing
