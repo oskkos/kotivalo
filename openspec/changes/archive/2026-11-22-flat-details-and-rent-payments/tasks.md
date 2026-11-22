@@ -66,5 +66,5 @@
 
 ## 10. Archive
 
-- [ ] 10.1 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
-- [ ] 10.2 `openspec archive flat-details-and-rent-payments` as the PR's last commit
+- [x] 10.1 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
+- [x] 10.2 `openspec archive flat-details-and-rent-payments` as the PR's last commit
