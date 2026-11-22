@@ -40,10 +40,10 @@
 
 ## 6. Recording, the month page
 
-- [ ] 6.1 `RecordPaymentDialog.tsx`: amount and payment date with the missing amount and today as defaults, server reasons under the fields and as alerts
-- [ ] 6.2 Route `/properties/$propertyId/rent/$tenancyId/$month` and `RentMonthPage.tsx`: status, expected, paid, missing, the payments with who recorded them, "Lisää maksu" and delete with confirmation for owners
-- [ ] 6.3 Component tests for the dialog and the page; Playwright tests named after "A smaller amount leaves the month partly paid" (from the month page), "A second payment defaults to the missing amount", "An invalid amount is refused", "Deleting a wrongly recorded payment", "The month's payments" and "A member sees the payments but can't change them"
-- [ ] 6.4 fi, sv and en messages for the dialog and the page (translate skill, term-critic)
+- [x] 6.1 `RecordPaymentDialog.tsx`: amount and payment date with the missing amount and today as defaults, server reasons under the fields and as alerts
+- [x] 6.2 Route `/properties/$propertyId/rent/$tenancyId/$month` and `RentMonthPage.tsx`: status, expected, paid, missing, the payments with who recorded them, "Lisää maksu" and delete with confirmation for owners
+- [x] 6.3 Component tests for the dialog and the page; Playwright tests named after "A second payment defaults to the missing amount", "An invalid amount is refused", "Deleting a wrongly recorded payment", "The month's payments" and "A member sees the payments but can't change them"
+- [x] 6.4 fi, sv and en messages for the dialog and the page (translate skill, term-critic)
 
 ## 7. The rent payments page
 
@@ -54,7 +54,7 @@
 ## 8. The flat details page
 
 - [ ] 8.1 Route `/properties/$propertyId` and `FlatDetailsPage.tsx` with its parts: the header with Edit and the menu, the flat card with owners, the rent card (status, record button, payments link), the warning, the tenancy card (moved from the edit page, `TenancyCard.tsx` reused), rent and charges with the capitalised total, latest entries, the vacant and *starts later* states
-- [ ] 8.2 Component tests; Playwright tests named after every scenario of "The flat details page" and "Recording this month's rent from the details page", reaching the page by its URL
+- [ ] 8.2 Component tests; Playwright tests named after every scenario of "The flat details page" and "Recording this month's rent from the details page" and "A smaller amount leaves the month partly paid", reaching the page by its URL
 - [ ] 8.3 fi, sv and en messages (translate skill, term-critic)
 
 ## 9. The details page as the flat's main page

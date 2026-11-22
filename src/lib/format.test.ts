@@ -10,6 +10,7 @@ import {
   formatMoney,
   formatMoneyChange,
   formatMonth,
+  formatMonthName,
   formatPercentChange,
   formatPercentNumber,
   formatShare,
@@ -130,6 +131,14 @@ describe('formatMonth', () => {
     expect(formatMonth(2026, 11, 'fi')).toBe('Marraskuu 2026')
     expect(formatMonth(2026, 11, 'sv')).toBe('November 2026')
     expect(formatMonth(2026, 1, 'en')).toBe('January 2026')
+  })
+})
+
+describe('formatMonthName', () => {
+  test("a month's name alone, with a capital letter", () => {
+    expect(formatMonthName('2026-11', 'fi')).toBe('Marraskuu')
+    expect(formatMonthName('2026-11', 'sv')).toBe('November')
+    expect(formatMonthName('2027-01', 'en')).toBe('January')
   })
 })
 

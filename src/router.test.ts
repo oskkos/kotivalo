@@ -11,6 +11,7 @@ vi.mock('#/features/account/functions', () => ({}))
 vi.mock('#/features/recurring-amounts/functions', () => ({}))
 vi.mock('#/features/transactions/functions', () => ({}))
 vi.mock('#/features/tenancies/functions', () => ({}))
+vi.mock('#/features/rent-payments/functions', () => ({}))
 
 describe('Router', () => {
   test('registers the home and sign-in pages', () => {
@@ -31,6 +32,12 @@ describe('Router', () => {
 
   test('registers the account page behind the signed-in layout', () => {
     expect(getRouter().routesById).toHaveProperty('/_authed/account')
+  })
+
+  test("registers a month's rent payments page behind the signed-in layout", () => {
+    expect(getRouter().routesById).toHaveProperty(
+      '/_authed/properties/$propertyId/rent/$tenancyId/$month',
+    )
   })
 
   test('registers the rent and charges page behind the signed-in layout', () => {

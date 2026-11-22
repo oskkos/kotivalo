@@ -28,6 +28,8 @@ export const colors = {
   yellowBorder: '#F2D58A', // invitation cards on the yellow tint
   lavenderTint: '#F1EAF6', // expense icons, notes
   greenTint: '#E3F4E4', // let and active chips
+  lateTint: '#FFDCD2', // late rent chips, with an icon and text
+  lateBorder: '#E8A390', // the rent card while the rent is late
   sand: '#F1E6D3', // segmented control track, pressed icon button
 
   // Lines
