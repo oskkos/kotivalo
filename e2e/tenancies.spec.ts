@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import { addFlat, card } from './support/flats'
 import { accepted, ownerWithFlat } from './support/sharing'
 import { waitForHydration } from './support/sign-in'
 import { addTenant, aino } from './support/tenancies'
@@ -222,5 +223,31 @@ test.describe('Cancelling an ending', () => {
     await expect(page.getByRole('dialog')).toHaveCount(0)
     await expect(page.getByText('Active', { exact: true })).toBeVisible()
     await expect(page.getByRole('link', { name: 'End tenancy' })).toBeVisible()
+  })
+})
+
+test.describe('Listing flats', () => {
+  test('The card shows the tenancy status', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addFlat(page, {
+      streetAddress: 'Koivupolku 7 A 4',
+      postcode: '33100',
+      city: 'Tampere',
+      rooms: '1 room',
+      floorArea: '32',
+    })
+    await addTenant(page, id, aino)
+    await page.getByRole('link', { name: 'End tenancy' }).click()
+    await waitForHydration(page)
+    await page.getByRole('button', { name: 'End tenancy' }).click()
+    await expect(page).toHaveURL(new RegExp(`/properties/${id}/tenancy$`))
+    await page.goto('/')
+    await waitForHydration(page)
+    const kuusikujaCard = card(page, 'Kuusikuja')
+    await expect(kuusikujaCard).toContainText(
+      `Notice given · ends ${endOfNextMonth().slice(0, 5)}`,
+    )
+    await expect(kuusikujaCard).toContainText('Aino Koski')
+    await expect(card(page, 'Koivupolku 7 A 4')).toContainText('Vacant')
   })
 })

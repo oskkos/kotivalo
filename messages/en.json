@@ -439,6 +439,8 @@
   "tenancy_cancel_open": "{name} stays on as the tenant, and the tenancy is open-ended again.",
   "tenancy_cancel_title": "Cancel the ending?",
   "tenancy_card_details": "{contract} · from {date}",
+  "tenancy_card_let": "Let",
+  "tenancy_card_starts": "Vacant · new tenant from {date}",
   "tenancy_card_vacant": "Vacant",
   "tenancy_contract": "Contract",
   "tenancy_contract_fixed_term": "Fixed-term",
