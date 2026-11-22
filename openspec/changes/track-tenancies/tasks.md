@@ -85,14 +85,14 @@
 
 ## 7. Ending and cancelling
 
-- [ ] 7.1 Route `/properties/$propertyId/tenancy/$tenancyId/end`; members are sent back to the Tenancy page
-- [ ] 7.2 `EndTenancyForm.tsx`, as on the Design canvas ("Päätä vuokrasuhde", "Päätä määräaikainen vuokrasuhde"):
+- [x] 7.1 Route `/properties/$propertyId/tenancy/$tenancyId/end`; members are sent back to the Tenancy page
+- [x] 7.2 `EndTenancyForm.tsx`, as on the Design canvas ("Päätä vuokrasuhde", "Päätä määräaikainen vuokrasuhde"):
   - open-ended: tenant / landlord / agreed, the notice date, the last rent day following the earliest date until edited, and the hint for each case and contract date
   - fixed-term: the explanation, agreed / court, the date and the last rent day
-- [ ] 7.3 End tenancy on the Tenancy page for owners; Cancel ending with a confirmation dialog during the notice period
-- [ ] 7.4 Messages in fi, then sv and en with the translate skill; add notice period to the term bank if it isn't there; the term-critic on the diff
-- [ ] 7.5 Component tests: the hint and default per way of ending and contract date, the landlord's limit reason, the fixed-term form, the cancel dialog
-- [ ] 7.6 Playwright:
+- [x] 7.3 End tenancy on the Tenancy page for owners; Cancel ending with a confirmation dialog during the notice period
+- [x] 7.4 Messages in fi, then sv and en with the translate skill; add notice period to the term bank if it isn't there; the term-critic on the diff
+- [x] 7.5 Component tests: the hint and default per way of ending and contract date, the landlord's limit reason, the fixed-term form, the cancel dialog
+- [x] 7.6 Playwright:
   - "The tenant gives notice"
   - "Ending a fixed term by agreement"
   - "Cancelling the tenant's notice"
