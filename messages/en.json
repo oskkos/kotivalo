@@ -163,6 +163,25 @@
   "date_placeholder": "dd/mm/yyyy",
   "email_action_fallback": "If the button doesn't work, copy this address into your browser:",
   "error_reference": "Error reference: {reference}",
+  "flat_details_all": "All",
+  "flat_details_latest": "Latest entries",
+  "flat_details_menu": "More actions",
+  "flat_details_no_entries": "No entries yet.",
+  "flat_details_page_title": "Flat details – Kotivalo",
+  "flat_details_partly_paid": "{paid} paid · {missing} outstanding",
+  "flat_details_record": "Mark as paid",
+  "flat_details_title": "Flat details",
+  "flat_details_unpaid_many": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} month's rent not recorded as fully paid",
+        "countPlural=other": "{count} months' rent not recorded as fully paid"
+      }
+    }
+  ],
+  "flat_details_unpaid_one": "Rent not recorded as fully paid: {months}",
   "invitation_accept": "Accept",
   "invitation_accepted": "{address} is now on your list.",
   "invitation_decline": "Decline",
@@ -541,6 +560,7 @@
   "tenancy_cancel_open": "{name} stays on as the tenant, and the tenancy is open-ended again.",
   "tenancy_cancel_title": "Cancel the ending?",
   "tenancy_card_details": "{contract} · from {date}",
+  "tenancy_card_details_due": "{contract} · from {date} · due on day {day} of the month",
   "tenancy_card_let": "Let",
   "tenancy_card_starts": "Vacant · new tenant from {date}",
   "tenancy_card_vacant": "Vacant",

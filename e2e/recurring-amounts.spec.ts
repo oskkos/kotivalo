@@ -1,38 +1,15 @@
 import { expect, test, type Page } from '@playwright/test'
 import { accepted, ownerWithFlat } from './support/sharing'
+import { openAmounts, setAmount, setTreatment } from './support/amounts'
 import { waitForHydration } from './support/sign-in'
 
 // The browser's language is English, so the app is in English.
-
-async function openAmounts(page: Page, id: string) {
-  await page.goto(`/properties/${id}/amounts`)
-  await waitForHydration(page)
-}
 
 const section = (page: Page, name: string) => page.getByRole('region', { name })
 
 // Upcoming changes are relative to today, so the tests don't age.
 const thisYear = new Date().getFullYear()
 const nextYear = thisYear + 1
-
-/** On the Rent and charges page: sets or changes an amount via its form. */
-async function setAmount(
-  page: Page,
-  item: string,
-  amount: string,
-  from: string,
-) {
-  await page
-    .getByRole('button', { name: new RegExp(`^(Set|Change): ${item}$`) })
-    .click()
-  await waitForHydration(page)
-  await page.getByRole('textbox', { name: /amount/i }).fill(amount)
-  await page.getByRole('textbox', { name: 'Valid from' }).fill(from)
-  await page.getByRole('button', { name: /^Save/ }).click()
-  await expect(
-    page.getByRole('heading', { name: 'Rent and charges' }),
-  ).toBeVisible()
-}
 
 /** A flat whose maintenance charge rises from 214 € to 226 € next year. */
 async function raisedCharge(page: Page) {
@@ -217,22 +194,6 @@ test.describe('Undoing the latest rent or charge change', () => {
     await expect(rent.getByText('From 01/03/2025')).toBeVisible()
   })
 })
-
-/** On the Rent and charges page: sets the treatment via its form. */
-async function setTreatment(page: Page, treatment: string, from: string) {
-  await page
-    .getByRole('button', {
-      name: /^(Set|Change): Treatment by the housing company$/,
-    })
-    .click()
-  await waitForHydration(page)
-  await page.getByRole('button', { name: treatment }).click()
-  await page.getByRole('textbox', { name: 'Valid from' }).fill(from)
-  await page.getByRole('button', { name: 'Save' }).click()
-  await expect(
-    page.getByRole('heading', { name: 'Rent and charges' }),
-  ).toBeVisible()
-}
 
 test.describe('The financing charge treatment', () => {
   test('Setting the treatment for the first time', async ({ page }) => {

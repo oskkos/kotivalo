@@ -163,6 +163,25 @@
   "date_placeholder": "pp.kk.vvvv",
   "email_action_fallback": "Jos painike ei toimi, kopioi tämä osoite selaimeesi:",
   "error_reference": "Virhetunnus: {reference}",
+  "flat_details_all": "Kaikki",
+  "flat_details_latest": "Viimeisimmät kirjaukset",
+  "flat_details_menu": "Muut toiminnot",
+  "flat_details_no_entries": "Ei vielä kirjauksia.",
+  "flat_details_page_title": "Asunnon tiedot – Kotivalo",
+  "flat_details_partly_paid": "{paid} maksettu · puuttuu {missing}",
+  "flat_details_record": "Merkitse maksetuksi",
+  "flat_details_title": "Asunnon tiedot",
+  "flat_details_unpaid_many": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Vuokraa ei ole kirjattu kokonaan maksetuksi {count} kuukaudelta",
+        "countPlural=other": "Vuokraa ei ole kirjattu kokonaan maksetuksi {count} kuukaudelta"
+      }
+    }
+  ],
+  "flat_details_unpaid_one": "Vuokraa ei ole kirjattu kokonaan maksetuksi: {months}",
   "invitation_accept": "Hyväksy",
   "invitation_accepted": "{address} on nyt listallasi.",
   "invitation_decline": "Hylkää",
@@ -541,6 +560,7 @@
   "tenancy_cancel_open": "{name} jatkaa vuokralaisena, ja vuokrasuhde on taas voimassa toistaiseksi.",
   "tenancy_cancel_title": "Perutaanko päättyminen?",
   "tenancy_card_details": "{contract} · {date} alkaen",
+  "tenancy_card_details_due": "{contract} · {date} alkaen · eräpäivä kuun {day}.",
   "tenancy_card_let": "Vuokrattu",
   "tenancy_card_starts": "Vapaa · uusi vuokralainen {date} alkaen",
   "tenancy_card_vacant": "Vapaa",

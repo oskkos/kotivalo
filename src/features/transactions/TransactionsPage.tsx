@@ -113,7 +113,7 @@ function Total(props: { label: string; amount: string }) {
   )
 }
 
-function EntryRow(props: {
+export function EntryRow(props: {
   entry: TransactionRow
   propertyId: string
   first: boolean
