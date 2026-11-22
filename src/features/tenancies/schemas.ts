@@ -90,20 +90,30 @@ export const tenancyFields = z
     return { ...fields, termEnd: termEnd.data }
   })
 
+/** How a tenancy ended, or how notice was given: the end form's fields. */
+const endingFields = z.object({
+  noticeGivenBy: z.enum(NOTICE_GIVERS),
+  noticeDate: typedDate,
+  lastDay: typedDate,
+})
+
 export const createTenancyInput = tenancyFields.and(
-  z.object({ propertyId: id, rent: typedAmount }),
+  z.object({
+    propertyId: id,
+    /** Absent when the form doesn't ask for it (rent.ts). */
+    rent: typedAmount.optional(),
+    /** An earlier tenancy's ending, recorded with it. */
+    ending: endingFields.optional(),
+  }),
 )
 
 export const updateTenancyInput = tenancyFields.and(
   z.object({ propertyId: id, tenancyId: id }),
 )
 
-export const endTenancyInput = z.object({
+export const endTenancyInput = endingFields.extend({
   propertyId: id,
   tenancyId: id,
-  noticeGivenBy: z.enum(NOTICE_GIVERS),
-  noticeDate: typedDate,
-  lastDay: typedDate,
 })
 
 export const tenancyRefInput = z.object({ propertyId: id, tenancyId: id })

@@ -105,3 +105,17 @@ export function pendingProblems(
   const blocking = new Set(main.map(key))
   return withChanges.filter((p) => !blocking.has(key(p)))
 }
+
+/**
+ * Problems of the main specs that remain once the active changes' deltas
+ * are applied. A gap an active change takes away (a scenario it removes or
+ * renames) doesn't block: the change's own tests replace it, and its archive
+ * makes the main specs agree.
+ */
+export function blockingProblems(
+  main: Problem[],
+  withChanges: Problem[],
+): Problem[] {
+  const remaining = new Set(withChanges.map(key))
+  return main.filter((p) => remaining.has(key(p)))
+}

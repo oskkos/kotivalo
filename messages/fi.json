@@ -339,6 +339,8 @@
   "reason_tenancy_already_ended_title": "Vuokrasuhde on jo päättynyt",
   "reason_tenancy_already_ending": "Vuokrasuhteelle on jo kirjattu päättyminen. Peru se ensin, jos haluat kirjata toisen.",
   "reason_tenancy_already_ending_title": "Päättyminen on jo kirjattu",
+  "reason_tenancy_already_started": "Vuokrasuhde on jo alkanut, joten sitä ei voi poistaa. Voit korjata sen tiedot tai päättää sen.",
+  "reason_tenancy_already_started_title": "Vuokrasuhde on jo alkanut",
   "reason_tenancy_cancel_later_tenancy": "Asunnolla on myöhempi vuokrasuhde, joten tämän vuokrasuhteen päättymistä ei voi perua.",
   "reason_tenancy_cancel_later_tenancy_title": "Päättymistä ei voi perua",
   "reason_tenancy_contract_made_in_future": "Sopimuksen tekopäivä ei voi olla tulevaisuudessa.",
