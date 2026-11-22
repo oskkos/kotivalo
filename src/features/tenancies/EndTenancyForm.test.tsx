@@ -117,6 +117,18 @@ describe('end tenancy form', () => {
     ).toBeVisible()
   })
 
+  test('payments after the last day show as an alert', async () => {
+    endTenancy.mockResolvedValue({
+      ok: false,
+      reason: 'tenancy_has_payments_outside',
+    })
+    const { user } = setup(aino)
+    await user.click(screen.getByRole('button', { name: 'End tenancy' }))
+    expect(
+      await screen.findByText('Payments would fall outside the tenancy'),
+    ).toBeVisible()
+  })
+
   test('an edited last day stays when the way changes', async () => {
     const { user } = setup(aino)
     await user.clear(lastDay())

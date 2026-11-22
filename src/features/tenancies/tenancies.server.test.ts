@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, test } from 'vitest'
 import { ownershipRepository } from '#/features/ownership/ownership.repository.server'
 import { propertyRepository } from '#/features/properties/property.repository.server'
 import { recurringAmountRepository } from '#/features/recurring-amounts/recurring-amount.repository.server'
+import { rentPaymentRepository } from '#/features/rent-payments/rent-payment.repository.server'
 import { sharingRepository } from '#/features/sharing/sharing.repository.server'
 import { createDb } from '#/server/platform/db.server'
 import { createCaptureLogger } from '#/server/platform/logger.server'
@@ -136,6 +137,7 @@ beforeEach(async () => {
   now = new Date(Date.UTC(2026, 10, 22, 10, 0, 0))
   capture = createCaptureLogger()
   await emptyTables(
+    'rent_payments',
     'tenancies',
     'recurring_amounts',
     'financing_treatments',
@@ -812,5 +814,108 @@ describe('tenancy statuses on the flats list', () => {
       [other]: { kind: 'vacant', nextStart: null },
     })
     expect(await listTenancyStatuses(deps('liisa'))).toEqual({})
+  })
+})
+
+/** Records a payment for `month`, paid before today (rent in advance). */
+async function paid(tenancyId: string, month: string) {
+  const id = await rentPaymentRepository(db).record(
+    'annika',
+    flat,
+    { tenancyId, month, amount: 89000, paidOn: '2026-11-20' },
+    now,
+  )
+  if (id === null) {
+    throw new Error(`no payment for ${month}`)
+  }
+}
+
+describe('Payments stay inside their tenancy', () => {
+  test('Ending before a paid month is refused', async () => {
+    const id = await addId(aino)
+    await paid(id, '2027-01')
+    expect(await endTenancy(deps(), flat, id, tenantNotice)).toEqual({
+      ok: false,
+      reason: 'tenancy_has_payments_outside',
+    })
+    expect((await view()).tenancies[0]?.validTo).toBe(null)
+  })
+
+  test('ending in the paid month is allowed', async () => {
+    const id = await addId(aino)
+    await paid(id, '2026-12')
+    expect(await endTenancy(deps(), flat, id, tenantNotice)).toEqual({
+      ok: true,
+    })
+  })
+
+  test('Correcting the start past a paid month is refused', async () => {
+    const id = await addId(aino)
+    await paid(id, '2025-03')
+    expect(
+      await updateTenancy(deps(), flat, id, {
+        ...aino,
+        validFrom: '2025-04-01',
+      }),
+    ).toEqual({ ok: false, reason: 'tenancy_has_payments_outside' })
+    expect((await view()).tenancies[0]?.validFrom).toBe('2025-03-01')
+  })
+
+  test('Moving the start within the paid month is allowed', async () => {
+    const id = await addId(aino)
+    await paid(id, '2025-03')
+    expect(
+      await updateTenancy(deps(), flat, id, {
+        ...aino,
+        validFrom: '2025-03-15',
+      }),
+    ).toEqual({ ok: true })
+    expect((await view()).tenancies[0]?.validFrom).toBe('2025-03-15')
+  })
+
+  test('correcting a fixed term to end before a paid month is refused', async () => {
+    const id = await addId(fixedTerm('2026-01-01', '2026-12-31'))
+    await paid(id, '2026-12')
+    expect(
+      await updateTenancy(deps(), flat, id, {
+        ...fixedTerm('2026-01-01', '2026-11-30'),
+      }),
+    ).toEqual({ ok: false, reason: 'tenancy_has_payments_outside' })
+  })
+
+  test('Removing a tenancy with payments is refused', async () => {
+    const id = await addId(fixedTerm('2027-01-01', '2027-12-31'))
+    await paid(id, '2027-01')
+    expect(await removeTenancy(deps(), flat, id)).toEqual({
+      ok: false,
+      reason: 'tenancy_has_payments',
+    })
+    expect((await view()).tenancies).toHaveLength(1)
+  })
+
+  test('the writes themselves keep payments inside', async () => {
+    const repo = tenancyRepository(db)
+    const id = await addId(aino)
+    await paid(id, '2027-01')
+    expect(await repo.end('annika', flat, id, tenantNotice, now)).toBe(false)
+    expect(
+      await repo.update(
+        'annika',
+        flat,
+        id,
+        { ...aino, validFrom: '2027-02-01' },
+        { validTo: null, expectedValidTo: null },
+        now,
+      ),
+    ).toBe(false)
+  })
+
+  test('the removing write itself keeps a tenancy with payments', async () => {
+    const repo = tenancyRepository(db)
+    const later = await addId(fixedTerm('2027-06-01', '2027-12-31'))
+    await paid(later, '2027-06')
+    expect(
+      await repo.removeNotStarted('annika', flat, later, '2026-11-22'),
+    ).toBe(false)
   })
 })

@@ -13,6 +13,7 @@ import {
   inArray,
   isNotNull,
   isNull,
+  lt,
   lte,
   ne,
   not,
@@ -27,6 +28,7 @@ import {
   properties,
   propertyAccess,
   recurringAmounts,
+  rentPayments,
   tenancies,
   type ContractType,
   type NoticeGiver,
@@ -125,6 +127,40 @@ export function tenancyRepository(db: Db) {
         ),
     )
 
+  /**
+   * None of the tenancy's rent payments falls outside the months of
+   * `from`–`to` (none: indefinitely), so payments stay inside their tenancy.
+   */
+  const paymentsInside = (from: IsoDate, to: IsoDate | null): SQL =>
+    notExists(
+      db
+        .select({ one: sql`1` })
+        .from(rentPayments)
+        .where(
+          and(
+            eq(rentPayments.tenancyId, tenancies.id),
+            or(
+              lt(rentPayments.month, from.slice(0, 7)),
+              to === null ? undefined : gt(rentPayments.month, to.slice(0, 7)),
+            ),
+          ),
+        ),
+    )
+
+  /** No rent payment of the tenancy is for a month after `lastDay`'s. */
+  const paymentsUntil = (lastDay: IsoDate): SQL =>
+    notExists(
+      db
+        .select({ one: sql`1` })
+        .from(rentPayments)
+        .where(
+          and(
+            eq(rentPayments.tenancyId, tenancies.id),
+            gt(rentPayments.month, lastDay.slice(0, 7)),
+          ),
+        ),
+    )
+
   const ownTenancy = (actorId: string, propertyId: string, id: string) =>
     and(
       eq(tenancies.id, id),
@@ -201,6 +237,16 @@ export function tenancyRepository(db: Db) {
         .from(tenancies)
         .where(eq(tenancies.propertyId, propertyId))
         .orderBy(desc(tenancies.validFrom))
+    },
+
+    /** The months (`YYYY-MM`) the tenancy has rent payments for. */
+    async paymentMonths(tenancyId: string): Promise<string[]> {
+      const rows = await db
+        .selectDistinct({ month: rentPayments.month })
+        .from(rentPayments)
+        .where(eq(rentPayments.tenancyId, tenancyId))
+        .orderBy(asc(rentPayments.month))
+      return rows.map((row) => row.month)
     },
 
     /** A tenancy, or null. */
@@ -349,6 +395,7 @@ export function tenancyRepository(db: Db) {
                 change.validTo,
                 tenancyId,
               ),
+              paymentsInside(fields.validFrom, change.validTo),
             ),
           )
           .returning({ id: tenancies.id }),
@@ -377,6 +424,7 @@ export function tenancyRepository(db: Db) {
             and(
               ownTenancy(actorId, propertyId, tenancyId),
               isNull(tenancies.noticeGivenBy),
+              paymentsUntil(ending.lastDay),
             ),
           )
           .returning({ id: tenancies.id }),
@@ -401,6 +449,12 @@ export function tenancyRepository(db: Db) {
             and(
               ownTenancy(actorId, propertyId, tenancyId),
               gt(tenancies.validFrom, today),
+              notExists(
+                db
+                  .select({ one: sql`1` })
+                  .from(rentPayments)
+                  .where(eq(rentPayments.tenancyId, tenancies.id)),
+              ),
             ),
           )
           .returning({ id: tenancies.id }),
