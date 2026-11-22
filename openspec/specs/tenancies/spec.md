@@ -1,7 +1,7 @@
 # tenancies Specification
 
 ## Purpose
-TBD - created by archiving change track-tenancies. Update Purpose after archive.
+A flat's tenancies as periods: adding a tenant with the contract date that decides the landlord's notice period and the rent saved as a rent period, the Tenancy page opened from the edit page, statuses, ending an open-ended tenancy by notice, agreement or another legal ground with the notice periods of the Act on Residential Leases (CONCEPT.md §4.2), ending a fixed term early, cancelling an ending and correcting a tenancy (owners only). Deposits and the contract attachment (#93) and rent payments (#33) come later.
 ## Requirements
 ### Requirement: Adding a tenant
 An owner of a flat SHALL be able to add a tenant to it from the Tenancy page: the tenant's name, an optional phone number and email address, the contract type (open-ended or fixed-term), the date the contract was made, the start date, the end date for a fixed-term contract, the monthly rent and the due day. *Contract made* SHALL default to the start date. The tenancy SHALL record the user who added it. After saving, the owner SHALL land on the Tenancy page, which shows the new tenancy. A member SHALL NOT be able to add a tenant.
