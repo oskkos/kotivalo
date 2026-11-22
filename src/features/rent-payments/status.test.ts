@@ -6,7 +6,9 @@ import {
   monthsNotFullyPaid,
   rentDueDate,
   rentMonths,
+  rentThisMonth,
   tenancyMonths,
+  type FlatRentData,
   type PaymentOfMonth,
   type RentTenancy,
 } from './status'
@@ -281,3 +283,168 @@ function rentPaidThrough(last: string): PaymentOfMonth[] {
     pay(month, 89000, `${month}-03`),
   )
 }
+
+describe('The rent summary on the flats list', () => {
+  const tenancy = (
+    id: string,
+    validFrom: string,
+    validTo: string | null = null,
+  ) => ({
+    id,
+    validFrom,
+    validTo,
+    dueDay: 5,
+    contractType: 'open_ended' as const,
+    termEnd: null,
+    noticeGivenBy: null,
+    noticeDate: null,
+  })
+  type T = ReturnType<typeof tenancy>
+  const flat = (
+    propertyId: string,
+    tenancies: T[],
+    rentPeriods: Period<number>[],
+    payments: PaymentOfMonth[] = [],
+  ): FlatRentData<T> => ({ propertyId, tenancies, rentPeriods, payments })
+
+  test("The summary adds up this month's rent of every flat", () => {
+    const summary = rentThisMonth(
+      [
+        flat(
+          'kuusikuja',
+          [tenancy('aino', '2025-03-01')],
+          rent(['2025-03-01', null, 89000]),
+        ),
+        flat(
+          'koivupolku',
+          [tenancy('ville', '2026-01-01')],
+          rent(['2026-01-01', null, 64000]),
+          [pay('2026-11', 64000, '2026-11-03', 'ville')],
+        ),
+        flat('rantatie', [], []),
+      ],
+      '2026-11-22',
+    )
+    expect(summary).toMatchObject({
+      received: 64000,
+      expected: 153000,
+      late: 1,
+      hasRent: true,
+    })
+    expect(summary.rows.kuusikuja?.status).toEqual({ kind: 'late', days: 17 })
+    expect(summary.rows.koivupolku?.status.kind).toBe('paid')
+    expect(summary.rows.rantatie).toBeUndefined()
+  })
+
+  test('A shared flat counts with its whole rent', () => {
+    const summary = rentThisMonth(
+      [
+        flat(
+          'kuusikuja',
+          [tenancy('aino', '2025-03-01')],
+          rent(['2025-03-01', null, 89000]),
+        ),
+      ],
+      '2026-11-22',
+    )
+    expect(summary).toMatchObject({ received: 0, expected: 89000 })
+  })
+
+  test('A tenancy that starts mid-month counts by days', () => {
+    const summary = rentThisMonth(
+      [
+        flat(
+          'kuusikuja',
+          [tenancy('aino', '2026-11-15')],
+          rent(['2026-11-01', null, 90000]),
+        ),
+      ],
+      '2026-11-22',
+    )
+    expect(summary).toMatchObject({ received: 0, expected: 48000 })
+  })
+
+  test('Both tenancies of a mid-month change count', () => {
+    const summary = rentThisMonth(
+      [
+        flat(
+          'kuusikuja',
+          [
+            tenancy('pekka', '2024-01-01', '2026-11-14'),
+            tenancy('aino', '2026-11-15'),
+          ],
+          rent(['2024-01-01', null, 90000]),
+          [pay('2026-11', 42000, '2026-11-02', 'pekka')],
+        ),
+      ],
+      '2026-11-22',
+    )
+    expect(summary).toMatchObject({ received: 42000, expected: 90000 })
+    // The card shows the current tenancy's month, due on its first day.
+    expect(summary.rows.kuusikuja?.tenancy.id).toBe('aino')
+    expect(summary.rows.kuusikuja?.status).toEqual({ kind: 'late', days: 7 })
+    expect(summary.late).toBe(1)
+  })
+
+  test('A payment for a month without rent is left out', () => {
+    const summary = rentThisMonth(
+      [
+        flat(
+          'kuusikuja',
+          [tenancy('aino', '2025-03-01')],
+          rent(['2025-03-01', null, 89000]),
+          [pay('2026-11', 89000, '2026-11-03')],
+        ),
+        flat(
+          'koivupolku',
+          [tenancy('ville', '2026-01-01')],
+          [],
+          [pay('2026-11', 50000, '2026-11-03', 'ville')],
+        ),
+      ],
+      '2026-11-22',
+    )
+    expect(summary).toMatchObject({ received: 89000, expected: 89000 })
+    expect(summary.rows.koivupolku?.status.kind).toBe('rent_not_set')
+  })
+
+  test('No summary without rent this month', () => {
+    expect(rentThisMonth([flat('rantatie', [], [])], '2026-11-22')).toEqual({
+      rows: {},
+      expected: 0,
+      received: 0,
+      late: 0,
+      hasRent: false,
+    })
+  })
+
+  test('a tenancy that starts after this month has no card row', () => {
+    const summary = rentThisMonth(
+      [
+        flat(
+          'rantatie',
+          [tenancy('aino', '2026-12-01')],
+          rent(['2026-12-01', null, 90000]),
+        ),
+      ],
+      '2026-11-22',
+    )
+    expect(summary.rows.rantatie).toBeUndefined()
+    expect(summary.hasRent).toBe(false)
+  })
+
+  test("a payment for another month doesn't count", () => {
+    const summary = rentThisMonth(
+      [
+        flat(
+          'kuusikuja',
+          [tenancy('aino', '2025-03-01')],
+          rent(['2025-03-01', null, 89000]),
+          [pay('2026-10', 89000, '2026-11-03')],
+        ),
+      ],
+      '2026-11-22',
+    )
+    expect(summary.received).toBe(0)
+  })
+})

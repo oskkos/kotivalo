@@ -1,7 +1,7 @@
 ## 1. This month's rent across flats
 
-- [ ] 1.1 `features/rent-payments/status.ts`: `rentThisMonth(flats, today)` as in design.md ("The summary is a pure function over the flats"): each flat's card row, `expected`, `received` and `late`
-- [ ] 1.2 Unit tests named after every scenario of "The rent summary on the flats list" and the row rules of "The rent status on a flat's card" (current tenancy, a tenancy that starts after this month, vacant)
+- [x] 1.1 `features/rent-payments/status.ts`: `rentThisMonth(flats, today)` as in design.md ("The summary is a pure function over the flats"): each flat's card row, `expected`, `received` and `late`
+- [x] 1.2 Unit tests named after every scenario of "The rent summary on the flats list" and the row rules of "The rent status on a flat's card" (current tenancy, a tenancy that starts after this month, vacant)
 
 ## 2. The server function
 

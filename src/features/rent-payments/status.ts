@@ -1,6 +1,6 @@
 // A month's expected rent and rent status for a tenancy (openspec:
 // rent-payments, "Expected rent of a month", "The rent status of a month",
-// "Months not fully paid"). Pure: computed from the flat's rent periods, the
+// "Months not fully paid", "The rent summary on the flats list"). Pure: computed from the flat's rent periods, the
 // tenancy's dates and due day, and the recorded payments; never stored.
 import {
   addMonths,
@@ -15,7 +15,11 @@ import {
   type Month,
   type Period,
 } from '#/features/recurring-amounts/periods'
-import { dueDate } from '#/features/tenancies/status'
+import {
+  currentTenancy,
+  dueDate,
+  type StatusTenancy,
+} from '#/features/tenancies/status'
 
 export interface RentTenancy {
   id: string
@@ -214,4 +218,69 @@ export function monthsNotFullyPaid<T extends RentTenancy>(data: {
   }).filter(
     (row) => row.status.kind === 'late' || row.status.kind === 'partly_paid',
   )
+}
+
+/** One flat's data for this month's rent on the flats list. */
+export interface FlatRentData<T extends RentTenancy & StatusTenancy> {
+  propertyId: string
+  /** The tenancies that run in this month or later. */
+  tenancies: readonly T[]
+  rentPeriods: readonly Period<number>[]
+  /** At least this month's payments of the flat's tenancies. */
+  payments: readonly PaymentOfMonth[]
+}
+
+export interface RentThisMonth<T extends RentTenancy> {
+  /**
+   * Each flat's card row by flat id: the current tenancy's month, as on the
+   * details page's rent card; absent for a vacant flat and one whose
+   * tenancy starts after this month.
+   */
+  rows: Partial<Record<string, RentMonth<T>>>
+  /** Cents expected this month across the flats, whole rents. */
+  expected: number
+  /** Cents recorded for this month's rent across the flats. */
+  received: number
+  /** Flats whose card row is late. */
+  late: number
+  /** Whether any tenancy has a rent in effect this month. */
+  hasRent: boolean
+}
+
+/**
+ * This month's rent across the flats on `today`: the cards' rows and the
+ * summary's totals. Every tenancy running in the month counts in the
+ * totals, a tenancy without a rent in effect in neither.
+ */
+export function rentThisMonth<T extends RentTenancy & StatusTenancy>(
+  flats: readonly FlatRentData<T>[],
+  today: IsoDate,
+): RentThisMonth<T> {
+  const month = monthOf(today)
+  const result: RentThisMonth<T> = {
+    rows: {},
+    expected: 0,
+    received: 0,
+    late: 0,
+    hasRent: false,
+  }
+  for (const flat of flats) {
+    const data = { ...flat, today }
+    for (const row of rentMonths({ ...data, from: month, to: month })) {
+      if (row.expected !== undefined) {
+        result.hasRent = true
+        result.expected += row.expected
+        result.received += row.paid
+      }
+    }
+    const current = currentTenancy(flat.tenancies, today)
+    if (current && current.validFrom <= lastDayOfMonth(month)) {
+      const row = rentMonth(current, month, data)
+      result.rows[flat.propertyId] = row
+      if (row.status.kind === 'late') {
+        result.late += 1
+      }
+    }
+  }
+  return result
 }
