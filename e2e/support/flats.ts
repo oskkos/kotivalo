@@ -53,7 +53,7 @@ export async function flatId(page: Page, streetAddress: string) {
   const href = await card(page, streetAddress)
     .getByRole('link')
     .getAttribute('href')
-  const id = /\/properties\/([^/]+)\/edit/.exec(href ?? '')?.[1]
+  const id = /\/properties\/([^/]+)$/.exec(href ?? '')?.[1]
   if (id === undefined) {
     throw new Error(`No link on the card of ${streetAddress}`)
   }

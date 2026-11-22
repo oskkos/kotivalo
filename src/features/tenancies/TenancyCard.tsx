@@ -1,7 +1,6 @@
-// The tenancy card at the top of a flat's edit page (Design canvas: Muokkaa
-// asuntoa · vuokrasuhdekortti): the current tenant with the contract type and
-// start, or "Vapaa"; it opens the Tenancy page (openspec: properties,
-// "Editing a flat").
+// The tenancy card on a flat's details page (Design canvas: Asunnon tiedot):
+// the current tenant with the contract type, start and due day; it opens the
+// Tenancy page (openspec: properties, "The flat details page").
 import Box from '@mui/material/Box'
 import Link from '@mui/material/Link'
 import Stack from '@mui/material/Stack'

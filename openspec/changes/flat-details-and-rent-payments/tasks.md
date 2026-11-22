@@ -59,10 +59,10 @@
 
 ## 9. The details page as the flat's main page
 
-- [ ] 9.1 The flats list card opens the details page; the edit page loses its header icons and the tenancy card, and saving and closing go to the details page
-- [ ] 9.2 The back links of the Tenancy, Rent and charges, Entries and Ownership and sharing pages go to the details page
-- [ ] 9.3 Update the Playwright and component tests of the modified scenarios: "Selecting a flat opens its details page", "Editing a flat's floor area", "Opening the tenancy page from the details page", "Opening the rent and charges page from the details page", "Opening the entries page from the details page"; remove the tests of "Selecting a flat opens its edit form" and "The edit page shows the tenancy card"
-- [ ] 9.4 CLAUDE.md "Current state": the details page and rent payments (`features/rent-payments/`, the statuses in `status.ts`)
+- [x] 9.1 The flats list card opens the details page; the edit page loses its header icons and the tenancy card, and saving and closing go to the details page
+- [x] 9.2 The back links of the Tenancy, Rent and charges, Entries and Ownership and sharing pages go to the details page
+- [x] 9.3 Update the Playwright and component tests of the modified scenarios: "Selecting a flat opens its details page", "Editing a flat's floor area", "Opening the tenancy page from the details page", "Opening the rent and charges page from the details page", "Opening the entries page from the details page"; remove the tests of "Selecting a flat opens its edit form" and "The edit page shows the tenancy card"
+- [x] 9.4 CLAUDE.md "Current state": the details page and rent payments (`features/rent-payments/`, the statuses in `status.ts`)
 
 ## 10. Archive
 

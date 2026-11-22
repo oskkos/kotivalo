@@ -43,7 +43,7 @@ function RentPaymentsRoute() {
       year={year}
       onBack={() => {
         void router.navigate({
-          to: '/properties/$propertyId/edit',
+          to: '/properties/$propertyId',
           params: { propertyId },
         })
       }}

@@ -74,10 +74,10 @@ test.describe('Adding a tenant', () => {
 })
 
 test.describe('The tenancy page', () => {
-  test('Opening the tenancy page from the edit page', async ({ page }) => {
+  test('Opening the tenancy page from the details page', async ({ page }) => {
     const id = await ownerWithFlat(page)
     await addTenant(page, id, aino)
-    await page.goto(`/properties/${id}/edit`)
+    await page.goto(`/properties/${id}`)
     await waitForHydration(page)
     await page.getByRole('link', { name: /Tenancy.*Aino Koski/ }).click()
     await expect(page).toHaveURL(new RegExp(`/properties/${id}/tenancy$`))
@@ -194,25 +194,6 @@ test.describe('The tenancy page', () => {
     const others = jussi.getByRole('region', { name: 'Other tenancies' })
     await expect(others).toContainText('Mikko Lehtinen')
     await expect(others.getByRole('link')).toHaveCount(0)
-  })
-})
-
-test.describe('Editing a flat', () => {
-  test('The edit page shows the tenancy card', async ({ page }) => {
-    const id = await ownerWithFlat(page)
-    await page.goto(`/properties/${id}/edit`)
-    await waitForHydration(page)
-    await expect(
-      page.getByRole('link', { name: /Tenancy.*Vacant/ }),
-    ).toBeVisible()
-    await addTenant(page, id, aino)
-    await page.goto(`/properties/${id}/edit`)
-    await waitForHydration(page)
-    await expect(
-      page.getByRole('link', {
-        name: /Aino Koski.*Open-ended · from 01\/03\/2025/,
-      }),
-    ).toBeVisible()
   })
 })
 
