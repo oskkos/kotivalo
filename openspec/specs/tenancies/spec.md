@@ -4,7 +4,7 @@
 A flat's tenancies as periods: adding a tenant with the contract date that decides the landlord's notice period and the rent saved as a rent period, the Tenancy page opened from the edit page, statuses, ending an open-ended tenancy by notice, agreement or another legal ground with the notice periods of the Act on Residential Leases (CONCEPT.md §4.2), ending a fixed term early, cancelling an ending and correcting a tenancy (owners only). Deposits and the contract attachment (#93) and rent payments (#33) come later.
 ## Requirements
 ### Requirement: Adding a tenant
-An owner of a flat SHALL be able to add a tenant to it from the Tenancy page: the tenant's name, an optional phone number and email address, the contract type (open-ended or fixed-term), the date the contract was made, the start date, the end date for a fixed-term contract, the monthly rent and the due day. *Contract made* SHALL default to the start date. The tenancy SHALL record the user who added it. After saving, the owner SHALL land on the Tenancy page, which shows the new tenancy. A member SHALL NOT be able to add a tenant.
+An owner of a flat SHALL be able to add a tenant to it from the Tenancy page: the tenant's name, an optional phone number and email address, the contract type (open-ended or fixed-term), the date the contract was made, the start date, the end date for a fixed-term contract, the monthly rent and the due day. *Contract made* SHALL default to the start date. When the start is before today, the owner SHALL be able to record the tenancy's ending in the same form: who gave notice, the notice date and the last rent day, under the rules of "Ending a tenancy" and "Ending a fixed-term tenancy early", with the same reasons. The tenancy SHALL record the user who added it. After saving, the owner SHALL land on the Tenancy page, which shows the new tenancy. A member SHALL NOT be able to add a tenant.
 
 #### Scenario: Adding an open-ended tenancy
 - **WHEN** today is `2026-11-22`, and Annika, owner of `Kuusikuja 3 B 12` since `2025-03-01` with no tenancy, adds `Aino Koski`, open-ended, contract made `12.2.2025`, starting `1.3.2025`, rent `890`, due day `5`
@@ -18,12 +18,24 @@ An owner of a flat SHALL be able to add a tenant to it from the Tenancy page: th
 - **WHEN** an owner enters the start date `15.3.2027` in the new tenant form and leaves *Contract made* untouched
 - **THEN** *Contract made* shows `15.3.2027`
 
+#### Scenario: Adding an earlier tenancy with its ending
+- **WHEN** today is `2026-11-22`, the flat's tenancy of `Aino Koski` runs open-ended from `2025-03-01`, and Annika adds `Pekka Virtanen`, open-ended from `1.6.2023`, with the tenant's notice on `20.1.2025` and the last rent day `28.2.2025`
+- **THEN** the tenancy is stored with the last rent day `2025-02-28`, and the Tenancy page lists `Pekka Virtanen` as ended under the other tenancies
+
+#### Scenario: The ending of an earlier tenancy follows the notice rules
+- **WHEN** today is `2026-11-22`, and an owner adds an open-ended tenancy from `1.6.2023` with the landlord's notice on `10.1.2025`, the contract made on `15.5.2023` and the last rent day `28.2.2025`
+- **THEN** it is refused with the reason `tenancy_end_before_notice_period`, because the earliest last rent day is `2025-07-31`, and nothing is stored
+
+#### Scenario: The ending can't be recorded for a tenancy that hasn't started
+- **WHEN** today is `2026-11-22`, and an owner sends a new tenancy starting `2027-01-01` with an agreed ending on `20.11.2026` and the last rent day `31.12.2026` to the server
+- **THEN** it is refused with the reason `tenancy_notice_before_start`, and nothing is stored
+
 #### Scenario: A member can't add a tenant
 - **WHEN** Jussi, a member of the flat, sends a new tenancy to the server
 - **THEN** it is refused with the reason `sharing_owner_only`, and nothing is stored
 
 ### Requirement: Tenancy dates and details
-A tenancy SHALL start and end on any day. The tenancies of a flat SHALL NOT overlap (`tenancy_overlaps`); a tenancy without an end runs indefinitely, so no tenancy can be added after it. An earlier tenancy MAY be added afterwards, before the others, to record the history. A tenancy SHALL NOT start before the start of the flat's first ownership period (`tenancy_start_before_ownership`). *Contract made* SHALL NOT be in the future (`tenancy_contract_made_in_future`). A fixed-term tenancy SHALL have an end date after its start (`tenancy_end_before_start`); an open-ended one SHALL have none until it is ended. The name SHALL NOT be empty (`tenant_name_required`) and SHALL be at most 100 characters (`tenant_name_too_long`); the phone number SHALL be at most 30 characters (`tenant_phone_too_long`); the email address, when given, SHALL be valid (`email_invalid`). The due day SHALL be a whole number from 1 to 31 (`tenancy_due_day_invalid`), and in a month with fewer days it SHALL be the month's last day.
+A tenancy SHALL start and end on any day. The tenancies of a flat SHALL NOT overlap (`tenancy_overlaps`); a tenancy without an end runs indefinitely, so no tenancy can be added after it. An earlier tenancy MAY be added afterwards, before the others, to record the history: a fixed-term one with its term, and an open-ended one with its ending (see "Adding a tenant"), whose last rent day is then its end for the overlap. A tenancy SHALL NOT start before the start of the flat's first ownership period (`tenancy_start_before_ownership`). *Contract made* SHALL NOT be in the future (`tenancy_contract_made_in_future`). A fixed-term tenancy SHALL have an end date after its start (`tenancy_end_before_start`); an open-ended one SHALL have none until it is ended. The name SHALL NOT be empty (`tenant_name_required`) and SHALL be at most 100 characters (`tenant_name_too_long`); the phone number SHALL be at most 30 characters (`tenant_phone_too_long`); the email address, when given, SHALL be valid (`email_invalid`). The due day SHALL be a whole number from 1 to 31 (`tenancy_due_day_invalid`), and in a month with fewer days it SHALL be the month's last day.
 
 **No Playwright test:** these are server-side rules and pure date calculations; Vitest covers them, and "Adding a tenant" and "Ending a tenancy" show reasons in the browser.
 
@@ -42,6 +54,10 @@ A tenancy SHALL start and end on any day. The tenancies of a flat SHALL NOT over
 #### Scenario: An earlier tenancy can be added afterwards
 - **WHEN** the flat's only tenancy starts on `2025-03-01`, and an owner adds a fixed-term tenancy from `1.6.2023` to `28.2.2025`
 - **THEN** it is stored and listed under the other tenancies
+
+#### Scenario: An earlier open-ended tenancy without its ending is refused
+- **WHEN** the flat's only tenancy starts on `2025-03-01`, and an owner adds an open-ended tenancy from `1.6.2023` without an ending
+- **THEN** it is refused with the reason `tenancy_overlaps`, and nothing is stored
 
 #### Scenario: A tenancy before the ownership is refused
 - **WHEN** the flat's first ownership period starts on `2025-03-01`, and an owner adds a tenancy starting `2025-02-15`
@@ -64,7 +80,7 @@ A tenancy SHALL start and end on any day. The tenancies of a flat SHALL NOT over
 - **THEN** its due date in February 2027 is `2027-02-28`, and in April 2027 `2027-04-30`
 
 ### Requirement: The rent of a new tenancy
-The new tenant form SHALL show the flat's rent in effect on the start date, or an empty field when there is none, and the rent SHALL be required. When the owner saves a different amount, it SHALL be recorded as the flat's rent from the first day of the start month, under the rules of "Setting a rent or charge": an amount dated on the latest rent period's start corrects it, and a start month before the latest rent period's start is refused with the reason `amount_date_too_early`. The tenancy and the rent SHALL be saved together or not at all. An unchanged amount SHALL NOT change the rent periods.
+The new tenant form SHALL show the flat's rent in effect on the start date, or an empty field when there is none, and the rent SHALL be required. When the owner saves a different amount, it SHALL be recorded as the flat's rent from the first day of the start month, under the rules of "Setting a rent or charge": an amount dated on the latest rent period's start corrects it. When the start month is before the latest rent period's start, the form SHALL NOT ask for the rent, and saving SHALL NOT change the rent periods; the rent stays on the Rent and charges page. The tenancy and the rent SHALL be saved together or not at all. An unchanged amount SHALL NOT change the rent periods.
 
 #### Scenario: The form shows the rent in effect on the start date
 - **WHEN** the flat's rent is 89000 cents from `2025-03-01`, and an owner enters the start date `1.1.2027`
@@ -74,16 +90,16 @@ The new tenant form SHALL show the flat's rent in effect on the start date, or a
 - **WHEN** the flat's rent is 89000 cents from `2025-03-01`, and Annika adds a tenancy starting `15.1.2027` with the rent `910`
 - **THEN** the rent is 89000 cents until `2026-12-31` and 91000 cents from `2027-01-01`, and the tenancy is stored
 
-#### Scenario: A rent for an earlier month than the latest change is refused
-- **WHEN** the flat's rent has a period from `2027-03-01`, and an owner adds a tenancy starting `1.1.2027` with a changed rent
-- **THEN** it is refused with the reason `amount_date_too_early`, and neither the tenancy nor the rent is stored
+#### Scenario: A tenancy starting before the latest rent period leaves the rent alone
+- **WHEN** the flat's ownership started on `2022-06-12`, its rent is 89000 cents from `2025-01-01`, and an owner adds a tenancy starting `1.6.2023`
+- **THEN** the form asks no rent, the tenancy is stored, and the rent still has one period, 89000 cents from `2025-01-01`
 
 #### Scenario: An unchanged rent leaves the periods alone
 - **WHEN** the flat's rent is 89000 cents from `2025-03-01`, and an owner adds a tenancy starting `1.1.2027` with the rent `890`
 - **THEN** the rent still has one period, 89000 cents from `2025-03-01`
 
 ### Requirement: The tenancy page
-Everyone with access to a flat SHALL be able to open its Tenancy page from the tenancy card at the top of the flat's edit page. The page SHALL show the current tenancy (the one running today, or else the next one to start): the tenant's name, its status, call and email links for the phone and email given, the contract type, contract made, the start, the end or last rent day, the rent in effect today and the due day; and, for notice given, who gave notice and when. The flat's other tenancies (earlier ones, and one to come after the current one) SHALL be listed below, newest first, with their dates and status. When the flat has no current tenancy, the page SHALL say that it is vacant, when the last tenancy ended if there was one, and offer to add a tenant. Owners SHALL see the buttons to add, edit, end and cancel; members SHALL NOT.
+Everyone with access to a flat SHALL be able to open its Tenancy page from the tenancy card at the top of the flat's edit page. The page SHALL show the current tenancy (the one running today, or else the next one to start): the tenant's name, its status, call and email links for the phone and email given, the contract type, contract made, the start, the end or last rent day, the rent in effect today and the due day; and, for notice given, who gave notice and when. The flat's other tenancies (earlier ones, and one to come after the current one) SHALL be listed below, newest first, with their dates and status. When the flat has no current tenancy, the page SHALL say that it is vacant, when the last tenancy ended if there was one, and offer to add a tenant. Owners SHALL see the buttons to add, edit, end and cancel; members SHALL NOT. For owners, each of the other tenancies SHALL open its correction form, and the page SHALL offer to add an earlier tenancy. Ending SHALL NOT be offered for a tenancy that hasn't started.
 
 #### Scenario: Opening the tenancy page from the edit page
 - **WHEN** Annika opens the edit page of `Kuusikuja 3 B 12`, where `Aino Koski` lives, and selects its tenancy card
@@ -93,9 +109,21 @@ Everyone with access to a flat SHALL be able to open its Tenancy page from the t
 - **WHEN** today is `2027-01-10`, the flat's only tenancy ended on `2026-12-31`, and Annika opens the Tenancy page
 - **THEN** the page says the flat is vacant since the tenancy ended on `31.12.2026`, lists that tenancy under the other tenancies, and shows "Lisää vuokralainen"
 
+#### Scenario: Adding an earlier tenancy from the tenancy page
+- **WHEN** `Aino Koski`'s open-ended tenancy runs, and Annika selects "Lisää aiempi vuokrasuhde" on the Tenancy page
+- **THEN** the new tenant form opens
+
+#### Scenario: Correcting an earlier tenancy from the list
+- **WHEN** the flat lists `Pekka Virtanen`'s ended tenancy under the other tenancies, and Annika selects it
+- **THEN** the correction form of `Pekka Virtanen`'s tenancy opens
+
+#### Scenario: A tenancy that hasn't started can't be ended
+- **WHEN** today is `2026-11-22`, and the flat's current tenancy, `Mikko Lehtinen`'s, starts on `2027-01-01`
+- **THEN** the Tenancy page offers no "Päätä vuokrasuhde" for it
+
 #### Scenario: A member sees the tenancy but can't change it
 - **WHEN** Jussi, a member of the flat, opens its Tenancy page
-- **THEN** he sees the tenant's name and contact links and no button to add, edit, end or cancel
+- **THEN** he sees the tenant's name and contact links, no button to add, edit, end or cancel, and the other tenancies don't open a form
 
 ### Requirement: Tenancy statuses
 A tenancy's status on a given day SHALL be: *Starts* (with the start date) before its start; *Ends* (with the end date) for a fixed-term tenancy that hasn't been ended early; *Notice given* (with the last rent day) from the notice date until the last rent day for one that has been ended; and *Active* otherwise while it runs. After its last day it SHALL be *Ended*. A flat SHALL be *Let* while a tenancy runs, *Notice given* while it runs with notice given, and *Vacant* when no tenancy runs; a vacant flat with a tenancy to come SHALL show when it starts.
@@ -178,7 +206,7 @@ A fixed-term tenancy SHALL end by itself on its end date, with no action. It SHA
 - **THEN** it is refused with the reason `tenancy_fixed_term_notice`, and the tenancy is unchanged
 
 ### Requirement: Cancelling an ending
-An owner SHALL be able to cancel the ending of a tenancy before its last rent day has passed, after a confirmation. An open-ended tenancy SHALL then run with no end again, and a fixed-term tenancy SHALL end on its original term's end again. Cancelling SHALL be refused when the flat has a later tenancy (`tenancy_cancel_later_tenancy`), when the tenancy hasn't been ended (`tenancy_not_ending`) or when its last rent day has passed (`tenancy_already_ended`). A member SHALL NOT be able to cancel.
+An owner SHALL be able to cancel the ending of a tenancy before its last rent day has passed, after a confirmation. An open-ended tenancy SHALL then run with no end again, and a fixed-term tenancy SHALL end on its original term's end again. Cancelling SHALL be refused when a later tenancy of the flat would overlap the tenancy as restored (`tenancy_cancel_later_tenancy`), when the tenancy hasn't been ended (`tenancy_not_ending`) or when its last rent day has passed (`tenancy_already_ended`). A later tenancy that starts after a fixed term's original end SHALL NOT prevent cancelling. A member SHALL NOT be able to cancel.
 
 #### Scenario: Cancelling the tenant's notice
 - **WHEN** today is `2026-11-25`, and the tenancy of `Aino Koski` ends on `2026-12-31` after the tenant's notice, and Annika cancels the ending
@@ -192,8 +220,12 @@ An owner SHALL be able to cancel the ending of a tenancy before its last rent da
 - **WHEN** a tenancy ends on `2026-12-31` and the next one starts on `2027-01-01`, and an owner cancels the first one's ending
 - **THEN** it is refused with the reason `tenancy_cancel_later_tenancy`
 
+#### Scenario: A later tenancy after the original term doesn't prevent cancelling
+- **WHEN** a fixed-term tenancy runs from `2027-01-01` to `2027-12-31` and was ended by agreement with the last rent day `2027-06-30`, the next tenancy starts on `2028-02-01`, and today is `2027-06-15`
+- **THEN** cancelling the ending succeeds, and the tenancy ends on `2027-12-31` again
+
 ### Requirement: Correcting a tenancy
-An owner SHALL be able to correct a tenancy's details: the name, phone, email, contract type, contract made, start, the fixed term's end and the due day, with the same checks as adding against the flat's other tenancies. The correction SHALL change the tenancy in place, without a history. The rent SHALL NOT be changed from this form; it stays on the Rent and charges page. A member SHALL NOT be able to correct a tenancy.
+An owner SHALL be able to correct a tenancy's details: the name, phone, email, contract type, contract made, start, the fixed term's end and the due day, with the same checks as adding against the flat's other tenancies. When an ending is recorded, the corrected tenancy SHALL still fit it under the rules of "Ending a tenancy" and "Ending a fixed-term tenancy early", or the correction SHALL be refused with the reason `tenancy_correction_conflicts_ending`. The correction SHALL change the tenancy in place, without a history. The rent SHALL NOT be changed from this form; it stays on the Rent and charges page. A member SHALL NOT be able to correct a tenancy.
 
 #### Scenario: Correcting the tenant's phone number
 - **WHEN** Annika corrects the phone number of `Aino Koski` to `040 765 4321`
@@ -203,7 +235,26 @@ An owner SHALL be able to correct a tenancy's details: the name, phone, email, c
 - **WHEN** the previous tenancy ended on `2025-02-28`, and an owner corrects the next tenancy's start to `2025-02-15`
 - **THEN** it is refused with the reason `tenancy_overlaps`, and the tenancy is unchanged
 
+#### Scenario: A correction must fit a recorded ending
+- **WHEN** `Aino Koski`'s open-ended tenancy has the tenant's notice with the last rent day `2026-12-31`, and an owner corrects it to fixed-term ending `30.11.2026`
+- **THEN** it is refused with the reason `tenancy_correction_conflicts_ending`, and the tenancy is unchanged
+
 #### Scenario: A member can't correct a tenancy
 - **WHEN** Jussi, a member, sends a correction to the server
+- **THEN** it is refused with the reason `sharing_owner_only`, and the tenancy is unchanged
+
+### Requirement: Removing a tenancy that hasn't started
+An owner SHALL be able to remove a tenancy before its start day, for example when the tenant withdraws before moving in, from the tenancy's correction form after a confirmation. On or after its start day removing SHALL be refused with the reason `tenancy_already_started`, and the form SHALL NOT offer it. Rent periods saved with the tenancy SHALL stay, because the rent belongs to the flat. After removing, the owner SHALL land on the Tenancy page. A member SHALL NOT be able to remove a tenancy.
+
+#### Scenario: Removing a tenancy whose tenant withdrew
+- **WHEN** today is `2026-11-22`, `Mikko Lehtinen`'s fixed-term tenancy starts on `1.1.2027`, and Annika removes it from its correction form and confirms
+- **THEN** the Tenancy page no longer lists `Mikko Lehtinen`, and the flat's rent periods are unchanged
+
+#### Scenario: A started tenancy can't be removed
+- **WHEN** today is `2026-11-22`, and an owner sends removing a tenancy that started on `2026-11-22` to the server
+- **THEN** it is refused with the reason `tenancy_already_started`, and the tenancy is unchanged
+
+#### Scenario: A member can't remove a tenancy
+- **WHEN** Jussi, a member, sends removing a tenancy that hasn't started to the server
 - **THEN** it is refused with the reason `sharing_owner_only`, and the tenancy is unchanged
 
