@@ -1,7 +1,8 @@
 import { expect, test } from '@playwright/test'
-import { addFlat, kuusikuja } from './support/flats'
+import { addFlat, flatId, kuusikuja } from './support/flats'
 import { accepted } from './support/sharing'
 import { signIn, uniqueEmail, waitForHydration } from './support/sign-in'
+import { logEntry } from './support/transactions'
 
 // The browser's language is English, so the app is in English.
 
@@ -118,5 +119,40 @@ test.describe('New entry from the bottom bar', () => {
       jussi.getByRole('heading', { name: 'Entries are added by the owners' }),
     ).toBeVisible()
     await expect(jussi.getByRole('textbox', { name: 'Amount' })).toHaveCount(0)
+  })
+
+  test('the flat last used on this device is chosen, without a hydration error', async ({
+    page,
+  }) => {
+    const errors: string[] = []
+    page.on('console', (message) => {
+      if (message.type() === 'error') {
+        errors.push(message.text())
+      }
+    })
+    page.on('pageerror', (error) => {
+      errors.push(error.message)
+    })
+    await signIn(page, uniqueEmail('nav'), 'Annika')
+    await addFlat(page, koivupolku)
+    await addFlat(page, rantatie)
+    await logEntry(page, await flatId(page, rantatie.streetAddress), {
+      category: 'Annual repair',
+      amount: '20',
+      // The flat's ownership begins today.
+      date: new Date().toLocaleDateString('en-GB'),
+    })
+
+    // A full load renders the page on the server first.
+    await page.goto('/transactions/new')
+    await waitForHydration(page)
+
+    await expect(page.getByRole('button', { name: /^Flat/ })).toContainText(
+      'Rantatie 15 C 21',
+    )
+    // A production build reports a mismatch as React error #418, #423 or #425.
+    expect(
+      errors.filter((text) => /hydrat|#4(18|23|25)\b/i.test(text)),
+    ).toEqual([])
   })
 })
