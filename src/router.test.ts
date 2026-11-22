@@ -34,6 +34,12 @@ describe('Router', () => {
     expect(getRouter().routesById).toHaveProperty('/_authed/account')
   })
 
+  test('registers the rent payments page behind the signed-in layout', () => {
+    expect(getRouter().routesById).toHaveProperty(
+      '/_authed/properties/$propertyId/rent/',
+    )
+  })
+
   test("registers a month's rent payments page behind the signed-in layout", () => {
     expect(getRouter().routesById).toHaveProperty(
       '/_authed/properties/$propertyId/rent/$tenancyId/$month',

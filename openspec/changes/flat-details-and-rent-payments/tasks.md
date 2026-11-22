@@ -47,9 +47,9 @@
 
 ## 7. The rent payments page
 
-- [ ] 7.1 Route `/properties/$propertyId/rent` with `?year=` and `RentPaymentsPage.tsx`: year choice, received total by payment date, the months with their statuses (one row per tenancy), the warning, the empty state
-- [ ] 7.2 Component tests; Playwright tests named after every scenario of "The rent payments page"
-- [ ] 7.3 fi, sv and en messages (translate skill, term-critic)
+- [x] 7.1 Route `/properties/$propertyId/rent` with `?year=` and `RentPaymentsPage.tsx`: year choice, received total by payment date, the months with their statuses (one row per tenancy), the warning, the empty state
+- [x] 7.2 Component tests; Playwright tests named after every scenario of "The rent payments page"
+- [x] 7.3 fi, sv and en messages (translate skill, term-critic)
 
 ## 8. The flat details page
 

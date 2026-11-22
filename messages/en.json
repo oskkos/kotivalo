@@ -429,6 +429,36 @@
   "rent_payment_delete_title": "Delete the payment?",
   "rent_payment_dialog_title": "{rent} paid",
   "rent_payment_save": "Save",
+  "rent_payments_empty": "Rent payments are recorded once the flat has a tenant.",
+  "rent_payments_months": "Months",
+  "rent_payments_page_title": "Rent payments – Kotivalo",
+  "rent_payments_received": "Rent received in {year}",
+  "rent_payments_received_note": "By payment date, because rental income is taxed in the year it is received.",
+  "rent_payments_title": "Rent payments",
+  "rent_payments_unpaid": [
+    {
+      "declarations": [
+        "input count",
+        "input months",
+        "local countPlural = count: plural"
+      ],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Rent not recorded as fully paid: {months}. The year summary doesn't assume it was paid.",
+        "countPlural=other": "Rent not recorded as fully paid for {count} months: {months}. The year summary doesn't assume they were paid."
+      }
+    }
+  ],
+  "rent_payments_year": "Year",
+  "rent_row_due": "Due {date}",
+  "rent_row_late": "Due {date} · no payments recorded",
+  "rent_row_paid": "{amount} · paid {date}",
+  "rent_row_partly_paid": "{paid} / {expected} · {missing} outstanding",
+  "rent_row_rent_not_set": "No rent is set for the month",
+  "rent_short_late": "Late",
+  "rent_short_paid": "Paid",
+  "rent_short_partly_paid": "Partly paid",
+  "rent_short_rent_not_set": "Not set",
   "rent_status_due": "Due {date}",
   "rent_status_late": [
     {
