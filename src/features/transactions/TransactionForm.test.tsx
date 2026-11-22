@@ -63,6 +63,16 @@ describe('Entry categories', () => {
     )
   })
 
+  test('An improvement is not deducted all at once', async () => {
+    const { user } = setup()
+    await user.click(screen.getByRole('button', { name: 'Improvement' }))
+    expect(hint()).toHaveTextContent('Not deducted all at once')
+    expect(hint()).not.toHaveTextContent('Deductible')
+    expect(hint()).toHaveTextContent(
+      'a tenth a year for 10 years from the year paid, or only when the flat is sold.',
+    )
+  })
+
   test('Rent is not a category', async () => {
     const { user } = setup()
     await user.click(screen.getByRole('button', { name: 'Income' }))

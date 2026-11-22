@@ -75,6 +75,13 @@ describe('Entry details', () => {
 })
 
 describe('entry details', () => {
+  test('an improvement has no form 7H row', () => {
+    setup({ ...expense, category: 'improvement' })
+    expect(screen.getByText('Not deducted all at once')).toBeVisible()
+    expect(screen.queryByText('Deductible')).toBeNull()
+    expect(screen.queryByText(/^2026 · /)).toBeNull()
+  })
+
   test('an income without a receipt', () => {
     setup({
       ...expense,

@@ -27,11 +27,15 @@ An owner of a flat SHALL be able to log an entry for it: an income or an expense
 - **THEN** it is refused with the reason `sharing_owner_only`, and nothing is stored
 
 ### Requirement: Entry categories
-Each entry SHALL have one category from its type's list (design.md, "Categories"). Each category SHALL tell the form 7H row the entry goes to and whether it is taxable income or a deductible expense, and the form SHALL show this with a short hint for the chosen category. Rent and the monthly maintenance and financing charges SHALL NOT be categories, because they are computed from their periods. A category of the other type SHALL be refused with the reason `transaction_category_invalid`.
+Each entry SHALL have one category from its type's list (design.md, "Categories"). Each category SHALL tell the form 7H row the entry goes to and whether it is taxable income or a deductible expense, and the form SHALL show this with a short hint for the chosen category. An improvement (perusparannus) SHALL be an expense category whose amount fills no row as such, because it is not deducted all at once: for a flat in a housing company, a tenth a year for 10 years from the year paid, or when the flat is sold. The form and the details SHALL say that it is not deducted all at once. Rent and the monthly maintenance and financing charges SHALL NOT be categories, because they are computed from their periods. A category of the other type SHALL be refused with the reason `transaction_category_invalid`.
 
 #### Scenario: The chosen category shows its tax hint
 - **WHEN** an owner chooses Expense and the category Annual repairs in the new entry form
 - **THEN** the form shows that it is a deductible expense, with the hint for annual repairs
+
+#### Scenario: An improvement is not deducted all at once
+- **WHEN** an owner chooses Expense and the category Improvement in the new entry form
+- **THEN** the form shows that it is not deducted all at once, with a hint that a flat in a housing company deducts a tenth a year for 10 years or deducts it when the flat is sold
 
 #### Scenario: Rent is not a category
 - **WHEN** an owner chooses Income in the new entry form
@@ -65,7 +69,7 @@ Everyone with access to a flat SHALL be able to open its Entries page from a but
 - **THEN** he sees the entries and no New entry button
 
 ### Requirement: Entry details
-Selecting an entry on the Entries page SHALL open its details: the signed amount, the note, the category, whether it is taxable income or a deductible expense, the flat, the date, the year and the form 7H row it goes to, who logged it and when ("You" for oneself), and its receipt or that it has none. Owners SHALL see an Edit button; members SHALL NOT.
+Selecting an entry on the Entries page SHALL open its details: the signed amount, the note, the category, whether it is taxable income or a deductible expense, the flat, the date, the year and the form 7H row it goes to (none for an improvement, which says it is not deducted all at once), who logged it and when ("You" for oneself), and its receipt or that it has none. Owners SHALL see an Edit button; members SHALL NOT.
 
 #### Scenario: The details of an expense
 - **WHEN** Annika opens the expense of 14550 cents in `annual_repair` on `2026-11-12` that she logged

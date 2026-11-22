@@ -84,6 +84,12 @@ export function TransactionDetails(props: Props) {
   const { entry } = props
   const [viewing, setViewing] = useState(false)
   const income = entry.type === 'income'
+  const { row } = CATEGORIES[entry.category]
+  const treatment = income
+    ? m.transactions_taxable()
+    : row
+      ? m.transactions_deductible()
+      : m.transactions_not_deducted()
   const receipt = entry.receipt
   const isPdf = receipt?.contentType === 'application/pdf'
   const author = props.loggedByYou ? m.sharing_you() : entry.createdBy.name
@@ -179,7 +185,7 @@ export function TransactionDetails(props: Props) {
                 fontWeight: 800,
               }}
             >
-              {income ? m.transactions_taxable() : m.transactions_deductible()}
+              {treatment}
             </Box>
           </Stack>
         </Stack>
@@ -190,13 +196,15 @@ export function TransactionDetails(props: Props) {
             value={props.property.streetAddress}
           />
           <Row label={m.transactions_date()} value={formatDate(entry.date)} />
-          <Row
-            label={m.transactions_summary_row()}
-            value={m.transactions_summary_row_value({
-              year: entry.date.slice(0, 4),
-              row: summaryRowLabel[CATEGORIES[entry.category].row](),
-            })}
-          />
+          {row && (
+            <Row
+              label={m.transactions_summary_row()}
+              value={m.transactions_summary_row_value({
+                year: entry.date.slice(0, 4),
+                row: summaryRowLabel[row](),
+              })}
+            />
+          )}
           <Row
             label={m.transactions_logged_by()}
             value={m.transactions_logged_by_value({
