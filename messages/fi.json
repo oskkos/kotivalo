@@ -405,6 +405,7 @@
   "reason_treatment_required": "Valitse käsittely.",
   "reason_unexpected": "Yritä uudelleen hetken kuluttua.",
   "reason_unexpected_title": "Jokin meni pieleen",
+  "rent_month_back_to_payments": "Takaisin vuokranmaksuihin",
   "rent_month_delete_label": "Poista maksu {amount}, {date}",
   "rent_month_due": "Eräpäivä {date}",
   "rent_month_expected": "Vuokra",

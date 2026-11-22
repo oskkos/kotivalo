@@ -165,6 +165,13 @@ test.describe('The rent payments page', () => {
     await expect(
       page.getByRole('heading', { name: 'December rent' }),
     ).toBeVisible()
+
+    await page.getByRole('button', { name: 'Back to rent payments' }).click()
+    await expect(page).toHaveURL(new RegExp(`/rent\\?year=${lastYear}$`))
+    await expect(page.getByRole('button', { name: lastYear })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
   })
 
   test('Rent is received in the year it is paid', async ({ page }) => {

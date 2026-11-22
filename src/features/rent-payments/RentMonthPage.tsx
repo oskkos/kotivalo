@@ -34,6 +34,8 @@ interface Props {
   view: RentMonthView
   propertyId: string
   address: string
+  /** Where Back leads: the flat, or the rent payments page it came from. */
+  backTo?: 'flat' | 'payments'
   onBack: () => void
   /** After a payment was recorded or deleted: reload. */
   onChanged: () => Promise<void>
@@ -130,7 +132,14 @@ export function RentMonthPage(props: Props) {
           pb: 0.5,
         }}
       >
-        <IconButton aria-label={m.amounts_back()} onClick={props.onBack}>
+        <IconButton
+          aria-label={
+            props.backTo === 'payments'
+              ? m.rent_month_back_to_payments()
+              : m.amounts_back()
+          }
+          onClick={props.onBack}
+        >
           <Icon path={BACK} />
         </IconButton>
         <Stack sx={{ alignItems: 'center', minWidth: 0 }}>

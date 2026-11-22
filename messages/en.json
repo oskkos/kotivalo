@@ -405,6 +405,7 @@
   "reason_treatment_required": "Choose a treatment.",
   "reason_unexpected": "Try again in a moment.",
   "reason_unexpected_title": "Something went wrong",
+  "rent_month_back_to_payments": "Back to rent payments",
   "rent_month_delete_label": "Delete the payment of {amount}, {date}",
   "rent_month_due": "Due {date}",
   "rent_month_expected": "Rent",

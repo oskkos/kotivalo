@@ -1,4 +1,5 @@
 import { createFileRoute, notFound, useRouter } from '@tanstack/react-router'
+import { z } from 'zod'
 import { NotFoundView } from '#/components/NotFoundView'
 import { getRentMonth } from '#/features/rent-payments/functions'
 import { RentMonthPage } from '#/features/rent-payments/RentMonthPage'
@@ -8,6 +9,10 @@ import { m } from '#/paraglide/messages.js'
 export const Route = createFileRoute(
   '/_authed/properties/$propertyId/rent/$tenancyId/$month',
 )({
+  // The year of the rent payments page the month was opened from, if any.
+  validateSearch: z.object({
+    year: z.number().int().min(2000).max(2100).optional(),
+  }),
   loader: async ({ params }) => {
     if (!MONTH.test(params.month)) {
       // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router's not-found signal
@@ -40,17 +45,25 @@ export const Route = createFileRoute(
 function RentMonthRoute() {
   const view = Route.useLoaderData()
   const { propertyId } = Route.useParams()
+  const { year } = Route.useSearch()
   const router = useRouter()
   return (
     <RentMonthPage
       view={view}
       propertyId={propertyId}
       address={view.property.streetAddress}
+      backTo={year === undefined ? 'flat' : 'payments'}
       onBack={() => {
-        void router.navigate({
-          to: '/properties/$propertyId',
-          params: { propertyId },
-        })
+        void (year === undefined
+          ? router.navigate({
+              to: '/properties/$propertyId',
+              params: { propertyId },
+            })
+          : router.navigate({
+              to: '/properties/$propertyId/rent',
+              params: { propertyId },
+              search: { year },
+            }))
       }}
       onChanged={() => router.invalidate()}
     />

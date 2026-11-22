@@ -107,7 +107,14 @@ describe('The rent payments page', () => {
   })
 
   test('the years are those in which a tenancy ran', () => {
-    expect(rentYears([aino], '2026-01-20')).toEqual([2026, 2025])
-    expect(rentYears([], '2026-01-20')).toEqual([])
+    expect(rentYears([aino], [], '2026-01-20')).toEqual([2026, 2025])
+    expect(rentYears([], [], '2026-01-20')).toEqual([])
+  })
+
+  test('Rent paid in advance before the tenancy', () => {
+    const fromJanuary = { ...aino, validFrom: '2026-01-01' }
+    expect(
+      rentYears([fromJanuary], [{ paidOn: '2025-12-28' }], '2026-01-20'),
+    ).toEqual([2026, 2025])
   })
 })

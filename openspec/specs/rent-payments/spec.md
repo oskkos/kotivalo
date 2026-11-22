@@ -151,7 +151,7 @@ Everyone with access to a flat SHALL be able to open a month's payments page for
 - **THEN** he sees the payments and no button to add or delete them
 
 ### Requirement: The rent payments page
-Everyone with access to a flat SHALL be able to open its rent payments page from the flat details page. It SHALL show one year at a time, the current year first, with a choice of the current year and the earlier years in which a tenancy of the flat ran. For the chosen year it SHALL show the rent received in the year: the total of the payments of the flat's tenancies whose payment date is in that year, whatever month they are for. It SHALL list the months up to the current one in which a tenancy ran, newest first, each with its status and opening its payments page; a month in which two tenancies ran SHALL be listed once per tenancy with the tenant's name. It SHALL warn about the year's months not fully paid ("Months not fully paid"), and say that the year summary does not assume them paid.
+Everyone with access to a flat SHALL be able to open its rent payments page from the flat details page. It SHALL show one year at a time, the current year first, with a choice of the current year and the earlier years in which a tenancy of the flat ran or rent was paid. For the chosen year it SHALL show the rent received in the year: the total of the payments of the flat's tenancies whose payment date is in that year, whatever month they are for. It SHALL list the months up to the current one in which a tenancy ran, newest first, each with its status and opening its payments page, whose Back returns to the chosen year; a month in which two tenancies ran SHALL be listed once per tenancy with the tenant's name. It SHALL warn about the year's months not fully paid ("Months not fully paid"), and say that the year summary does not assume them paid.
 
 #### Scenario: Months newest first with their statuses
 - **WHEN** today is `2026-11-22`, `Aino Koski`'s tenancy runs from `2025-03-01` with the due day 5, every month to September 2026 is paid, October has no payments and November has 50000 cents
@@ -160,6 +160,10 @@ Everyone with access to a flat SHALL be able to open its rent payments page from
 #### Scenario: Rent is received in the year it is paid
 - **WHEN** December 2025's rent of 89000 cents was paid on `2026-01-02`, and the months January to September 2026 were paid in 2026, each 89000 cents
 - **THEN** 2026 shows the rent received `8 900,00 €`, and 2025 doesn't count December's payment
+
+#### Scenario: Rent paid in advance before the tenancy
+- **WHEN** today is `2026-01-20`, a tenancy starts on `2026-01-01`, and January's rent was paid on `2025-12-28`
+- **THEN** the page offers 2026 and 2025
 
 #### Scenario: Two tenancies in the same month
 - **WHEN** `Pekka Virtanen`'s tenancy ended on `2025-02-14` and `Aino Koski`'s started on `2025-02-15`
