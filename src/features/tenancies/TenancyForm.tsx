@@ -6,6 +6,8 @@
 // "Correcting a tenancy").
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import Checkbox from '@mui/material/Checkbox'
+import FormControlLabel from '@mui/material/FormControlLabel'
 import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
@@ -23,9 +25,21 @@ import { formatAmountInput, formatDate } from '#/lib/format'
 import { failureReason } from '#/lib/network-error'
 import type { AlertReason, FieldReason } from '#/lib/reasons'
 import { m } from '#/paraglide/messages.js'
+import type { NoticeGiver } from '#/server/db/schema'
 import { colors, radii } from '#/theme/tokens'
 import { createTenancy, updateTenancy } from './functions'
+import {
+  EndingHint,
+  EndingWayPicker,
+  hintFor,
+  LAST_DAY_REASONS,
+  NOTICE_REASONS,
+  noticeDateLabel,
+  suggestedLastDay,
+  waysFor,
+} from './ending'
 import { contractShortLabel } from './labels'
+import { rentAsked } from './rent'
 import {
   typedDueDay,
   typedTenantEmail,
@@ -58,9 +72,11 @@ type Field =
   | 'termEnd'
   | 'rent'
   | 'dueDay'
+  | 'noticeDate'
+  | 'lastDay'
 
 /** The field a server's reason belongs under; others are alerts. */
-const FIELD_OF: Partial<Record<FieldReason, Field>> = {
+const FIELD_OF_TENANCY: Partial<Record<FieldReason, Field>> = {
   tenant_name_required: 'tenantName',
   tenant_name_too_long: 'tenantName',
   tenant_phone_too_long: 'tenantPhone',
@@ -94,6 +110,14 @@ export function previousTenancy(
     before.validTo >= today
     ? before
     : undefined
+}
+
+const FIELD_OF: Partial<Record<FieldReason, Field>> = {
+  ...FIELD_OF_TENANCY,
+  ...Object.fromEntries<Field>([
+    ...NOTICE_REASONS.map((reason): [string, Field] => [reason, 'noticeDate']),
+    ...LAST_DAY_REASONS.map((reason): [string, Field] => [reason, 'lastDay']),
+  ]),
 }
 
 function CloseIcon() {
@@ -139,6 +163,10 @@ export function TenancyForm(props: Props) {
   // Contract made and the rent follow the start until the user edits them.
   const madeEditedRef = useRef(editing !== undefined)
   const rentEditedRef = useRef(false)
+  // An earlier tenancy's ending (adding only, a start before today).
+  const [ended, setEnded] = useState(false)
+  const [by, setBy] = useState<NoticeGiver>('tenant')
+  const lastDayEditedRef = useRef(false)
 
   const form = useForm({
     defaultValues: {
@@ -151,11 +179,19 @@ export function TenancyForm(props: Props) {
       termEnd: editing?.termEnd ? formatDate(editing.termEnd) : '',
       rent: '',
       dueDay: editing ? String(editing.dueDay) : '',
+      noticeDate: '',
+      lastDay: '',
     },
     onSubmit: async ({ value }) => {
       setAlert(undefined)
       setReasons({})
-      const { rent, ...fields } = value
+      const { rent, noticeDate, lastDay, ...fields } = value
+      const start = parseFiDate(fields.validFrom)
+      // As the form shows them: the rent from the latest rent period on, the
+      // ending for a start before today.
+      const askRent = start === undefined || rentAsked(rents, start)
+      const withEnding =
+        ended && start !== undefined && start < (props.today ?? start)
       try {
         const result = editing
           ? await updateTenancy({
@@ -166,7 +202,22 @@ export function TenancyForm(props: Props) {
               },
             })
           : await createTenancy({
-              data: { propertyId: props.propertyId, rent, ...fields },
+              data: {
+                propertyId: props.propertyId,
+                ...fields,
+                ...(askRent ? { rent } : {}),
+                ...(withEnding
+                  ? {
+                      ending: {
+                        noticeGivenBy: waysFor(fields.contractType).includes(by)
+                          ? by
+                          : waysFor(fields.contractType)[0],
+                        noticeDate,
+                        lastDay,
+                      },
+                    }
+                  : {}),
+              },
             })
         if (result.ok) {
           await props.onSaved()
@@ -188,6 +239,36 @@ export function TenancyForm(props: Props) {
   const contractType = useSelector(form.store, (s) => s.values.contractType)
   const start = useSelector(form.store, (s) => parseFiDate(s.values.validFrom))
   const previous = previousTenancy(props.tenancies ?? [], start, props.today)
+  const contractMade = useSelector(form.store, (s) =>
+    parseFiDate(s.values.contractMade),
+  )
+  const termEnd = useSelector(form.store, (s) => parseFiDate(s.values.termEnd))
+  const noticeDate = useSelector(form.store, (s) =>
+    parseFiDate(s.values.noticeDate),
+  )
+  const askRent =
+    editing === undefined && (start === undefined || rentAsked(rents, start))
+  const canEnd =
+    editing === undefined &&
+    start !== undefined &&
+    props.today !== undefined &&
+    start < props.today
+  // The tenancy as entered, for the suggested last day and the hint.
+  const entered =
+    start === undefined
+      ? undefined
+      : {
+          contractType,
+          contractMade: contractMade ?? start,
+          validFrom: start,
+          termEnd: contractType === 'fixed_term' ? (termEnd ?? null) : null,
+        }
+  const suggest = (way: NoticeGiver, notice: IsoDate | undefined) => {
+    if (!lastDayEditedRef.current && entered) {
+      form.setFieldValue('lastDay', suggestedLastDay(way, entered, notice))
+    }
+  }
+  const way = waysFor(contractType).includes(by) ? by : waysFor(contractType)[0]
   const clear = (field: Field) => () => {
     setReasons((current) => ({ ...current, [field]: undefined }))
   }
@@ -394,7 +475,7 @@ export function TenancyForm(props: Props) {
             {m.tenancy_form_made_hint()}
           </Typography>
           <Box sx={pair}>
-            {editing ? null : (
+            {askRent ? (
               <form.Field
                 name="rent"
                 validators={{ onChange: typedAmount }}
@@ -416,7 +497,7 @@ export function TenancyForm(props: Props) {
                   />
                 )}
               </form.Field>
-            )}
+            ) : null}
             <form.Field
               name="dueDay"
               validators={{ onChange: typedDueDay }}
@@ -434,10 +515,84 @@ export function TenancyForm(props: Props) {
           </Box>
           {editing ? null : (
             <Typography variant="body2" color="text.secondary">
-              {m.tenancy_form_rent_hint()}
+              {askRent
+                ? m.tenancy_form_rent_hint()
+                : m.tenancy_form_rent_not_asked()}
             </Typography>
           )}
         </Section>
+        {canEnd && entered ? (
+          <Section title={m.tenancy_form_ending()}>
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={ended}
+                  onChange={(e) => {
+                    setEnded(e.target.checked)
+                    if (e.target.checked) {
+                      suggest(way, noticeDate)
+                    }
+                  }}
+                />
+              }
+              label={m.tenancy_form_ended()}
+              sx={{ minHeight: 44 }}
+            />
+            {ended ? (
+              <>
+                <EndingWayPicker
+                  id="tenancy-ending-way"
+                  contractType={contractType}
+                  value={way}
+                  onChange={(chosen) => {
+                    setBy(chosen)
+                    clear('lastDay')()
+                    suggest(chosen, noticeDate)
+                  }}
+                />
+                <Box sx={pair}>
+                  <form.Field
+                    name="noticeDate"
+                    validators={{ onChange: typedDate }}
+                    listeners={{
+                      onChange: ({ value }) => {
+                        clear('noticeDate')()
+                        suggest(way, parseFiDate(value))
+                      },
+                    }}
+                  >
+                    {(field) => (
+                      <TextField
+                        field={field}
+                        reason={reasons.noticeDate}
+                        label={noticeDateLabel(way)}
+                        placeholder={m.date_placeholder()}
+                      />
+                    )}
+                  </form.Field>
+                  <form.Field
+                    name="lastDay"
+                    validators={{ onChange: typedDate }}
+                    listeners={{ onChange: clear('lastDay') }}
+                  >
+                    {(field) => (
+                      <TextField
+                        field={field}
+                        reason={reasons.lastDay}
+                        label={m.tenancy_last_day()}
+                        placeholder={m.date_placeholder()}
+                        onFocus={() => {
+                          lastDayEditedRef.current = true
+                        }}
+                      />
+                    )}
+                  </form.Field>
+                </Box>
+                <EndingHint text={hintFor(way, entered, noticeDate)} />
+              </>
+            ) : null}
+          </Section>
+        ) : null}
         {alert === undefined ? null : <ReasonAlert reason={alert} />}
       </Stack>
       <Box

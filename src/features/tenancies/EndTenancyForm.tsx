@@ -22,7 +22,16 @@ import { m } from '#/paraglide/messages.js'
 import type { NoticeGiver } from '#/server/db/schema'
 import { colors, radii } from '#/theme/tokens'
 import { endTenancy } from './functions'
-import { earliestLastDay, noticePeriodMonths } from './notice'
+import {
+  EndingHint,
+  EndingWayPicker,
+  hintFor,
+  LAST_DAY_REASONS,
+  NOTICE_REASONS,
+  noticeDateLabel,
+  suggestedLastDay,
+  waysFor,
+} from './ending'
 import type { Tenancy } from './tenancy.repository.server'
 
 interface Props {
@@ -33,29 +42,6 @@ interface Props {
   onDone: () => Promise<void>
   onClose: () => void
 }
-
-const OPEN_WAYS = ['tenant', 'landlord', 'agreed', 'other'] as const
-const FIXED_WAYS = ['agreed', 'court', 'other'] as const
-
-const wayLabel: Record<NoticeGiver, () => string> = {
-  tenant: () => m.tenancy_end_by_tenant(),
-  landlord: () => m.tenancy_end_by_landlord(),
-  agreed: () => m.tenancy_by_agreed(),
-  court: () => m.tenancy_by_court(),
-  other: () => m.tenancy_by_other(),
-}
-
-const NOTICE_REASONS: readonly FieldReason[] = [
-  'date_invalid',
-  'tenancy_notice_in_future',
-  'tenancy_notice_before_start',
-]
-const LAST_DAY_REASONS: readonly FieldReason[] = [
-  'tenancy_end_before_notice',
-  'tenancy_end_before_notice_period',
-  'tenancy_end_after_term',
-  'tenancy_fixed_term_notice',
-]
 
 function CloseIcon() {
   return (
@@ -74,57 +60,24 @@ function CloseIcon() {
   )
 }
 
-/** The hint under the dates for the chosen way of ending. */
-function hintFor(
-  by: NoticeGiver,
-  tenancy: Tenancy,
-  noticeDate: string | undefined,
-): string {
-  switch (by) {
-    case 'tenant':
-    case 'landlord': {
-      const date = noticeDate ?? tenancy.validFrom
-      const earliest = formatDate(earliestLastDay(by, tenancy, date))
-      return by === 'tenant'
-        ? m.tenancy_end_hint_tenant({ date: earliest })
-        : m.tenancy_end_hint_landlord({
-            made: formatDate(tenancy.contractMade),
-            months: String(noticePeriodMonths(by, tenancy, date)),
-            date: earliest,
-          })
-    }
-    case 'agreed':
-      return m.tenancy_end_hint_agreed()
-    case 'court':
-      return m.tenancy_end_hint_court()
-    case 'other':
-      return m.tenancy_end_hint_other()
-  }
-}
-
 export function EndTenancyForm(props: Props) {
   const { tenancy, today } = props
   const fixed = tenancy.contractType === 'fixed_term'
-  const ways = fixed ? FIXED_WAYS : OPEN_WAYS
-  const [by, setBy] = useState<NoticeGiver>(ways[0])
+  const [by, setBy] = useState<NoticeGiver>(
+    () => waysFor(tenancy.contractType)[0],
+  )
   const [alert, setAlert] = useState<AlertReason>()
   const [noticeReason, setNoticeReason] = useState<FieldReason>()
   const [lastDayReason, setLastDayReason] = useState<FieldReason>()
   const lastDayEditedRef = useRef(false)
 
-  const suggested = (way: NoticeGiver, notice: string) => {
-    const date = parseFiDate(notice)
-    return date === undefined
-      ? ''
-      : formatDate(earliestLastDay(way, tenancy, date))
-  }
+  const suggested = (way: NoticeGiver, notice: string) =>
+    suggestedLastDay(way, tenancy, parseFiDate(notice))
 
   const form = useForm({
     defaultValues: {
       noticeDate: formatDate(today),
-      lastDay: fixed
-        ? ''
-        : formatDate(earliestLastDay(ways[0], tenancy, today)),
+      lastDay: suggestedLastDay(by, tenancy, today),
     },
     onSubmit: async ({ value }) => {
       setAlert(undefined)
@@ -228,39 +181,12 @@ export function EndTenancyForm(props: Props) {
             {m.tenancy_end_fixed_info({ date: formatDate(tenancy.termEnd) })}
           </Box>
         ) : null}
-        <Stack role="group" aria-labelledby="end-way-label" sx={{ gap: 0.75 }}>
-          <Typography
-            id="end-way-label"
-            variant="body2"
-            component="span"
-            sx={{ fontWeight: 800, color: 'text.secondary' }}
-          >
-            {fixed ? m.tenancy_end_ground() : m.tenancy_end_who()}
-          </Typography>
-          <Box
-            sx={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
-              gap: 0.75,
-            }}
-          >
-            {ways.map((way) => (
-              <Button
-                key={way}
-                type="button"
-                aria-pressed={by === way}
-                onClick={() => {
-                  choose(way)
-                }}
-                variant={by === way ? 'contained' : 'outlined'}
-                color={by === way ? 'accent' : 'inherit'}
-                sx={{ minHeight: 44, borderRadius: 999, px: 1 }}
-              >
-                {wayLabel[way]()}
-              </Button>
-            ))}
-          </Box>
-        </Stack>
+        <EndingWayPicker
+          id="end-way-label"
+          contractType={tenancy.contractType}
+          value={by}
+          onChange={choose}
+        />
         <Box
           sx={{
             display: 'grid',
@@ -284,13 +210,7 @@ export function EndTenancyForm(props: Props) {
               <TextField
                 field={field}
                 reason={noticeReason}
-                label={
-                  by === 'tenant' || by === 'landlord'
-                    ? m.tenancy_end_notice_date()
-                    : by === 'other'
-                      ? m.tenancy_end_other_date()
-                      : m.tenancy_end_decided()
-                }
+                label={noticeDateLabel(by)}
                 placeholder={m.date_placeholder()}
               />
             )}
@@ -317,20 +237,7 @@ export function EndTenancyForm(props: Props) {
             )}
           </form.Field>
         </Box>
-        <Box
-          role="status"
-          sx={{
-            bgcolor: colors.yellowTint,
-            borderRadius: `${String(radii.input)}px`,
-            px: 1.75,
-            py: 1.5,
-            fontSize: 13,
-            fontWeight: 700,
-            lineHeight: 1.45,
-          }}
-        >
-          {hintFor(by, tenancy, notice)}
-        </Box>
+        <EndingHint text={hintFor(by, tenancy, notice)} />
         <Typography variant="body2" color="text.secondary">
           {m.tenancy_end_info()}
         </Typography>
