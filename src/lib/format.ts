@@ -143,6 +143,16 @@ export function formatMonth(
   return text.charAt(0).toLocaleUpperCase(INTL_LOCALES[locale]) + text.slice(1)
 }
 
+/** A month's name alone, e.g. "2026-11" → "Marraskuu" in Finnish. */
+export function formatMonthName(month: string, locale: Locale = getLocale()) {
+  const [year, number] = month.split('-').map(Number) as [number, number]
+  const text = new Intl.DateTimeFormat(INTL_LOCALES[locale], {
+    timeZone: 'UTC',
+    month: 'long',
+  }).format(new Date(Date.UTC(year, number - 1, 1)))
+  return text.charAt(0).toLocaleUpperCase(INTL_LOCALES[locale]) + text.slice(1)
+}
+
 /** A date without its year, e.g. "2026-11-12" → "12.11." in Finnish. */
 export function formatDayMonth(iso: string, locale: Locale = getLocale()) {
   formatDate(iso, locale) // validates
