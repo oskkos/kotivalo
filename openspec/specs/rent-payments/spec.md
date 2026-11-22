@@ -115,7 +115,7 @@ For a day before the tenancy starts, the flat details page SHALL show *No rent t
 - **THEN** the due date of `2027-02` is `2027-02-28`
 
 ### Requirement: Months not fully paid
-The months not fully paid of a flat on a given day SHALL be the months of its tenancies in the current and the previous calendar year, up to and including the current month, whose status on that day is *Late* or *Partly paid*. A month that is *Due* or *Rent not set* SHALL NOT count. The flat details page SHALL warn about these months other than the current one, and the rent payments page about those of the chosen year.
+The months not fully paid of a flat on a given day SHALL be the months of its tenancies in the current and the previous calendar year, up to and including the current month, whose status on that day is *Late* or *Partly paid*. A month that is *Due* or *Rent not set* SHALL NOT count. The flat details page SHALL warn about these months other than the one its rent card shows, opening the rent payments page on the year of the newest of them, and the rent payments page SHALL warn about those of the chosen year.
 
 **No Playwright test:** a pure selection of months by their status; Vitest covers it, and the warnings are shown in the browser tests of "The flat details page" and "The rent payments page".
 
@@ -126,6 +126,14 @@ The months not fully paid of a flat on a given day SHALL be the months of its te
 #### Scenario: Months two years back don't count
 - **WHEN** today is `2026-11-22`, and a tenancy that ran in 2023 and 2024 has no payments
 - **THEN** none of its months are not fully paid
+
+#### Scenario: An earlier tenancy's month is warned about on the details page
+- **WHEN** today is `2026-11-22`, `Pekka Virtanen`'s tenancy with the due day 5 ended on `2026-11-10` without a payment for November, and `Aino Koski`'s started on `2026-11-15`
+- **THEN** the rent card shows Aino's November, and the details page warns about Pekka's November
+
+#### Scenario: The warning opens the year of the newest month
+- **WHEN** today is `2026-09-22`, and December 2025 is the only month not fully paid
+- **THEN** the details page's warning opens the rent payments page on 2025
 
 #### Scenario: A month before its due date doesn't count
 - **WHEN** today is `2026-11-03`, the due day is 5, and November has no payments

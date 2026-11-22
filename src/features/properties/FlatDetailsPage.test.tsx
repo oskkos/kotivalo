@@ -10,8 +10,18 @@ import { FlatDetailsPage } from './FlatDetailsPage'
 vi.mock('@tanstack/react-router', () => ({
   createLink:
     () =>
-    ({ children, to }: { children: ReactNode; to: string }) => (
-      <a href={to}>{children}</a>
+    ({
+      children,
+      to,
+      search,
+    }: {
+      children: ReactNode
+      to: string
+      search?: { year?: number }
+    }) => (
+      <a href={search?.year ? `${to}?year=${String(search.year)}` : to}>
+        {children}
+      </a>
     ),
 }))
 vi.mock('#/features/rent-payments/functions', () => ({}))
@@ -121,5 +131,58 @@ describe('The flat details page', () => {
     const amounts = screen.getByRole('region', { name: 'Rent and charges' })
     expect(amounts).toHaveTextContent('€890.00')
     expect(within(amounts).getAllByText('Not set')).toHaveLength(2)
+  })
+})
+
+describe('Months not fully paid', () => {
+  test("An earlier tenancy's month is warned about on the details page", () => {
+    const pekka: Tenancy = {
+      ...aino,
+      id: 't0',
+      tenantName: 'Pekka Virtanen',
+      validFrom: '2024-01-01',
+      validTo: '2026-11-10',
+      noticeGivenBy: 'tenant',
+      noticeDate: '2026-10-10',
+    }
+    const paid = (tenancyId: string, month: string) => ({
+      id: `${tenancyId}-${month}`,
+      tenancyId,
+      month,
+      amount: 89000,
+      paidOn: `${month}-03`,
+      recordedBy: 'Annika',
+    })
+    renderPage(
+      details({
+        tenancies: [{ ...aino, validFrom: '2026-11-15' }, pekka],
+        payments: [
+          ...Array.from({ length: 10 }, (_, i) =>
+            paid('t0', `2026-${String(i + 1).padStart(2, '0')}`),
+          ),
+          ...Array.from({ length: 12 }, (_, i) =>
+            paid('t0', `2025-${String(i + 1).padStart(2, '0')}`),
+          ),
+        ],
+      }),
+    )
+    expect(screen.getByRole('region', { name: 'November rent' })).toBeVisible()
+    expect(
+      screen.getByText('Rent not recorded as fully paid: November 2026'),
+    ).toBeVisible()
+  })
+
+  test('The warning opens the year of the newest month', () => {
+    renderPage(
+      details({
+        payments: details().payments.filter((p) => p.month !== '2025-12'),
+        today: '2026-09-22',
+      }),
+    )
+    expect(
+      screen
+        .getByText('Rent not recorded as fully paid: December 2025')
+        .closest('a'),
+    ).toHaveAttribute('href', '/properties/$propertyId/rent?year=2025')
   })
 })
