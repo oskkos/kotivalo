@@ -5,6 +5,7 @@ import Button from '@mui/material/Button'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { createFileRoute, Link, useRouter } from '@tanstack/react-router'
+import { useSyncExternalStore } from 'react'
 import { z } from 'zod'
 import { sortByStreetAddress } from '#/features/properties/property'
 import { getNewTransactionOptions } from '#/features/transactions/functions'
@@ -23,6 +24,9 @@ function lastFlat(): string | undefined {
     return undefined
   }
 }
+
+/** The remembered flat changes only by this page's own save. */
+const noSubscription = () => () => undefined
 
 function rememberFlat(id: string) {
   try {
@@ -89,6 +93,13 @@ function NewTransactionRoute() {
   const router = useRouter()
   const owned = sortByStreetAddress(options.owned, getLocale())
   const fixed = owned.find((flat) => flat.id === propertyId)
+  // The server can't see this device's storage: hydration uses the server's
+  // value, then the page renders again with the remembered flat.
+  const remembered = useSyncExternalStore(
+    noSubscription,
+    lastFlat,
+    () => undefined,
+  )
   if (owned.length === 0) {
     return options.hasFlats ? (
       <Explanation
@@ -104,12 +115,14 @@ function NewTransactionRoute() {
       />
     )
   }
-  const remembered = lastFlat()
   // owned has at least one flat here.
   const initial =
     fixed ?? owned.find((flat) => flat.id === remembered) ?? owned[0]
   return (
     <TransactionForm
+      // The form keeps its own flat; a remembered flat found after mount
+      // starts it again with that flat.
+      key={initial.id}
       flats={fixed ? [fixed] : owned}
       initialFlatId={initial.id}
       pickFlat={!fixed}
