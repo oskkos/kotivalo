@@ -13,7 +13,9 @@ import {
   lt,
   notExists,
   sql,
+  type SQL,
 } from 'drizzle-orm'
+import type { BatchItem } from 'drizzle-orm/batch'
 import { dayBefore, type IsoDate } from '#/lib/dates'
 import {
   financingTreatments,
@@ -43,7 +45,7 @@ interface Undo {
 }
 
 /** A write's expectation: the latest period's start as read, or none. */
-interface Expected {
+export interface Expected {
   propertyId: string
   actorId: string
   latestStart: IsoDate | null
@@ -71,6 +73,106 @@ export function recurringAmountRepository(db: Db) {
       eq(recurringAmounts.propertyId, propertyId),
       eq(recurringAmounts.kind, kind),
     )
+
+  /**
+   * The statements that set an amount from `from`: on the latest period's
+   * start they correct that period, otherwise they close the latest period
+   * the day before and add a new one. `onlyIf` joins every statement's
+   * condition, so another write in the same batch can gate them. The last
+   * statement returns a row when it applied.
+   */
+  function amountStatements(
+    write: Expected & { kind: RecurringAmountKind; amount: number },
+    onlyIf?: SQL,
+  ): [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]] {
+    const { propertyId, actorId, kind, amount, from, latestStart } = write
+    const scope = amountScope(propertyId, kind)
+    if (latestStart === from) {
+      return [
+        db
+          .update(recurringAmounts)
+          .set({ amount })
+          .where(
+            and(
+              scope,
+              eq(recurringAmounts.validFrom, from),
+              isNull(recurringAmounts.validTo),
+              isOwner(actorId, propertyId),
+              onlyIf,
+            ),
+          )
+          .returning({ id: recurringAmounts.id }),
+      ]
+    }
+    const id = crypto.randomUUID()
+    // The latest period is closed by this write (or there was none), and
+    // nothing of this kind starts on or after `from`.
+    const ready = and(
+      eq(properties.id, propertyId),
+      isOwner(actorId, propertyId),
+      onlyIf,
+      notExists(
+        db
+          .select({ one: sql`1` })
+          .from(recurringAmounts)
+          .where(and(scope, gte(recurringAmounts.validFrom, from))),
+      ),
+      latestStart === null
+        ? notExists(
+            db
+              .select({ one: sql`1` })
+              .from(recurringAmounts)
+              .where(scope),
+          )
+        : exists(
+            db
+              .select({ one: sql`1` })
+              .from(recurringAmounts)
+              .where(
+                and(
+                  scope,
+                  eq(recurringAmounts.validFrom, latestStart),
+                  eq(recurringAmounts.validTo, dayBefore(from)),
+                ),
+              ),
+          ),
+    )
+    const insert = db
+      .insert(recurringAmounts)
+      .select(
+        db
+          .select({
+            id: sql<string>`${id}`.as('id'),
+            propertyId: properties.id,
+            kind: sql<RecurringAmountKind>`${kind}`.as('kind'),
+            amount: sql<number>`${amount}`.as('amount'),
+            validFrom: sql<string>`${from}`.as('valid_from'),
+            validTo: sql<null>`null`.as('valid_to'),
+          })
+          .from(properties)
+          .where(ready),
+      )
+      .returning({ id: recurringAmounts.id })
+    if (latestStart === null) {
+      return [insert]
+    }
+    return [
+      db
+        .update(recurringAmounts)
+        .set({ validTo: dayBefore(from) })
+        .where(
+          and(
+            scope,
+            eq(recurringAmounts.validFrom, latestStart),
+            lt(recurringAmounts.validFrom, from),
+            isNull(recurringAmounts.validTo),
+            isOwner(actorId, propertyId),
+            onlyIf,
+          ),
+        ),
+      insert,
+    ]
+  }
 
   return {
     async forProperty(propertyId: string): Promise<RecurringAmounts> {
@@ -108,101 +210,18 @@ export function recurringAmountRepository(db: Db) {
       }
     },
 
+    amountStatements,
+
     /**
-     * Sets an amount from `from`: on the latest period's start it corrects
-     * that period, otherwise it closes the latest period the day before and
-     * adds a new one. Returns whether it applied.
+     * Sets an amount from `from` (amountStatements). Returns whether it
+     * applied.
      */
     async setAmount(
       write: Expected & { kind: RecurringAmountKind; amount: number },
     ): Promise<boolean> {
-      const { propertyId, actorId, kind, amount, from, latestStart } = write
-      const scope = amountScope(propertyId, kind)
-      if (latestStart === from) {
-        const [updated] = await atomically(db, [
-          db
-            .update(recurringAmounts)
-            .set({ amount })
-            .where(
-              and(
-                scope,
-                eq(recurringAmounts.validFrom, from),
-                isNull(recurringAmounts.validTo),
-                isOwner(actorId, propertyId),
-              ),
-            )
-            .returning({ id: recurringAmounts.id }),
-        ])
-        return updated.length > 0
-      }
-      const id = crypto.randomUUID()
-      // The latest period is closed by this write (or there was none), and
-      // nothing of this kind starts on or after `from`.
-      const ready = and(
-        eq(properties.id, propertyId),
-        isOwner(actorId, propertyId),
-        notExists(
-          db
-            .select({ one: sql`1` })
-            .from(recurringAmounts)
-            .where(and(scope, gte(recurringAmounts.validFrom, from))),
-        ),
-        latestStart === null
-          ? notExists(
-              db
-                .select({ one: sql`1` })
-                .from(recurringAmounts)
-                .where(scope),
-            )
-          : exists(
-              db
-                .select({ one: sql`1` })
-                .from(recurringAmounts)
-                .where(
-                  and(
-                    scope,
-                    eq(recurringAmounts.validFrom, latestStart),
-                    eq(recurringAmounts.validTo, dayBefore(from)),
-                  ),
-                ),
-            ),
-      )
-      const insert = db
-        .insert(recurringAmounts)
-        .select(
-          db
-            .select({
-              id: sql<string>`${id}`.as('id'),
-              propertyId: properties.id,
-              kind: sql<RecurringAmountKind>`${kind}`.as('kind'),
-              amount: sql<number>`${amount}`.as('amount'),
-              validFrom: sql<string>`${from}`.as('valid_from'),
-              validTo: sql<null>`null`.as('valid_to'),
-            })
-            .from(properties)
-            .where(ready),
-        )
-        .returning({ id: recurringAmounts.id })
-      if (latestStart === null) {
-        const [inserted] = await atomically(db, [insert])
-        return inserted.length > 0
-      }
-      const [, inserted] = await atomically(db, [
-        db
-          .update(recurringAmounts)
-          .set({ validTo: dayBefore(from) })
-          .where(
-            and(
-              scope,
-              eq(recurringAmounts.validFrom, latestStart),
-              lt(recurringAmounts.validFrom, from),
-              isNull(recurringAmounts.validTo),
-              isOwner(actorId, propertyId),
-            ),
-          ),
-        insert,
-      ])
-      return inserted.length > 0
+      const results = await atomically(db, amountStatements(write))
+      const last = results.at(-1) as unknown[]
+      return last.length > 0
     },
 
     /**

@@ -28,6 +28,10 @@ import {
   type ContractType,
   type NoticeGiver,
 } from '#/server/db/schema'
+import {
+  recurringAmountRepository,
+  type Expected,
+} from '#/features/recurring-amounts/recurring-amount.repository.server'
 import { atomically, type Db } from '#/server/platform/db.server'
 
 /** What an owner enters for a tenancy. */
@@ -219,7 +223,49 @@ export function tenancyRepository(db: Db) {
         .orderBy(asc(tenancies.validFrom))
     },
 
-    createStatement,
+    /**
+     * Adds a tenancy and, when given, sets the flat's rent in the same batch.
+     * The rent statements apply only if the tenancy row went in. Returns the
+     * tenancy's id (null when it wasn't added) and whether the rent applied.
+     */
+    async createWithRent(
+      actorId: string,
+      propertyId: string,
+      fields: TenancyFields,
+      rent:
+        (Omit<Expected, 'propertyId' | 'actorId'> & { amount: number }) | null,
+      now: Date,
+    ): Promise<{ id: string | null; rentApplied: boolean }> {
+      const { id, statement } = createStatement(
+        actorId,
+        propertyId,
+        fields,
+        now,
+      )
+      if (rent === null) {
+        const [inserted] = await atomically(db, [statement])
+        return { id: inserted[0]?.id ?? null, rentApplied: false }
+      }
+      const added = exists(
+        db
+          .select({ one: sql`1` })
+          .from(other)
+          .where(eq(other.id, id)),
+      )
+      const results = await atomically(db, [
+        statement,
+        ...recurringAmountRepository(db).amountStatements(
+          { ...rent, propertyId, actorId, kind: 'rent' },
+          added,
+        ),
+      ])
+      const inserted = results[0]
+      const last = results.at(-1) as unknown[]
+      return {
+        id: inserted[0]?.id ?? null,
+        rentApplied: inserted.length > 0 && last.length > 0,
+      }
+    },
 
     /** Adds a tenancy. Null when the actor isn't an owner or it overlaps. */
     async create(
@@ -339,3 +385,4 @@ export function tenancyRepository(db: Db) {
     },
   }
 }
+export type TenancyRepository = ReturnType<typeof tenancyRepository>
