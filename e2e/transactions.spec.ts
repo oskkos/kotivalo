@@ -265,8 +265,9 @@ test.describe('Editing an entry', () => {
     await page.getByRole('button', { name: 'Save changes' }).click()
 
     await expect(page.getByRole('heading', { name: 'Expense' })).toBeVisible()
+    // The details may show the cached entry until its reload finishes.
+    await expect.poll(() => receiptSrc(page)).not.toBe(oldSrc)
     const newSrc = await receiptSrc(page)
-    expect(newSrc).not.toBe(oldSrc)
     expect((await page.request.get(oldSrc ?? '')).status()).toBe(404)
     expect((await page.request.get(newSrc ?? '')).status()).toBe(200)
   })
