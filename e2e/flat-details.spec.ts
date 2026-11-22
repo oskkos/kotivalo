@@ -101,7 +101,11 @@ test.describe('The flat details page', () => {
         name: /\d+ months' rent not recorded as fully paid/,
       })
       .click()
-    await expect(page).toHaveURL(`/properties/${id}/rent`)
+    // It opens on the year of the newest of them, last month.
+    const lastMonth = new Date(thisYear, today.getMonth() - 1, 1)
+    await expect(page).toHaveURL(
+      `/properties/${id}/rent?year=${String(lastMonth.getFullYear())}`,
+    )
   })
 
   test('A vacant flat', async ({ page }) => {
