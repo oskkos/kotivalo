@@ -80,3 +80,22 @@ export function addYears(date: IsoDate, years: number): IsoDate {
   const last = Number(lastDayOfMonth(target).slice(8))
   return `${target}-${String(Math.min(day, last)).padStart(2, '0')}`
 }
+
+/** The number of days in a month `YYYY-MM`: `2028-02` → 29. */
+export function daysInMonth(month: string): number {
+  return Number(lastDayOfMonth(month).slice(8))
+}
+
+const dayNumber = (date: IsoDate): number => {
+  const [year, month, day] = date.split('-').map(Number) as [
+    number,
+    number,
+    number,
+  ]
+  return Date.UTC(year, month - 1, day) / 86_400_000
+}
+
+/** Days from `from` to `to`, negative when `to` is earlier. */
+export function daysBetween(from: IsoDate, to: IsoDate): number {
+  return dayNumber(to) - dayNumber(from)
+}

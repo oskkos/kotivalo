@@ -54,6 +54,8 @@ export type FieldReason =
   | 'tenancy_end_before_notice_period'
   | 'tenancy_end_after_term'
   | 'tenancy_fixed_term_notice'
+  | 'rent_payment_amount_invalid'
+  | 'rent_payment_date_in_future'
 
 /** Errors about the whole action, shown as an alert with a title. */
 export type AlertReason =
@@ -84,6 +86,10 @@ export type AlertReason =
   | 'tenancy_cancel_later_tenancy'
   | 'tenancy_correction_conflicts_ending'
   | 'tenancy_already_started'
+  | 'tenancy_has_payments_outside'
+  | 'tenancy_has_payments'
+  | 'rent_payment_month_outside_tenancy'
+  | 'rent_payment_not_found'
   /** The amounts changed since they were read; the page reloads them. */
   | 'amount_changed'
   /** A request never reached the server: offline or cancelled. */
@@ -297,6 +303,28 @@ const texts: Record<Reason, () => ReasonText> = {
   tenancy_correction_conflicts_ending: () => ({
     title: m.reason_tenancy_correction_conflicts_ending_title(),
     text: m.reason_tenancy_correction_conflicts_ending(),
+  }),
+  tenancy_has_payments_outside: () => ({
+    title: m.reason_tenancy_has_payments_outside_title(),
+    text: m.reason_tenancy_has_payments_outside(),
+  }),
+  tenancy_has_payments: () => ({
+    title: m.reason_tenancy_has_payments_title(),
+    text: m.reason_tenancy_has_payments(),
+  }),
+  rent_payment_amount_invalid: () => ({
+    text: m.reason_rent_payment_amount_invalid(),
+  }),
+  rent_payment_date_in_future: () => ({
+    text: m.reason_rent_payment_date_in_future(),
+  }),
+  rent_payment_month_outside_tenancy: () => ({
+    title: m.reason_rent_payment_month_outside_tenancy_title(),
+    text: m.reason_rent_payment_month_outside_tenancy(),
+  }),
+  rent_payment_not_found: () => ({
+    title: m.reason_rent_payment_not_found_title(),
+    text: m.reason_rent_payment_not_found(),
   }),
   amount_changed: () => ({
     title: m.reason_amount_changed_title(),
