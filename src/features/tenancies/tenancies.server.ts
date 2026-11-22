@@ -105,12 +105,15 @@ async function ownershipStart(
 
 const today = (deps: TenancyDeps) => isoDateInFinland(deps.now())
 
-/** The flat's tenancies, for everyone with access. */
-export async function getTenancies(
+/** The flat's tenancies and its amounts, or undefined without access. */
+async function loadView(
   deps: TenancyDeps,
   propertyId: string,
 ): Promise<
-  ({ ok: true; rentToday: number | null } & TenancyView) | typeof notFound
+  | (TenancyView & {
+      amounts: Awaited<ReturnType<RecurringAmountRepository['forProperty']>>
+    })
+  | undefined
 > {
   const [role, property, tenancies, amounts] = await Promise.all([
     deps.sharing.roleOf(deps.userId, propertyId),
@@ -119,16 +122,27 @@ export async function getTenancies(
     deps.amounts.forProperty(propertyId),
   ])
   if (!role || !property) {
+    return undefined
+  }
+  return { role, property, today: today(deps), tenancies, amounts }
+}
+
+/** The flat's tenancies, for everyone with access. */
+export async function getTenancies(
+  deps: TenancyDeps,
+  propertyId: string,
+): Promise<
+  ({ ok: true; rentToday: number | null } & TenancyView) | typeof notFound
+> {
+  const view = await loadView(deps, propertyId)
+  if (!view) {
     return notFound
   }
-  const day = today(deps)
+  const { amounts, ...rest } = view
   return {
     ok: true,
-    role,
-    property,
-    today: day,
-    tenancies,
-    rentToday: periodOn(amounts.amounts.rent, day)?.value ?? null,
+    ...rest,
+    rentToday: periodOn(amounts.amounts.rent, view.today)?.value ?? null,
   }
 }
 
@@ -145,20 +159,17 @@ export async function getNewTenancyOptions(
     } & TenancyView)
   | typeof notFound
 > {
-  const [view, amounts, start] = await Promise.all([
-    getTenancies(deps, propertyId),
-    deps.amounts.forProperty(propertyId),
+  const [view, start] = await Promise.all([
+    loadView(deps, propertyId),
     ownershipStart(deps, propertyId),
   ])
-  if (!view.ok || start === undefined) {
+  if (!view || start === undefined) {
     return notFound
   }
+  const { amounts, ...rest } = view
   return {
     ok: true,
-    role: view.role,
-    property: view.property,
-    today: view.today,
-    tenancies: view.tenancies,
+    ...rest,
     rents: amounts.amounts.rent,
     ownershipStart: start,
   }
