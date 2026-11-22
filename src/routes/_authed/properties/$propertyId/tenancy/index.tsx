@@ -87,15 +87,19 @@ function TenancyRoute() {
                   {m.tenancy_end_title()}
                 </ButtonLink>
               ) : null}
+              {/* A tenancy with a last day (a fixed term, or an ending
+                  recorded) can be followed by the next one. */}
+              {tenancy.validTo !== null ? (
+                <ButtonLink
+                  to="/properties/$propertyId/tenancy/new"
+                  params={{ propertyId }}
+                  sx={{ minHeight: 48 }}
+                >
+                  {m.tenancy_add_next()}
+                </ButtonLink>
+              ) : null}
               {status.kind === 'notice_given' ? (
                 <>
-                  <ButtonLink
-                    to="/properties/$propertyId/tenancy/new"
-                    params={{ propertyId }}
-                    sx={{ minHeight: 48 }}
-                  >
-                    {m.tenancy_add_next()}
-                  </ButtonLink>
                   <Button
                     variant="text"
                     color="inherit"

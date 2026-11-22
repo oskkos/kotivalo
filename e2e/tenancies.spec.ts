@@ -37,6 +37,23 @@ test.describe('Adding a tenant', () => {
     await expect(page.getByText(`Starts 01/01/${nextYear}`)).toBeVisible()
     await expect(page.getByText(`31/12/${nextYear}`)).toBeVisible()
   })
+
+  test('a fixed-term tenancy can be followed by the next tenant', async ({
+    page,
+  }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, {
+      name: 'Mikko Lehtinen',
+      start: `01/01/${nextYear}`,
+      termEnd: `31/12/${nextYear}`,
+      contractMade: '20/11/2026',
+      rent: '910',
+    })
+
+    await page.getByRole('link', { name: 'Add a new tenant' }).click()
+
+    await expect(page).toHaveURL(`/properties/${id}/tenancy/new`)
+  })
 })
 
 test.describe('The tenancy page', () => {
