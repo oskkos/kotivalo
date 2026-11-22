@@ -35,8 +35,8 @@
 
 ## 5. Flat details server function
 
-- [ ] 5.1 `features/properties/details.server.ts`: `getFlatDetails` as in design.md ("The details page reads through one server function"), reusing the tenancies, recurring-amounts and transactions loaders; `functions.ts` exposes it
-- [ ] 5.2 Workers tests: the shape for an owner and a member; the three latest entries; a stranger gets not found
+- [x] 5.1 `features/properties/details.server.ts`: `getFlatDetails` as in design.md ("The details page reads through one server function"), reusing the tenancies, recurring-amounts and transactions loaders; `functions.ts` exposes it
+- [x] 5.2 Workers tests: the shape for an owner and a member; the three latest entries; a stranger gets not found
 
 ## 6. Recording, the month page
 

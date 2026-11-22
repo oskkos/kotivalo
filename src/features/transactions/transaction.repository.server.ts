@@ -178,6 +178,29 @@ export function transactionRepository(db: Db) {
       }))
     },
 
+    /** The flat's latest entries by date, newest first. */
+    async latest(propertyId: string, limit: number): Promise<TransactionRow[]> {
+      const rows = await db
+        .select({
+          id: transactions.id,
+          type: transactions.type,
+          category: transactions.category,
+          amount: transactions.amount,
+          date: transactions.date,
+          note: transactions.note,
+          receiptId: receipts.id,
+        })
+        .from(transactions)
+        .leftJoin(receipts, eq(receipts.transactionId, transactions.id))
+        .where(eq(transactions.propertyId, propertyId))
+        .orderBy(desc(transactions.date), desc(transactions.createdAt))
+        .limit(limit)
+      return rows.map(({ receiptId, ...row }) => ({
+        ...row,
+        hasReceipt: receiptId !== null,
+      }))
+    },
+
     /** The years that have entries, newest first. */
     async years(propertyId: string): Promise<number[]> {
       const rows = await db
