@@ -20,6 +20,8 @@ export function TenancyCard(props: {
   propertyId: string
   /** The current tenancy, or null when the flat is vacant. */
   tenancy: Tenancy | null
+  /** Adds the due day, as the flat details page shows it. */
+  showDueDay?: boolean
 }) {
   const { tenancy } = props
   return (
@@ -68,10 +70,16 @@ export function TenancyCard(props: {
         </Typography>
         {tenancy ? (
           <Typography variant="body2" color="text.secondary">
-            {m.tenancy_card_details({
-              contract: contractShortLabel[tenancy.contractType](),
-              date: formatDate(tenancy.validFrom),
-            })}
+            {props.showDueDay
+              ? m.tenancy_card_details_due({
+                  contract: contractShortLabel[tenancy.contractType](),
+                  date: formatDate(tenancy.validFrom),
+                  day: String(tenancy.dueDay),
+                })
+              : m.tenancy_card_details({
+                  contract: contractShortLabel[tenancy.contractType](),
+                  date: formatDate(tenancy.validFrom),
+                })}
           </Typography>
         ) : null}
       </Stack>

@@ -53,9 +53,9 @@
 
 ## 8. The flat details page
 
-- [ ] 8.1 Route `/properties/$propertyId` and `FlatDetailsPage.tsx` with its parts: the header with Edit and the menu, the flat card with owners, the rent card (status, record button, payments link), the warning, the tenancy card (moved from the edit page, `TenancyCard.tsx` reused), rent and charges with the capitalised total, latest entries, the vacant and *starts later* states
-- [ ] 8.2 Component tests; Playwright tests named after every scenario of "The flat details page" and "Recording this month's rent from the details page" and "A smaller amount leaves the month partly paid", reaching the page by its URL
-- [ ] 8.3 fi, sv and en messages (translate skill, term-critic)
+- [x] 8.1 Route `/properties/$propertyId` and `FlatDetailsPage.tsx` with its parts: the header with Edit and the menu, the flat card with owners, the rent card (status, record button, payments link), the warning, the tenancy card (moved from the edit page, `TenancyCard.tsx` reused), rent and charges with the capitalised total, latest entries, the vacant and *starts later* states
+- [x] 8.2 Component tests; Playwright tests named after every scenario of "The flat details page" and "Recording this month's rent from the details page" and "A smaller amount leaves the month partly paid", reaching the page by its URL
+- [x] 8.3 fi, sv and en messages (translate skill, term-critic)
 
 ## 9. The details page as the flat's main page
 

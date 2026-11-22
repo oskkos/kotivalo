@@ -163,6 +163,25 @@
   "date_placeholder": "dd.mm.åååå",
   "email_action_fallback": "Om knappen inte fungerar, kopiera den här adressen till din webbläsare:",
   "error_reference": "Felkod: {reference}",
+  "flat_details_all": "Alla",
+  "flat_details_latest": "Senaste registreringarna",
+  "flat_details_menu": "Fler åtgärder",
+  "flat_details_no_entries": "Inga registreringar ännu.",
+  "flat_details_page_title": "Bostadens uppgifter – Kotivalo",
+  "flat_details_partly_paid": "{paid} betalt · {missing} saknas",
+  "flat_details_record": "Markera som betald",
+  "flat_details_title": "Bostadens uppgifter",
+  "flat_details_unpaid_many": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Hyran är inte registrerad som helt betald för {count} månad",
+        "countPlural=other": "Hyran är inte registrerad som helt betald för {count} månader"
+      }
+    }
+  ],
+  "flat_details_unpaid_one": "Hyran är inte registrerad som helt betald: {months}",
   "invitation_accept": "Godkänn",
   "invitation_accepted": "{address} finns nu på din lista.",
   "invitation_decline": "Avböj",
@@ -541,6 +560,7 @@
   "tenancy_cancel_open": "{name} fortsätter som hyresgäst, och hyresförhållandet gäller igen tills vidare.",
   "tenancy_cancel_title": "Ångra upphörandet?",
   "tenancy_card_details": "{contract} · från {date}",
+  "tenancy_card_details_due": "{contract} · från {date} · förfallodag den {day} i månaden",
   "tenancy_card_let": "Uthyrd",
   "tenancy_card_starts": "Ledig · ny hyresgäst från {date}",
   "tenancy_card_vacant": "Ledig",
