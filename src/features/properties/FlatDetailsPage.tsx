@@ -391,10 +391,14 @@ function Vacant(props: { view: FlatDetails; since: string | null }) {
 
 function Unpaid(props: { propertyId: string; rows: RentMonth[] }) {
   const { rows } = props
+  // The year of the newest month, so that the page opens on a year that
+  // lists it.
+  const year = Number(rows[0]?.month.slice(0, 4))
   return (
     <TextLink
       to="/properties/$propertyId/rent"
       params={{ propertyId: props.propertyId }}
+      search={{ year }}
       underline="none"
       sx={{
         display: 'flex',
@@ -598,7 +602,11 @@ export function FlatDetailsPage(props: Props) {
     current && current.validFrom <= lastDayOfMonth(month)
       ? rentMonth(current, month, data)
       : undefined
-  const unpaid = monthsNotFullyPaid(data).filter((r) => r.month !== month)
+  // The rent card shows the current tenancy's month; an earlier tenancy that
+  // ended this month is warned about with the other months.
+  const unpaid = monthsNotFullyPaid(data).filter(
+    (r) => !(r.month === month && r.tenancy.id === row?.tenancy.id),
+  )
   const canEnd =
     current?.noticeGivenBy === null && current.validFrom <= view.today
       ? current
