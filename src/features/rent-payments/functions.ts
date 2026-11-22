@@ -1,5 +1,5 @@
-// Server functions for rent payments, called by the flat details page, the
-// month's payments page and the rent payments page. The logic is in
+// Server functions for rent payments, called by the flats list, the flat
+// details page, the month's payments page and the rent payments page. The logic is in
 // rent-payments.server.ts; these validate the input with the shared schemas,
 // check the session and wire in the request context.
 import { createServerFn } from '@tanstack/react-start'
@@ -13,6 +13,7 @@ import {
   deleteRentPayment as remove,
   getRentMonth as getMonth,
   getRentPayments as getList,
+  listRentThisMonth as listThisMonth,
   recordRentPayment as record,
   type RentPaymentDeps,
 } from './rent-payments.server'
@@ -50,6 +51,10 @@ export const getRentPayments = createServerFn({ method: 'GET' })
   .handler(async ({ data }) =>
     getList(await rentPaymentDeps(), data.propertyId),
   )
+
+export const listRentThisMonth = createServerFn({ method: 'GET' }).handler(
+  async () => listThisMonth(await rentPaymentDeps()),
+)
 
 export const getRentMonth = createServerFn({ method: 'GET' })
   .validator(rentMonthInput)

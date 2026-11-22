@@ -15,6 +15,7 @@ import {
   deleteRentPayment,
   getRentMonth,
   getRentPayments,
+  listRentThisMonth,
   recordRentPayment,
   type RentPaymentDeps,
 } from './rent-payments.server'
@@ -225,5 +226,67 @@ describe('The rent payment views', () => {
       ok: false,
       reason: 'property_not_found',
     })
+  })
+})
+
+describe("This month's rent across the user's flats", () => {
+  test("gives an owner and a member the flat's tenancies, rent and this month's payments", async () => {
+    await recordRentPayment(deps(), flat, november(50000))
+    await recordRentPayment(deps(), flat, {
+      ...november(),
+      month: '2026-10',
+      paidOn: '2026-10-03',
+    })
+    for (const user of ['annika', 'jussi']) {
+      const view = await listRentThisMonth(deps(user))
+      expect(view.today).toBe('2026-11-22')
+      expect(view.flats).toEqual([
+        {
+          propertyId: flat,
+          tenancies: [expect.objectContaining({ id: tenancy })],
+          rentPeriods: [
+            { validFrom: '2025-03-01', validTo: null, value: 89000 },
+          ],
+          payments: [
+            {
+              tenancyId: tenancy,
+              month: '2026-11',
+              amount: 50000,
+              paidOn: '2026-11-22',
+            },
+          ],
+        },
+      ])
+    }
+  })
+
+  test("leaves a stranger's flats out", async () => {
+    expect((await listRentThisMonth(deps('stranger'))).flats).toEqual([])
+  })
+
+  test('includes a tenancy that ended earlier this month and leaves out one that ended before', async () => {
+    await env.DB.prepare(
+      "UPDATE tenancies SET valid_from = '2026-11-15', contract_made = '2026-11-01' WHERE id = ?",
+    )
+      .bind(tenancy)
+      .run()
+    const fixedTerm = (tenantName: string, from: string, to: string) =>
+      tenancyRepository(db).create(
+        'annika',
+        flat,
+        {
+          ...aino,
+          tenantName,
+          contractType: 'fixed_term',
+          contractMade: from,
+          validFrom: from,
+          termEnd: to,
+        },
+        now,
+      )
+    await fixedTerm('Pekka', '2024-01-01', '2026-10-31')
+    const ville = await fixedTerm('Ville', '2026-11-01', '2026-11-14')
+    const view = await listRentThisMonth(deps())
+    expect(view.flats[0]?.tenancies.map((t) => t.id)).toEqual([ville, tenancy])
   })
 })

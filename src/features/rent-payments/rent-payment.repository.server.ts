@@ -3,7 +3,18 @@
 // payment, the month lying inside the tenancy, in its own statement, so a
 // role lost or a tenancy corrected between the read and the write changes
 // nothing. The server checks the same rules first to give the reason.
-import { and, asc, eq, exists, gte, isNull, lte, or, sql } from 'drizzle-orm'
+import {
+  and,
+  asc,
+  eq,
+  exists,
+  gte,
+  inArray,
+  isNull,
+  lte,
+  or,
+  sql,
+} from 'drizzle-orm'
 import { lastDayOfMonth, type IsoDate } from '#/lib/dates'
 import {
   propertyAccess,
@@ -23,6 +34,16 @@ export interface RentPayment {
   paidOn: IsoDate
   /** The display name of the user who recorded it. */
   recordedBy: string
+}
+
+/** A payment of one of several flats, for this month's rent on the list. */
+export interface FlatRentPayment {
+  propertyId: string
+  tenancyId: string
+  month: string
+  /** Cents. */
+  amount: number
+  paidOn: IsoDate
 }
 
 export interface NewRentPayment {
@@ -68,6 +89,32 @@ export function rentPaymentRepository(db: Db) {
           asc(rentPayments.month),
           asc(rentPayments.paidOn),
           asc(rentPayments.createdAt),
+        )
+    },
+
+    /** The payments of the flats' tenancies for the rent of `month`. */
+    async forMonth(
+      propertyIds: string[],
+      month: string,
+    ): Promise<FlatRentPayment[]> {
+      if (propertyIds.length === 0) {
+        return []
+      }
+      return db
+        .select({
+          propertyId: tenancies.propertyId,
+          tenancyId: rentPayments.tenancyId,
+          month: rentPayments.month,
+          amount: rentPayments.amount,
+          paidOn: rentPayments.paidOn,
+        })
+        .from(rentPayments)
+        .innerJoin(tenancies, eq(tenancies.id, rentPayments.tenancyId))
+        .where(
+          and(
+            inArray(tenancies.propertyId, propertyIds),
+            eq(rentPayments.month, month),
+          ),
         )
     },
 

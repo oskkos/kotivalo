@@ -21,7 +21,7 @@ import type {
   RentPayment,
   RentPaymentRepository,
 } from './rent-payment.repository.server'
-import { tenancyMonths } from './status'
+import { tenancyMonths, type FlatRentData } from './status'
 
 export interface RentPaymentDeps {
   /** The signed-in user. */
@@ -89,6 +89,49 @@ export async function getRentPayments(
     tenancies,
     rents: amounts.amounts.rent,
     payments,
+  }
+}
+
+/** This month's rent data of every flat the user has access to. */
+export interface RentThisMonthView {
+  today: IsoDate
+  flats: FlatRentData<Tenancy>[]
+}
+
+/**
+ * For the flats list: the user's flats with the tenancies running this
+ * month, their rent periods and this month's payments (openspec:
+ * rent-payments, "The rent summary on the flats list"). Access is checked
+ * once by listing the user's flats; every other read is by their ids.
+ */
+export async function listRentThisMonth(
+  deps: RentPaymentDeps,
+): Promise<RentThisMonthView> {
+  const day = today(deps)
+  const month = day.slice(0, 7)
+  const ids = (await deps.properties.listForUser(deps.userId)).map(
+    (flat) => flat.id,
+  )
+  const [tenancies, rents, payments] = await Promise.all([
+    deps.tenancies.currentFor(ids, `${month}-01`),
+    deps.amounts.rentFor(ids),
+    deps.payments.forMonth(ids, month),
+  ])
+  return {
+    today: day,
+    flats: ids.map((propertyId) => ({
+      propertyId,
+      tenancies: tenancies.filter((t) => t.propertyId === propertyId),
+      rentPeriods: rents[propertyId] ?? [],
+      payments: payments
+        .filter((p) => p.propertyId === propertyId)
+        .map(({ tenancyId, month, amount, paidOn }) => ({
+          tenancyId,
+          month,
+          amount,
+          paidOn,
+        })),
+    })),
   }
 }
 
