@@ -89,6 +89,16 @@ In practice there is rarely a new tenant ready when notice is given, so "change 
 - **Moving day** (§68): the end date for contracts made on or after 1.10.2026; the next weekday after it for older contracts. Rent runs to the end date either way.
 - The app shows these as hints, not legal advice.
 
+**Rent payments** (#25). Rental income is taxed in the year it is received: "Tulo katsotaan sen verovuoden tuloksi, jona se on nostettu, merkitty verovelvollisen tilille tai muutoin saatu vallintaan." ([Income Tax Act 1535/1992](https://www.finlex.fi/fi/lainsaadanto/1992/1535) §110). December's rent paid in January is next year's income, and rent never paid is no income. So payments are recorded, not assumed:
+
+- The owner marks a month's rent as paid with one tap. The amount defaults to the expected rent and the date to today; both can be changed.
+- A month can have several payments. Less than the expected rent shows as _Partly paid_ with the amount missing.
+- _Late_ is counted from the tenancy's due day, e.g. "10 days late".
+- The year summary (#34) takes gross rent from the payments received in the year, by payment date. Months without a payment are shown as a warning ("rent for 3 months not marked"), never assumed paid.
+- A deposit is not income, but the part kept for unpaid rent or damage is rental income in the year it is kept ([Tax Administration](https://www.vero.fi/en/individuals/property/rental_income/what-is-considered-rental-income/)); the deposit return (#30) records it.
+- Rent is still not an entry (#32): the expected amount comes from the rent periods, and payments are their own records.
+- No action marks several months as paid at once; a new issue if it is ever needed.
+
 ### 4.3 Financing charge: income-recognised or capitalised
 
 Each flat stores whether the housing company recognises the financing charge (rahoitusvastike) as income or capitalises it. The property manager can tell you.
@@ -169,6 +179,7 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 | `ownership_periods`                          | property_id, user_id, share (basis points, > 0), valid_from, valid_to, reason (sale / gift / inheritance / division / other; none for the first period)             |
 | `tenancies`                                  | property_id, tenant, contact details, type, contract made, start, end, deposit, due day, notice given by, notice date                                               |
 | `deposit_returns`                            | tenancy_id, amount returned, deduction, reason, date                                                                                                                |
+| `rent_payments`                              | tenancy_id, month (the rent's month), amount, paid_on, created_by (lands with #33)                                                                                  |
 | `recurring_amounts`                          | property_id, kind (rent / maintenance charge / financing charge), amount, valid_from, valid_to                                                                      |
 | `financing_treatments`                       | property_id, treatment (income-recognised / capitalised), valid_from, valid_to                                                                                      |
 | `transactions`                               | property_id, type (income / expense), category (decides the form 7H row and deductibility), amount (positive cents), date, note, created_by, created_at, updated_at |
@@ -198,6 +209,7 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 - [x] ~~Language selection has no screen.~~ A light Account page (`/account`: name, email, language, sign out) chooses the language, and a language chosen on the sign-in page also updates an existing account (#27, Design canvas row "Tili ja kieli"). The rest of the Account sketch comes later.
 - [ ] Loans have no input screen. The year summary shows loan interest and the data model has `loans`, `loan_borrowers` and `loan_payments`, but no sketch collects them.
 - [ ] How a joint loan's deductible interest is split between borrowers: by debt shares, by who actually paid, or equally by default. Check against Vero.fi guidance before the loans proposal. If the rule is "by who paid", the split moves from `loan_borrowers` to each payment.
+- [x] ~~How rent is marked as paid.~~ Payments are recorded per month and give the year summary its gross rent, because rent is taxed when received (§4.2, #25).
 - [ ] Logging the deposit return later has no screen. End tenancy says to log it after the final inspection, but nothing shows where.
 - [x] ~~Missing screens: accepting a flat invitation, and the first-run empty state with no flats.~~ Both are on the Design canvas ("Jakaminen ja kutsut") and built; so are the sign-in screens. A passkey option comes with its own issue.
 - [ ] The former owner's read-only view of their ownership period is not sketched.
