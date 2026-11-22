@@ -76,6 +76,7 @@ A month's rent status for a tenancy on a given day SHALL be computed, never stor
 - *Partly paid* (with the missing amount) when there are payments adding up to less
 - *Late* (with the days since the due date) when there are no payments and the day is after the due date
 - *Due* (with the due date) when there are no payments and the day is on or before the due date
+- *Nothing to pay* when the expected rent is 0 € and there are no payments
 - *Rent not set* when the expected rent is unknown, whatever the payments
 For a day before the tenancy starts, the flat details page SHALL show *No rent this month* with the tenancy's start instead.
 
@@ -100,6 +101,10 @@ For a day before the tenancy starts, the flat details page SHALL show *No rent t
 #### Scenario: Paid more than expected
 - **WHEN** the expected rent is 89000 cents and November has a payment of 90000 cents
 - **THEN** November is *Paid*
+
+#### Scenario: A rent of 0 € is never late
+- **WHEN** the rent is 0 cents, the due day is 5, November has no payments, and the day is `2026-11-22`
+- **THEN** November is *Nothing to pay*, and it is not a month not fully paid
 
 #### Scenario: The due date in the first month is no earlier than the start
 - **WHEN** the due day is 5, a tenancy starts on `2026-11-15`, and the day is `2026-11-10`

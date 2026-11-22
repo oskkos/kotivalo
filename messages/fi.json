@@ -471,6 +471,7 @@
   "rent_payments_year": "Vuosi",
   "rent_row_due": "Eräpäivä {date}",
   "rent_row_late": "Eräpäivä {date} · ei kirjattuja maksuja",
+  "rent_row_nothing_to_pay": "Kuukauden vuokra on {amount}",
   "rent_row_paid": "{amount} · maksettu {date}",
   "rent_row_partly_paid": "{paid} / {expected} · puuttuu {missing}",
   "rent_row_rent_not_set": "Vuokraa ei ole asetettu kuukaudelle",
@@ -489,6 +490,7 @@
       }
     }
   ],
+  "rent_status_nothing_to_pay": "Ei maksettavaa",
   "rent_status_paid": "Maksettu {date}",
   "rent_status_partly_paid": "Osittain maksettu",
   "rent_status_rent_not_set": "Vuokraa ei asetettu",

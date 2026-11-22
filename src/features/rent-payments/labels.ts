@@ -23,6 +23,8 @@ export function statusText(status: RentStatus): string {
       return m.rent_status_partly_paid()
     case 'paid':
       return m.rent_status_paid({ date: formatDayMonth(status.on) })
+    case 'nothing_to_pay':
+      return m.rent_status_nothing_to_pay()
     case 'rent_not_set':
       return m.rent_status_rent_not_set()
   }
@@ -39,6 +41,7 @@ export function statusTone(status: RentStatus): StatusTone {
     case 'late':
       return 'late'
     case 'due':
+    case 'nothing_to_pay':
     case 'rent_not_set':
       return 'lavender'
   }
