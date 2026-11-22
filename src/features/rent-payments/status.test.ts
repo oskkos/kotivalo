@@ -58,6 +58,17 @@ describe('Expected rent of a month', () => {
     expect(expectedRent(changed, aino, '2026-03')).toBe(92000)
   })
 
+  test('A tenant change with a new rent mid-month', () => {
+    const changed = rent(
+      ['2025-03-01', '2026-10-31', 80000],
+      ['2026-11-01', null, 90000],
+    )
+    const outgoing = { ...aino, validTo: '2026-11-14' }
+    const incoming = { ...aino, id: 'next', validFrom: '2026-11-15' }
+    expect(expectedRent(changed, outgoing, '2026-11')).toBe(42000)
+    expect(expectedRent(changed, incoming, '2026-11')).toBe(48000)
+  })
+
   test('No rent set', () => {
     expect(expectedRent([], aino, '2026-11')).toBeUndefined()
     expect(
