@@ -11,13 +11,17 @@ function stubImage(width: number, height: number) {
     'createImageBitmap',
     vi.fn(() => Promise.resolve({ width, height, close: vi.fn() })),
   )
-  const drawn: number[][] = []
-  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(
-    () =>
-      ({
-        drawImage: (_image: unknown, ...args: number[]) => drawn.push(args),
-      }) as unknown as CanvasRenderingContext2D,
-  )
+  const drawn: (string | number)[][] = []
+  vi.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation(() => {
+    const context = {
+      fillStyle: '',
+      fillRect: (...args: number[]) =>
+        drawn.push([`fill ${context.fillStyle}`, ...args]),
+      drawImage: (_image: unknown, ...args: number[]) =>
+        drawn.push(['image', ...args]),
+    }
+    return context as unknown as CanvasRenderingContext2D
+  })
   vi.spyOn(HTMLCanvasElement.prototype, 'toBlob').mockImplementation(
     (callback) => {
       callback(new Blob([new Uint8Array(300_000)], { type: 'image/jpeg' }))
@@ -46,16 +50,22 @@ describe('receipt preparation', () => {
     const prepared = await prepareReceipt(
       file('image/png', 5_000_000, 'IMG_1.png'),
     )
-    expect(drawn).toEqual([[0, 0, 2000, 1500]])
+    expect(drawn).toEqual([
+      ['fill #ffffff', 0, 0, 2000, 1500],
+      ['image', 0, 0, 2000, 1500],
+    ])
     expect(prepared.type).toBe('image/jpeg')
     expect(prepared.name).toBe('IMG_1.jpg')
     expect(prepared.size).toBe(300_000)
   })
 
-  test('a small image within the edge is sent as it is', async () => {
-    stubImage(1200, 900)
+  test('a small image is redrawn too, so its EXIF data is dropped', async () => {
+    const drawn = stubImage(1200, 900)
     const original = file('image/jpeg', 400_000)
-    expect(await prepareReceipt(original)).toBe(original)
+    const prepared = await prepareReceipt(original)
+    expect(prepared).not.toBe(original)
+    expect(prepared.type).toBe('image/jpeg')
+    expect(drawn).toContainEqual(['image', 0, 0, 1200, 900])
   })
 
   test('a PDF is sent as it is, up to 10 MB', async () => {
