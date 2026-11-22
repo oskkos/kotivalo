@@ -918,4 +918,49 @@ describe('Payments stay inside their tenancy', () => {
       await repo.removeNotStarted('annika', flat, later, '2026-11-22'),
     ).toBe(false)
   })
+
+  /** Deps whose first payment check misses a payment recorded right after. */
+  function racing(tenancyId: string, month: string): TenancyDeps {
+    const base = deps()
+    let checked = false
+    return {
+      ...base,
+      tenancies: {
+        ...base.tenancies,
+        paymentMonths: async (id) => {
+          if (!checked) {
+            checked = true
+            await paid(tenancyId, month)
+            return []
+          }
+          return base.tenancies.paymentMonths(id)
+        },
+      },
+    }
+  }
+
+  test('a payment recorded during an ending is named as the reason', async () => {
+    const id = await addId(aino)
+    expect(
+      await endTenancy(racing(id, '2027-01'), flat, id, tenantNotice),
+    ).toEqual({ ok: false, reason: 'tenancy_has_payments_outside' })
+  })
+
+  test('a payment recorded during a correction is named as the reason', async () => {
+    const id = await addId(aino)
+    expect(
+      await updateTenancy(racing(id, '2025-03'), flat, id, {
+        ...aino,
+        validFrom: '2025-04-01',
+      }),
+    ).toEqual({ ok: false, reason: 'tenancy_has_payments_outside' })
+  })
+
+  test('a payment recorded during a removal is named as the reason', async () => {
+    const id = await addId(fixedTerm('2027-01-01', '2027-12-31'))
+    expect(await removeTenancy(racing(id, '2027-01'), flat, id)).toEqual({
+      ok: false,
+      reason: 'tenancy_has_payments',
+    })
+  })
 })

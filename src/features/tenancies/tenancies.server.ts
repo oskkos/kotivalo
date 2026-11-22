@@ -376,7 +376,15 @@ export async function updateTenancy(
     deps.now(),
   )
   if (!updated) {
-    return refusal(deps, propertyId, tenancyNotFound)
+    // A payment recorded meanwhile is the likelier cause than a removal.
+    const now = await deps.tenancies.paymentMonths(tenancyId)
+    return refusal(
+      deps,
+      propertyId,
+      paymentsOutside(now, fields.validFrom, validTo)
+        ? fail('tenancy_has_payments_outside')
+        : tenancyNotFound,
+    )
   }
   deps.log.info('tenancy.updated', { propertyId, tenancyId })
   return { ok: true }
@@ -415,7 +423,14 @@ export async function endTenancy(
     deps.now(),
   )
   if (!ended) {
-    return refusal(deps, propertyId, fail('tenancy_already_ending'))
+    const now = await deps.tenancies.paymentMonths(tenancyId)
+    return refusal(
+      deps,
+      propertyId,
+      paymentsOutside(now, existing.validFrom, ending.lastDay)
+        ? fail('tenancy_has_payments_outside')
+        : fail('tenancy_already_ending'),
+    )
   }
   deps.log.info('tenancy.ended', {
     propertyId,
@@ -453,13 +468,18 @@ export async function removeTenancy(
     day,
   )
   if (!removed) {
-    const now = await deps.tenancies.get(tenancyId)
+    const [now, months] = await Promise.all([
+      deps.tenancies.get(tenancyId),
+      deps.tenancies.paymentMonths(tenancyId),
+    ])
     return refusal(
       deps,
       propertyId,
-      now?.propertyId === propertyId
-        ? fail('tenancy_already_started')
-        : tenancyNotFound,
+      now?.propertyId !== propertyId
+        ? tenancyNotFound
+        : months.length > 0
+          ? fail('tenancy_has_payments')
+          : fail('tenancy_already_started'),
     )
   }
   deps.log.info('tenancy.removed', { propertyId, tenancyId })
