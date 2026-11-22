@@ -1,16 +1,13 @@
 // Prepares a receipt file in the browser before upload (design.md, "Images
-// are resized in the browser"): an image is redrawn at most 2000 px on its
-// long edge as JPEG, which also drops its EXIF data (location included); a
-// PDF, or an image that is already small, is sent as it is. The Worker can't
+// are resized in the browser"): every image is redrawn at most 2000 px on
+// its long edge as JPEG, which also drops its EXIF data (location included),
+// so small images are redrawn too. A PDF is sent as it is. The Worker can't
 // resize images on the free plan.
 import type { FieldReason } from '#/lib/reasons'
 import { MAX_UPLOAD_BYTES } from '#/server/files/upload'
 
 /** The longest edge of an uploaded receipt image, in pixels. */
 export const MAX_IMAGE_EDGE = 2000
-
-/** An image this small and within the edge is sent as it is. */
-const SMALL_IMAGE_BYTES = 1.5 * 1024 * 1024
 
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
 
@@ -62,10 +59,6 @@ export async function prepareReceipt(file: File): Promise<File> {
     throw new ReceiptProblem('receipt_unreadable')
   }
   const size = fitWithin(bitmap.width, bitmap.height)
-  if (size.width === bitmap.width && file.size <= SMALL_IMAGE_BYTES) {
-    bitmap.close()
-    return file
-  }
   const canvas = document.createElement('canvas')
   canvas.width = size.width
   canvas.height = size.height
@@ -74,6 +67,10 @@ export async function prepareReceipt(file: File): Promise<File> {
     bitmap.close()
     throw new ReceiptProblem('receipt_unreadable')
   }
+  // JPEG has no transparency: transparent areas of a PNG or WebP would turn
+  // black, hiding dark text, so they become white like paper.
+  context.fillStyle = '#ffffff'
+  context.fillRect(0, 0, size.width, size.height)
   context.drawImage(bitmap, 0, 0, size.width, size.height)
   bitmap.close()
   const blob = await new Promise<Blob | null>((resolve) => {
