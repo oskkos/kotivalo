@@ -111,4 +111,4 @@
 
 ## 10. Archive
 
-- [ ] 10.1 `openspec archive track-tenancies` as the PR's last commit
+- [x] 10.1 `openspec archive track-tenancies` as the PR's last commit
