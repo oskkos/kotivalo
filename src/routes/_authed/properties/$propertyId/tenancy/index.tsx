@@ -1,4 +1,5 @@
 import Button from '@mui/material/Button'
+import Link from '@mui/material/Link'
 import Stack from '@mui/material/Stack'
 import {
   createFileRoute,
@@ -38,6 +39,7 @@ export const Route = createFileRoute(
 })
 
 const ButtonLink = createLink(Button)
+const TextLink = createLink(Link)
 
 function TenancyRoute() {
   const view = Route.useLoaderData()
@@ -64,6 +66,32 @@ function TenancyRoute() {
             {m.tenancy_add()}
           </ButtonLink>
         }
+        otherRow={(tenancy, row) => (
+          <TextLink
+            to="/properties/$propertyId/tenancy/$tenancyId/edit"
+            params={{ propertyId, tenancyId: tenancy.id }}
+            underline="none"
+            color="inherit"
+            sx={{ display: 'block' }}
+          >
+            {row}
+          </TextLink>
+        )}
+        earlierAction={
+          <TextLink
+            to="/properties/$propertyId/tenancy/new"
+            params={{ propertyId }}
+            sx={{
+              alignSelf: 'center',
+              minHeight: 44,
+              display: 'inline-flex',
+              alignItems: 'center',
+              fontWeight: 800,
+            }}
+          >
+            {m.tenancy_add_earlier()}
+          </TextLink>
+        }
         currentActions={(tenancy) => {
           const status = tenancyStatus(tenancy, view.today)
           return (
@@ -77,7 +105,11 @@ function TenancyRoute() {
               >
                 {m.tenancy_edit()}
               </ButtonLink>
-              {tenancy.noticeGivenBy === null && status.kind !== 'ended' ? (
+              {/* A tenancy that hasn't started has no notice date that is
+                  both on or after its start and not in the future. */}
+              {tenancy.noticeGivenBy === null &&
+              status.kind !== 'ended' &&
+              status.kind !== 'starts' ? (
                 <ButtonLink
                   to="/properties/$propertyId/tenancy/$tenancyId/end"
                   params={{ propertyId, tenancyId: tenancy.id }}

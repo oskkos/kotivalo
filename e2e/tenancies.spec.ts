@@ -104,6 +104,56 @@ test.describe('The tenancy page', () => {
     await expect(page.getByRole('link', { name: 'Add tenant' })).toBeVisible()
   })
 
+  test('Adding an earlier tenancy from the tenancy page', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await page.getByRole('link', { name: 'Add an earlier tenancy' }).click()
+    await expect(page).toHaveURL(`/properties/${id}/tenancy/new`)
+    await expect(
+      page.getByRole('heading', { name: 'New tenant' }),
+    ).toBeVisible()
+  })
+
+  test('Correcting an earlier tenancy from the list', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await addTenant(page, id, {
+      name: 'Pekka Virtanen',
+      start: '01/06/2023',
+      ending: { by: 'Tenant', noticeDate: '20/01/2025' },
+    })
+    await waitForHydration(page)
+    await page
+      .getByRole('region', { name: 'Other tenancies' })
+      .getByRole('link', { name: /Pekka Virtanen/ })
+      .click()
+    await expect(page).toHaveURL(
+      new RegExp(`/properties/${id}/tenancy/[^/]+/edit$`),
+    )
+    await expect(page.getByRole('textbox', { name: 'Name' })).toHaveValue(
+      'Pekka Virtanen',
+    )
+  })
+
+  test("A tenancy that hasn't started can't be ended", async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, {
+      name: 'Mikko Lehtinen',
+      start: `01/01/${nextYear}`,
+      termEnd: `31/12/${nextYear}`,
+      // Made today: the start's default would be in the future.
+      contractMade: new Date().toLocaleDateString('en-GB'),
+      rent: '910',
+    })
+    await expect(
+      page.getByRole('heading', { name: 'Mikko Lehtinen' }),
+    ).toBeVisible()
+    await expect(
+      page.getByRole('link', { name: 'Edit the tenancy' }),
+    ).toBeVisible()
+    await expect(page.getByRole('link', { name: 'End tenancy' })).toHaveCount(0)
+  })
+
   test("A member sees the tenancy but can't change it", async ({
     page,
     browser,
@@ -122,6 +172,28 @@ test.describe('The tenancy page', () => {
       jussi.getByRole('link', { name: 'Edit the tenancy' }),
     ).toHaveCount(0)
     await expect(jussi.getByRole('link', { name: 'Add tenant' })).toHaveCount(0)
+    await expect(
+      jussi.getByRole('link', { name: 'Add an earlier tenancy' }),
+    ).toHaveCount(0)
+  })
+
+  test("a member's list of other tenancies opens no form", async ({
+    page,
+    browser,
+  }) => {
+    const { id, jussi } = await accepted(page, browser)
+    await addTenant(page, id, {
+      name: 'Mikko Lehtinen',
+      start: '01/03/2023',
+      termEnd: '31/12/2024',
+      rent: '850',
+    })
+    await addTenant(page, id, aino)
+    await jussi.goto(`/properties/${id}/tenancy`)
+    await waitForHydration(jussi)
+    const others = jussi.getByRole('region', { name: 'Other tenancies' })
+    await expect(others).toContainText('Mikko Lehtinen')
+    await expect(others.getByRole('link')).toHaveCount(0)
   })
 })
 
