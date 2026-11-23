@@ -8,7 +8,10 @@ export async function openAmounts(page: Page, id: string) {
   await waitForHydration(page)
 }
 
-/** On the Rent and charges page: sets or changes an amount via its form. */
+/**
+ * On the Rent and charges page: sets or changes an amount via its form; a
+ * financing charge by its name.
+ */
 export async function setAmount(
   page: Page,
   item: string,
@@ -42,6 +45,24 @@ export async function setTreatment(
   await page.getByRole('button', { name: treatment }).click()
   await page.getByRole('textbox', { name: 'Valid from' }).fill(from)
   await page.getByRole('button', { name: 'Save' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Rent and charges' }),
+  ).toBeVisible()
+}
+
+/** On the Rent and charges page: adds a financing charge via its form. */
+export async function addFinancingCharge(
+  page: Page,
+  name: string,
+  amount: string,
+  from: string,
+) {
+  await page.getByRole('button', { name: 'Add financing charge' }).click()
+  await waitForHydration(page)
+  await page.getByRole('textbox', { name: 'Name' }).fill(name)
+  await page.getByRole('textbox', { name: 'Amount (€/month)' }).fill(amount)
+  await page.getByRole('textbox', { name: 'Valid from' }).fill(from)
+  await page.getByRole('button', { name: 'Add', exact: true }).click()
   await expect(
     page.getByRole('heading', { name: 'Rent and charges' }),
   ).toBeVisible()

@@ -78,7 +78,7 @@ describe('financing charge names', () => {
     ).toBe('financing_charge_name_too_long')
   })
 
-  test('a charge id goes only with a financing charge', () => {
+  test('a charge id goes with a financing charge, and only with one', () => {
     const base = { propertyId: 'flat', amount: '42', from: '1.1.2026' }
     expect(
       setAmountInput.safeParse({
@@ -90,6 +90,9 @@ describe('financing charge names', () => {
     expect(
       setAmountInput.safeParse({ ...base, kind: 'rent', chargeId: 'c1' })
         .success,
+    ).toBe(false)
+    expect(
+      setAmountInput.safeParse({ ...base, kind: 'financing_charge' }).success,
     ).toBe(false)
   })
 })

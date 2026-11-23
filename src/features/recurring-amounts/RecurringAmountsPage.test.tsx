@@ -16,6 +16,12 @@ const empty: RecurringAmountsView = {
   treatments: [],
 }
 
+const p = (validFrom: string, validTo: string | null, value: number) => ({
+  validFrom,
+  validTo,
+  value,
+})
+
 const filled: RecurringAmountsView = {
   ...empty,
   capitalised: 131600,
@@ -27,23 +33,54 @@ const filled: RecurringAmountsView = {
     ],
     financing_charge: [{ validFrom: '2025-03-01', validTo: null, value: 8600 }],
   },
+  financingCharges: [
+    {
+      id: 'unnamed',
+      name: null,
+      periods: [{ validFrom: '2025-03-01', validTo: null, value: 8600 }],
+    },
+  ],
   treatments: [
     { validFrom: '2025-03-01', validTo: null, value: 'capitalised' },
+  ],
+}
+
+/** Putkiremontti and Julkisivu, Julkisivu rising next year. */
+const several: RecurringAmountsView = {
+  ...filled,
+  financingCharges: [
+    {
+      id: 'putki',
+      name: 'Putkiremontti',
+      periods: [p('2025-03-01', null, 8600)],
+    },
+    {
+      id: 'julkisivu',
+      name: 'Julkisivu',
+      periods: [
+        p('2026-01-01', '2026-12-31', 4200),
+        p('2027-01-01', null, 4500),
+      ],
+    },
   ],
 }
 
 function setup(view: RecurringAmountsView) {
   const user = userEvent.setup()
   const onEdit = vi.fn()
+  const onEditCharge = vi.fn()
+  const onAddCharge = vi.fn()
   render(
     <RecurringAmountsPage
       view={view}
       address="Kuusikuja 3 B 12"
       onBack={vi.fn()}
       onEdit={onEdit}
+      onEditCharge={onEditCharge}
+      onAddCharge={onAddCharge}
     />,
   )
-  return { user, onEdit }
+  return { user, onEdit, onEditCharge, onAddCharge }
 }
 
 const section = (name: string) => screen.getByRole('region', { name })
@@ -54,6 +91,12 @@ describe('The rent and charges page', () => {
     for (const name of ['Rent', 'Maintenance charge', 'Financing charge']) {
       expect(within(section(name)).getAllByText('Not set')[0]).toBeVisible()
     }
+    expect(
+      within(section('Financing charge')).getByText('No financing charges'),
+    ).toBeVisible()
+    expect(
+      screen.getByRole('button', { name: 'Add financing charge' }),
+    ).toBeVisible()
     expect(screen.getByRole('button', { name: 'Set: Rent' })).toBeVisible()
     expect(
       screen.getByRole('button', {
@@ -77,9 +120,15 @@ describe('The rent and charges page', () => {
   })
 
   test("A member sees the amounts but can't change them", () => {
-    setup({ ...filled, role: 'member' })
+    setup({ ...several, role: 'member' })
     expect(within(section('Rent')).getByText('€890.00/month')).toBeVisible()
+    expect(
+      within(section('Financing charges')).getByText('Putkiremontti'),
+    ).toBeVisible()
     expect(screen.queryByRole('button', { name: /^(Set|Change):/ })).toBeNull()
+    expect(
+      screen.queryByRole('button', { name: 'Add financing charge' }),
+    ).toBeNull()
     expect(
       screen.getByText('Only owners can change the amounts.'),
     ).toBeVisible()
@@ -105,5 +154,57 @@ describe('The rent and charges page', () => {
       }),
     )
     expect(onEdit.mock.calls).toEqual([['rent'], ['treatment']])
+  })
+
+  test('Several financing charges with their sum', () => {
+    setup(several)
+    const financing = section('Financing charges')
+    expect(financing).toHaveTextContent('€128.00/month in total')
+    const rows = within(financing).getAllByRole('listitem')
+    expect(rows[0]).toHaveTextContent(
+      'Putkiremontti€86.00/monthFrom 01/03/2025',
+    )
+    expect(rows[1]).toHaveTextContent(
+      'Julkisivu€42.00/monthFrom 01/01/2026ChangeFrom 01/01/2027: €45.00/month',
+    )
+    expect(
+      within(financing).getByText(
+        'Treatment by the housing company · applies to all',
+      ),
+    ).toBeVisible()
+  })
+
+  test('one unnamed charge looks as before', () => {
+    setup(filled)
+    const financing = section('Financing charge')
+    expect(within(financing).getByText('€86.00/month')).toBeVisible()
+    expect(
+      within(financing).queryByText('in total', { exact: false }),
+    ).toBeNull()
+    expect(
+      screen.getByRole('button', { name: 'Change: Financing charge' }),
+    ).toBeVisible()
+  })
+
+  test('a charge that starts later shows its first amount', () => {
+    setup({
+      ...empty,
+      financingCharges: [
+        { id: 'c', name: 'Julkisivu', periods: [p('2027-01-01', null, 4200)] },
+      ],
+    })
+    const financing = section('Financing charge')
+    expect(within(financing).getByText('€42.00/month')).toBeVisible()
+    expect(within(financing).getByText('From 01/01/2027')).toBeVisible()
+  })
+
+  test('the charge buttons open their forms', async () => {
+    const { user, onEditCharge, onAddCharge } = setup(several)
+    await user.click(screen.getByRole('button', { name: 'Change: Julkisivu' }))
+    await user.click(
+      screen.getByRole('button', { name: 'Add financing charge' }),
+    )
+    expect(onEditCharge).toHaveBeenCalledWith('julkisivu')
+    expect(onAddCharge).toHaveBeenCalled()
   })
 })

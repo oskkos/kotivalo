@@ -335,7 +335,7 @@ describe('Rent and charges are recorded as monthly periods', () => {
 describe('Financing charges in the repository', () => {
   const add = (
     chargeId: string,
-    name: string | null,
+    name: string,
     amount: number,
     from: string,
     propertyId = flat,
@@ -416,7 +416,7 @@ describe('Financing charges in the repository', () => {
   })
 
   test('renaming changes the name only', async () => {
-    await add('putki', null, 8600, '2025-03-01')
+    await add('putki', 'Putki', 8600, '2025-03-01')
     expect(
       await repo.renameFinancingCharge({
         propertyId: flat,

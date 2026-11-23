@@ -58,6 +58,18 @@ function RecurringAmountsRoute() {
           })
         }
       }}
+      onEditCharge={(chargeId) => {
+        void router.navigate({
+          to: '/properties/$propertyId/amounts/financing/$chargeId',
+          params: { propertyId, chargeId },
+        })
+      }}
+      onAddCharge={() => {
+        void router.navigate({
+          to: '/properties/$propertyId/amounts/financing/new',
+          params: { propertyId },
+        })
+      }}
     />
   )
 }

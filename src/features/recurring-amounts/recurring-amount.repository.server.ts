@@ -411,8 +411,7 @@ export function recurringAmountRepository(db: Db) {
       propertyId: string
       actorId: string
       chargeId: string
-      /** Null only for the transitional unnamed charge (design.md). */
-      name: string | null
+      name: string
       amount: number
       from: IsoDate
     }): Promise<boolean> {
@@ -423,7 +422,7 @@ export function recurringAmountRepository(db: Db) {
             .select({
               id: sql<string>`${chargeId}`.as('id'),
               propertyId: properties.id,
-              name: sql<string | null>`${name}`.as('name'),
+              name: sql<string>`${name}`.as('name'),
             })
             .from(properties)
             .where(

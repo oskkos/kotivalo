@@ -25,12 +25,12 @@
 
 ## 3. The financing charges card and adding a charge
 
-- [ ] 3.1 Messages for the card and the add form (*Rahoitusvastikkeet*, the sum, none yet, *Lisää rahoitusvastike*, *Nimi* with its hint, the treatment note, "koskee kaikkia"), fi, sv and en with the translate skill and the term-critic on the diff
-- [ ] 3.2 `RecurringAmountsPage.tsx`: the `FinancingCharges` card as in design.md ("Routes and components"): charges in effect or upcoming, the sum, the add link for owners, the treatment row
-- [ ] 3.3 `FinancingChargeForm.tsx` (name, amount, date, the treatment note) and the route `/properties/$propertyId/amounts/financing/new` (owners only, like `$kind`)
-- [ ] 3.4 Route `/properties/$propertyId/amounts/financing/$chargeId` opening `AmountForm` for that charge (set and undo with `chargeId`); `/amounts/$kind` no longer accepts the financing slug; the transitional server fallback from 1.4 is removed and `chargeId` becomes required for financing
-- [ ] 3.5 `e2e/support/amounts.ts`: `addFinancingCharge(page, name, amount, from)`, and `setAmount` for a named charge; existing e2e tests updated to the new card
-- [ ] 3.6 Component tests for the card (one unnamed charge, several with the sum, none, member) and the form; Playwright tests for "The rent and charges page" and "Adding a financing charge"
+- [x] 3.1 Messages for the card and the add form (*Rahoitusvastikkeet*, the sum, none yet, *Lisää rahoitusvastike*, *Nimi* with its hint, the treatment note, "koskee kaikkia"), fi, sv and en with the translate skill and the term-critic on the diff
+- [x] 3.2 `RecurringAmountsPage.tsx`: the `FinancingCharges` card as in design.md ("Routes and components"): charges in effect or upcoming, the sum, the add link for owners, the treatment row
+- [x] 3.3 `FinancingChargeForm.tsx` (name, amount, date, the treatment note) and the route `/properties/$propertyId/amounts/financing/new` (owners only, like `$kind`)
+- [x] 3.4 Route `/properties/$propertyId/amounts/financing/$chargeId` opening `AmountForm` for that charge (set and undo with `chargeId`); `/amounts/$kind` no longer accepts the financing slug; the transitional server fallback from 1.4 is removed and `chargeId` becomes required for financing
+- [x] 3.5 `e2e/support/amounts.ts`: `addFinancingCharge(page, name, amount, from)`, and `setAmount` for a named charge; existing e2e tests updated to the new card
+- [x] 3.6 Component tests for the card (one unnamed charge, several with the sum, none, member) and the form; Playwright tests for "The rent and charges page" and "Adding a financing charge"
 
 ## 4. Renaming and ending a charge
 

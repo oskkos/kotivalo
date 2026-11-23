@@ -87,7 +87,7 @@ describe('The flat details page', () => {
       propertyId: flat,
       actorId: 'annika',
       chargeId: 'charge',
-      name: null,
+      name: 'Putkiremontti',
       amount: 8000,
       from: '2026-09-01',
     })

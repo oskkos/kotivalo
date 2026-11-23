@@ -41,7 +41,7 @@ function deps(userId: string): RecurringAmountDeps {
 }
 
 const set = (
-  kind: 'rent' | 'maintenance_charge' | 'financing_charge',
+  kind: 'rent' | 'maintenance_charge',
   amount: number,
   from: string,
   userId = 'annika',
@@ -105,7 +105,11 @@ describe('Getting the rent and charges', () => {
   })
 
   test('the view carries today, the ownership start and the capitalised sum', async () => {
-    await set('financing_charge', 8000, '2025-03-01')
+    await addFinancingCharge(deps('annika'), flat, {
+      name: 'Putkiremontti',
+      amount: 8000,
+      from: '2025-03-01',
+    })
     await setFinancingTreatment(deps('annika'), flat, {
       treatment: 'capitalised',
       from: '2025-03-01',
@@ -315,7 +319,11 @@ describe('Undoing the latest treatment change', () => {
   })
 
   test('Undoing the only treatment', async () => {
-    await set('financing_charge', 8000, '2025-03-01')
+    await addFinancingCharge(deps('annika'), flat, {
+      name: 'Putkiremontti',
+      amount: 8000,
+      from: '2025-03-01',
+    })
     await treat('capitalised', '2025-03-01')
     expect((await view()).capitalised).toBe(21 * 8000)
     expect(await undoFinancingTreatment(deps('annika'), flat)).toEqual({
@@ -457,7 +465,17 @@ describe('Adding a financing charge', () => {
 
 describe('Renaming a financing charge', () => {
   test('Naming the unnamed charge', async () => {
-    await set('financing_charge', 8600, '2025-03-01')
+    // The charge the migration made from the previous financing charge.
+    await env.DB.prepare(
+      'INSERT INTO financing_charges (id, property_id, name) VALUES (?, ?, NULL)',
+    )
+      .bind('unnamed', flat)
+      .run()
+    await env.DB.prepare(
+      "INSERT INTO recurring_amounts (id, property_id, kind, financing_charge_id, amount, valid_from) VALUES ('p1', ?, 'financing_charge', 'unnamed', 8600, '2025-03-01')",
+    )
+      .bind(flat)
+      .run()
     const unnamed = (await charges()).at(0)
     if (unnamed === undefined) {
       throw new Error('No charge')

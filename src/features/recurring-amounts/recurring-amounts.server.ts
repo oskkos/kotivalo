@@ -134,29 +134,17 @@ const chargeNotFound = {
 
 /**
  * The periods a change applies to: the rent's, the maintenance charge's, or
- * the named financing charge's. Transitional (design.md): a financing change
- * without a charge id goes to the flat's first charge, or to none yet.
+ * the named financing charge's; undefined for a charge not of the flat.
  */
 function sequenceOf(
   data: RecurringAmounts,
   kind: RecurringAmountKind,
   chargeId: string | undefined,
-):
-  | { periods: readonly Period<number>[]; chargeId: string | undefined }
-  | undefined {
+): readonly Period<number>[] | undefined {
   if (kind !== 'financing_charge') {
-    return { periods: data.amounts[kind], chargeId: undefined }
+    return data.amounts[kind]
   }
-  const charge =
-    chargeId === undefined
-      ? data.financingCharges.at(0)
-      : data.financingCharges.find((each) => each.id === chargeId)
-  if (charge === undefined) {
-    return chargeId === undefined
-      ? { periods: [], chargeId: undefined }
-      : undefined
-  }
-  return { periods: charge.periods, chargeId: charge.id }
+  return data.financingCharges.find((charge) => charge.id === chargeId)?.periods
 }
 
 export async function setRecurringAmount(
@@ -174,40 +162,25 @@ export async function setRecurringAmount(
     return refused
   }
   const data = await deps.amounts.forProperty(propertyId)
-  const sequence = sequenceOf(data, change.kind, change.chargeId)
-  if (!sequence) {
+  const periods = sequenceOf(data, change.kind, change.chargeId)
+  if (!periods) {
     return chargeNotFound
   }
-  const latestStart = sequence.periods.at(-1)?.validFrom
+  const latestStart = periods.at(-1)?.validFrom
   const problem = await dateProblem(deps, propertyId, change.from, latestStart)
   if (problem) {
     return problem
   }
-  // Transitional (design.md): a financing amount for a flat with no charge
-  // yet adds an unnamed one, until the pages add charges by name.
-  const chargeId =
-    change.kind === 'financing_charge' && sequence.chargeId === undefined
-      ? crypto.randomUUID()
-      : sequence.chargeId
-  const applied =
-    change.kind === 'financing_charge' && sequence.chargeId === undefined
-      ? await deps.amounts.addFinancingCharge({
-          propertyId,
-          actorId: deps.userId,
-          chargeId: chargeId ?? crypto.randomUUID(),
-          name: null,
-          amount: change.amount,
-          from: change.from,
-        })
-      : await deps.amounts.setAmount({
-          propertyId,
-          actorId: deps.userId,
-          kind: change.kind,
-          chargeId,
-          amount: change.amount,
-          from: change.from,
-          latestStart: latestStart ?? null,
-        })
+  const { chargeId } = change
+  const applied = await deps.amounts.setAmount({
+    propertyId,
+    actorId: deps.userId,
+    kind: change.kind,
+    chargeId,
+    amount: change.amount,
+    from: change.from,
+    latestStart: latestStart ?? null,
+  })
   if (!applied) {
     return changedMeanwhile
   }
@@ -225,18 +198,17 @@ export async function undoRecurringAmount(
   deps: RecurringAmountDeps,
   propertyId: string,
   kind: RecurringAmountKind,
-  requestedChargeId?: string,
+  chargeId?: string,
 ): Promise<{ ok: true } | Failure> {
   const refused = await roleCheck(deps, propertyId)
   if (refused) {
     return refused
   }
   const data = await deps.amounts.forProperty(propertyId)
-  const sequence = sequenceOf(data, kind, requestedChargeId)
-  if (!sequence) {
+  const periods = sequenceOf(data, kind, chargeId)
+  if (!periods) {
     return chargeNotFound
   }
-  const { periods, chargeId } = sequence
   const latest = periods.at(-1)
   if (!latest) {
     return { ok: false, reason: 'amount_nothing_to_undo' }
