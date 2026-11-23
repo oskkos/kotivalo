@@ -21,6 +21,7 @@ import { Route as AuthedTransactionsNewRouteImport } from './routes/_authed/tran
 import { Route as ApiReceiptsReceiptIdRouteImport } from './routes/api/receipts/$receiptId'
 import { Route as ApiTestInboxRouteImport } from './routes/api/test/inbox'
 import { Route as AuthedPropertiesPropertyIdIndexRouteImport } from './routes/_authed/properties/$propertyId/index'
+import { Route as AuthedPropertiesPropertyIdChargesRouteImport } from './routes/_authed/properties/$propertyId/charges'
 import { Route as AuthedPropertiesPropertyIdEditRouteImport } from './routes/_authed/properties/$propertyId/edit'
 import { Route as AuthedPropertiesPropertyIdSharingRouteImport } from './routes/_authed/properties/$propertyId/sharing'
 import { Route as AuthedPropertiesPropertyIdAmountsIndexRouteImport } from './routes/_authed/properties/$propertyId/amounts/index'
@@ -94,6 +95,12 @@ const AuthedPropertiesPropertyIdIndexRoute =
   AuthedPropertiesPropertyIdIndexRouteImport.update({
     id: '/properties/$propertyId/',
     path: '/properties/$propertyId/',
+    getParentRoute: () => AuthedRoute,
+  } as any)
+const AuthedPropertiesPropertyIdChargesRoute =
+  AuthedPropertiesPropertyIdChargesRouteImport.update({
+    id: '/properties/$propertyId/charges',
+    path: '/properties/$propertyId/charges',
     getParentRoute: () => AuthedRoute,
   } as any)
 const AuthedPropertiesPropertyIdEditRoute =
@@ -192,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/transactions/new': typeof AuthedTransactionsNewRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
+  '/properties/$propertyId/charges': typeof AuthedPropertiesPropertyIdChargesRoute
   '/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
   '/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
   '/properties/$propertyId/': typeof AuthedPropertiesPropertyIdIndexRoute
@@ -219,6 +227,7 @@ export interface FileRoutesByTo {
   '/transactions/new': typeof AuthedTransactionsNewRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
+  '/properties/$propertyId/charges': typeof AuthedPropertiesPropertyIdChargesRoute
   '/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
   '/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
   '/properties/$propertyId': typeof AuthedPropertiesPropertyIdIndexRoute
@@ -248,6 +257,7 @@ export interface FileRoutesById {
   '/_authed/transactions/new': typeof AuthedTransactionsNewRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
+  '/_authed/properties/$propertyId/charges': typeof AuthedPropertiesPropertyIdChargesRoute
   '/_authed/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
   '/_authed/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
   '/_authed/properties/$propertyId/': typeof AuthedPropertiesPropertyIdIndexRoute
@@ -277,6 +287,7 @@ export interface FileRouteTypes {
     | '/transactions/new'
     | '/api/receipts/$receiptId'
     | '/api/test/inbox'
+    | '/properties/$propertyId/charges'
     | '/properties/$propertyId/edit'
     | '/properties/$propertyId/sharing'
     | '/properties/$propertyId/'
@@ -304,6 +315,7 @@ export interface FileRouteTypes {
     | '/transactions/new'
     | '/api/receipts/$receiptId'
     | '/api/test/inbox'
+    | '/properties/$propertyId/charges'
     | '/properties/$propertyId/edit'
     | '/properties/$propertyId/sharing'
     | '/properties/$propertyId'
@@ -332,6 +344,7 @@ export interface FileRouteTypes {
     | '/_authed/transactions/new'
     | '/api/receipts/$receiptId'
     | '/api/test/inbox'
+    | '/_authed/properties/$propertyId/charges'
     | '/_authed/properties/$propertyId/edit'
     | '/_authed/properties/$propertyId/sharing'
     | '/_authed/properties/$propertyId/'
@@ -444,6 +457,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedPropertiesPropertyIdIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/properties/$propertyId/charges': {
+      id: '/_authed/properties/$propertyId/charges'
+      path: '/properties/$propertyId/charges'
+      fullPath: '/properties/$propertyId/charges'
+      preLoaderRoute: typeof AuthedPropertiesPropertyIdChargesRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/properties/$propertyId/edit': {
       id: '/_authed/properties/$propertyId/edit'
       path: '/properties/$propertyId/edit'
@@ -551,6 +571,7 @@ interface AuthedRouteChildren {
   AuthedIndexRoute: typeof AuthedIndexRoute
   AuthedPropertiesNewRoute: typeof AuthedPropertiesNewRoute
   AuthedTransactionsNewRoute: typeof AuthedTransactionsNewRoute
+  AuthedPropertiesPropertyIdChargesRoute: typeof AuthedPropertiesPropertyIdChargesRoute
   AuthedPropertiesPropertyIdEditRoute: typeof AuthedPropertiesPropertyIdEditRoute
   AuthedPropertiesPropertyIdSharingRoute: typeof AuthedPropertiesPropertyIdSharingRoute
   AuthedPropertiesPropertyIdIndexRoute: typeof AuthedPropertiesPropertyIdIndexRoute
@@ -574,6 +595,8 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedIndexRoute: AuthedIndexRoute,
   AuthedPropertiesNewRoute: AuthedPropertiesNewRoute,
   AuthedTransactionsNewRoute: AuthedTransactionsNewRoute,
+  AuthedPropertiesPropertyIdChargesRoute:
+    AuthedPropertiesPropertyIdChargesRoute,
   AuthedPropertiesPropertyIdEditRoute: AuthedPropertiesPropertyIdEditRoute,
   AuthedPropertiesPropertyIdSharingRoute:
     AuthedPropertiesPropertyIdSharingRoute,
