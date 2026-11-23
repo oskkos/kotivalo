@@ -160,6 +160,29 @@
   "amounts_undo_title": "Perutaanko {date} alkava summa?",
   "amounts_upcoming": "{date} alkaen {amount}",
   "app_tagline": "Valoa vuokranantajan arkeen",
+  "charges_changed": "{charge} muuttui, oli {amount}",
+  "charges_empty_set": "Aseta vastikkeet",
+  "charges_empty_text": "Kun hoitovastike tai rahoitusvastike on asetettu, näet täällä, paljonko vastikkeet ovat kuukausittain ja vuodessa.",
+  "charges_empty_title": "Vastikkeita ei ole asetettu",
+  "charges_estimate": "Koko vuonna {amount}, jos summat eivät muutu.",
+  "charges_footnote": "Summat lasketaan asetetuista kuukausisummista eikä toteutuneista maksuista. Jos summa on väärin, korjaa se, niin myös menneet kuukaudet korjautuvat.",
+  "charges_month_charge": "{charge} {amount}",
+  "charges_months": "Kuukaudet",
+  "charges_months_counted": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} kuukausi",
+        "countPlural=other": "{count} kuukautta"
+      }
+    }
+  ],
+  "charges_page_title": "Vastikkeet – Kotivalo",
+  "charges_title": "Vastikkeet",
+  "charges_treatment_not_set": "Käsittelyä ei ole asetettu",
+  "charges_year": "Vuosi",
+  "charges_year_total": "Vastikkeet vuonna {year}",
   "date_placeholder": "pp.kk.vvvv",
   "email_action_fallback": "Jos painike ei toimi, kopioi tämä osoite selaimeesi:",
   "error_reference": "Virhetunnus: {reference}",

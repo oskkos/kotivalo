@@ -10,10 +10,10 @@
 
 ## 3. The charges page
 
-- [ ] 3.1 Term `charge` (*vastike*) in `i18n/terms.json` with the translate skill, and the term-critic on the diff
-- [ ] 3.2 fi, sv and en messages for the page: title, year summary (total, maintenance charge, financing charge per treatment, counted months, estimate), month rows (charges, total, "oli …"), footnote with the link, empty state and "Aseta vastikkeet"; with the translate skill and the term-critic on the diff
-- [ ] 3.3 `features/recurring-amounts/ChargesPage.tsx` as in design.md ("Components"), and the route `src/routes/_authed/properties/$propertyId/charges.tsx` loading `getRecurringAmounts` and `getProperty`, with `?year=` and the not-found view; Back to the details page
-- [ ] 3.4 Component tests: the summary with one and with two financing treatments, the estimate shown only before December, the change mark, the empty state with and without the button
+- [x] 3.1 Term `charge` (*vastike*) in `i18n/terms.json` with the translate skill, and the term-critic on the diff
+- [x] 3.2 fi, sv and en messages for the page: title, year summary (total, maintenance charge, financing charge per treatment, counted months, estimate), month rows (charges, total, "oli …"), footnote with the link, empty state and "Aseta vastikkeet"; with the translate skill and the term-critic on the diff
+- [x] 3.3 `features/recurring-amounts/ChargesPage.tsx` as in design.md ("Components"), and the route `src/routes/_authed/properties/$propertyId/charges.tsx` loading `getRecurringAmounts` and `getProperty`, with `?year=` and the not-found view; Back to the details page
+- [x] 3.4 Component tests: the summary with one and with two financing treatments, the estimate shown only before December, the change mark, the empty state with and without the button
 - [ ] 3.5 Playwright tests in `e2e/charges.spec.ts` for "The charges page" (owner, member, earlier year, no charges, no access), with dates relative to today so they don't age (`addFlat` with `ownedSince`, `setAmount`, `setTreatment`)
 
 ## 4. The row on the flat details page

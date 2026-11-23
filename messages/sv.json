@@ -160,6 +160,29 @@
   "amounts_undo_title": "Ångra beloppet från {date}?",
   "amounts_upcoming": "Från {date}: {amount}",
   "app_tagline": "Ljus i hyresvärdens vardag",
+  "charges_changed": "{charge}: ändrat, tidigare {amount}",
+  "charges_empty_set": "Ange vederlag",
+  "charges_empty_text": "När skötselvederlaget eller finansieringsvederlaget har angetts ser du här vad vederlagen uppgår till per månad och per år.",
+  "charges_empty_title": "Inga vederlag har angetts",
+  "charges_estimate": "För hela året blir det {amount} om beloppen inte ändras.",
+  "charges_footnote": "Beloppen räknas ut från de angivna månadsbeloppen, inte från faktiska betalningar. Om ett belopp är fel, rätta det, så rättas även de tidigare månaderna.",
+  "charges_month_charge": "{charge} {amount}",
+  "charges_months": "Månader",
+  "charges_months_counted": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} månad",
+        "countPlural=other": "{count} månader"
+      }
+    }
+  ],
+  "charges_page_title": "Vederlag – Kotivalo",
+  "charges_title": "Vederlag",
+  "charges_treatment_not_set": "Behandlingen är inte angiven",
+  "charges_year": "År",
+  "charges_year_total": "Vederlag år {year}",
   "date_placeholder": "dd.mm.åååå",
   "email_action_fallback": "Om knappen inte fungerar, kopiera den här adressen till din webbläsare:",
   "error_reference": "Felkod: {reference}",
