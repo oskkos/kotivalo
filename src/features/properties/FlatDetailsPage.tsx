@@ -32,7 +32,6 @@ import { EntryRow } from '#/features/transactions/TransactionsPage'
 import { lastDayOfMonth } from '#/lib/dates'
 import { formatArea, formatDate, formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
-import type { RecurringAmountKind } from '#/server/db/schema'
 import { colors, radii, shadows } from '#/theme/tokens'
 import type { FlatDetails } from './details.server'
 import { ownershipLine } from './ownership-line'
@@ -426,18 +425,82 @@ function Unpaid(props: { propertyId: string; rows: RentMonth[] }) {
   )
 }
 
-const KINDS: RecurringAmountKind[] = [
-  'rent',
-  'maintenance_charge',
-  'financing_charge',
-]
+interface AmountRow {
+  key: string
+  label: string
+  /** A second line under the label: a charge's name or the treatment. */
+  note?: string
+  /** Text on the right: an amount per month, a treatment, or not set. */
+  value: string
+}
+
+/**
+ * The rent, the maintenance charge and the financing charges in effect
+ * today. One unnamed charge, or none, shows its treatment under it as
+ * before; several show their names and the treatment once below them.
+ */
+function amountRows(view: FlatDetails): AmountRow[] {
+  const perMonth = (cents: number | undefined) =>
+    cents === undefined
+      ? m.amounts_not_set()
+      : m.amounts_per_month({ amount: formatMoney(cents) })
+  const treatment = periodOn(view.treatments, view.today)?.value
+  const treatmentText =
+    treatment === undefined ? undefined : treatmentLabel[treatment]()
+  const rows: AmountRow[] = [
+    {
+      key: 'rent',
+      label: kindLabel.rent(),
+      value: perMonth(periodOn(view.amounts.rent, view.today)?.value),
+    },
+    {
+      key: 'maintenance',
+      label: kindLabel.maintenance_charge(),
+      value: perMonth(
+        periodOn(view.amounts.maintenance_charge, view.today)?.value,
+      ),
+    },
+  ]
+  const active = view.financingCharges.flatMap((charge) => {
+    const cents = periodOn(charge.periods, view.today)?.value
+    return cents !== undefined && cents > 0 ? [{ charge, cents }] : []
+  })
+  const only = active.length === 1 ? active[0] : undefined
+  if (active.length === 0 || only?.charge.name === null) {
+    return [
+      ...rows,
+      {
+        key: 'financing',
+        label: kindLabel.financing_charge(),
+        note: treatmentText,
+        value: perMonth(only?.cents),
+      },
+    ]
+  }
+  return [
+    ...rows,
+    ...active.map(({ charge, cents }) => ({
+      key: charge.id,
+      label: kindLabel.financing_charge(),
+      note: charge.name ?? undefined,
+      value: perMonth(cents),
+    })),
+    {
+      key: 'treatment',
+      label: m.amounts_treatment_label(),
+      value: treatmentText ?? m.amounts_not_set(),
+    },
+  ]
+}
 
 function Amounts(props: { view: FlatDetails }) {
   const { view } = props
-  const treatment = periodOn(view.treatments, view.today)?.value
   const year = Number(view.today.slice(0, 4))
   const chargesSoFar = chargesOfYear(
-    view.amounts,
+    {
+      maintenance: view.amounts.maintenance_charge,
+      financing: view.financingCharges,
+    },
     view.treatments,
     year,
     view.today,
@@ -475,50 +538,45 @@ function Amounts(props: { view: FlatDetails }) {
       </Stack>
       <Box sx={{ ...card, overflow: 'hidden' }}>
         <Box component="dl" sx={{ m: 0, px: 2 }}>
-          {KINDS.map((kind, i) => {
-            const amount = periodOn(view.amounts[kind], view.today)?.value
-            return (
-              <Stack
-                key={kind}
-                direction="row"
+          {amountRows(view).map((row, i) => (
+            <Stack
+              key={row.key}
+              direction="row"
+              sx={{
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                gap: 1.5,
+                minHeight: 48,
+                py: 0.5,
+                borderTop: i === 0 ? 'none' : `1px solid ${colors.divider}`,
+              }}
+            >
+              <Typography
+                component="dt"
                 sx={{
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  gap: 1.5,
-                  minHeight: 48,
-                  py: 0.5,
-                  borderTop: i === 0 ? 'none' : `1px solid ${colors.divider}`,
+                  fontSize: 14,
+                  fontWeight: 800,
+                  color: 'text.secondary',
                 }}
               >
-                <Typography
-                  component="dt"
-                  sx={{
-                    fontSize: 14,
-                    fontWeight: 800,
-                    color: 'text.secondary',
-                  }}
-                >
-                  {kindLabel[kind]()}
-                  {kind === 'financing_charge' && treatment !== undefined ? (
-                    <Box
-                      component="span"
-                      sx={{ display: 'block', fontSize: 12, fontWeight: 700 }}
-                    >
-                      {treatmentLabel[treatment]()}
-                    </Box>
-                  ) : null}
-                </Typography>
-                <Typography
-                  component="dd"
-                  sx={{ m: 0, fontSize: 15, fontWeight: 900 }}
-                >
-                  {amount === undefined
-                    ? m.amounts_not_set()
-                    : m.amounts_per_month({ amount: formatMoney(amount) })}
-                </Typography>
-              </Stack>
-            )
-          })}
+                {row.label}
+                {row.note === undefined ? null : (
+                  <Box
+                    component="span"
+                    sx={{ display: 'block', fontSize: 12, fontWeight: 700 }}
+                  >
+                    {row.note}
+                  </Box>
+                )}
+              </Typography>
+              <Typography
+                component="dd"
+                sx={{ m: 0, fontSize: 15, fontWeight: 900 }}
+              >
+                {row.value}
+              </Typography>
+            </Stack>
+          ))}
         </Box>
         <TextLink
           to="/properties/$propertyId/charges"

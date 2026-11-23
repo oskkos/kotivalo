@@ -58,7 +58,6 @@ const details = (over: Partial<FlatDetails> = {}): FlatDetails => ({
   amounts: {
     rent: [{ validFrom: '2025-03-01', validTo: null, value: 89000 }],
     maintenance_charge: [],
-    financing_charge: [],
   },
   financingCharges: [],
   treatments: [],
@@ -132,6 +131,51 @@ describe('The flat details page', () => {
     const amounts = screen.getByRole('region', { name: 'Rent and charges' })
     expect(amounts).toHaveTextContent('€890.00')
     expect(within(amounts).getAllByText('Not set')).toHaveLength(2)
+  })
+
+  test('Each financing charge in effect today', () => {
+    const p = (validFrom: string, validTo: string | null, value: number) => ({
+      validFrom,
+      validTo,
+      value,
+    })
+    renderPage(
+      details({
+        today: '2026-11-23',
+        financingCharges: [
+          {
+            id: 'putki',
+            name: 'Putkiremontti',
+            periods: [p('2025-03-01', null, 8600)],
+          },
+          {
+            id: 'julkisivu',
+            name: 'Julkisivu',
+            periods: [p('2026-01-01', null, 4200)],
+          },
+          {
+            id: 'hissi',
+            name: 'Hissiremontti',
+            periods: [
+              p('2025-03-01', '2025-12-31', 2400),
+              p('2026-01-01', null, 0),
+            ],
+          },
+        ],
+        treatments: [
+          { validFrom: '2025-03-01', validTo: null, value: 'capitalised' },
+        ],
+      }),
+    )
+    const amounts = screen.getByRole('region', { name: 'Rent and charges' })
+    expect(amounts).toHaveTextContent(
+      'Financing chargePutkiremontti€86.00/month',
+    )
+    expect(amounts).toHaveTextContent('Financing chargeJulkisivu€42.00/month')
+    expect(amounts).toHaveTextContent(
+      'Treatment by the housing companyPlaced in reserve',
+    )
+    expect(amounts).not.toHaveTextContent('Hissiremontti')
   })
 })
 

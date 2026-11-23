@@ -188,7 +188,9 @@
   "charges_empty_set": "Aseta vastikkeet",
   "charges_empty_text": "Kun hoitovastike tai rahoitusvastike on asetettu, näet täällä, paljonko vastikkeet ovat kuukausittain ja vuodessa.",
   "charges_empty_title": "Vastikkeita ei ole asetettu",
+  "charges_ended": "{charge} päättyi",
   "charges_estimate": "Koko vuonna {amount}, jos summat eivät muutu.",
+  "charges_financing_note": "Rahoitusvastike · {treatment}",
   "charges_footnote": "Summat lasketaan asetetuista kuukausisummista eikä toteutuneista maksuista. Jos summa on väärin, korjaa se, niin myös menneet kuukaudet korjautuvat.",
   "charges_month_charge": "{charge} {amount}",
   "charges_months": "Kuukaudet",
@@ -203,6 +205,7 @@
     }
   ],
   "charges_page_title": "Vastikkeet – Kotivalo",
+  "charges_started": "{charge} alkoi",
   "charges_title": "Vastikkeet",
   "charges_treatment_not_set": "Käsittelyä ei ole asetettu",
   "charges_year": "Vuosi",

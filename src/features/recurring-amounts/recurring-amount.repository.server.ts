@@ -24,7 +24,6 @@ import {
   properties,
   propertyAccess,
   recurringAmounts,
-  RECURRING_AMOUNT_KINDS,
   type FinancingTreatment,
   type RecurringAmountKind,
 } from '#/server/db/schema'
@@ -40,11 +39,8 @@ export interface FinancingCharge {
 }
 
 export interface RecurringAmounts {
-  /**
-   * Per kind, oldest first. `financing_charge` is transitional: the first
-   * financing charge's periods, until every page reads `financingCharges`.
-   */
-  amounts: Record<RecurringAmountKind, Period<number>[]>
+  /** The rent's and the maintenance charge's periods, oldest first. */
+  amounts: Record<'rent' | 'maintenance_charge', Period<number>[]>
   /** Ordered by their first period's start, then name. */
   financingCharges: FinancingCharge[]
   /** Oldest first. */
@@ -297,14 +293,12 @@ export function recurringAmountRepository(db: Db) {
               b.periods[0]?.validFrom ?? '',
             ) || (a.name ?? '').localeCompare(b.name ?? '', 'fi'),
         )
-      const amounts = Object.fromEntries(
-        RECURRING_AMOUNT_KINDS.map((kind) => [
-          kind,
-          kind === 'financing_charge'
-            ? (charges[0]?.periods ?? [])
-            : amountRows.filter((row) => row.kind === kind).map(period),
-        ]),
-      ) as RecurringAmounts['amounts']
+      const of = (kind: RecurringAmountKind) =>
+        amountRows.filter((row) => row.kind === kind).map(period)
+      const amounts = {
+        rent: of('rent'),
+        maintenance_charge: of('maintenance_charge'),
+      }
       return {
         amounts,
         financingCharges: charges,

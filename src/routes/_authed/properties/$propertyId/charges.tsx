@@ -44,7 +44,10 @@ function ChargesRoute() {
       view={{
         role: view.role,
         today: view.today,
-        amounts: view.amounts,
+        amounts: {
+          maintenance: view.amounts.maintenance_charge,
+          financing: view.financingCharges,
+        },
         treatments: view.treatments,
       }}
       propertyId={propertyId}

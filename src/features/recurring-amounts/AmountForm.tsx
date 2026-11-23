@@ -300,7 +300,7 @@ export function AmountForm(props: Props) {
     ? 'financing_charge'
     : (what as SingleKind)
   const chargeId = charge?.id
-  const periods = charge ? charge.periods : view.amounts[kind]
+  const periods = charge ? charge.periods : view.amounts[what as SingleKind]
   const latest = periods.at(-1)
   const previous = periods.at(-2)
   const ended = charge !== undefined && isEnded(charge.periods, view.today)

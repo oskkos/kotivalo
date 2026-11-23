@@ -42,12 +42,12 @@
 
 ## 5. Several charges in the computed views
 
-- [ ] 5.1 `charges.ts`: `ChargePeriods` with the financing charges, a month's charges as a list, the year's lines per charge and treatment, the *started* and *ended* marks, `chargeYears` over all sequences (design.md "The calculations"); `charges.test.ts` updated, with the new scenarios of "Charges of a month"
-- [ ] 5.2 `ChargesPage.tsx`: a summary line per charge with its name and treatment, the month rows listing every charge above 0 and the started and ended marks; messages with the translate skill; component tests
-- [ ] 5.3 `details.server.ts` and `FlatDetailsPage.tsx`: a row per financing charge in effect today, the treatment once, this year's total over all charges; Workers and component tests
-- [ ] 5.4 Remove the transitional `amounts.financing_charge` from the repository and the view
-- [ ] 5.5 Playwright tests "A line for each financing charge" (charges page) and "Each financing charge in effect today" (details page); the existing charges and details page tests still passing
-- [ ] 5.6 CLAUDE.md "Current state": several named financing charges per flat
+- [x] 5.1 `charges.ts`: `ChargePeriods` with the financing charges, a month's charges as a list, the year's lines per charge and treatment, the *started* and *ended* marks, `chargeYears` over all sequences (design.md "The calculations"); `charges.test.ts` updated, with the new scenarios of "Charges of a month"
+- [x] 5.2 `ChargesPage.tsx`: a summary line per charge with its name and treatment, the month rows listing every charge above 0 and the started and ended marks; messages with the translate skill; component tests
+- [x] 5.3 `details.server.ts` and `FlatDetailsPage.tsx`: a row per financing charge in effect today, the treatment once, this year's total over all charges; Workers and component tests
+- [x] 5.4 Remove the transitional `amounts.financing_charge` from the repository and the view
+- [x] 5.5 Playwright tests "A line for each financing charge" (charges page) and "Each financing charge in effect today" (details page); the existing charges and details page tests still passing
+- [x] 5.6 CLAUDE.md "Current state": several named financing charges per flat
 
 ## 6. Archive
 
