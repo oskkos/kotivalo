@@ -1,5 +1,11 @@
 import { describe, expect, test } from 'vitest'
-import { setAmountInput, setTreatmentInput, typedAmount } from './schemas'
+import {
+  addFinancingChargeInput,
+  financingChargeName,
+  setAmountInput,
+  setTreatmentInput,
+  typedAmount,
+} from './schemas'
 
 const amount = (text: string) => typedAmount.safeParse(text)
 
@@ -45,5 +51,45 @@ describe('start dates', () => {
         from: '2.3.2025',
       }).error?.issues[0]?.message,
     ).toBe('amount_date_not_month_start')
+  })
+})
+
+describe('Adding a financing charge', () => {
+  test('A financing charge needs a name', () => {
+    for (const name of ['', '  ']) {
+      expect(
+        addFinancingChargeInput.safeParse({
+          propertyId: 'flat',
+          name,
+          amount: '42',
+          from: '1.1.2026',
+        }).error?.issues[0]?.message,
+      ).toBe('financing_charge_name_required')
+    }
+  })
+})
+
+describe('financing charge names', () => {
+  test('a name is trimmed and at most 60 characters', () => {
+    expect(financingChargeName.parse('  Julkisivu ')).toBe('Julkisivu')
+    expect(financingChargeName.safeParse('x'.repeat(60)).success).toBe(true)
+    expect(
+      financingChargeName.safeParse('x'.repeat(61)).error?.issues[0]?.message,
+    ).toBe('financing_charge_name_too_long')
+  })
+
+  test('a charge id goes only with a financing charge', () => {
+    const base = { propertyId: 'flat', amount: '42', from: '1.1.2026' }
+    expect(
+      setAmountInput.safeParse({
+        ...base,
+        kind: 'financing_charge',
+        chargeId: 'c1',
+      }).success,
+    ).toBe(true)
+    expect(
+      setAmountInput.safeParse({ ...base, kind: 'rent', chargeId: 'c1' })
+        .success,
+    ).toBe(false)
   })
 })

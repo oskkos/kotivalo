@@ -123,26 +123,28 @@ export function yearEffect(
 }
 
 /**
- * The financing charges added to the acquisition cost so far: the charge of
- * every month up to and including today's whose treatment on its first day
- * is capitalised.
+ * The financing charges added to the acquisition cost so far: over all the
+ * flat's financing charges, the amount of every month up to and including
+ * today's whose treatment on its first day is capitalised.
  */
 export function accumulatedCapitalised(
-  financing: readonly Period<number>[],
+  charges: readonly { periods: readonly Period<number>[] }[],
   treatments: readonly Period<'income_recognised' | 'capitalised'>[],
   today: IsoDate,
 ): number {
-  if (financing.length === 0) {
-    return 0
-  }
-  const first = financing[0]
   let total = 0
   const last = monthOf(today)
-  for (let month = monthOf(first.validFrom); month <= last;) {
-    if (valueInMonth(treatments, month) === 'capitalised') {
-      total += valueInMonth(financing, month) ?? 0
+  for (const { periods } of charges) {
+    const first = periods.at(0)
+    if (first === undefined) {
+      continue
     }
-    month = nextMonth(month)
+    for (let month = monthOf(first.validFrom); month <= last;) {
+      if (valueInMonth(treatments, month) === 'capitalised') {
+        total += valueInMonth(periods, month) ?? 0
+      }
+      month = nextMonth(month)
+    }
   }
   return total
 }

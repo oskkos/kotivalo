@@ -91,7 +91,7 @@ UPDATE recurring_amounts SET financing_charge_id =
 - New `addFinancingCharge({ propertyId, name, amount, from })` and `renameFinancingCharge({ propertyId, chargeId, name })`.
 - `getRecurringAmounts` returns `amounts` for `rent` and `maintenance_charge` only, plus `financingCharges: { id, name: string | null, periods }[]` ordered by their first period's start, then name.
 - Reason codes:
-  - `financing_charge_name_required` (field)
+  - `financing_charge_name_required` and `financing_charge_name_too_long` (field)
   - `financing_charge_name_taken` (field)
   - `financing_charge_not_found` (alert)
 - Logs:

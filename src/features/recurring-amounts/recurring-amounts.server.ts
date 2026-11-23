@@ -11,7 +11,11 @@ import type {
   RecurringAmountKind,
 } from '#/server/db/schema'
 import type { Logger } from '#/server/log/log'
-import { accumulatedCapitalised, validateAmountDate } from './periods'
+import {
+  accumulatedCapitalised,
+  validateAmountDate,
+  type Period,
+} from './periods'
 import type {
   RecurringAmountRepository,
   RecurringAmounts,
@@ -95,7 +99,7 @@ export async function getRecurringAmounts(
     today,
     ownershipStart: start ?? today,
     capitalised: accumulatedCapitalised(
-      data.amounts.financing_charge,
+      data.financingCharges,
       data.treatments,
       today,
     ),
@@ -120,32 +124,77 @@ async function dateProblem(
   return problem ? { ok: false, reason: problem } : undefined
 }
 
+const sameName = (a: string, b: string) =>
+  a.toLocaleLowerCase('fi') === b.toLocaleLowerCase('fi')
+
+const chargeNotFound = {
+  ok: false,
+  reason: 'financing_charge_not_found',
+} as const satisfies Failure
+
+/**
+ * The periods a change applies to: the rent's, the maintenance charge's, or
+ * the named financing charge's. Transitional (design.md): a financing change
+ * without a charge id goes to the flat's first charge, or to none yet.
+ */
+function sequenceOf(
+  data: RecurringAmounts,
+  kind: RecurringAmountKind,
+  chargeId: string | undefined,
+):
+  | { periods: readonly Period<number>[]; chargeId: string | undefined }
+  | undefined {
+  if (kind !== 'financing_charge') {
+    return { periods: data.amounts[kind], chargeId: undefined }
+  }
+  const charge =
+    chargeId === undefined
+      ? data.financingCharges.at(0)
+      : data.financingCharges.find((each) => each.id === chargeId)
+  if (charge === undefined) {
+    return chargeId === undefined
+      ? { periods: [], chargeId: undefined }
+      : undefined
+  }
+  return { periods: charge.periods, chargeId: charge.id }
+}
+
 export async function setRecurringAmount(
   deps: RecurringAmountDeps,
   propertyId: string,
-  change: { kind: RecurringAmountKind; amount: number; from: IsoDate },
+  change: {
+    kind: RecurringAmountKind
+    chargeId?: string
+    amount: number
+    from: IsoDate
+  },
 ): Promise<{ ok: true } | Failure<FieldReason | AlertReason>> {
   const refused = await roleCheck(deps, propertyId)
   if (refused) {
     return refused
   }
-  const { amounts, financingCharges } =
-    await deps.amounts.forProperty(propertyId)
-  const latestStart = amounts[change.kind].at(-1)?.validFrom
+  const data = await deps.amounts.forProperty(propertyId)
+  const sequence = sequenceOf(data, change.kind, change.chargeId)
+  if (!sequence) {
+    return chargeNotFound
+  }
+  const latestStart = sequence.periods.at(-1)?.validFrom
   const problem = await dateProblem(deps, propertyId, change.from, latestStart)
   if (problem) {
     return problem
   }
-  // Transitional (design.md): until the pages name a charge, a financing
-  // amount goes to the flat's first charge, or adds an unnamed one.
+  // Transitional (design.md): a financing amount for a flat with no charge
+  // yet adds an unnamed one, until the pages add charges by name.
   const chargeId =
-    change.kind === 'financing_charge' ? financingCharges[0]?.id : undefined
+    change.kind === 'financing_charge' && sequence.chargeId === undefined
+      ? crypto.randomUUID()
+      : sequence.chargeId
   const applied =
-    change.kind === 'financing_charge' && chargeId === undefined
+    change.kind === 'financing_charge' && sequence.chargeId === undefined
       ? await deps.amounts.addFinancingCharge({
           propertyId,
           actorId: deps.userId,
-          chargeId: crypto.randomUUID(),
+          chargeId: chargeId ?? crypto.randomUUID(),
           name: null,
           amount: change.amount,
           from: change.from,
@@ -165,6 +214,7 @@ export async function setRecurringAmount(
   deps.log.info('recurring_amount.set', {
     propertyId,
     kind: change.kind,
+    ...(chargeId === undefined ? {} : { chargeId }),
     from: change.from,
     corrected: change.from === latestStart,
   })
@@ -175,26 +225,30 @@ export async function undoRecurringAmount(
   deps: RecurringAmountDeps,
   propertyId: string,
   kind: RecurringAmountKind,
+  requestedChargeId?: string,
 ): Promise<{ ok: true } | Failure> {
   const refused = await roleCheck(deps, propertyId)
   if (refused) {
     return refused
   }
   const data = await deps.amounts.forProperty(propertyId)
-  const periods = data.amounts[kind]
+  const sequence = sequenceOf(data, kind, requestedChargeId)
+  if (!sequence) {
+    return chargeNotFound
+  }
+  const { periods, chargeId } = sequence
   const latest = periods.at(-1)
   if (!latest) {
     return { ok: false, reason: 'amount_nothing_to_undo' }
   }
+  const previousStart = periods.at(-2)?.validFrom ?? null
   const applied = await deps.amounts.undoLatestAmount({
     propertyId,
     actorId: deps.userId,
     kind,
-    // Transitional, as in setRecurringAmount.
-    chargeId:
-      kind === 'financing_charge' ? data.financingCharges[0]?.id : undefined,
+    chargeId,
     latestStart: latest.validFrom,
-    previousStart: periods.at(-2)?.validFrom ?? null,
+    previousStart,
   })
   if (!applied) {
     return changedMeanwhile
@@ -202,7 +256,95 @@ export async function undoRecurringAmount(
   deps.log.info('recurring_amount.undone', {
     propertyId,
     kind,
+    ...(chargeId === undefined ? {} : { chargeId }),
     from: latest.validFrom,
+  })
+  if (chargeId !== undefined && previousStart === null) {
+    deps.log.info('financing_charge.removed', { propertyId, chargeId })
+  }
+  return { ok: true }
+}
+
+/** Adds a financing charge with its first amount. */
+export async function addFinancingCharge(
+  deps: RecurringAmountDeps,
+  propertyId: string,
+  add: { name: string; amount: number; from: IsoDate },
+): Promise<
+  { ok: true; chargeId: string } | Failure<FieldReason | AlertReason>
+> {
+  const refused = await roleCheck(deps, propertyId)
+  if (refused) {
+    return refused
+  }
+  const { financingCharges } = await deps.amounts.forProperty(propertyId)
+  if (
+    financingCharges.some(
+      (charge) => charge.name !== null && sameName(charge.name, add.name),
+    )
+  ) {
+    return { ok: false, reason: 'financing_charge_name_taken' }
+  }
+  const problem = await dateProblem(deps, propertyId, add.from, undefined)
+  if (problem) {
+    return problem
+  }
+  const chargeId = crypto.randomUUID()
+  const applied = await deps.amounts.addFinancingCharge({
+    propertyId,
+    actorId: deps.userId,
+    chargeId,
+    name: add.name,
+    amount: add.amount,
+    from: add.from,
+  })
+  if (!applied) {
+    return changedMeanwhile
+  }
+  deps.log.info('financing_charge.added', {
+    propertyId,
+    chargeId,
+    from: add.from,
+  })
+  return { ok: true, chargeId }
+}
+
+/** Renames a financing charge; its own name doesn't count as taken. */
+export async function renameFinancingCharge(
+  deps: RecurringAmountDeps,
+  propertyId: string,
+  rename: { chargeId: string; name: string },
+): Promise<{ ok: true } | Failure<FieldReason | AlertReason>> {
+  const refused = await roleCheck(deps, propertyId)
+  if (refused) {
+    return refused
+  }
+  const { financingCharges } = await deps.amounts.forProperty(propertyId)
+  if (!financingCharges.some((charge) => charge.id === rename.chargeId)) {
+    return chargeNotFound
+  }
+  if (
+    financingCharges.some(
+      (charge) =>
+        charge.id !== rename.chargeId &&
+        charge.name !== null &&
+        sameName(charge.name, rename.name),
+    )
+  ) {
+    return { ok: false, reason: 'financing_charge_name_taken' }
+  }
+  const applied = await deps.amounts.renameFinancingCharge({
+    propertyId,
+    actorId: deps.userId,
+    chargeId: rename.chargeId,
+    name: rename.name,
+  })
+  if (!applied) {
+    return changedMeanwhile
+  }
+  deps.log.info('financing_charge.renamed', {
+    propertyId,
+    chargeId: rename.chargeId,
   })
   return { ok: true }
 }

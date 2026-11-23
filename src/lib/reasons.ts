@@ -32,6 +32,9 @@ export type FieldReason =
   | 'amount_date_before_ownership'
   | 'amount_date_too_early'
   | 'treatment_required'
+  | 'financing_charge_name_required'
+  | 'financing_charge_name_too_long'
+  | 'financing_charge_name_taken'
   | 'transaction_amount_invalid'
   | 'transaction_category_invalid'
   | 'transaction_date_in_future'
@@ -77,6 +80,7 @@ export type AlertReason =
   | 'ownership_invalid'
   | 'amount_nothing_to_undo'
   | 'treatment_nothing_to_undo'
+  | 'financing_charge_not_found'
   | 'transaction_not_found'
   | 'storage_quota_full'
   | 'tenancy_not_found'
@@ -146,6 +150,15 @@ const texts: Record<Reason, () => ReasonText> = {
   }),
   amount_date_too_early: () => ({ text: m.reason_amount_date_too_early() }),
   treatment_required: () => ({ text: m.reason_treatment_required() }),
+  financing_charge_name_required: () => ({
+    text: m.reason_financing_charge_name_required(),
+  }),
+  financing_charge_name_too_long: () => ({
+    text: m.reason_financing_charge_name_too_long(),
+  }),
+  financing_charge_name_taken: () => ({
+    text: m.reason_financing_charge_name_taken(),
+  }),
   transaction_amount_invalid: () => ({
     text: m.reason_transaction_amount_invalid(),
   }),
@@ -267,6 +280,10 @@ const texts: Record<Reason, () => ReasonText> = {
   treatment_nothing_to_undo: () => ({
     title: m.reason_treatment_nothing_to_undo_title(),
     text: m.reason_treatment_nothing_to_undo(),
+  }),
+  financing_charge_not_found: () => ({
+    title: m.reason_financing_charge_not_found_title(),
+    text: m.reason_financing_charge_not_found(),
   }),
   transaction_not_found: () => ({
     title: m.reason_transaction_not_found_title(),

@@ -1,4 +1,4 @@
-// Server functions for rent, charges and the financing charge treatment,
+// Server functions for rent, charges, financing charges and the treatment,
 // called by the Rent and charges page and its forms. The logic is in
 // recurring-amounts.server.ts; these validate the input with the shared
 // schemas, check the session and wire in the request context.
@@ -8,7 +8,9 @@ import { sharingRepository } from '#/features/sharing/sharing.repository.server'
 import { getRequestContext } from '#/server/platform/context.server'
 import { recurringAmountRepository } from './recurring-amount.repository.server'
 import {
+  addFinancingCharge as addCharge,
   getRecurringAmounts as get,
+  renameFinancingCharge as renameCharge,
   setFinancingTreatment as setTreatment,
   setRecurringAmount as setAmount,
   undoFinancingTreatment as undoTreatment,
@@ -16,7 +18,9 @@ import {
   type RecurringAmountDeps,
 } from './recurring-amounts.server'
 import {
+  addFinancingChargeInput,
   propertyRefInput,
+  renameFinancingChargeInput,
   setAmountInput,
   setTreatmentInput,
   undoAmountInput,
@@ -53,6 +57,7 @@ export const setRecurringAmount = createServerFn({ method: 'POST' })
   .handler(async ({ data }) =>
     setAmount(await recurringAmountDeps(), data.propertyId, {
       kind: data.kind,
+      chargeId: data.chargeId,
       amount: data.amount,
       from: data.from,
     }),
@@ -61,7 +66,31 @@ export const setRecurringAmount = createServerFn({ method: 'POST' })
 export const undoRecurringAmount = createServerFn({ method: 'POST' })
   .validator(undoAmountInput)
   .handler(async ({ data }) =>
-    undo(await recurringAmountDeps(), data.propertyId, data.kind),
+    undo(
+      await recurringAmountDeps(),
+      data.propertyId,
+      data.kind,
+      data.chargeId,
+    ),
+  )
+
+export const addFinancingCharge = createServerFn({ method: 'POST' })
+  .validator(addFinancingChargeInput)
+  .handler(async ({ data }) =>
+    addCharge(await recurringAmountDeps(), data.propertyId, {
+      name: data.name,
+      amount: data.amount,
+      from: data.from,
+    }),
+  )
+
+export const renameFinancingCharge = createServerFn({ method: 'POST' })
+  .validator(renameFinancingChargeInput)
+  .handler(async ({ data }) =>
+    renameCharge(await recurringAmountDeps(), data.propertyId, {
+      chargeId: data.chargeId,
+      name: data.name,
+    }),
   )
 
 export const setFinancingTreatment = createServerFn({ method: 'POST' })

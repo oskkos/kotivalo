@@ -4,7 +4,7 @@
 import { z } from 'zod'
 import { typedDate } from '#/features/ownership/schemas'
 import { parseDecimal } from '#/lib/decimal'
-import type { FieldReason } from '#/lib/reasons'
+import type { AlertReason, FieldReason } from '#/lib/reasons'
 import {
   FINANCING_TREATMENTS,
   RECURRING_AMOUNT_KINDS,
@@ -36,16 +36,56 @@ export const recurringAmountKind = z.enum(RECURRING_AMOUNT_KINDS)
 
 export const propertyRefInput = z.object({ propertyId: id })
 
-export const setAmountInput = z.object({
+/** A financing charge's name as typed: trimmed, 1 to 60 characters. */
+export const financingChargeName = z
+  .string({ error: 'financing_charge_name_required' satisfies FieldReason })
+  .trim()
+  .min(1, { error: 'financing_charge_name_required' satisfies FieldReason })
+  .max(60, { error: 'financing_charge_name_too_long' satisfies FieldReason })
+
+/**
+ * A charge id names one financing charge, and only a financing charge.
+ * Transitional (design.md): until the pages send it, a financing amount may
+ * come without one.
+ */
+const chargeOnlyForFinancing = (input: { kind: string; chargeId?: string }) =>
+  input.kind === 'financing_charge' || input.chargeId === undefined
+
+export const setAmountInput = z
+  .object({
+    propertyId: id,
+    kind: recurringAmountKind,
+    chargeId: id.optional(),
+    amount: typedAmount,
+    from: monthStartDate,
+  })
+  .refine(chargeOnlyForFinancing, {
+    error: 'financing_charge_not_found' satisfies AlertReason,
+    path: ['chargeId'],
+  })
+
+export const undoAmountInput = z
+  .object({
+    propertyId: id,
+    kind: recurringAmountKind,
+    chargeId: id.optional(),
+  })
+  .refine(chargeOnlyForFinancing, {
+    error: 'financing_charge_not_found' satisfies AlertReason,
+    path: ['chargeId'],
+  })
+
+export const addFinancingChargeInput = z.object({
   propertyId: id,
-  kind: recurringAmountKind,
+  name: financingChargeName,
   amount: typedAmount,
   from: monthStartDate,
 })
 
-export const undoAmountInput = z.object({
+export const renameFinancingChargeInput = z.object({
   propertyId: id,
-  kind: recurringAmountKind,
+  chargeId: id,
+  name: financingChargeName,
 })
 
 export const setTreatmentInput = z.object({
@@ -56,3 +96,4 @@ export const setTreatmentInput = z.object({
 
 export type SetAmountInput = z.input<typeof setAmountInput>
 export type SetTreatmentInput = z.input<typeof setTreatmentInput>
+export type AddFinancingChargeInput = z.input<typeof addFinancingChargeInput>
