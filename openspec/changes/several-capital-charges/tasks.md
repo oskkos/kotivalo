@@ -34,11 +34,11 @@
 
 ## 4. Renaming and ending a charge
 
-- [ ] 4.1 Messages: *Uusi summa* / *Päättyy*, the end date label and hint, *Päättyneet rahoitusvastikkeet*, "Päättyi {date}", the removal confirmation, fi, sv and en with the translate skill and the term-critic on the diff
-- [ ] 4.2 `periods.ts`: `isEnded(periods, today)` with unit tests
-- [ ] 4.3 `AmountForm.tsx` for a financing charge: the name field (saved first when changed), the *Uusi summa* / *Päättyy* choice (`ChoiceField`), on an ended charge only the name and the history; the undo confirmation says the charge is removed when it is the only period
-- [ ] 4.4 `RecurringAmountsPage.tsx`: the ended list below the card
-- [ ] 4.5 Component tests; Playwright tests for "Renaming a financing charge", "Ending a financing charge" and "Undoing a financing charge's only amount removes it"
+- [x] 4.1 Messages: *Uusi summa* / *Päättyy*, the end date label and hint, *Päättyneet rahoitusvastikkeet*, "Päättyi {date}", the removal confirmation, fi, sv and en with the translate skill and the term-critic on the diff
+- [x] 4.2 `periods.ts`: `isEnded(periods, today)` with unit tests
+- [x] 4.3 `AmountForm.tsx` for a financing charge: the name field (saved first when changed), the *Uusi summa* / *Päättyy* choice (`ChoiceField`), on an ended charge only the name and the history; the undo confirmation says the charge is removed when it is the only period
+- [x] 4.4 `RecurringAmountsPage.tsx`: the ended list below the card
+- [x] 4.5 Component tests; Playwright tests for "Renaming a financing charge", "Ending a financing charge" and "Undoing a financing charge's only amount removes it"
 
 ## 5. Several charges in the computed views
 

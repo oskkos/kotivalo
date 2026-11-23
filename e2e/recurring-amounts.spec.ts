@@ -258,6 +258,28 @@ test.describe('Undoing the latest rent or charge change', () => {
     await expect(rent.getByText('€890.00/month')).toBeVisible()
     await expect(rent.getByText('From 01/03/2025')).toBeVisible()
   })
+
+  test("Undoing a financing charge's only amount removes it", async ({
+    page,
+  }) => {
+    const id = await ownerWithFlat(page)
+    await openAmounts(page, id)
+    await addFinancingCharge(page, 'Putkiremontti', '86', '01/03/2025')
+    await addFinancingCharge(page, 'Julkisivu', '42', '01/01/2026')
+
+    await page.getByRole('button', { name: 'Change: Julkisivu' }).click()
+    await waitForHydration(page)
+    await page.getByRole('button', { name: 'Undo the latest change' }).click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toContainText(
+      'This charge has only this amount, so undoing it removes the charge.',
+    )
+    await dialog.getByRole('button', { name: 'Undo change' }).click()
+
+    const financing = section(page, 'Financing charge')
+    await expect(financing.getByText('Putkiremontti')).toBeVisible()
+    await expect(page.getByText('Julkisivu')).toHaveCount(0)
+  })
 })
 
 test.describe('The financing charge treatment', () => {
@@ -336,5 +358,93 @@ test.describe('Accumulated capitalised financing charges', () => {
         { exact: false },
       ),
     ).toBeVisible()
+  })
+})
+
+/** Opens the form of a financing charge from the Rent and charges page. */
+async function openCharge(page: Page, name: string) {
+  await page.getByRole('button', { name: `Change: ${name}` }).click()
+  await waitForHydration(page)
+}
+
+/** Ends a financing charge from a date via its form. */
+async function endCharge(page: Page, name: string, from: string) {
+  await openCharge(page, name)
+  await page.getByRole('button', { name: 'Ending' }).click()
+  await page
+    .getByRole('textbox', { name: 'No longer collected from' })
+    .fill(from)
+  await page.getByRole('button', { name: 'Mark the charge as ended' }).click()
+  await expect(
+    page.getByRole('heading', { name: 'Rent and charges' }),
+  ).toBeVisible()
+}
+
+test.describe('Renaming a financing charge', () => {
+  test('Changing the case of a name', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await openAmounts(page, id)
+    await addFinancingCharge(page, 'julkisivu', '42', '01/01/2026')
+
+    await openCharge(page, 'julkisivu')
+    const name = page.getByRole('textbox', { name: 'Name' })
+    await expect(name).toHaveValue('julkisivu')
+    await name.fill('Julkisivu')
+    await page.getByRole('button', { name: 'Save name' }).click()
+
+    await expect(
+      page.getByRole('button', { name: 'Change: Julkisivu' }),
+    ).toBeVisible()
+  })
+})
+
+test.describe('Ending a financing charge', () => {
+  test('Ending a charge from next year', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await openAmounts(page, id)
+    await addFinancingCharge(page, 'Hissiremontti', '24', '01/03/2025')
+
+    await endCharge(page, 'Hissiremontti', `01/01/${String(nextYear)}`)
+
+    const financing = section(page, 'Financing charge')
+    await expect(financing).toContainText('Hissiremontti€24.00/month')
+    await expect(
+      financing.getByText(`From 01/01/${String(nextYear)}: €0.00/month`),
+    ).toBeVisible()
+  })
+
+  test('An ended charge is listed apart', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await openAmounts(page, id)
+    await addFinancingCharge(page, 'Hissiremontti', '24', '01/03/2025')
+
+    await endCharge(page, 'Hissiremontti', `01/01/${String(thisYear)}`)
+
+    await expect(
+      section(page, 'Financing charge').getByText('No financing charges'),
+    ).toBeVisible()
+    await expect(section(page, 'Ended financing charges')).toContainText(
+      `HissiremonttiEnded 31/12/${String(thisYear - 1)} · was €24.00/month`,
+    )
+  })
+
+  test('Undoing an ending', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await openAmounts(page, id)
+    await addFinancingCharge(page, 'Hissiremontti', '24', '01/03/2025')
+    await endCharge(page, 'Hissiremontti', `01/01/${String(thisYear)}`)
+
+    await section(page, 'Ended financing charges').getByRole('button').click()
+    await waitForHydration(page)
+    await page.getByRole('button', { name: 'Undo the latest change' }).click()
+    await page
+      .getByRole('dialog')
+      .getByRole('button', { name: 'Undo change' })
+      .click()
+
+    await expect(
+      section(page, 'Financing charge').getByText('€24.00/month'),
+    ).toBeVisible()
+    await expect(page.getByText('Ended financing charges')).toHaveCount(0)
   })
 })
