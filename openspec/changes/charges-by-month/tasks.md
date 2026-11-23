@@ -18,9 +18,9 @@
 
 ## 4. The row on the flat details page
 
-- [ ] 4.1 `FlatDetailsPage.tsx` `Amounts`: the *Vastikkeet kuukausittain* row inside the card with this year's total so far from `chargesOfYear`, opening the charges page; fi, sv and en messages
-- [ ] 4.2 Playwright test "This year's charges open the charges page" in the details page spec; the existing details page tests still passing
-- [ ] 4.3 CLAUDE.md "Current state": the charges page by year, opened from the details page
+- [x] 4.1 `FlatDetailsPage.tsx` `Amounts`: the *Vastikkeet kuukausittain* row inside the card with this year's total so far from `chargesOfYear`, opening the charges page; fi, sv and en messages
+- [x] 4.2 Playwright test "This year's charges open the charges page" in the details page spec; the existing details page tests still passing
+- [x] 4.3 CLAUDE.md "Current state": the charges page by year, opened from the details page
 
 ## 5. Archive
 

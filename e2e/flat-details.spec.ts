@@ -160,6 +160,34 @@ test.describe('The flat details page', () => {
     ).toBeVisible()
   })
 
+  test("This year's charges open the charges page", async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await openAmounts(page, id)
+    await setAmount(
+      page,
+      'Maintenance charge',
+      '214',
+      `01/01/${String(thisYear)}`,
+    )
+    await setAmount(
+      page,
+      'Financing charge',
+      '86',
+      `01/03/${String(thisYear - 1)}`,
+    )
+    await openDetails(page, id)
+    const months = today.getMonth() + 1
+    const soFar = new Intl.NumberFormat('en-FI', {
+      style: 'currency',
+      currency: 'EUR',
+    }).format(months * 300)
+    const row = page.getByRole('link', { name: /^Charges by month/ })
+    await expect(row).toContainText(`${String(thisYear)} so far: ${soFar}`)
+
+    await row.click()
+    await expect(page.getByRole('heading', { name: 'Charges' })).toBeVisible()
+  })
+
   test('The latest entries', async ({ page }) => {
     const id = await ownerWithFlat(page)
     const year = String(thisYear - 1)

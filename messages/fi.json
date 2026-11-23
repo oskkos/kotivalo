@@ -187,6 +187,8 @@
   "email_action_fallback": "Jos painike ei toimi, kopioi tämä osoite selaimeesi:",
   "error_reference": "Virhetunnus: {reference}",
   "flat_details_all": "Kaikki",
+  "flat_details_charges": "Vastikkeet kuukausittain",
+  "flat_details_charges_so_far": "Vuonna {year} tähän mennessä {amount}",
   "flat_details_latest": "Viimeisimmät kirjaukset",
   "flat_details_menu": "Muut toiminnot",
   "flat_details_no_entries": "Ei vielä kirjauksia.",
