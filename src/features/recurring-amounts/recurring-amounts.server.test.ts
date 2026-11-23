@@ -11,7 +11,9 @@ import {
 import { addTestUser, emptyTables } from '#/test/users.server'
 import { recurringAmountRepository } from './recurring-amount.repository.server'
 import {
+  addFinancingCharge,
   getRecurringAmounts,
+  renameFinancingCharge,
   setFinancingTreatment,
   setRecurringAmount,
   undoFinancingTreatment,
@@ -347,5 +349,244 @@ describe('Undoing the latest treatment change', () => {
       ok: false,
       reason: 'property_not_found',
     })
+  })
+})
+
+const addCharge = async (
+  name: string,
+  amount: number,
+  from: string,
+  userId = 'annika',
+  propertyId = flat,
+) => addFinancingCharge(deps(userId), propertyId, { name, amount, from })
+
+/** Adds a charge as Annika and returns its id. */
+const chargeId = async (name: string, amount: number, from: string) => {
+  const added = await addCharge(name, amount, from)
+  if (!added.ok) {
+    throw new Error(added.reason)
+  }
+  return added.chargeId
+}
+
+const setCharge = (
+  id: string,
+  amount: number,
+  from: string,
+  userId = 'annika',
+) =>
+  setRecurringAmount(deps(userId), flat, {
+    kind: 'financing_charge',
+    chargeId: id,
+    amount,
+    from,
+  })
+
+const charges = async () => (await view()).financingCharges
+
+/** A second flat of Annika's. */
+const otherFlat = async () =>
+  (
+    await propertyRepository(db).create(
+      'annika',
+      {
+        streetAddress: 'Koivutie 1 A 2',
+        postcode: '33100',
+        city: 'Tampere',
+        roomCount: 1,
+        floorArea: 300,
+      },
+      now,
+      '2025-03-01',
+    )
+  ).id
+
+describe('Adding a financing charge', () => {
+  test('Adding a second financing charge', async () => {
+    await chargeId('Putkiremontti', 8600, '2025-03-01')
+    expect(await addCharge('Julkisivu', 4200, '2026-01-01')).toEqual({
+      ok: true,
+      chargeId: expect.any(String) as string,
+    })
+    expect(logLines.at(-1)).toMatchObject({
+      level: 'info',
+      event: 'financing_charge.added',
+      propertyId: flat,
+      from: '2026-01-01',
+    })
+    expect(JSON.stringify(logLines)).not.toContain('Julkisivu')
+    expect(
+      (await charges()).map(({ name, periods }) => ({ name, periods })),
+    ).toEqual([
+      {
+        name: 'Putkiremontti',
+        periods: [{ validFrom: '2025-03-01', validTo: null, value: 8600 }],
+      },
+      {
+        name: 'Julkisivu',
+        periods: [{ validFrom: '2026-01-01', validTo: null, value: 4200 }],
+      },
+    ])
+  })
+
+  test('A name already in use is refused', async () => {
+    await chargeId('Putkiremontti', 8600, '2025-03-01')
+    expect(await addCharge('putkiremontti', 4200, '2026-01-01')).toEqual({
+      ok: false,
+      reason: 'financing_charge_name_taken',
+    })
+    expect(await charges()).toHaveLength(1)
+  })
+
+  test("A new charge's date before the flat's ownership is refused", async () => {
+    expect(await addCharge('Julkisivu', 4200, '2025-01-01')).toEqual({
+      ok: false,
+      reason: 'amount_date_before_ownership',
+    })
+    expect(await charges()).toEqual([])
+  })
+
+  test("A member can't add a financing charge", async () => {
+    expect(await addCharge('Julkisivu', 4200, '2026-01-01', 'jussi')).toEqual({
+      ok: false,
+      reason: 'sharing_owner_only',
+    })
+    expect(await charges()).toEqual([])
+  })
+})
+
+describe('Renaming a financing charge', () => {
+  test('Naming the unnamed charge', async () => {
+    await set('financing_charge', 8600, '2025-03-01')
+    const unnamed = (await charges()).at(0)
+    if (unnamed === undefined) {
+      throw new Error('No charge')
+    }
+    expect(unnamed.name).toBeNull()
+    expect(
+      await renameFinancingCharge(deps('annika'), flat, {
+        chargeId: unnamed.id,
+        name: 'Putkiremontti',
+      }),
+    ).toEqual({ ok: true })
+    expect(logLines.at(-1)).toMatchObject({
+      event: 'financing_charge.renamed',
+      chargeId: unnamed.id,
+    })
+    expect(await charges()).toEqual([{ ...unnamed, name: 'Putkiremontti' }])
+  })
+
+  test('Changing the case of a name', async () => {
+    const id = await chargeId('julkisivu', 4200, '2026-01-01')
+    expect(
+      await renameFinancingCharge(deps('annika'), flat, {
+        chargeId: id,
+        name: 'Julkisivu',
+      }),
+    ).toEqual({ ok: true })
+    expect((await charges())[0]?.name).toBe('Julkisivu')
+  })
+
+  test("another charge's name is taken", async () => {
+    await chargeId('Putkiremontti', 8600, '2025-03-01')
+    const id = await chargeId('Julkisivu', 4200, '2026-01-01')
+    expect(
+      await renameFinancingCharge(deps('annika'), flat, {
+        chargeId: id,
+        name: 'PUTKIREMONTTI',
+      }),
+    ).toEqual({ ok: false, reason: 'financing_charge_name_taken' })
+  })
+
+  test("Another flat's charge is not found", async () => {
+    const other = await otherFlat()
+    const added = await addCharge('Muu', 1000, '2025-03-01', 'annika', other)
+    expect(
+      await renameFinancingCharge(deps('annika'), flat, {
+        chargeId: added.ok ? added.chargeId : '',
+        name: 'Julkisivu',
+      }),
+    ).toEqual({ ok: false, reason: 'financing_charge_not_found' })
+  })
+
+  test("A member can't rename a financing charge", async () => {
+    const id = await chargeId('Julkisivu', 4200, '2026-01-01')
+    expect(
+      await renameFinancingCharge(deps('jussi'), flat, {
+        chargeId: id,
+        name: 'Hissi',
+      }),
+    ).toEqual({ ok: false, reason: 'sharing_owner_only' })
+  })
+})
+
+describe('Financing charges', () => {
+  describe('Setting a rent or charge', () => {
+    test('Changing one financing charge leaves the others', async () => {
+      const putki = await chargeId('Putkiremontti', 8600, '2025-03-01')
+      const julkisivu = await chargeId('Julkisivu', 4200, '2026-01-01')
+      expect(await setCharge(julkisivu, 4500, '2027-01-01')).toEqual({
+        ok: true,
+      })
+      expect(logLines.at(-1)).toMatchObject({
+        event: 'recurring_amount.set',
+        kind: 'financing_charge',
+        chargeId: julkisivu,
+      })
+      const after = await charges()
+      expect(after.find((charge) => charge.id === putki)?.periods).toEqual([
+        { validFrom: '2025-03-01', validTo: null, value: 8600 },
+      ])
+      expect(after.find((charge) => charge.id === julkisivu)?.periods).toEqual([
+        { validFrom: '2026-01-01', validTo: '2026-12-31', value: 4200 },
+        { validFrom: '2027-01-01', validTo: null, value: 4500 },
+      ])
+    })
+
+    test("Another flat's financing charge is not found", async () => {
+      const other = await otherFlat()
+      const added = await addCharge('Muu', 1000, '2025-03-01', 'annika', other)
+      expect(
+        await setCharge(added.ok ? added.chargeId : '', 2000, '2026-01-01'),
+      ).toEqual({ ok: false, reason: 'financing_charge_not_found' })
+    })
+  })
+
+  describe('Undoing the latest rent or charge change', () => {
+    test("Undoing a financing charge's only amount removes it", async () => {
+      const putki = await chargeId('Putkiremontti', 8600, '2025-03-01')
+      const julkisivu = await chargeId('Julkisivu', 4200, '2026-01-01')
+      expect(
+        await undoRecurringAmount(
+          deps('annika'),
+          flat,
+          'financing_charge',
+          julkisivu,
+        ),
+      ).toEqual({ ok: true })
+      expect(logLines.map((line) => line.event)).toEqual([
+        'recurring_amount.undone',
+        'financing_charge.removed',
+      ])
+      expect((await charges()).map((charge) => charge.id)).toEqual([putki])
+    })
+  })
+})
+
+describe('Ending a financing charge', () => {
+  test('Undoing an ending', async () => {
+    const hissi = await chargeId('Hissiremontti', 2400, '2025-03-01')
+    await setCharge(hissi, 0, '2026-01-01')
+    expect(
+      await undoRecurringAmount(
+        deps('annika'),
+        flat,
+        'financing_charge',
+        hissi,
+      ),
+    ).toEqual({ ok: true })
+    expect((await charges())[0]?.periods).toEqual([
+      { validFrom: '2025-03-01', validTo: null, value: 2400 },
+    ])
   })
 })

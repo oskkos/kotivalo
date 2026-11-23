@@ -54,7 +54,7 @@ None.
   - *Muuta rahoitusvastiketta · nimi ja päättyminen* (`RahoitusMuutos`)
   - *Asunnon tiedot · useampi rahoitusvastike* (`AsuntoTiedotRahoitus`)
   - *Vastikkeet kuukausittain · useampi rahoitusvastike* (`VastikeKuukaudetUseat`)
-- **Messages:** new fi, sv and en messages and reason codes (`financing_charge_name_required`, `financing_charge_name_taken`, `financing_charge_not_found`), written with the translate skill.
+- **Messages:** new fi, sv and en messages and reason codes (`financing_charge_name_required`, `financing_charge_name_too_long`, `financing_charge_name_taken`, `financing_charge_not_found`), written with the translate skill.
 - **Logs:**
   - `financing_charge.added`, `financing_charge.renamed`, `financing_charge.removed`.
   - `recurring_amount.set` and `recurring_amount.undone` carry the charge id for financing charges.

@@ -95,7 +95,7 @@ export async function getFlatDetails(
     tenancies,
     ...amounts,
     capitalised: accumulatedCapitalised(
-      amounts.amounts.financing_charge,
+      amounts.financingCharges,
       amounts.treatments,
       today,
     ),

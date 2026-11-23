@@ -127,9 +127,13 @@ describe('the effect of a change on its year', () => {
 })
 
 describe('Accumulated capitalised financing charges', () => {
-  const financing: Period<number>[] = [
-    { validFrom: '2025-03-01', validTo: '2025-12-31', value: 8000 },
-    { validFrom: '2026-01-01', validTo: null, value: 8600 },
+  const financing = [
+    {
+      periods: [
+        { validFrom: '2025-03-01', validTo: '2025-12-31', value: 8000 },
+        { validFrom: '2026-01-01', validTo: null, value: 8600 },
+      ] satisfies Period<number>[],
+    },
   ]
 
   test('Only capitalised months count', () => {
@@ -169,5 +173,29 @@ describe('Accumulated capitalised financing charges', () => {
 
   test('no financing charge means nothing accumulated', () => {
     expect(accumulatedCapitalised([], [], '2026-11-21')).toBe(0)
+  })
+
+  test('All financing charges count', () => {
+    const p = (validFrom: string, validTo: string | null, value: number) => ({
+      validFrom,
+      validTo,
+      value,
+    })
+    expect(
+      accumulatedCapitalised(
+        [
+          { periods: [p('2025-03-01', null, 8600)] },
+          { periods: [p('2026-01-01', null, 4200)] },
+          {
+            periods: [
+              p('2025-03-01', '2025-12-31', 2400),
+              p('2026-01-01', null, 0),
+            ],
+          },
+        ],
+        [{ validFrom: '2025-03-01', validTo: null, value: 'capitalised' }],
+        '2026-11-23',
+      ),
+    ).toBe(21 * 8600 + 11 * 4200 + 10 * 2400)
   })
 })

@@ -13,15 +13,15 @@
 
 ## 2. Server functions for financing charges
 
-- [ ] 2.1 `schemas.ts`: `financingChargeName` (trimmed, 1–60, `financing_charge_name_required`), `addFinancingChargeInput`, `renameFinancingChargeInput`, and `chargeId` on `setAmountInput` and `undoAmountInput` (optional for `financing_charge` until group 3, refused for other kinds); unit tests
-- [ ] 2.2 `recurring-amounts.server.ts`:
+- [x] 2.1 `schemas.ts`: `financingChargeName` (trimmed, 1–60, `financing_charge_name_required` / `financing_charge_name_too_long`), `addFinancingChargeInput`, `renameFinancingChargeInput`, and `chargeId` on `setAmountInput` and `undoAmountInput` (optional for `financing_charge` until group 3, refused for other kinds); unit tests
+- [x] 2.2 `recurring-amounts.server.ts`:
   - `addFinancingCharge` and `renameFinancingCharge`, with owner check, name uniqueness ignoring case (`financing_charge_name_taken`) and the date rules for a first amount
   - `financing_charge_not_found` for a charge id not of the flat, in set, undo and rename
   - the view's `financingCharges` and `capitalised` summed over the charges (`accumulatedCapitalised` takes the charges)
-- [ ] 2.3 `functions.ts`: `addFinancingCharge`, `renameFinancingCharge`; `chargeId` passed through set and undo
-- [ ] 2.4 Reason codes in `src/lib/reasons.ts`, with fi, sv and en messages written with the translate skill
-- [ ] 2.5 Logs `financing_charge.added`, `financing_charge.renamed`, `financing_charge.removed`, and `chargeId` on `recurring_amount.set` and `recurring_amount.undone`
-- [ ] 2.6 Workers tests named after the server-side scenarios of "Adding a financing charge", "Renaming a financing charge", "Setting a rent or charge" ("Another flat's financing charge is not found") and "Undoing the latest rent or charge change" ("Undoing a financing charge's only amount removes it"), and "All financing charges count" in a unit test; asserting the log events
+- [x] 2.3 `functions.ts`: `addFinancingCharge`, `renameFinancingCharge`; `chargeId` passed through set and undo
+- [x] 2.4 Reason codes in `src/lib/reasons.ts`, with fi, sv and en messages written with the translate skill
+- [x] 2.5 Logs `financing_charge.added`, `financing_charge.renamed`, `financing_charge.removed`, and `chargeId` on `recurring_amount.set` and `recurring_amount.undone`
+- [x] 2.6 Workers tests named after the server-side scenarios of "Adding a financing charge", "Renaming a financing charge", "Setting a rent or charge" ("Another flat's financing charge is not found") and "Undoing the latest rent or charge change" ("Undoing a financing charge's only amount removes it"), and "All financing charges count" in a unit test; asserting the log events
 
 ## 3. The financing charges card and adding a charge
 
