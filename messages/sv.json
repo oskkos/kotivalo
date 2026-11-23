@@ -187,6 +187,8 @@
   "email_action_fallback": "Om knappen inte fungerar, kopiera den här adressen till din webbläsare:",
   "error_reference": "Felkod: {reference}",
   "flat_details_all": "Alla",
+  "flat_details_charges": "Vederlag per månad",
+  "flat_details_charges_so_far": "År {year} hittills {amount}",
   "flat_details_latest": "Senaste registreringarna",
   "flat_details_menu": "Fler åtgärder",
   "flat_details_no_entries": "Inga registreringar ännu.",

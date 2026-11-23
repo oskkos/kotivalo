@@ -187,6 +187,8 @@
   "email_action_fallback": "If the button doesn't work, copy this address into your browser:",
   "error_reference": "Error reference: {reference}",
   "flat_details_all": "All",
+  "flat_details_charges": "Charges by month",
+  "flat_details_charges_so_far": "{year} so far: {amount}",
   "flat_details_latest": "Latest entries",
   "flat_details_menu": "More actions",
   "flat_details_no_entries": "No entries yet.",

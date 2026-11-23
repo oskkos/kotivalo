@@ -12,6 +12,7 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { createLink } from '@tanstack/react-router'
 import { useState } from 'react'
+import { chargesOfYear } from '#/features/recurring-amounts/charges'
 import { periodOn } from '#/features/recurring-amounts/periods'
 import { kindLabel, treatmentLabel } from '#/features/recurring-amounts/labels'
 import { rentMonthTitle } from '#/features/rent-payments/labels'
@@ -434,6 +435,13 @@ const KINDS: RecurringAmountKind[] = [
 function Amounts(props: { view: FlatDetails }) {
   const { view } = props
   const treatment = periodOn(view.treatments, view.today)?.value
+  const year = Number(view.today.slice(0, 4))
+  const chargesSoFar = chargesOfYear(
+    view.amounts,
+    view.treatments,
+    year,
+    view.today,
+  ).total
   return (
     <Stack
       component="section"
@@ -465,47 +473,87 @@ function Amounts(props: { view: FlatDetails }) {
           {m.amounts_change()}
         </TextLink>
       </Stack>
-      <Box component="dl" sx={{ ...card, m: 0, px: 2 }}>
-        {KINDS.map((kind, i) => {
-          const amount = periodOn(view.amounts[kind], view.today)?.value
-          return (
-            <Stack
-              key={kind}
-              direction="row"
-              sx={{
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: 1.5,
-                minHeight: 48,
-                py: 0.5,
-                borderTop: i === 0 ? 'none' : `1px solid ${colors.divider}`,
-              }}
-            >
-              <Typography
-                component="dt"
-                sx={{ fontSize: 14, fontWeight: 800, color: 'text.secondary' }}
+      <Box sx={{ ...card, overflow: 'hidden' }}>
+        <Box component="dl" sx={{ m: 0, px: 2 }}>
+          {KINDS.map((kind, i) => {
+            const amount = periodOn(view.amounts[kind], view.today)?.value
+            return (
+              <Stack
+                key={kind}
+                direction="row"
+                sx={{
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  minHeight: 48,
+                  py: 0.5,
+                  borderTop: i === 0 ? 'none' : `1px solid ${colors.divider}`,
+                }}
               >
-                {kindLabel[kind]()}
-                {kind === 'financing_charge' && treatment !== undefined ? (
-                  <Box
-                    component="span"
-                    sx={{ display: 'block', fontSize: 12, fontWeight: 700 }}
-                  >
-                    {treatmentLabel[treatment]()}
-                  </Box>
-                ) : null}
-              </Typography>
-              <Typography
-                component="dd"
-                sx={{ m: 0, fontSize: 15, fontWeight: 900 }}
+                <Typography
+                  component="dt"
+                  sx={{
+                    fontSize: 14,
+                    fontWeight: 800,
+                    color: 'text.secondary',
+                  }}
+                >
+                  {kindLabel[kind]()}
+                  {kind === 'financing_charge' && treatment !== undefined ? (
+                    <Box
+                      component="span"
+                      sx={{ display: 'block', fontSize: 12, fontWeight: 700 }}
+                    >
+                      {treatmentLabel[treatment]()}
+                    </Box>
+                  ) : null}
+                </Typography>
+                <Typography
+                  component="dd"
+                  sx={{ m: 0, fontSize: 15, fontWeight: 900 }}
+                >
+                  {amount === undefined
+                    ? m.amounts_not_set()
+                    : m.amounts_per_month({ amount: formatMoney(amount) })}
+                </Typography>
+              </Stack>
+            )
+          })}
+        </Box>
+        <TextLink
+          to="/properties/$propertyId/charges"
+          params={{ propertyId: view.property.id }}
+          underline="none"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            minHeight: 60,
+            pl: 2,
+            pr: 1.5,
+            py: 1,
+            borderTop: `1px solid ${colors.cardBorder}`,
+            color: 'text.primary',
+          }}
+        >
+          <Stack sx={{ flex: 1, minWidth: 0 }}>
+            <Box component="span" sx={{ fontSize: 15, fontWeight: 900 }}>
+              {m.flat_details_charges()}
+            </Box>
+            {chargesSoFar > 0 ? (
+              <Box
+                component="span"
+                sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary' }}
               >
-                {amount === undefined
-                  ? m.amounts_not_set()
-                  : m.amounts_per_month({ amount: formatMoney(amount) })}
-              </Typography>
-            </Stack>
-          )
-        })}
+                {m.flat_details_charges_so_far({
+                  year: String(year),
+                  amount: formatMoney(chargesSoFar),
+                })}
+              </Box>
+            ) : null}
+          </Stack>
+          <Icon path={NEXT} size={18} />
+        </TextLink>
       </Box>
       {view.capitalised > 0 ? (
         <Typography
