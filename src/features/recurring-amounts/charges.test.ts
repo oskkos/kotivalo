@@ -1,0 +1,151 @@
+import { describe, expect, test } from 'vitest'
+import { chargesOfYear, chargeYears, type ChargePeriods } from './charges'
+import type { Period } from './periods'
+import type { FinancingTreatment } from '#/server/db/schema'
+
+const p = (
+  validFrom: string,
+  validTo: string | null,
+  value: number,
+): Period<number> => ({ validFrom, validTo, value })
+
+const t = (
+  validFrom: string,
+  validTo: string | null,
+  value: FinancingTreatment,
+): Period<FinancingTreatment> => ({ validFrom, validTo, value })
+
+const charges = (
+  maintenance: Period<number>[],
+  financing: Period<number>[] = [],
+): ChargePeriods => ({
+  maintenance_charge: maintenance,
+  financing_charge: financing,
+})
+
+const months = (year: number, from: number, to: number): string[] =>
+  Array.from(
+    { length: to - from + 1 },
+    (_, i) => `${String(year)}-${String(to - i).padStart(2, '0')}`,
+  )
+
+describe('Charges of a month', () => {
+  test("A year's charges up to the current month", () => {
+    const year = chargesOfYear(
+      charges([p('2026-01-01', null, 21400)], [p('2025-03-01', null, 8600)]),
+      [],
+      2026,
+      '2026-11-23',
+    )
+    expect(year.months.map((m) => m.month)).toEqual(months(2026, 1, 11))
+    expect(year.months.every((m) => m.total === 30000)).toBe(true)
+    expect(year.maintenance).toBe(235400)
+    expect(year.financing).toEqual({ not_set: 94600 })
+    expect(year.total).toBe(330000)
+  })
+
+  test('An earlier year starts from the first charge', () => {
+    const year = chargesOfYear(
+      charges([p('2025-03-01', null, 20500)], [p('2025-03-01', null, 8600)]),
+      [],
+      2025,
+      '2026-11-23',
+    )
+    expect(year.months.map((m) => m.month)).toEqual(months(2025, 3, 12))
+    expect(year.months.every((m) => m.total === 29100)).toBe(true)
+    expect(year.total).toBe(291000)
+    expect(year.estimate).toBeUndefined()
+  })
+
+  test('A change shows the previous amount', () => {
+    const periods = charges([
+      p('2025-03-01', '2025-12-31', 20500),
+      p('2026-01-01', null, 21400),
+    ])
+    const year = chargesOfYear(periods, [], 2026, '2026-11-23')
+    const jan = year.months.find((m) => m.month === '2026-01')
+    const feb = year.months.find((m) => m.month === '2026-02')
+    expect(jan?.charges.maintenance_charge).toEqual({
+      cents: 21400,
+      previous: 20500,
+    })
+    expect(feb?.charges.maintenance_charge).toEqual({ cents: 21400 })
+  })
+
+  test('The first month of a charge is not a change', () => {
+    const year = chargesOfYear(
+      charges([], [p('2025-03-01', null, 8600)]),
+      [],
+      2025,
+      '2026-11-23',
+    )
+    const march = year.months.find((m) => m.month === '2025-03')
+    expect(march?.charges.financing_charge).toEqual({ cents: 8600 })
+    expect(march?.charges.maintenance_charge).toBeUndefined()
+  })
+
+  test('The financing charge by treatment when it changes mid-year', () => {
+    const year = chargesOfYear(
+      charges([], [p('2026-01-01', null, 8600)]),
+      [
+        t('2025-03-01', '2026-06-30', 'capitalised'),
+        t('2026-07-01', null, 'income_recognised'),
+      ],
+      2026,
+      '2026-11-23',
+    )
+    expect(year.financing).toEqual({
+      capitalised: 51600,
+      income_recognised: 43000,
+    })
+  })
+
+  test('A financing charge without a treatment', () => {
+    const year = chargesOfYear(
+      charges([], [p('2026-01-01', null, 8600)]),
+      [],
+      2026,
+      '2026-11-23',
+    )
+    expect(year.financing).toEqual({ not_set: 94600 })
+    expect(year.months[0]?.treatment).toBeUndefined()
+  })
+
+  test('The whole-year estimate includes a change set for later in the year', () => {
+    const year = chargesOfYear(
+      charges(
+        [p('2026-01-01', '2026-11-30', 21400), p('2026-12-01', null, 22600)],
+        [p('2025-03-01', null, 8600)],
+      ),
+      [],
+      2026,
+      '2026-11-23',
+    )
+    expect(year.total).toBe(330000)
+    expect(year.estimate).toBe(361200)
+  })
+
+  test('No estimate in December', () => {
+    const year = chargesOfYear(
+      charges([p('2026-01-01', null, 21400)]),
+      [],
+      2026,
+      '2026-12-05',
+    )
+    expect(year.months).toHaveLength(12)
+    expect(year.estimate).toBeUndefined()
+  })
+
+  test('The years since the first charge', () => {
+    // The rent is not a charge, so its earlier start doesn't add 2024.
+    expect(
+      chargeYears(charges([p('2025-03-01', null, 20500)]), '2026-11-23'),
+    ).toEqual([2026, 2025])
+  })
+
+  test('Charges set only from a later month', () => {
+    const periods = charges([p('2027-01-01', null, 22600)])
+    expect(chargeYears(periods, '2026-11-23')).toEqual([])
+    expect(chargesOfYear(periods, [], 2026, '2026-11-23').months).toEqual([])
+  })
+})

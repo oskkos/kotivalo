@@ -1,7 +1,7 @@
 ## 1. A year's charges
 
-- [ ] 1.1 `features/recurring-amounts/charges.ts`: `chargeYears(amounts, today)` and `chargesOfYear(amounts, treatments, year, today)` as in design.md ("A year's charges are one pure function"), on `valueInMonth`
-- [ ] 1.2 Unit tests `charges.test.ts` named after every scenario of "Charges of a month"
+- [x] 1.1 `features/recurring-amounts/charges.ts`: `chargeYears(amounts, today)` and `chargesOfYear(amounts, treatments, year, today)` as in design.md ("A year's charges are one pure function"), on `valueInMonth`
+- [x] 1.2 Unit tests `charges.test.ts` named after every scenario of "Charges of a month"
 
 ## 2. Year buttons as a shared component
 
