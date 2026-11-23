@@ -5,8 +5,8 @@
 
 ## 2. Year buttons as a shared component
 
-- [ ] 2.1 Move the rent payments page's year buttons into `components/YearChoice.tsx` (the years, the chosen one, `onYear`; `aria-pressed`, 44 px targets); `RentPaymentsPage.tsx` uses it, with no visible change
-- [ ] 2.2 Component test for `YearChoice` (the chosen year pressed, choosing another calls `onYear`); the existing rent payments tests still passing
+- [x] 2.1 Move the rent payments page's year buttons into `components/YearChoice.tsx` (the years, the chosen one, `onYear`; `aria-pressed`, 44 px targets); `RentPaymentsPage.tsx` uses it, with no visible change
+- [x] 2.2 Component test for `YearChoice` (the chosen year pressed, choosing another calls `onYear`); the existing rent payments tests still passing
 
 ## 3. The charges page
 

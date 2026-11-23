@@ -3,12 +3,12 @@
 // payment date, the months with their statuses, newest first, and a warning
 // for the months not fully paid.
 import Box from '@mui/material/Box'
-import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Link from '@mui/material/Link'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { createLink } from '@tanstack/react-router'
+import { YearChoice } from '#/components/YearChoice'
 import { monthOf } from '#/features/recurring-amounts/periods'
 import type { Period } from '#/features/recurring-amounts/periods'
 import type { Tenancy } from '#/features/tenancies/tenancy.repository.server'
@@ -228,29 +228,12 @@ export function RentPaymentsPage(props: Props) {
           </Typography>
         ) : (
           <>
-            <Stack
-              role="group"
-              aria-label={m.rent_payments_year()}
-              direction="row"
-              sx={{ gap: 1, flexWrap: 'wrap' }}
-            >
-              {years.map((option) => {
-                const pressed = option === year
-                return (
-                  <Button
-                    key={option}
-                    variant={pressed ? 'contained' : 'outlined'}
-                    aria-pressed={pressed}
-                    onClick={() => {
-                      props.onYear(option)
-                    }}
-                    sx={{ borderRadius: 999, minHeight: 44, px: 2.25 }}
-                  >
-                    {String(option)}
-                  </Button>
-                )
-              })}
-            </Stack>
+            <YearChoice
+              label={m.rent_payments_year()}
+              years={years}
+              year={year}
+              onYear={props.onYear}
+            />
             <Stack
               component="section"
               aria-labelledby="received-title"
