@@ -1,15 +1,15 @@
 ## 1. Financing charges in the database
 
-- [ ] 1.1 `schema.ts`: table `financing_charges` (`id()`, `property_id` with cascade, `name` nullable) and `recurring_amounts.financing_charge_id` (nullable, cascade) with an index `(financing_charge_id, valid_from)`; `pnpm db:generate`, then append the backfill from design.md ("The migration") to the generated `0008` file before committing it
-- [ ] 1.2 Workers test for "Existing financing charges become unnamed charges": apply the migrations up to `0007`, store periods in the previous schema, apply `0008`, and check both scenarios (a helper in `src/test/apply-migrations.server.ts` to apply up to a given migration)
-- [ ] 1.3 `recurring-amount.repository.server.ts`:
+- [x] 1.1 `schema.ts`: table `financing_charges` (`id()`, `property_id` with cascade, `name` nullable) and `recurring_amounts.financing_charge_id` (nullable, cascade) with an index `(financing_charge_id, valid_from)`; `pnpm db:generate`, then append the backfill from design.md ("The migration") to the generated `0008` file before committing it
+- [x] 1.2 Workers test for "Existing financing charges become unnamed charges": store periods as the previous version did (no charge) and run the migration's backfill statements from `d1Migrations` on them, for both scenarios (the backfill touches only rows without a charge, so it can run again)
+- [x] 1.3 `recurring-amount.repository.server.ts`:
   - `forProperty` returns `financingCharges` (id, name, periods; ordered by first start, then name), plus a transitional `amounts.financing_charge`, the first charge's periods
   - period writes and undo take a sequence (`{ kind }` or `{ kind: 'financing_charge', chargeId }`), scoped by charge and its flat
   - `addFinancingCharge` (charge and first period in one batch)
   - `renameFinancingCharge`
   - undoing a charge's only period also deletes the charge
-- [ ] 1.4 `recurring-amounts.server.ts`, transitional until group 3: a financing amount without a charge id goes to the flat's first charge, or adds an unnamed one when there is none, so the current pages keep working
-- [ ] 1.5 Repository Workers tests: the scenario "Each financing charge has its own periods"; writes to one charge leave the others alone; another flat's charge id applies nothing; adding stores both rows or neither; undoing the only period removes the charge; existing tests still passing
+- [x] 1.4 `recurring-amounts.server.ts`, transitional until group 3: a financing amount without a charge id goes to the flat's first charge, or adds an unnamed one when there is none, so the current pages keep working
+- [x] 1.5 Repository Workers tests: the scenario "Each financing charge has its own periods"; writes to one charge leave the others alone; another flat's charge id applies nothing; adding stores both rows or neither; undoing the only period removes the charge; existing tests still passing
 
 ## 2. Server functions for financing charges
 

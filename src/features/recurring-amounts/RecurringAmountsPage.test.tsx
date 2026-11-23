@@ -12,6 +12,7 @@ const empty: RecurringAmountsView = {
   ownershipStart: '2025-03-01',
   capitalised: 0,
   amounts: { rent: [], maintenance_charge: [], financing_charge: [] },
+  financingCharges: [],
   treatments: [],
 }
 

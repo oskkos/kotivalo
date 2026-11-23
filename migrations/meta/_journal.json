@@ -57,6 +57,13 @@
       "when": 1795358528558,
       "tag": "0007_rent_payments",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "6",
+      "when": 1795463119652,
+      "tag": "0008_financing_charges",
+      "breakpoints": true
     }
   ]
 }

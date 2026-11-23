@@ -60,6 +60,7 @@ const details = (over: Partial<FlatDetails> = {}): FlatDetails => ({
     maintenance_charge: [],
     financing_charge: [],
   },
+  financingCharges: [],
   treatments: [],
   capitalised: 0,
   // Every month to September paid; October and November not.

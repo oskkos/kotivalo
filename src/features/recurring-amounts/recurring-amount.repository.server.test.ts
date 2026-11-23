@@ -26,6 +26,7 @@ const amounts = async (kind: 'rent' | 'maintenance_charge') =>
 beforeEach(async () => {
   await emptyTables(
     'recurring_amounts',
+    'financing_charges',
     'financing_treatments',
     'ownership_periods',
     'property_invitations',
@@ -68,6 +69,7 @@ describe('The recurring amount repository', () => {
   test('a flat without amounts has empty periods', async () => {
     expect(await repo.forProperty(flat)).toEqual({
       amounts: { rent: [], maintenance_charge: [], financing_charge: [] },
+      financingCharges: [],
       treatments: [],
     })
   })
@@ -326,6 +328,155 @@ describe('Rent and charges are recorded as monthly periods', () => {
     expect(await amounts('rent')).toEqual([
       { validFrom: '2025-03-01', validTo: '2027-02-28', value: 89000 },
       { validFrom: '2027-03-01', validTo: null, value: 92000 },
+    ])
+  })
+})
+
+describe('Financing charges in the repository', () => {
+  const add = (
+    chargeId: string,
+    name: string | null,
+    amount: number,
+    from: string,
+    propertyId = flat,
+    actorId = 'annika',
+  ) =>
+    repo.addFinancingCharge({
+      propertyId,
+      actorId,
+      chargeId,
+      name,
+      amount,
+      from,
+    })
+  const setCharge = (
+    chargeId: string,
+    amount: number,
+    from: string,
+    latestStart: string | null,
+  ) =>
+    repo.setAmount({
+      propertyId: flat,
+      actorId: 'annika',
+      kind: 'financing_charge',
+      chargeId,
+      amount,
+      from,
+      latestStart,
+    })
+  const charges = async () => (await repo.forProperty(flat)).financingCharges
+
+  describe('Rent and charges are recorded as monthly periods', () => {
+    test('Each financing charge has its own periods', async () => {
+      expect(await add('putki', 'Putkiremontti', 8600, '2025-03-01')).toBe(true)
+      expect(await add('julkisivu', 'Julkisivu', 4200, '2026-01-01')).toBe(true)
+      expect(
+        await setCharge('julkisivu', 4500, '2027-01-01', '2026-01-01'),
+      ).toBe(true)
+      expect(await charges()).toEqual([
+        {
+          id: 'putki',
+          name: 'Putkiremontti',
+          periods: [{ validFrom: '2025-03-01', validTo: null, value: 8600 }],
+        },
+        {
+          id: 'julkisivu',
+          name: 'Julkisivu',
+          periods: [
+            { validFrom: '2026-01-01', validTo: '2026-12-31', value: 4200 },
+            { validFrom: '2027-01-01', validTo: null, value: 4500 },
+          ],
+        },
+      ])
+    })
+  })
+
+  test('the transitional financing_charge amounts are the first charge', async () => {
+    await add('putki', 'Putkiremontti', 8600, '2025-03-01')
+    await add('julkisivu', 'Julkisivu', 4200, '2026-01-01')
+    expect((await repo.forProperty(flat)).amounts.financing_charge).toEqual([
+      { validFrom: '2025-03-01', validTo: null, value: 8600 },
+    ])
+  })
+
+  test("a new period can't join another flat's charge", async () => {
+    await add('muu', 'Muu', 1000, '2025-03-01', other)
+    expect(await setCharge('muu', 2000, '2026-01-01', null)).toBe(false)
+    expect(await charges()).toEqual([])
+    expect(
+      (await repo.forProperty(other)).financingCharges[0]?.periods,
+    ).toEqual([{ validFrom: '2025-03-01', validTo: null, value: 1000 }])
+  })
+
+  test('a member adds no charge, and nothing is stored', async () => {
+    expect(
+      await add('putki', 'Putkiremontti', 8600, '2025-03-01', flat, 'jussi'),
+    ).toBe(false)
+    expect(await charges()).toEqual([])
+  })
+
+  test('renaming changes the name only', async () => {
+    await add('putki', null, 8600, '2025-03-01')
+    expect(
+      await repo.renameFinancingCharge({
+        propertyId: flat,
+        actorId: 'annika',
+        chargeId: 'putki',
+        name: 'Putkiremontti',
+      }),
+    ).toBe(true)
+    expect(await charges()).toEqual([
+      {
+        id: 'putki',
+        name: 'Putkiremontti',
+        periods: [{ validFrom: '2025-03-01', validTo: null, value: 8600 }],
+      },
+    ])
+    expect(
+      await repo.renameFinancingCharge({
+        propertyId: other,
+        actorId: 'annika',
+        chargeId: 'putki',
+        name: 'Muu',
+      }),
+    ).toBe(false)
+  })
+
+  test("undoing a charge's only period removes the charge", async () => {
+    await add('putki', 'Putkiremontti', 8600, '2025-03-01')
+    await add('julkisivu', 'Julkisivu', 4200, '2026-01-01')
+    expect(
+      await repo.undoLatestAmount({
+        propertyId: flat,
+        actorId: 'annika',
+        kind: 'financing_charge',
+        chargeId: 'julkisivu',
+        latestStart: '2026-01-01',
+        previousStart: null,
+      }),
+    ).toBe(true)
+    expect((await charges()).map((charge) => charge.id)).toEqual(['putki'])
+  })
+
+  test('undoing a later period keeps the charge', async () => {
+    await add('putki', 'Putkiremontti', 8600, '2025-03-01')
+    await setCharge('putki', 0, '2026-01-01', '2025-03-01')
+    expect(
+      await repo.undoLatestAmount({
+        propertyId: flat,
+        actorId: 'annika',
+        kind: 'financing_charge',
+        chargeId: 'putki',
+        latestStart: '2026-01-01',
+        previousStart: '2025-03-01',
+      }),
+    ).toBe(true)
+    expect(await charges()).toEqual([
+      {
+        id: 'putki',
+        name: 'Putkiremontti',
+        periods: [{ validFrom: '2025-03-01', validTo: null, value: 8600 }],
+      },
     ])
   })
 })

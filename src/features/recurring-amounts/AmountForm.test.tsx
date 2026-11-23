@@ -31,6 +31,13 @@ const view: RecurringAmountsView = {
     ],
     financing_charge: [{ validFrom: '2025-03-01', validTo: null, value: 8600 }],
   },
+  financingCharges: [
+    {
+      id: 'charge',
+      name: null,
+      periods: [{ validFrom: '2025-03-01', validTo: null, value: 8600 }],
+    },
+  ],
   treatments: [
     { validFrom: '2025-03-01', validTo: '2026-12-31', value: 'capitalised' },
     { validFrom: '2027-01-01', validTo: null, value: 'income_recognised' },
