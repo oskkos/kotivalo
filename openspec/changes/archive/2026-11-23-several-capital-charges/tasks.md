@@ -51,5 +51,5 @@
 
 ## 6. Archive
 
-- [ ] 6.1 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
-- [ ] 6.2 `openspec archive several-capital-charges` as the last commit
+- [x] 6.1 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
+- [x] 6.2 `openspec archive several-capital-charges` as the last commit

@@ -101,7 +101,7 @@ Everyone with access to a flat SHALL be able to open its details page, the flat'
 - for the current tenancy ("The tenancy page"), this month's rent card: the month, its expected rent and status ("The rent status of a month"), with "Merkitse maksetuksi" for owners while the month is not paid (*Lisää maksu* when partly paid), and a link to the month's payments page
 - a warning about earlier months not fully paid ("Months not fully paid"), naming the month when there is one and the number of months otherwise, opening the rent payments page
 - the tenancy card: the tenant's name with the contract type, start and due day, opening the Tenancy page
-- the rent, maintenance charge and financing charge in effect today with the financing charge's treatment, or that each is not set, and the accumulated capitalised financing charges when above zero ("Accumulated capitalised financing charges"), opening the Rent and charges page
+- the rent and maintenance charge in effect today, or that each is not set; each financing charge in effect today with its name ("Adding a financing charge"), or that none is, with the treatment once; and the accumulated capitalised financing charges when above zero ("Accumulated capitalised financing charges"), opening the Rent and charges page
 - below them, *Vastikkeet kuukausittain*, opening the charges page ("The charges page"), with this year's charges so far ("Charges of a month") when above zero
 - the three latest entries by date ("The entries page"), each opening its details, and a link to the Entries page; or that there are no entries yet
 - in the header, a back link to the flats list, Edit, and a menu with Edit flat, Rent and charges, Rent payments, Entries and Ownership and sharing for everyone, and for owners End tenancy while the current tenancy runs without a recorded ending and Add tenant
@@ -139,6 +139,10 @@ When the flat has no current tenancy, the rent card SHALL be replaced by a note 
 #### Scenario: The rent and charges with the capitalised total
 - **WHEN** today is `2026-11-22`, the rent is 89000 cents, the maintenance charge 21400 cents, and the financing charge 8600 cents capitalised from `2025-03-01`
 - **THEN** the page shows `890,00 €/kk`, `214,00 €/kk`, `86,00 €/kk` with "Rahastoitu", and the accumulated capitalised financing charges
+
+#### Scenario: Each financing charge in effect today
+- **WHEN** today is `2026-11-23`, `Putkiremontti` is 8600 cents from `2025-03-01`, `Julkisivu` 4200 cents from `2026-01-01`, `Hissiremontti` 2400 cents from `2025-03-01` and 0 cents from `2026-01-01`, and the treatment capitalised from `2025-03-01`
+- **THEN** the page shows `Putkiremontti` `86,00 €/kk` and `Julkisivu` `42,00 €/kk`, "Rahastoitu" once, and no `Hissiremontti`
 
 #### Scenario: This year's charges open the charges page
 - **WHEN** today is `2026-11-23`, the maintenance charge is 21400 cents from `2026-01-01`, and the financing charge 8600 cents from `2025-03-01`
