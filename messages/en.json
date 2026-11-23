@@ -160,6 +160,29 @@
   "amounts_undo_title": "Undo the amount from {date}?",
   "amounts_upcoming": "From {date}: {amount}",
   "app_tagline": "Light for a landlord's everyday work",
+  "charges_changed": "{charge} changed, was {amount}",
+  "charges_empty_set": "Set charges",
+  "charges_empty_text": "Once the maintenance charge or financing charge is set, you'll see here what the charges come to each month and year.",
+  "charges_empty_title": "No charges set",
+  "charges_estimate": "The whole year comes to {amount} if the amounts don't change.",
+  "charges_footnote": "The amounts are worked out from the monthly amounts set, not from actual payments. If an amount is wrong, correct it, and the past months are corrected too.",
+  "charges_month_charge": "{charge} {amount}",
+  "charges_months": "Months",
+  "charges_months_counted": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} month",
+        "countPlural=other": "{count} months"
+      }
+    }
+  ],
+  "charges_page_title": "Charges – Kotivalo",
+  "charges_title": "Charges",
+  "charges_treatment_not_set": "Treatment not set",
+  "charges_year": "Year",
+  "charges_year_total": "Charges in {year}",
   "date_placeholder": "dd/mm/yyyy",
   "email_action_fallback": "If the button doesn't work, copy this address into your browser:",
   "error_reference": "Error reference: {reference}",

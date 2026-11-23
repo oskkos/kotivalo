@@ -351,6 +351,57 @@
       "status": "proposed"
     }
   },
+  "charge": {
+    "code": "charge",
+    "definition": "A monthly payment the housing company collects from a flat's owner; the general word for the maintenance charge and the financing charge together.",
+    "fi": {
+      "term": "vastike",
+      "match": [
+        "vastike(tta\\p{L}*)?",
+        "vastikkee\\p{L}*",
+        "vastikkei\\p{L}*",
+        "yhtiövastik\\p{L}*",
+        "kuukausivastik\\p{L}*"
+      ],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/vahennykset/",
+          "quote": "Voit vähentää pääomavastikkeen (rahoitusvastike) vuokratulosta, jos vastikkeet on tuloutettu yhtiön kirjanpidossa."
+        }
+      ]
+    },
+    "sv": {
+      "term": "vederlag",
+      "match": [
+        "vederlag(et|en|ets|ens|s)?",
+        "bolagsvederlag\\p{L}*",
+        "månadsvederlag\\p{L}*"
+      ],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/privatpersoner/egendom/hyresinkomster/avdrag/",
+          "quote": "Du kan dra av kapitalvederlaget (finansieringsvederlaget) från hyresinkomsterna om vederlagen har intäktsförts"
+        }
+      ]
+    },
+    "en": {
+      "term": "charge",
+      "match": ["charges?"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/individuals/property/rental_income/deductions/",
+          "quote": "If the company collects charges or fees that the company has booked as a balance-sheet reserve, you cannot deduct them."
+        }
+      ]
+    },
+    "notes": "The general word, used where both charges are meant (Vuokra ja vastikkeet, the charges page). Yhtiövastike / bolagsvederlag (the bank's maintenance_charge notes give it as the housing companies act's general word; not checked against Finlex here) and kuukausivastike / månadsvederlag are accepted by the patterns; the UI uses the shorter vastike / vederlag, as the Tax Administration's pages do. The fi patterns list the forms explicitly because vastik- also starts vastikään (recently); the sv pattern lists the forms so that vederlagsfri (free of charge) doesn't count. Compounds of the specific charges (hoitovastike, rahoitusvastike) are not matched: the patterns need a word boundary before them, and the longer compound terms win where they overlap. Charge in code and in the English UI never covers water charges, although the en pattern also matches water charge(s), charge as a verb and the specific charges; the check runs from the Finnish side, so this only weakens it."
+  },
   "deductible": {
     "definition": "An expense that can be subtracted from rental income in taxation.",
     "showOriginal": true,
