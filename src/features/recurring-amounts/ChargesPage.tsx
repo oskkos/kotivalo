@@ -1,7 +1,8 @@
-// A flat's charges by year (Design canvas: Vastikkeet kuukausittain;
-// openspec: recurring-amounts, "The charges page"): the year's total, the
-// maintenance charge and the financing charge by treatment, and the months
-// newest first. Computed from the periods; nothing here is stored.
+// A flat's charges by year (Design canvas: Vastikkeet kuukausittain,
+// VastikeKuukaudetUseat; openspec: recurring-amounts, "The charges page"):
+// the year's total, the maintenance charge and each financing charge by
+// treatment, and the months newest first. Computed from the periods; nothing
+// here is stored.
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
@@ -15,14 +16,15 @@ import { m } from '#/paraglide/messages.js'
 import type { FinancingTreatment, PropertyRole } from '#/server/db/schema'
 import { colors, radii } from '#/theme/tokens'
 import {
-  CHARGE_KINDS,
   chargesOfYear,
   chargeYears,
   type ChargeMonth,
   type ChargePeriods,
+  type FinancingLine,
+  type MonthCharge,
   type TreatmentKey,
 } from './charges'
-import { kindLabel, treatmentLabel } from './labels'
+import { chargeLabel, kindLabel, treatmentLabel } from './labels'
 import type { Period } from './periods'
 
 export interface ChargesPageView {
@@ -51,12 +53,6 @@ const card = {
 const TextLink = createLink(Link)
 const ButtonLink = createLink(Button)
 
-const TREATMENTS: TreatmentKey[] = [
-  'income_recognised',
-  'capitalised',
-  'not_set',
-]
-
 function treatmentText(key: TreatmentKey): string {
   return key === 'not_set'
     ? m.charges_treatment_not_set()
@@ -81,19 +77,61 @@ function BackIcon() {
   )
 }
 
-/** "Hoitovastike 214,00 € · Rahoitusvastike 86,00 €" */
+/** The charge's name: the maintenance charge, or a financing charge's. */
+const labelOf = (charge: MonthCharge) =>
+  charge.kind === 'maintenance_charge'
+    ? kindLabel.maintenance_charge()
+    : chargeLabel(charge)
+
+/** "Hoitovastike 214,00 € · Putkiremontti 86,00 €", charges above 0 only. */
 function monthDetail(row: ChargeMonth): string {
-  return CHARGE_KINDS.flatMap((kind) => {
-    const charge = row.charges[kind]
-    return charge
-      ? [
-          m.charges_month_charge({
-            charge: kindLabel[kind](),
-            amount: formatMoney(charge.cents),
-          }),
-        ]
-      : []
-  }).join(' · ')
+  return row.charges
+    .filter((charge) => charge.cents > 0)
+    .map((charge) =>
+      m.charges_month_charge({
+        charge: labelOf(charge),
+        amount: formatMoney(charge.cents),
+      }),
+    )
+    .join(' · ')
+}
+
+/** The marks of a month: a changed amount, a started or ended charge. */
+function monthMarks(row: ChargeMonth): { key: string; text: string }[] {
+  return row.charges.flatMap((charge) => {
+    const label = labelOf(charge)
+    const marks: { key: string; text: string }[] = []
+    if (charge.previous !== undefined) {
+      marks.push({
+        key: `${charge.key}-changed`,
+        text: m.charges_changed({
+          charge: label,
+          amount: formatMoney(charge.previous),
+        }),
+      })
+    }
+    if (charge.started) {
+      marks.push({
+        key: `${charge.key}-started`,
+        text: m.charges_started({ charge: label }),
+      })
+    }
+    if (charge.ended) {
+      marks.push({
+        key: `${charge.key}-ended`,
+        text: m.charges_ended({ charge: label }),
+      })
+    }
+    return marks
+  })
+}
+
+/** A financing line: its name, and the term with its treatment as a note. */
+function financingLabel(line: FinancingLine): { label: string; note: string } {
+  const treatment = treatmentText(line.treatment)
+  return line.name === null
+    ? { label: kindLabel.financing_charge(), note: treatment }
+    : { label: line.name, note: m.charges_financing_note({ treatment }) }
 }
 
 function SummaryRow(props: { label: string; note?: string; amount: number }) {
@@ -227,25 +265,23 @@ export function ChargesPage(props: Props) {
                   : ` · ${m.charges_estimate({ amount: formatMoney(charges.estimate) })}`}
               </Typography>
               <Box component="dl" sx={{ m: 0, mt: 1 }}>
-                {charges.months.some(
-                  (row) => row.charges.maintenance_charge,
+                {charges.months.some((row) =>
+                  row.charges.some(
+                    (charge) => charge.kind === 'maintenance_charge',
+                  ),
                 ) ? (
                   <SummaryRow
                     label={kindLabel.maintenance_charge()}
                     amount={charges.maintenance}
                   />
                 ) : null}
-                {TREATMENTS.map((key) => {
-                  const amount = charges.financing[key]
-                  return amount === undefined ? null : (
-                    <SummaryRow
-                      key={key}
-                      label={kindLabel.financing_charge()}
-                      note={treatmentText(key)}
-                      amount={amount}
-                    />
-                  )
-                })}
+                {charges.financing.map((line) => (
+                  <SummaryRow
+                    key={`${line.chargeId}-${line.treatment}`}
+                    {...financingLabel(line)}
+                    amount={line.cents}
+                  />
+                ))}
               </Box>
             </Stack>
             {charges.months.length > 0 ? (
@@ -284,27 +320,21 @@ export function ChargesPage(props: Props) {
                       <Typography variant="body2" color="text.secondary">
                         {monthDetail(row)}
                       </Typography>
-                      {CHARGE_KINDS.map((kind) => {
-                        const previous = row.charges[kind]?.previous
-                        return previous === undefined ? null : (
-                          <Typography
-                            key={kind}
-                            sx={{
-                              mt: 0.375,
-                              px: 1,
-                              borderRadius: 999,
-                              bgcolor: colors.lavenderTint,
-                              fontSize: 12,
-                              fontWeight: 800,
-                            }}
-                          >
-                            {m.charges_changed({
-                              charge: kindLabel[kind](),
-                              amount: formatMoney(previous),
-                            })}
-                          </Typography>
-                        )
-                      })}
+                      {monthMarks(row).map((mark) => (
+                        <Typography
+                          key={mark.key}
+                          sx={{
+                            mt: 0.375,
+                            px: 1,
+                            borderRadius: 999,
+                            bgcolor: colors.lavenderTint,
+                            fontSize: 12,
+                            fontWeight: 800,
+                          }}
+                        >
+                          {mark.text}
+                        </Typography>
+                      ))}
                     </Stack>
                     <Typography
                       sx={{

@@ -11,7 +11,7 @@ const empty: RecurringAmountsView = {
   today: '2026-11-21',
   ownershipStart: '2025-03-01',
   capitalised: 0,
-  amounts: { rent: [], maintenance_charge: [], financing_charge: [] },
+  amounts: { rent: [], maintenance_charge: [] },
   financingCharges: [],
   treatments: [],
 }
@@ -31,7 +31,6 @@ const filled: RecurringAmountsView = {
       { validFrom: '2026-01-01', validTo: '2026-12-31', value: 21400 },
       { validFrom: '2027-01-01', validTo: null, value: 22600 },
     ],
-    financing_charge: [{ validFrom: '2025-03-01', validTo: null, value: 8600 }],
   },
   financingCharges: [
     {

@@ -188,7 +188,9 @@
   "charges_empty_set": "Ange vederlag",
   "charges_empty_text": "När skötselvederlaget eller finansieringsvederlaget har angetts ser du här vad vederlagen uppgår till per månad och per år.",
   "charges_empty_title": "Inga vederlag har angetts",
+  "charges_ended": "{charge}: upphörde",
   "charges_estimate": "För hela året blir det {amount} om beloppen inte ändras.",
+  "charges_financing_note": "Finansieringsvederlag · {treatment}",
   "charges_footnote": "Beloppen räknas ut från de angivna månadsbeloppen, inte från faktiska betalningar. Om ett belopp är fel, rätta det, så rättas även de tidigare månaderna.",
   "charges_month_charge": "{charge} {amount}",
   "charges_months": "Månader",
@@ -203,6 +205,7 @@
     }
   ],
   "charges_page_title": "Vederlag – Kotivalo",
+  "charges_started": "{charge}: började tas ut",
   "charges_title": "Vederlag",
   "charges_treatment_not_set": "Behandlingen är inte angiven",
   "charges_year": "År",

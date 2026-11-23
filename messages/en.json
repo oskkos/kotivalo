@@ -188,7 +188,9 @@
   "charges_empty_set": "Set charges",
   "charges_empty_text": "Once the maintenance charge or financing charge is set, you'll see here what the charges come to each month and year.",
   "charges_empty_title": "No charges set",
+  "charges_ended": "{charge} ended",
   "charges_estimate": "The whole year comes to {amount} if the amounts don't change.",
+  "charges_financing_note": "Financing charge · {treatment}",
   "charges_footnote": "The amounts are worked out from the monthly amounts set, not from actual payments. If an amount is wrong, correct it, and the past months are corrected too.",
   "charges_month_charge": "{charge} {amount}",
   "charges_months": "Months",
@@ -203,6 +205,7 @@
     }
   ],
   "charges_page_title": "Charges – Kotivalo",
+  "charges_started": "{charge} started",
   "charges_title": "Charges",
   "charges_treatment_not_set": "Treatment not set",
   "charges_year": "Year",

@@ -68,7 +68,7 @@ const set = (
 describe('The recurring amount repository', () => {
   test('a flat without amounts has empty periods', async () => {
     expect(await repo.forProperty(flat)).toEqual({
-      amounts: { rent: [], maintenance_charge: [], financing_charge: [] },
+      amounts: { rent: [], maintenance_charge: [] },
       financingCharges: [],
       treatments: [],
     })
@@ -389,14 +389,6 @@ describe('Financing charges in the repository', () => {
         },
       ])
     })
-  })
-
-  test('the transitional financing_charge amounts are the first charge', async () => {
-    await add('putki', 'Putkiremontti', 8600, '2025-03-01')
-    await add('julkisivu', 'Julkisivu', 4200, '2026-01-01')
-    expect((await repo.forProperty(flat)).amounts.financing_charge).toEqual([
-      { validFrom: '2025-03-01', validTo: null, value: 8600 },
-    ])
   })
 
   test("a new period can't join another flat's charge", async () => {

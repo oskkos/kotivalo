@@ -22,11 +22,13 @@ const view: ChargesPageView = {
   role: 'owner',
   today: '2026-11-23',
   amounts: {
-    maintenance_charge: [
+    maintenance: [
       p('2025-03-01', '2025-12-31', 20500),
       p('2026-01-01', null, 21400),
     ],
-    financing_charge: [p('2025-03-01', null, 8600)],
+    financing: [
+      { id: 'fin', name: null, periods: [p('2025-03-01', null, 8600)] },
+    ],
   },
   treatments: [
     { validFrom: '2025-03-01', validTo: null, value: 'capitalised' },
@@ -116,7 +118,7 @@ describe('charges page', () => {
   })
 
   test('without charges an owner gets the button to set them', () => {
-    renderPage({ amounts: { maintenance_charge: [], financing_charge: [] } })
+    renderPage({ amounts: { maintenance: [], financing: [] } })
     expect(screen.getByText('No charges set')).toBeVisible()
     expect(screen.getByRole('link', { name: 'Set charges' })).toHaveAttribute(
       'href',
@@ -128,9 +130,71 @@ describe('charges page', () => {
   test('without charges a member gets no button', () => {
     renderPage({
       role: 'member',
-      amounts: { maintenance_charge: [], financing_charge: [] },
+      amounts: { maintenance: [], financing: [] },
     })
     expect(screen.getByText('No charges set')).toBeVisible()
     expect(screen.queryByRole('link', { name: 'Set charges' })).toBeNull()
+  })
+
+  test('A line for each financing charge', () => {
+    renderPage({
+      amounts: {
+        maintenance: [p('2026-01-01', null, 21400)],
+        financing: [
+          {
+            id: 'putki',
+            name: 'Putkiremontti',
+            periods: [p('2025-03-01', null, 8600)],
+          },
+          {
+            id: 'julkisivu',
+            name: 'Julkisivu',
+            periods: [p('2026-01-01', null, 4200)],
+          },
+        ],
+      },
+    })
+    const summary = screen.getByRole('region', { name: 'Charges in 2026' })
+    expect(summary).toHaveTextContent('€3,762.00')
+    expect(summary).toHaveTextContent(
+      'PutkiremonttiFinancing charge · Placed in reserve€946.00',
+    )
+    expect(summary).toHaveTextContent(
+      'JulkisivuFinancing charge · Placed in reserve€462.00',
+    )
+    const months = within(screen.getByRole('list', { name: 'Months' }))
+      .getAllByRole('listitem')
+      .map((row) => row.textContent)
+    expect(months[0]).toContain(
+      'Maintenance charge €214.00 · Putkiremontti €86.00 · Julkisivu €42.00',
+    )
+    expect(months[0]).toContain('€342.00')
+    expect(months[10]).toContain('Julkisivu started')
+  })
+
+  test('an ended charge is marked and left out of the month', () => {
+    renderPage({
+      amounts: {
+        maintenance: [p('2026-01-01', null, 21400)],
+        financing: [
+          {
+            id: 'hissi',
+            name: 'Hissiremontti',
+            periods: [
+              p('2025-03-01', '2025-12-31', 2400),
+              p('2026-01-01', null, 0),
+            ],
+          },
+        ],
+      },
+    })
+    const months = within(screen.getByRole('list', { name: 'Months' }))
+      .getAllByRole('listitem')
+      .map((row) => row.textContent)
+    expect(months[10]).toContain('Hissiremontti ended')
+    expect(months[10]).not.toContain('Hissiremontti €')
+    expect(
+      screen.getByRole('region', { name: 'Charges in 2026' }),
+    ).not.toHaveTextContent('Hissiremontti')
   })
 })

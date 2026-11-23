@@ -137,7 +137,7 @@ describe('The flat details page', () => {
       'Aino Koski',
     ])
     expect(result.ok && result.payments.map((p) => p.amount)).toEqual([89000])
-    expect(result.ok && result.amounts.financing_charge).toHaveLength(1)
+    expect(result.ok && result.financingCharges).toHaveLength(1)
   })
 
   test('lists the three latest entries', async () => {

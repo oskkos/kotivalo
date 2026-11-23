@@ -36,8 +36,8 @@ const months = (page: Page) =>
 
 /**
  * Annika's flat: the maintenance charge 205 € from March last year and
- * 214 € from January, the financing charge 86 € from March last year,
- * placed in reserve.
+ * 214 € from January, the financing charge Putkiremontti 86 € from March
+ * last year, placed in reserve.
  */
 async function flatWithCharges(page: Page) {
   const id = await ownerWithFlat(page)
@@ -71,7 +71,7 @@ test.describe('The charges page', () => {
       `Maintenance charge${money(monthsSoFar * 21400)}`,
     )
     await expect(year).toContainText(
-      `Financing chargePlaced in reserve${money(monthsSoFar * 8600)}`,
+      `PutkiremonttiFinancing charge · Placed in reserve${money(monthsSoFar * 8600)}`,
     )
     await expect(year).toContainText(estimateText)
     await expect(months(page)).toHaveCount(monthsSoFar)
@@ -148,5 +148,26 @@ test.describe('The charges page', () => {
       other.getByRole('heading', { name: 'Flat not found' }),
     ).toBeVisible()
     await other.close()
+  })
+
+  test('A line for each financing charge', async ({ page }) => {
+    const id = await flatWithCharges(page)
+    await addFinancingCharge(
+      page,
+      'Julkisivu',
+      '42',
+      `01/01/${String(thisYear)}`,
+    )
+    await openCharges(page, id)
+
+    const year = summary(page, thisYear)
+    await expect(year).toContainText(money(monthsSoFar * 34200))
+    await expect(year).toContainText(
+      `JulkisivuFinancing charge · Placed in reserve${money(monthsSoFar * 4200)}`,
+    )
+    await expect(months(page).first()).toContainText(
+      `Maintenance charge ${money(21400)} · Putkiremontti ${money(8600)} · Julkisivu ${money(4200)}`,
+    )
+    await expect(months(page).last()).toContainText('Julkisivu started')
   })
 })

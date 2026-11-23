@@ -193,6 +193,37 @@ test.describe('The flat details page', () => {
     await expect(page.getByRole('heading', { name: 'Charges' })).toBeVisible()
   })
 
+  test('Each financing charge in effect today', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await openAmounts(page, id)
+    const start = `01/01/${String(thisYear - 1)}`
+    await addFinancingCharge(page, 'Putkiremontti', '86', start)
+    await addFinancingCharge(page, 'Julkisivu', '42', start)
+    await addFinancingCharge(page, 'Hissiremontti', '24', start)
+    await page.getByRole('button', { name: 'Change: Hissiremontti' }).click()
+    await waitForHydration(page)
+    await page.getByRole('button', { name: 'Ending' }).click()
+    await page
+      .getByRole('textbox', { name: 'No longer collected from' })
+      .fill(`01/01/${String(thisYear)}`)
+    await page.getByRole('button', { name: 'Mark the charge as ended' }).click()
+    await expect(
+      page.getByRole('heading', { name: 'Rent and charges' }),
+    ).toBeVisible()
+    await setTreatment(page, 'Placed in reserve', start)
+
+    await openDetails(page, id)
+    const amounts = page.getByRole('region', { name: 'Rent and charges' })
+    await expect(amounts).toContainText(
+      'Financing chargePutkiremontti€86.00/month',
+    )
+    await expect(amounts).toContainText('Financing chargeJulkisivu€42.00/month')
+    await expect(amounts).toContainText(
+      'Treatment by the housing companyPlaced in reserve',
+    )
+    await expect(amounts).not.toContainText('Hissiremontti')
+  })
+
   test('The latest entries', async ({ page }) => {
     const id = await ownerWithFlat(page)
     const year = String(thisYear - 1)
