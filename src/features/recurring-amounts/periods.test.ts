@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import {
   accumulatedCapitalised,
+  isEnded,
   currentAndUpcoming,
   monthlyAmounts,
   nextMonth,
@@ -197,5 +198,33 @@ describe('Accumulated capitalised financing charges', () => {
         '2026-11-23',
       ),
     ).toBe(21 * 8600 + 11 * 4200 + 10 * 2400)
+  })
+})
+
+describe('ended charges', () => {
+  const ended: Period<number>[] = [
+    { validFrom: '2025-03-01', validTo: '2025-12-31', value: 2400 },
+    { validFrom: '2026-01-01', validTo: null, value: 0 },
+  ]
+
+  test('0 today with no later period has ended', () => {
+    expect(isEnded(ended, '2026-11-23')).toBe(true)
+  })
+
+  test('an end that starts later has not ended yet', () => {
+    expect(isEnded(ended, '2025-12-31')).toBe(false)
+  })
+
+  test('a charge above 0, or one that starts again, has not ended', () => {
+    expect(isEnded(ended.slice(0, 1), '2026-11-23')).toBe(false)
+    expect(
+      isEnded(
+        [
+          { ...ended[1], validTo: '2026-12-31' },
+          { validFrom: '2027-01-01', validTo: null, value: 1000 },
+        ],
+        '2026-11-23',
+      ),
+    ).toBe(false)
   })
 })

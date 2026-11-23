@@ -207,4 +207,30 @@ describe('The rent and charges page', () => {
     expect(onEditCharge).toHaveBeenCalledWith('julkisivu')
     expect(onAddCharge).toHaveBeenCalled()
   })
+
+  test('ended charges are listed below the card', async () => {
+    const { user, onEditCharge } = setup({
+      ...several,
+      financingCharges: [
+        ...several.financingCharges,
+        {
+          id: 'hissi',
+          name: 'Hissiremontti',
+          periods: [
+            p('2025-03-01', '2025-12-31', 2400),
+            p('2026-01-01', null, 0),
+          ],
+        },
+      ],
+    })
+    expect(
+      within(section('Financing charges')).queryByText('Hissiremontti'),
+    ).toBeNull()
+    const ended = section('Ended financing charges')
+    expect(ended).toHaveTextContent(
+      'HissiremonttiEnded 31/12/2025 · was €24.00/month',
+    )
+    await user.click(within(ended).getByRole('button'))
+    expect(onEditCharge).toHaveBeenCalledWith('hissi')
+  })
 })

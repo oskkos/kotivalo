@@ -9,6 +9,7 @@ import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { useId } from 'react'
+import { dayBefore } from '#/lib/dates'
 import { formatDate, formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 import type { FinancingCharge } from './recurring-amount.repository.server'
@@ -20,7 +21,7 @@ import {
   treatmentLabel,
   type SingleKind,
 } from './labels'
-import { currentAndUpcoming, periodOn } from './periods'
+import { currentAndUpcoming, isEnded, periodOn } from './periods'
 import type { RecurringAmountsView } from './recurring-amounts.server'
 
 interface Props {
@@ -287,7 +288,9 @@ function FinancingCharges(props: {
   onEditTreatment: () => void
 }) {
   const headingId = useId()
-  const charges = props.view.financingCharges
+  const charges = props.view.financingCharges.filter(
+    (charge) => !isEnded(charge.periods, props.view.today),
+  )
   const several = charges.length > 1
   const unnamedOnly = charges.length === 1 && charges[0]?.name === null
   const total = charges.reduce(
@@ -390,6 +393,95 @@ function PlusIcon() {
   )
 }
 
+/**
+ * Financing charges that have ended, below the card: when each ended and
+ * the amount before it (spec: "Ending a financing charge").
+ */
+function EndedCharges(props: {
+  view: RecurringAmountsView
+  canEdit: boolean
+  onEditCharge: (chargeId: string) => void
+}) {
+  const headingId = useId()
+  const ended = props.view.financingCharges.filter((charge) =>
+    isEnded(charge.periods, props.view.today),
+  )
+  if (ended.length === 0) {
+    return null
+  }
+  return (
+    <Stack component="section" aria-labelledby={headingId} sx={{ gap: 0.75 }}>
+      <Typography
+        id={headingId}
+        variant="body2"
+        component="h2"
+        sx={{ fontWeight: 800, color: 'text.secondary', px: 0.5 }}
+      >
+        {m.amounts_charge_ended_title()}
+      </Typography>
+      <Stack
+        component="ul"
+        aria-labelledby={headingId}
+        sx={{ listStyle: 'none', m: 0, p: 0, gap: 0.75 }}
+      >
+        {ended.map((charge) => {
+          const last = charge.periods.at(-1)
+          const before = charge.periods.at(-2)
+          const detail =
+            last && before
+              ? m.amounts_charge_ended({
+                  date: formatDate(dayBefore(last.validFrom)),
+                  amount: m.amounts_per_month({
+                    amount: formatMoney(before.value),
+                  }),
+                })
+              : undefined
+          const content = (
+            <Stack sx={{ flex: 1, minWidth: 0, textAlign: 'left' }}>
+              <Typography sx={{ fontSize: 14, fontWeight: 900 }}>
+                {chargeLabel(charge)}
+              </Typography>
+              {detail ? (
+                <Typography variant="body2" color="text.secondary">
+                  {detail}
+                </Typography>
+              ) : null}
+            </Stack>
+          )
+          return (
+            <Box component="li" key={charge.id}>
+              {props.canEdit ? (
+                <Button
+                  variant="text"
+                  color="inherit"
+                  fullWidth
+                  onClick={() => {
+                    props.onEditCharge(charge.id)
+                  }}
+                  sx={{ ...endedRow, justifyContent: 'flex-start' }}
+                >
+                  {content}
+                </Button>
+              ) : (
+                <Box sx={{ ...endedRow, display: 'flex' }}>{content}</Box>
+              )}
+            </Box>
+          )
+        })}
+      </Stack>
+    </Stack>
+  )
+}
+
+const endedRow = {
+  ...card,
+  borderRadius: `${String(radii.input)}px`,
+  minHeight: 52,
+  px: 2,
+  py: 0.75,
+  fontWeight: 'inherit',
+} as const
+
 export function RecurringAmountsPage(props: Props) {
   const { view } = props
   const canEdit = view.role === 'owner'
@@ -442,6 +534,11 @@ export function RecurringAmountsPage(props: Props) {
           onEditTreatment={() => {
             props.onEdit('treatment')
           }}
+        />
+        <EndedCharges
+          view={view}
+          canEdit={canEdit}
+          onEditCharge={props.onEditCharge}
         />
         {view.capitalised > 0 ? (
           <Box

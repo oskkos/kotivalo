@@ -148,3 +148,15 @@ export function accumulatedCapitalised(
   }
   return total
 }
+
+/**
+ * A charge has ended when its amount today is 0 and no later period starts
+ * (spec: "Ending a financing charge").
+ */
+export function isEnded(
+  periods: readonly Period<number>[],
+  today: IsoDate,
+): boolean {
+  const current = periodOn(periods, today)
+  return current?.value === 0 && current === periods.at(-1)
+}

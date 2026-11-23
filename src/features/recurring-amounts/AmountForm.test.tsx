@@ -2,16 +2,22 @@ import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, test, vi } from 'vitest'
 import { AmountForm } from './AmountForm'
-import { setRecurringAmount, undoRecurringAmount } from './functions'
+import {
+  renameFinancingCharge,
+  setRecurringAmount,
+  undoRecurringAmount,
+} from './functions'
 import type { RecurringAmountsView } from './recurring-amounts.server'
 
 // jsdom's browser language is English, so the form is in English.
 vi.mock('#/lib/client-log', () => ({ clientLog: { error: vi.fn() } }))
 vi.mock('./functions', () => ({
+  renameFinancingCharge: vi.fn(),
   setRecurringAmount: vi.fn(),
   undoRecurringAmount: vi.fn(),
 }))
 const save = vi.mocked(setRecurringAmount)
+const rename = vi.mocked(renameFinancingCharge)
 const undo = vi.mocked(undoRecurringAmount)
 
 afterEach(() => {
@@ -237,5 +243,105 @@ describe('Undoing the latest rent or charge change', () => {
     expect(
       screen.queryByRole('button', { name: 'Undo the latest change' }),
     ).toBeNull()
+  })
+})
+
+/** Renders the form of a named financing charge. */
+function setupCharge(
+  periods: { validFrom: string; validTo: string | null; value: number }[],
+) {
+  const user = userEvent.setup()
+  const onDone = vi.fn(() => Promise.resolve())
+  render(
+    <AmountForm
+      propertyId="flat"
+      what={{ id: 'hissi', name: 'Hissiremontti', periods }}
+      view={view}
+      address="Kuusikuja 3 B 12"
+      onDone={onDone}
+      onClose={vi.fn()}
+    />,
+  )
+  return { user, onDone }
+}
+
+describe('Renaming a financing charge', () => {
+  test('the name is saved on its own', async () => {
+    rename.mockResolvedValue({ ok: true })
+    const { user, onDone } = setupCharge([
+      { validFrom: '2025-03-01', validTo: null, value: 2400 },
+    ])
+    expect(screen.getByRole('heading', { name: 'Hissiremontti' })).toBeVisible()
+    const name = screen.getByRole('textbox', { name: 'Name' })
+    await user.clear(name)
+    await user.type(name, 'Hissi ')
+    await user.click(screen.getByRole('button', { name: 'Save name' }))
+    expect(rename).toHaveBeenCalledWith({
+      data: { propertyId: 'flat', chargeId: 'hissi', name: 'Hissi' },
+    })
+    expect(save).not.toHaveBeenCalled()
+    expect(onDone).toHaveBeenCalled()
+  })
+
+  test("the server's name reason is shown under the name", async () => {
+    rename.mockResolvedValue({
+      ok: false,
+      reason: 'financing_charge_name_taken',
+    })
+    const { user, onDone } = setupCharge([
+      { validFrom: '2025-03-01', validTo: null, value: 2400 },
+    ])
+    await user.type(screen.getByRole('textbox', { name: 'Name' }), 'x')
+    await user.click(screen.getByRole('button', { name: 'Save name' }))
+    expect(
+      await screen.findByText(
+        'The flat already has a financing charge with this name.',
+      ),
+    ).toBeVisible()
+    expect(onDone).not.toHaveBeenCalled()
+  })
+})
+
+describe('Ending a financing charge', () => {
+  test('ending hides the amount and sends 0 from the date', async () => {
+    save.mockResolvedValue({ ok: true })
+    const { user } = setupCharge([
+      { validFrom: '2025-03-01', validTo: null, value: 2400 },
+    ])
+    await user.click(screen.getByRole('button', { name: 'Ending' }))
+    expect(screen.queryByRole('textbox', { name: /amount/i })).toBeNull()
+    await user.type(
+      screen.getByRole('textbox', { name: 'No longer collected from' }),
+      '01/01/2027',
+    )
+    await user.click(
+      screen.getByRole('button', { name: 'Mark the charge as ended' }),
+    )
+    expect(save).toHaveBeenCalledWith({
+      data: {
+        propertyId: 'flat',
+        kind: 'financing_charge',
+        chargeId: 'hissi',
+        amount: '0',
+        from: '01/01/2027',
+      },
+    })
+  })
+
+  test('an ended charge shows its name and history, and no amount', () => {
+    setupCharge([
+      { validFrom: '2025-03-01', validTo: '2025-12-31', value: 2400 },
+      { validFrom: '2026-01-01', validTo: null, value: 0 },
+    ])
+    expect(
+      screen.getByText(
+        'This charge has ended. You can change its name or undo the latest change.',
+      ),
+    ).toBeVisible()
+    expect(screen.queryByRole('textbox', { name: /amount/i })).toBeNull()
+    expect(screen.queryByRole('button', { name: /^Save/ })).toBeNull()
+    expect(
+      screen.getByRole('button', { name: 'Undo the latest change' }),
+    ).toBeVisible()
   })
 })

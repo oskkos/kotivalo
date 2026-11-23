@@ -2,16 +2,20 @@
 // charge (Design canvas: VastikeMuutos, VastikeEnsimmainen, VastikePeru,
 // RahoitusMuutos): the new amount, its start date, the difference and its
 // effect on that year, the history, and undoing the latest change, which
-// removes a financing charge with its only amount (spec: "Setting a rent or
-// charge", "Undoing the latest rent or charge change").
+// removes a financing charge with its only amount. A financing charge's form
+// also renames it and ends it (spec: "Setting a rent or charge", "Undoing
+// the latest rent or charge change", "Renaming a financing charge", "Ending a
+// financing charge").
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
+import MuiTextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import { useForm, useSelector } from '@tanstack/react-form'
 import { useState } from 'react'
 import { ReasonAlert } from '#/components/ReasonAlert'
+import { ChoiceField } from '#/components/form/ChoiceField'
 import { TextField } from '#/components/form/TextField'
 import { clientLog } from '#/lib/client-log'
 import { parseFiDate } from '#/lib/dates'
@@ -23,16 +27,20 @@ import {
   formatPercentChange,
 } from '#/lib/format'
 import { failureReason } from '#/lib/network-error'
-import type { AlertReason, FieldReason } from '#/lib/reasons'
+import { reasonText, type AlertReason, type FieldReason } from '#/lib/reasons'
 import { m } from '#/paraglide/messages.js'
 import type { RecurringAmountKind } from '#/server/db/schema'
 import { colors, radii } from '#/theme/tokens'
-import { setRecurringAmount, undoRecurringAmount } from './functions'
+import {
+  renameFinancingCharge,
+  setRecurringAmount,
+  undoRecurringAmount,
+} from './functions'
 import { chargeLabel, type SingleKind } from './labels'
-import { periodOn, yearEffect, type Period } from './periods'
+import { isEnded, periodOn, yearEffect, type Period } from './periods'
 import type { FinancingCharge } from './recurring-amount.repository.server'
 import type { RecurringAmountsView } from './recurring-amounts.server'
-import { monthStartDate, typedAmount } from './schemas'
+import { financingChargeName, monthStartDate, typedAmount } from './schemas'
 import { UndoButton, UndoDialog } from './UndoDialog'
 
 interface Props {
@@ -201,6 +209,90 @@ function History(props: {
   )
 }
 
+const NAME_REASONS = [
+  'financing_charge_name_required',
+  'financing_charge_name_too_long',
+  'financing_charge_name_taken',
+] as const
+
+/**
+ * A financing charge's name, saved on its own: a name is not a period, so it
+ * changes without a date (spec: "Renaming a financing charge").
+ */
+function ChargeName(props: {
+  propertyId: string
+  charge: FinancingCharge
+  onDone: () => Promise<void>
+}) {
+  const [name, setName] = useState(props.charge.name ?? '')
+  const [reason, setReason] = useState<FieldReason>()
+  const [alert, setAlert] = useState<AlertReason>()
+  const [saving, setSaving] = useState(false)
+  const changed = name.trim() !== (props.charge.name ?? '')
+
+  async function save() {
+    const parsed = financingChargeName.safeParse(name)
+    if (!parsed.success) {
+      setReason(parsed.error.issues[0]?.message as FieldReason)
+      return
+    }
+    setReason(undefined)
+    setAlert(undefined)
+    setSaving(true)
+    try {
+      const result = await renameFinancingCharge({
+        data: {
+          propertyId: props.propertyId,
+          chargeId: props.charge.id,
+          name: parsed.data,
+        },
+      })
+      if (result.ok) {
+        await props.onDone()
+      } else if (isIn(NAME_REASONS, result.reason)) {
+        setReason(result.reason)
+      } else {
+        setAlert(result.reason as AlertReason)
+      }
+    } catch (error) {
+      clientLog.error('financing_charge.rename_failed', {}, error)
+      setAlert(failureReason(error))
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  return (
+    <Stack sx={{ gap: 1 }}>
+      <MuiTextField
+        label={m.amounts_charge_form_name()}
+        value={name}
+        onChange={(e) => {
+          setName(e.target.value)
+          setReason(undefined)
+        }}
+        error={reason !== undefined}
+        helperText={reason === undefined ? undefined : reasonText(reason).text}
+        disabled={saving}
+        slotProps={{ htmlInput: { maxLength: 60 } }}
+      />
+      {changed ? (
+        <Button
+          variant="outlined"
+          loading={saving}
+          onClick={() => {
+            void save()
+          }}
+          sx={{ alignSelf: 'flex-start', minHeight: 44, borderRadius: 999 }}
+        >
+          {m.amounts_charge_rename_save()}
+        </Button>
+      ) : null}
+      {alert === undefined ? null : <ReasonAlert reason={alert} />}
+    </Stack>
+  )
+}
+
 export function AmountForm(props: Props) {
   const { what, view, propertyId } = props
   const charge = typeof what === 'string' ? undefined : what
@@ -211,13 +303,18 @@ export function AmountForm(props: Props) {
   const periods = charge ? charge.periods : view.amounts[kind]
   const latest = periods.at(-1)
   const previous = periods.at(-2)
+  const ended = charge !== undefined && isEnded(charge.periods, view.today)
   const [alert, setAlert] = useState<AlertReason>()
   const [amountReason, setAmountReason] = useState<FieldReason>()
   const [dateReason, setDateReason] = useState<FieldReason>()
   const [undoing, setUndoing] = useState(false)
 
   const form = useForm({
-    defaultValues: { amount: '', from: '' },
+    defaultValues: {
+      change: 'amount' as 'amount' | 'end',
+      amount: '',
+      from: '',
+    },
     onSubmit: async ({ value }) => {
       setAlert(undefined)
       setAmountReason(undefined)
@@ -248,6 +345,7 @@ export function AmountForm(props: Props) {
     },
   })
 
+  const ending = useSelector(form.store, (s) => s.values.change === 'end')
   const amountText = useSelector(form.store, (s) => s.values.amount)
   const fromText = useSelector(form.store, (s) => s.values.from)
   const newCents = parseDecimal(amountText, 2)
@@ -302,96 +400,161 @@ export function AmountForm(props: Props) {
         component="main"
         sx={{ flex: 1, gap: 2, px: 2.5, pt: 1.25, pb: 2.5 }}
       >
-        {latest ? (
-          <Box
-            sx={{
-              bgcolor: 'background.paper',
-              border: `1px solid ${colors.cardBorder}`,
-              borderRadius: `${String(radii.input)}px`,
-              px: 1.75,
-              py: 1.5,
-            }}
-          >
-            <Typography
-              variant="body2"
-              sx={{ fontWeight: 800 }}
-              color="text.secondary"
+        {charge ? (
+          <ChargeName
+            propertyId={propertyId}
+            charge={charge}
+            onDone={props.onDone}
+          />
+        ) : null}
+        {ended ? (
+          <Typography sx={{ fontWeight: 700 }}>
+            {m.amounts_charge_ended_note()}
+          </Typography>
+        ) : (
+          <>
+            {latest ? (
+              <Box
+                sx={{
+                  bgcolor: 'background.paper',
+                  border: `1px solid ${colors.cardBorder}`,
+                  borderRadius: `${String(radii.input)}px`,
+                  px: 1.75,
+                  py: 1.5,
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  sx={{ fontWeight: 800 }}
+                  color="text.secondary"
+                >
+                  {latestIsUpcoming
+                    ? m.amounts_form_latest_upcoming()
+                    : m.amounts_form_current()}
+                </Typography>
+                <Typography sx={{ fontSize: 22, fontWeight: 900 }}>
+                  {m.amounts_per_month({ amount: formatMoney(latest.value) })}
+                </Typography>
+              </Box>
+            ) : null}
+            {charge && latest ? (
+              <form.Field
+                name="change"
+                listeners={{
+                  onChange: ({ value }) => {
+                    // Ending sets 0 from the date; the amount field is hidden.
+                    form.setFieldValue('amount', value === 'end' ? '0' : '')
+                    setAmountReason(undefined)
+                  },
+                }}
+              >
+                {(field) => (
+                  <ChoiceField
+                    field={field}
+                    label={m.amounts_charge_choice()}
+                    choices={[
+                      {
+                        value: 'amount',
+                        label: m.amounts_charge_change_amount(),
+                      },
+                      { value: 'end', label: m.amounts_charge_end() },
+                    ]}
+                  />
+                )}
+              </form.Field>
+            ) : null}
+            {ending ? (
+              <Box
+                sx={{
+                  bgcolor: colors.yellowTint,
+                  borderRadius: `${String(radii.input)}px`,
+                  px: 1.75,
+                  py: 1.5,
+                  fontSize: 13,
+                  fontWeight: 700,
+                  lineHeight: 1.4,
+                }}
+              >
+                {m.amounts_charge_end_note()}
+              </Box>
+            ) : (
+              <>
+                <form.Field
+                  name="amount"
+                  validators={{ onChange: typedAmount }}
+                  listeners={{
+                    onChange: () => {
+                      setAmountReason(undefined)
+                    },
+                  }}
+                >
+                  {(field) => (
+                    <TextField
+                      field={field}
+                      reason={amountReason}
+                      label={
+                        latest ? m.amounts_form_new() : m.amounts_form_amount()
+                      }
+                      slotProps={{ htmlInput: { inputMode: 'decimal' } }}
+                    />
+                  )}
+                </form.Field>
+                {effect ? (
+                  <Box
+                    role="status"
+                    sx={{
+                      bgcolor: colors.yellowTint,
+                      borderRadius: `${String(radii.input)}px`,
+                      px: 1.75,
+                      py: 1.5,
+                    }}
+                  >
+                    <Typography sx={{ fontWeight: 900 }}>
+                      {m.amounts_per_month({
+                        amount: formatMoneyChange(effect.difference),
+                      })}
+                      {effect.percent === undefined
+                        ? ''
+                        : ` (${formatPercentChange(effect.percent)})`}
+                    </Typography>
+                    <Typography variant="body2" sx={{ fontWeight: 700 }}>
+                      {effectText(target, effect)}
+                    </Typography>
+                  </Box>
+                ) : null}
+              </>
+            )}
+            <form.Field
+              name="from"
+              validators={{ onChange: monthStartDate }}
+              listeners={{
+                onChange: () => {
+                  setDateReason(undefined)
+                },
+              }}
             >
-              {latestIsUpcoming
-                ? m.amounts_form_latest_upcoming()
-                : m.amounts_form_current()}
+              {(field) => (
+                <TextField
+                  field={field}
+                  reason={dateReason}
+                  label={
+                    ending ? m.amounts_charge_end_from() : m.amounts_form_from()
+                  }
+                  placeholder={m.date_placeholder()}
+                />
+              )}
+            </form.Field>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: -1 }}>
+              {ending
+                ? m.amounts_charge_end_hint()
+                : latest === undefined
+                  ? m.amounts_form_hint_first()
+                  : kind === 'rent'
+                    ? m.amounts_form_hint_rent()
+                    : m.amounts_form_hint_charge()}
             </Typography>
-            <Typography sx={{ fontSize: 22, fontWeight: 900 }}>
-              {m.amounts_per_month({ amount: formatMoney(latest.value) })}
-            </Typography>
-          </Box>
-        ) : null}
-        <form.Field
-          name="amount"
-          validators={{ onChange: typedAmount }}
-          listeners={{
-            onChange: () => {
-              setAmountReason(undefined)
-            },
-          }}
-        >
-          {(field) => (
-            <TextField
-              field={field}
-              reason={amountReason}
-              label={latest ? m.amounts_form_new() : m.amounts_form_amount()}
-              slotProps={{ htmlInput: { inputMode: 'decimal' } }}
-            />
-          )}
-        </form.Field>
-        {effect ? (
-          <Box
-            role="status"
-            sx={{
-              bgcolor: colors.yellowTint,
-              borderRadius: `${String(radii.input)}px`,
-              px: 1.75,
-              py: 1.5,
-            }}
-          >
-            <Typography sx={{ fontWeight: 900 }}>
-              {m.amounts_per_month({
-                amount: formatMoneyChange(effect.difference),
-              })}
-              {effect.percent === undefined
-                ? ''
-                : ` (${formatPercentChange(effect.percent)})`}
-            </Typography>
-            <Typography variant="body2" sx={{ fontWeight: 700 }}>
-              {effectText(target, effect)}
-            </Typography>
-          </Box>
-        ) : null}
-        <form.Field
-          name="from"
-          validators={{ onChange: monthStartDate }}
-          listeners={{
-            onChange: () => {
-              setDateReason(undefined)
-            },
-          }}
-        >
-          {(field) => (
-            <TextField
-              field={field}
-              reason={dateReason}
-              label={m.amounts_form_from()}
-              placeholder={m.date_placeholder()}
-            />
-          )}
-        </form.Field>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: -1 }}>
-          {latest === undefined
-            ? m.amounts_form_hint_first()
-            : kind === 'rent'
-              ? m.amounts_form_hint_rent()
-              : m.amounts_form_hint_charge()}
-        </Typography>
+          </>
+        )}
         {alert === undefined ? null : <ReasonAlert reason={alert} />}
         {latest ? (
           <History
@@ -402,33 +565,37 @@ export function AmountForm(props: Props) {
           />
         ) : null}
       </Stack>
-      <Box
-        component="footer"
-        sx={{
-          px: 2.5,
-          pt: 1.5,
-          pb: 3.5,
-          borderTop: `1px solid ${colors.cardBorder}`,
-        }}
-      >
-        <form.Subscribe selector={(s) => s.isSubmitting}>
-          {(submitting) => (
-            <Button
-              type="submit"
-              fullWidth
-              loading={submitting}
-              loadingPosition="start"
-              sx={{ minHeight: 56 }}
-            >
-              {submitting
-                ? m.amounts_form_saving()
-                : latest
-                  ? m.amounts_form_save_change()
-                  : m.amounts_form_save_first()}
-            </Button>
-          )}
-        </form.Subscribe>
-      </Box>
+      {ended ? null : (
+        <Box
+          component="footer"
+          sx={{
+            px: 2.5,
+            pt: 1.5,
+            pb: 3.5,
+            borderTop: `1px solid ${colors.cardBorder}`,
+          }}
+        >
+          <form.Subscribe selector={(s) => s.isSubmitting}>
+            {(submitting) => (
+              <Button
+                type="submit"
+                fullWidth
+                loading={submitting}
+                loadingPosition="start"
+                sx={{ minHeight: 56 }}
+              >
+                {submitting
+                  ? m.amounts_form_saving()
+                  : ending
+                    ? m.amounts_charge_end_save()
+                    : latest
+                      ? m.amounts_form_save_change()
+                      : m.amounts_form_save_first()}
+              </Button>
+            )}
+          </form.Subscribe>
+        </Box>
+      )}
       {latest ? (
         <UndoDialog
           open={undoing}
