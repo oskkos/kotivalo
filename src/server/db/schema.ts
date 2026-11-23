@@ -218,10 +218,33 @@ export const RECURRING_AMOUNT_KINDS = [
 export type RecurringAmountKind = (typeof RECURRING_AMOUNT_KINDS)[number]
 
 /**
- * Rent and charges over time (openspec: recurring-amounts). One row per kind
- * and period; every period starts on the first of a month. A change closes
- * the open row the day before and adds the next, so rows are never
- * overwritten. Monthly amounts are computed from these rows, never stored.
+ * A flat's financing charges (openspec: recurring-amounts): a housing company
+ * can collect several at once, e.g. one per renovation loan. Their amounts
+ * are periods in recurring_amounts; the treatment is the flat's, one for all.
+ */
+export const financingCharges = sqliteTable(
+  'financing_charges',
+  {
+    id: id(),
+    propertyId: text('property_id')
+      .notNull()
+      .references(() => properties.id, { onDelete: 'cascade' }),
+    /**
+     * Null only for the charge each flat got when financing charges became
+     * several; the UI shows it as the term's word in the user's language.
+     */
+    name: text('name'),
+  },
+  (t) => [index('financing_charges_property_idx').on(t.propertyId)],
+)
+
+/**
+ * Rent and charges over time (openspec: recurring-amounts). One row per
+ * sequence and period: the rent, the maintenance charge, or one financing
+ * charge (`financing_charge_id`, set on every financing_charge row). Every
+ * period starts on the first of a month. A change closes the open row the
+ * day before and adds the next, so rows are never overwritten. Monthly
+ * amounts are computed from these rows, never stored.
  */
 export const recurringAmounts = sqliteTable(
   'recurring_amounts',
@@ -231,6 +254,11 @@ export const recurringAmounts = sqliteTable(
       .notNull()
       .references(() => properties.id, { onDelete: 'cascade' }),
     kind: text('kind', { enum: RECURRING_AMOUNT_KINDS }).notNull(),
+    /** The financing charge a financing_charge row belongs to; else null. */
+    financingChargeId: text('financing_charge_id').references(
+      () => financingCharges.id,
+      { onDelete: 'cascade' },
+    ),
     /** Per month, in cents. */
     amount: cents('amount').notNull(),
     ...validity(),
@@ -239,6 +267,10 @@ export const recurringAmounts = sqliteTable(
     index('recurring_amounts_property_idx').on(
       t.propertyId,
       t.kind,
+      t.validFrom,
+    ),
+    index('recurring_amounts_financing_charge_idx').on(
+      t.financingChargeId,
       t.validFrom,
     ),
   ],

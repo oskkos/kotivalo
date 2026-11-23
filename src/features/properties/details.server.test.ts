@@ -46,6 +46,7 @@ beforeEach(async () => {
     'transactions',
     'tenancies',
     'recurring_amounts',
+    'financing_charges',
     'financing_treatments',
     'ownership_periods',
     'property_access',
@@ -82,13 +83,13 @@ beforeEach(async () => {
 describe('The flat details page', () => {
   test('gives an owner the flat, its owners, tenancies, amounts and payments', async () => {
     const amounts = recurringAmountRepository(db)
-    await amounts.setAmount({
+    await amounts.addFinancingCharge({
       propertyId: flat,
       actorId: 'annika',
-      kind: 'financing_charge',
+      chargeId: 'charge',
+      name: null,
       amount: 8000,
       from: '2026-09-01',
-      latestStart: null,
     })
     await amounts.setTreatment({
       propertyId: flat,

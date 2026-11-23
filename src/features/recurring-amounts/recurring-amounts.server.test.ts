@@ -56,6 +56,7 @@ const view = async (userId = 'annika') => {
 beforeEach(async () => {
   await emptyTables(
     'recurring_amounts',
+    'financing_charges',
     'financing_treatments',
     'ownership_periods',
     'property_invitations',

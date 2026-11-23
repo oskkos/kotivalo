@@ -129,20 +129,36 @@ export async function setRecurringAmount(
   if (refused) {
     return refused
   }
-  const { amounts } = await deps.amounts.forProperty(propertyId)
+  const { amounts, financingCharges } =
+    await deps.amounts.forProperty(propertyId)
   const latestStart = amounts[change.kind].at(-1)?.validFrom
   const problem = await dateProblem(deps, propertyId, change.from, latestStart)
   if (problem) {
     return problem
   }
-  const applied = await deps.amounts.setAmount({
-    propertyId,
-    actorId: deps.userId,
-    kind: change.kind,
-    amount: change.amount,
-    from: change.from,
-    latestStart: latestStart ?? null,
-  })
+  // Transitional (design.md): until the pages name a charge, a financing
+  // amount goes to the flat's first charge, or adds an unnamed one.
+  const chargeId =
+    change.kind === 'financing_charge' ? financingCharges[0]?.id : undefined
+  const applied =
+    change.kind === 'financing_charge' && chargeId === undefined
+      ? await deps.amounts.addFinancingCharge({
+          propertyId,
+          actorId: deps.userId,
+          chargeId: crypto.randomUUID(),
+          name: null,
+          amount: change.amount,
+          from: change.from,
+        })
+      : await deps.amounts.setAmount({
+          propertyId,
+          actorId: deps.userId,
+          kind: change.kind,
+          chargeId,
+          amount: change.amount,
+          from: change.from,
+          latestStart: latestStart ?? null,
+        })
   if (!applied) {
     return changedMeanwhile
   }
@@ -164,7 +180,8 @@ export async function undoRecurringAmount(
   if (refused) {
     return refused
   }
-  const periods = (await deps.amounts.forProperty(propertyId)).amounts[kind]
+  const data = await deps.amounts.forProperty(propertyId)
+  const periods = data.amounts[kind]
   const latest = periods.at(-1)
   if (!latest) {
     return { ok: false, reason: 'amount_nothing_to_undo' }
@@ -173,6 +190,9 @@ export async function undoRecurringAmount(
     propertyId,
     actorId: deps.userId,
     kind,
+    // Transitional, as in setRecurringAmount.
+    chargeId:
+      kind === 'financing_charge' ? data.financingCharges[0]?.id : undefined,
     latestStart: latest.validFrom,
     previousStart: periods.at(-2)?.validFrom ?? null,
   })
