@@ -24,5 +24,5 @@
 
 ## 5. Archive
 
-- [ ] 5.1 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
-- [ ] 5.2 `openspec archive charges-by-month` as the last commit
+- [x] 5.1 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
+- [x] 5.2 `openspec archive charges-by-month` as the last commit
