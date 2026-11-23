@@ -1,8 +1,9 @@
-// Setting or changing the rent, maintenance charge or financing charge
-// (Design canvas: VastikeMuutos, VastikeEnsimmainen, VastikePeru): the new
-// amount, its start date, the difference and its effect on that year, the
-// history, and undoing the latest change (spec: "Setting a rent or charge",
-// "Undoing the latest rent or charge change").
+// Setting or changing the rent, the maintenance charge or one financing
+// charge (Design canvas: VastikeMuutos, VastikeEnsimmainen, VastikePeru,
+// RahoitusMuutos): the new amount, its start date, the difference and its
+// effect on that year, the history, and undoing the latest change, which
+// removes a financing charge with its only amount (spec: "Setting a rent or
+// charge", "Undoing the latest rent or charge change").
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
@@ -27,14 +28,17 @@ import { m } from '#/paraglide/messages.js'
 import type { RecurringAmountKind } from '#/server/db/schema'
 import { colors, radii } from '#/theme/tokens'
 import { setRecurringAmount, undoRecurringAmount } from './functions'
+import { chargeLabel, type SingleKind } from './labels'
 import { periodOn, yearEffect, type Period } from './periods'
+import type { FinancingCharge } from './recurring-amount.repository.server'
 import type { RecurringAmountsView } from './recurring-amounts.server'
 import { monthStartDate, typedAmount } from './schemas'
 import { UndoButton, UndoDialog } from './UndoDialog'
 
 interface Props {
   propertyId: string
-  kind: RecurringAmountKind
+  /** The rent or maintenance charge, or one of the financing charges. */
+  what: SingleKind | FinancingCharge
   view: RecurringAmountsView
   address: string
   /** After saving or undoing: reload and go back to the page. */
@@ -42,27 +46,30 @@ interface Props {
   onClose: () => void
 }
 
-const titles: Record<
-  RecurringAmountKind,
-  { set: () => string; change: () => string }
-> = {
-  rent: {
-    set: () => m.amounts_form_set_rent(),
-    change: () => m.amounts_form_change_rent(),
-  },
-  maintenance_charge: {
-    set: () => m.amounts_form_set_maintenance_charge(),
-    change: () => m.amounts_form_change_maintenance_charge(),
-  },
-  financing_charge: {
-    set: () => m.amounts_form_set_financing_charge(),
-    change: () => m.amounts_form_change_financing_charge(),
-  },
-}
+const titles: Record<SingleKind, { set: () => string; change: () => string }> =
+  {
+    rent: {
+      set: () => m.amounts_form_set_rent(),
+      change: () => m.amounts_form_change_rent(),
+    },
+    maintenance_charge: {
+      set: () => m.amounts_form_set_maintenance_charge(),
+      change: () => m.amounts_form_change_maintenance_charge(),
+    },
+  }
 
-/** The form's title: "Set rent" before the first amount, then "Change …". */
-export function amountFormTitle(kind: RecurringAmountKind, set: boolean) {
-  return set ? titles[kind].change() : titles[kind].set()
+/**
+ * The form's title: "Set rent" before the first amount, then "Change …"; a
+ * financing charge's name.
+ */
+export function amountFormTitle(
+  what: SingleKind | FinancingCharge,
+  set: boolean,
+) {
+  if (typeof what !== 'string') {
+    return chargeLabel(what)
+  }
+  return set ? titles[what].change() : titles[what].set()
 }
 
 const AMOUNT_REASONS = ['amount_invalid'] as const
@@ -195,8 +202,13 @@ function History(props: {
 }
 
 export function AmountForm(props: Props) {
-  const { kind, view, propertyId } = props
-  const periods = view.amounts[kind]
+  const { what, view, propertyId } = props
+  const charge = typeof what === 'string' ? undefined : what
+  const kind: RecurringAmountKind = charge
+    ? 'financing_charge'
+    : (what as SingleKind)
+  const chargeId = charge?.id
+  const periods = charge ? charge.periods : view.amounts[kind]
   const latest = periods.at(-1)
   const previous = periods.at(-2)
   const [alert, setAlert] = useState<AlertReason>()
@@ -212,7 +224,13 @@ export function AmountForm(props: Props) {
       setDateReason(undefined)
       try {
         const result = await setRecurringAmount({
-          data: { propertyId, kind, amount: value.amount, from: value.from },
+          data: {
+            propertyId,
+            kind,
+            chargeId,
+            amount: value.amount,
+            from: value.from,
+          },
         })
         if (result.ok) {
           await props.onDone()
@@ -273,7 +291,7 @@ export function AmountForm(props: Props) {
             component="h1"
             sx={{ fontSize: 18, textAlign: 'center' }}
           >
-            {amountFormTitle(kind, latest !== undefined)}
+            {amountFormTitle(what, latest !== undefined)}
           </Typography>
           <Typography variant="body2" color="text.secondary" noWrap>
             {props.address}
@@ -424,9 +442,13 @@ export function AmountForm(props: Props) {
                   amount: formatMoney(previous.value),
                   date: formatDate(previous.validFrom),
                 })
-              : m.amounts_undo_only_text()
+              : charge
+                ? m.amounts_undo_remove_charge_text()
+                : m.amounts_undo_only_text()
           }
-          undo={() => undoRecurringAmount({ data: { propertyId, kind } })}
+          undo={() =>
+            undoRecurringAmount({ data: { propertyId, kind, chargeId } })
+          }
           failureEvent="recurring_amount.undo_failed"
           onDone={props.onDone}
         />

@@ -44,8 +44,10 @@ const view: RecurringAmountsView = {
   ],
 }
 
+const charge = view.financingCharges[0]
+
 function setup(
-  kind: 'rent' | 'maintenance_charge' | 'financing_charge',
+  what: 'rent' | 'maintenance_charge' | 'financing_charge',
   data = view,
 ) {
   const user = userEvent.setup()
@@ -53,7 +55,7 @@ function setup(
   render(
     <AmountForm
       propertyId="flat"
-      kind={kind}
+      what={what === 'financing_charge' ? charge : what}
       view={data}
       address="Kuusikuja 3 B 12"
       onDone={onDone}
@@ -201,13 +203,17 @@ describe('Undoing the latest rent or charge change', () => {
     )
     const dialog = screen.getByRole('dialog')
     expect(dialog).toHaveTextContent(
-      'The amount is removed. You can set it again from the right date.',
+      'This charge has only this amount, so undoing it removes the charge.',
     )
     await user.click(
       within(dialog).getByRole('button', { name: 'Undo change' }),
     )
     expect(undo).toHaveBeenCalledWith({
-      data: { propertyId: 'flat', kind: 'financing_charge' },
+      data: {
+        propertyId: 'flat',
+        kind: 'financing_charge',
+        chargeId: 'charge',
+      },
     })
     expect(onDone).toHaveBeenCalled()
   })

@@ -1,5 +1,10 @@
 import { expect, test, type Page } from '@playwright/test'
-import { openAmounts, setAmount, setTreatment } from './support/amounts'
+import {
+  addFinancingCharge,
+  openAmounts,
+  setAmount,
+  setTreatment,
+} from './support/amounts'
 import { accepted, ownerWithFlat } from './support/sharing'
 import { signIn, uniqueEmail, waitForHydration } from './support/sign-in'
 import { addTenant, aino } from './support/tenancies'
@@ -144,7 +149,7 @@ test.describe('The flat details page', () => {
     await openAmounts(page, id)
     await setAmount(page, 'Rent', '890', thisMonthStart)
     await setAmount(page, 'Maintenance charge', '214', thisMonthStart)
-    await setAmount(page, 'Financing charge', '86', thisMonthStart)
+    await addFinancingCharge(page, 'Putkiremontti', '86', thisMonthStart)
     await setTreatment(page, 'Placed in reserve', thisMonthStart)
     await openDetails(page, id)
     const amounts = page.getByRole('region', { name: 'Rent and charges' })
@@ -169,9 +174,9 @@ test.describe('The flat details page', () => {
       '214',
       `01/01/${String(thisYear)}`,
     )
-    await setAmount(
+    await addFinancingCharge(
       page,
-      'Financing charge',
+      'Putkiremontti',
       '86',
       `01/03/${String(thisYear - 1)}`,
     )

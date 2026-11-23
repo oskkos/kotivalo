@@ -43,13 +43,9 @@ export const financingChargeName = z
   .min(1, { error: 'financing_charge_name_required' satisfies FieldReason })
   .max(60, { error: 'financing_charge_name_too_long' satisfies FieldReason })
 
-/**
- * A charge id names one financing charge, and only a financing charge.
- * Transitional (design.md): until the pages send it, a financing amount may
- * come without one.
- */
-const chargeOnlyForFinancing = (input: { kind: string; chargeId?: string }) =>
-  input.kind === 'financing_charge' || input.chargeId === undefined
+/** A charge id names one financing charge, and a financing charge needs one. */
+const chargeMatchesKind = (input: { kind: string; chargeId?: string }) =>
+  (input.kind === 'financing_charge') === (input.chargeId !== undefined)
 
 export const setAmountInput = z
   .object({
@@ -59,7 +55,7 @@ export const setAmountInput = z
     amount: typedAmount,
     from: monthStartDate,
   })
-  .refine(chargeOnlyForFinancing, {
+  .refine(chargeMatchesKind, {
     error: 'financing_charge_not_found' satisfies AlertReason,
     path: ['chargeId'],
   })
@@ -70,7 +66,7 @@ export const undoAmountInput = z
     kind: recurringAmountKind,
     chargeId: id.optional(),
   })
-  .refine(chargeOnlyForFinancing, {
+  .refine(chargeMatchesKind, {
     error: 'financing_charge_not_found' satisfies AlertReason,
     path: ['chargeId'],
   })

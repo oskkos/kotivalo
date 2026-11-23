@@ -1,6 +1,11 @@
 import { expect, test, type Page } from '@playwright/test'
 import { accepted, ownerWithFlat } from './support/sharing'
-import { openAmounts, setAmount, setTreatment } from './support/amounts'
+import {
+  addFinancingCharge,
+  openAmounts,
+  setAmount,
+  setTreatment,
+} from './support/amounts'
 import { waitForHydration } from './support/sign-in'
 
 // The browser's language is English, so the app is in English.
@@ -57,14 +62,18 @@ test.describe('The rent and charges page', () => {
     await expect(
       page.getByRole('heading', { name: 'Rent and charges' }),
     ).toBeVisible()
-    for (const name of ['Rent', 'Maintenance charge', 'Financing charge']) {
-      await expect(
-        section(page, name).getByText('Not set').first(),
-      ).toBeVisible()
+    for (const name of ['Rent', 'Maintenance charge']) {
+      await expect(section(page, name).getByText('Not set')).toBeVisible()
       await expect(
         page.getByRole('button', { name: `Set: ${name}` }),
       ).toBeVisible()
     }
+    const financing = section(page, 'Financing charge')
+    await expect(financing.getByText('No financing charges')).toBeVisible()
+    await expect(financing.getByText('Not set')).toBeVisible()
+    await expect(
+      page.getByRole('button', { name: 'Add financing charge' }),
+    ).toBeVisible()
     await expect(
       page.getByRole('button', {
         name: 'Set: Treatment by the housing company',
@@ -86,6 +95,9 @@ test.describe('The rent and charges page', () => {
     await expect(
       jussi.getByRole('button', { name: /^(Set|Change):/ }),
     ).toHaveCount(0)
+    await expect(
+      jussi.getByRole('button', { name: 'Add financing charge' }),
+    ).toHaveCount(0)
     await jussi.close()
   })
 
@@ -99,6 +111,54 @@ test.describe('The rent and charges page', () => {
     ).toBeVisible()
     await expect(
       charge.getByText(`From 01/01/${String(nextYear)}: €226.00/month`),
+    ).toBeVisible()
+  })
+
+  test('Several financing charges with their sum', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await openAmounts(page, id)
+    await addFinancingCharge(page, 'Putkiremontti', '86', '01/03/2025')
+    await addFinancingCharge(page, 'Julkisivu', '42', '01/01/2026')
+    await setTreatment(page, 'Placed in reserve', '01/03/2025')
+
+    const financing = section(page, 'Financing charges')
+    await expect(financing).toContainText('€128.00/month in total')
+    const rows = financing.getByRole('listitem')
+    await expect(rows.nth(0)).toContainText('Putkiremontti€86.00/month')
+    await expect(rows.nth(1)).toContainText('Julkisivu€42.00/month')
+    await expect(
+      financing.getByText('Treatment by the housing company · applies to all'),
+    ).toBeVisible()
+  })
+})
+
+test.describe('Adding a financing charge', () => {
+  test('Adding a second financing charge', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await openAmounts(page, id)
+    await addFinancingCharge(page, 'Putkiremontti', '86', '01/03/2025')
+    await addFinancingCharge(page, 'Julkisivu', '42', '01/01/2026')
+
+    const rows = section(page, 'Financing charges').getByRole('listitem')
+    await expect(rows).toHaveCount(2)
+    await expect(rows.nth(1)).toContainText(
+      'Julkisivu€42.00/monthFrom 01/01/2026',
+    )
+  })
+
+  test('A name already in use is refused', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await openAmounts(page, id)
+    await addFinancingCharge(page, 'Putkiremontti', '86', '01/03/2025')
+
+    await page.getByRole('button', { name: 'Add financing charge' }).click()
+    await waitForHydration(page)
+    await page.getByRole('textbox', { name: 'Name' }).fill('putkiremontti ')
+    await page.getByRole('textbox', { name: 'Amount (€/month)' }).fill('42')
+    await page.getByRole('textbox', { name: 'Valid from' }).fill('01/01/2026')
+    await page.getByRole('button', { name: 'Add', exact: true }).click()
+    await expect(
+      page.getByText('The flat already has a financing charge with this name.'),
     ).toBeVisible()
   })
 })
@@ -265,8 +325,8 @@ test.describe('Accumulated capitalised financing charges', () => {
     await openAmounts(page, id)
     // Capitalised from March to December 2025 (10 months of €80), then
     // income-recognised: €800 whenever the test runs from 2026 on.
-    await setAmount(page, 'Financing charge', '80', '01/03/2025')
-    await setAmount(page, 'Financing charge', '86', '01/01/2026')
+    await addFinancingCharge(page, 'Putkiremontti', '80', '01/03/2025')
+    await setAmount(page, 'Putkiremontti', '86', '01/01/2026')
     await setTreatment(page, 'Placed in reserve', '01/03/2025')
     await setTreatment(page, 'Recorded as revenue', '01/01/2026')
 

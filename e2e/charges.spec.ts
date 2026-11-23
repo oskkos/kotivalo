@@ -1,5 +1,10 @@
 import { expect, test, type Page } from '@playwright/test'
-import { openAmounts, setAmount, setTreatment } from './support/amounts'
+import {
+  addFinancingCharge,
+  openAmounts,
+  setAmount,
+  setTreatment,
+} from './support/amounts'
 import { accepted, ownerWithFlat } from './support/sharing'
 import { signIn, uniqueEmail, waitForHydration } from './support/sign-in'
 
@@ -45,7 +50,7 @@ async function flatWithCharges(page: Page) {
     '214',
     `01/01/${String(thisYear)}`,
   )
-  await setAmount(page, 'Financing charge', '86', march)
+  await addFinancingCharge(page, 'Putkiremontti', '86', march)
   await setTreatment(page, 'Placed in reserve', march)
   return id
 }

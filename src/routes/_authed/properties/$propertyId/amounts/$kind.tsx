@@ -78,7 +78,7 @@ function AmountFormRoute() {
       // A fresh form for each kind.
       key={kind}
       propertyId={propertyId}
-      kind={kind}
+      what={kind}
       view={view}
       address={address}
       onDone={() => router.invalidate().then(toPage)}
