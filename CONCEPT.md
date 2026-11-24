@@ -42,7 +42,7 @@ Kotivalo is a mobile app for private landlords with one or more rental flats. It
 
 ## 3. Screens
 
-All screens are sketched on the [Design canvas](https://claude.ai/code/artifact/16231de4-89b5-4369-aabc-610e9c6893e6) (390 × 844, phone). The app UI is in Finnish; the Finnish screen names are in parentheses.
+All screens are sketched on the [Design canvas](https://claude.ai/artifact/DGX1pDjibhPqZjLUjm8jTb) (390 × 844, phone). The app UI is in Finnish; the Finnish screen names are in parentheses.
 
 | Screen                                                | Content                                                                                                                                                                                                         |
 | ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -228,7 +228,7 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 
 ## 7. Materials
 
-- **[Design canvas](https://claude.ai/code/artifact/16231de4-89b5-4369-aabc-610e9c6893e6):** logo, splash screen and 13 app screens
+- **[Design canvas](https://claude.ai/artifact/DGX1pDjibhPqZjLUjm8jTb):** logo, splash screen and 13 app screens
 - **[Concept film](https://claude.ai/artifact/3R4BejS1VPHvLBa9Lgp3ky)** (motion, 30 s): logo → flats → new entry → statistics → taxes → end card
 - **[App showcase](https://claude.ai/artifact/L8WxhFFC52kbtHuD4EGmy4)** (motion, 60 s): screens and transitions with taps
 
