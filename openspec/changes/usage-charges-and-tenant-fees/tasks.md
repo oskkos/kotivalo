@@ -24,8 +24,8 @@
 
 ## 5. Changing the occupants
 
-- [ ] 5.1 Term bank: *asukas* / *asukasmäärä* (code `occupants`) with the translate skill and the term-critic's review of the diff
-- [ ] 5.2 `tenancy.repository.server.ts` occupants writes on the shared builder; `tenancies.server.ts` and `functions.ts`: `setTenancyOccupants` and `undoTenancyOccupants` (session, owner, `tenancy_not_found`, `validateTenancyPeriodDate`, `occupants_invalid`, `occupants_nothing_to_undo`, `amount_changed`); logs `tenancy.occupants_changed`, `tenancy.occupants_corrected`, `tenancy.occupants_change_undone`; reason `occupants_nothing_to_undo` with fi, sv and en; Workers tests named after the server-side scenarios of "Changing the occupants", asserting the log events
+- [x] 5.1 Term bank: *asukas* / *asukasmäärä* (code `occupants`) with the translate skill and the term-critic's review of the diff
+- [x] 5.2 `tenancy.repository.server.ts` occupants writes on the shared builder; `tenancies.server.ts` and `functions.ts`: `setTenancyOccupants` and `undoTenancyOccupants` (session, owner, `tenancy_not_found`, `validateTenancyPeriodDate`, `occupants_invalid`, `occupants_nothing_to_undo`, `amount_changed`); logs `tenancy.occupants_changed`, `tenancy.occupants_corrected`, `tenancy.occupants_change_undone`; reason `occupants_nothing_to_undo` with fi, sv and en; Workers tests named after the server-side scenarios of "Changing the occupants", asserting the log events
 - [ ] 5.3 `TenancyPage.tsx`: the occupants row (today's number, the upcoming change, when the latest started) with *Muuta* opening the change dialog and the undo confirmation for owners; component tests
 - [ ] 5.4 Playwright tests for "Changing the occupants" (`e2e/support/tenancies.ts`: `setOccupants`)
 

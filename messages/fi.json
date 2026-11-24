@@ -387,6 +387,8 @@
   "reason_network": "Tarkista verkkoyhteys ja yritä uudelleen.",
   "reason_network_title": "Ei yhteyttä",
   "reason_occupants_invalid": "Kirjoita asukkaiden määrä kokonaislukuna 1–20.",
+  "reason_occupants_nothing_to_undo": "Asukasmäärällä on vain yksi jakso, joten peruttavaa muutosta ei ole. Lataa sivu uudelleen.",
+  "reason_occupants_nothing_to_undo_title": "Ei peruttavaa muutosta",
   "reason_ownership_date_in_future": "Päivä ei voi olla tulevaisuudessa.",
   "reason_ownership_date_too_early": "Muutos voi alkaa aikaisintaan nykyisen omistusjakson alkupäivänä.",
   "reason_ownership_date_too_late": "Päivän pitää olla ennen seuraavaa omistusmuutosta.",

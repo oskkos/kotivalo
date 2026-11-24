@@ -387,6 +387,8 @@
   "reason_network": "Kontrollera nätverksanslutningen och försök igen.",
   "reason_network_title": "Ingen anslutning",
   "reason_occupants_invalid": "Skriv antalet boende som ett heltal från 1 till 20.",
+  "reason_occupants_nothing_to_undo": "Antalet boende har bara en period, så det finns ingen ändring att ångra. Ladda om sidan.",
+  "reason_occupants_nothing_to_undo_title": "Ingen ändring att ångra",
   "reason_ownership_date_in_future": "Datumet kan inte vara i framtiden.",
   "reason_ownership_date_too_early": "Ändringen kan börja tidigast på den nuvarande ägarperiodens startdatum.",
   "reason_ownership_date_too_late": "Datumet måste vara före nästa ägarändring.",
