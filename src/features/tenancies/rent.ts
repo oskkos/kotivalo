@@ -53,20 +53,17 @@ export type RentDateProblem =
 
 /**
  * A new rent starts on the first of a month or the tenancy's start day,
- * inside the tenancy, and not before the latest period's start. On that
- * start itself it corrects the latest period. Before the first period's
- * start no rent is in effect (a migrated tenancy), so a date there fills
- * the months up to the first period (`fillsBeforeFirst`).
+ * inside the tenancy, and not before the latest period's start. On the
+ * start of any of its periods (`starts`, in order) it corrects that
+ * period. Before the first period's start no rent is in effect (a migrated
+ * tenancy), so a date there fills the months up to the first period
+ * (`fillsBeforeFirst`).
  */
 export function validateRentDate(
   from: IsoDate,
-  limits: {
-    tenancy: RentDates
-    firstStart: IsoDate | undefined
-    latestStart: IsoDate | undefined
-  },
+  limits: { tenancy: RentDates; starts: readonly IsoDate[] },
 ): RentDateProblem | undefined {
-  const { tenancy, firstStart, latestStart } = limits
+  const { tenancy, starts } = limits
   if (!from.endsWith('-01') && from !== tenancy.validFrom) {
     return 'amount_date_not_month_start'
   }
@@ -76,9 +73,10 @@ export function validateRentDate(
   if (tenancy.validTo !== null && from > tenancy.validTo) {
     return 'rent_date_after_tenancy'
   }
-  if (fillsBeforeFirst(from, firstStart)) {
+  if (fillsBeforeFirst(from, starts.at(0)) || starts.includes(from)) {
     return undefined
   }
+  const latestStart = starts.at(-1)
   if (latestStart !== undefined && from < latestStart) {
     return 'amount_date_too_early'
   }

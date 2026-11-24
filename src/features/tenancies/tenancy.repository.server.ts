@@ -79,6 +79,11 @@ export interface RentWrite {
   from: IsoDate
   latestStart: IsoDate | null
   /**
+   * True when `from` is the start of one of the tenancy's periods: the
+   * write corrects that period's amount, while it still starts there.
+   */
+  corrects?: boolean
+  /**
    * The first period's start as read, when `from` is before it: the write
    * fills the months up to it instead of changing the latest period.
    */
@@ -275,8 +280,8 @@ export function tenancyRepository(db: Db) {
   const rentsOf = (tenancyId: string) => eq(tenancyRents.tenancyId, tenancyId)
 
   /**
-   * The statements that set a tenancy's rent from `from`: on the latest
-   * period's start they correct it, otherwise they close the latest period
+   * The statements that set a tenancy's rent from `from`: on a period's
+   * start (`corrects`) they correct it, otherwise they close the latest period
    * the day before and add a new one; before the first period's start they
    * add a period up to it. `onlyIf` joins every statement's condition. The
    * last statement returns a row when it applied.
@@ -291,20 +296,12 @@ export function tenancyRepository(db: Db) {
     if (write.firstStart !== undefined) {
       return [fillStatement(write, write.firstStart, owned, onlyIf)]
     }
-    if (latestStart === from) {
+    if (write.corrects === true) {
       return [
         db
           .update(tenancyRents)
           .set({ amount })
-          .where(
-            and(
-              scope,
-              eq(tenancyRents.validFrom, from),
-              isNull(tenancyRents.validTo),
-              owned,
-              onlyIf,
-            ),
-          )
+          .where(and(scope, eq(tenancyRents.validFrom, from), owned, onlyIf))
           .returning({ id: tenancyRents.id }),
       ]
     }

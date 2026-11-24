@@ -446,10 +446,26 @@ describe("a tenancy's rent writes", () => {
         amount: 95000,
         from: '2025-03-01',
         latestStart: '2025-03-01',
+        corrects: true,
       }),
     ).toBe(true)
     expect((await repo.rentsFor([id]))[id]).toEqual([
       { validFrom: '2025-03-01', validTo: null, value: 95000 },
+    ])
+  })
+
+  test('a correction of a period that no longer starts there applies nothing', async () => {
+    expect(
+      await repo.setRent({
+        ...write(),
+        amount: 95000,
+        from: '2026-03-01',
+        latestStart: '2026-03-01',
+        corrects: true,
+      }),
+    ).toBe(false)
+    expect((await repo.rentsFor([id]))[id]).toEqual([
+      { validFrom: '2025-03-01', validTo: null, value: 89000 },
     ])
   })
 
