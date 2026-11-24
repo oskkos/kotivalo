@@ -16,7 +16,9 @@ import {
   getTenancy,
   listTenancyStatuses,
   removeTenancy,
+  setTenancyOccupants,
   setTenancyRent,
+  undoTenancyOccupants,
   undoTenancyRent,
   updateTenancy,
   type TenancyDeps,
@@ -1037,7 +1039,7 @@ const occupantsOf = async (id: string) =>
 const feesOf = async (id: string) =>
   (await tenancyRepository(db).feesFor([id]))[id] ?? []
 
-describe('The occupants of a new tenancy', () => {
+describe('Occupants and fees of a new tenancy', () => {
   test('The occupants of a new tenancy', async () => {
     const result = await add(
       fixedTerm('2027-01-15', '2027-12-31'),
@@ -1228,6 +1230,119 @@ describe('Occupants and fees stay inside their tenancy', () => {
       'SELECT (SELECT count(*) FROM tenant_fee_amounts) AS amounts',
     ).first<{ amounts: number }>()
     expect(rows?.amounts).toBe(0)
+  })
+})
+
+describe('Changing the occupants', () => {
+  test('A second occupant moves in', async () => {
+    const id = await addId(aino)
+    expect(
+      await setTenancyOccupants(deps(), flat, id, {
+        persons: 2,
+        from: '2026-12-01',
+      }),
+    ).toEqual({ ok: true })
+    expect(await occupantsOf(id)).toEqual([
+      { validFrom: '2025-03-01', validTo: '2026-11-30', value: 1 },
+      { validFrom: '2026-12-01', validTo: null, value: 2 },
+    ])
+    expect(capture.lines.at(-1)).toMatchObject({
+      event: 'tenancy.occupants_changed',
+      propertyId: flat,
+      tenancyId: id,
+    })
+  })
+
+  test("Correcting the occupants on the tenancy's start", async () => {
+    const id = await addId(aino)
+    expect(
+      await setTenancyOccupants(deps(), flat, id, {
+        persons: 2,
+        from: '2025-03-01',
+      }),
+    ).toEqual({ ok: true })
+    expect(await occupantsOf(id)).toEqual([
+      { validFrom: '2025-03-01', validTo: null, value: 2 },
+    ])
+    expect(capture.lines.at(-1)).toMatchObject({
+      event: 'tenancy.occupants_corrected',
+    })
+  })
+
+  test('Undoing an occupants change', async () => {
+    const id = await addId(aino)
+    await setTenancyOccupants(deps(), flat, id, {
+      persons: 2,
+      from: '2026-12-01',
+    })
+    expect(await undoTenancyOccupants(deps(), flat, id)).toEqual({ ok: true })
+    expect(await occupantsOf(id)).toEqual([
+      { validFrom: '2025-03-01', validTo: null, value: 1 },
+    ])
+    expect(capture.lines.at(-1)).toMatchObject({
+      event: 'tenancy.occupants_change_undone',
+    })
+  })
+
+  test("The only occupants period can't be undone", async () => {
+    const id = await addId(aino)
+    expect(await undoTenancyOccupants(deps(), flat, id)).toEqual({
+      ok: false,
+      reason: 'occupants_nothing_to_undo',
+    })
+    expect(await occupantsOf(id)).toHaveLength(1)
+  })
+
+  test("A member can't change the occupants", async () => {
+    const id = await addId(aino)
+    expect(
+      await setTenancyOccupants(deps('jussi'), flat, id, {
+        persons: 2,
+        from: '2026-12-01',
+      }),
+    ).toEqual({ ok: false, reason: 'sharing_owner_only' })
+    expect(await undoTenancyOccupants(deps('jussi'), flat, id)).toEqual({
+      ok: false,
+      reason: 'sharing_owner_only',
+    })
+    expect(await occupantsOf(id)).toHaveLength(1)
+  })
+
+  test('the date rules and the number are checked', async () => {
+    const id = await addId(aino)
+    await setTenancyOccupants(deps(), flat, id, {
+      persons: 2,
+      from: '2026-12-01',
+    })
+    const set = (persons: number, from: string) =>
+      setTenancyOccupants(deps(), flat, id, { persons, from })
+    expect(await set(3, '2026-12-15')).toMatchObject({
+      reason: 'amount_date_not_month_start',
+    })
+    expect(await set(3, '2025-01-01')).toMatchObject({
+      reason: 'rent_date_before_tenancy',
+    })
+    expect(await set(3, '2026-11-01')).toMatchObject({
+      reason: 'amount_date_too_early',
+    })
+    expect(await set(0, '2027-01-01')).toMatchObject({
+      reason: 'occupants_invalid',
+    })
+    expect(await set(21, '2027-01-01')).toMatchObject({
+      reason: 'occupants_invalid',
+    })
+    expect(await occupantsOf(id)).toHaveLength(2)
+  })
+
+  test("another flat's tenancy is not found", async () => {
+    const id = await addId(aino)
+    await flatOwnedSince('2022-06-12')
+    expect(
+      await setTenancyOccupants(deps(), flat, id, {
+        persons: 2,
+        from: '2026-12-01',
+      }),
+    ).toEqual({ ok: false, reason: 'tenancy_not_found' })
   })
 })
 

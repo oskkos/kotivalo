@@ -97,6 +97,7 @@ export type AlertReason =
   | 'tenancy_has_payments'
   | 'tenancy_has_rent_after_end'
   | 'tenancy_start_after_rent_change'
+  | 'occupants_nothing_to_undo'
   | 'tenancy_has_changes_after_end'
   | 'tenancy_start_after_change'
   | 'rent_payment_month_outside_tenancy'
@@ -341,6 +342,10 @@ const texts: Record<Reason, () => ReasonText> = {
   tenancy_has_rent_after_end: () => ({
     title: m.reason_tenancy_has_rent_after_end_title(),
     text: m.reason_tenancy_has_rent_after_end(),
+  }),
+  occupants_nothing_to_undo: () => ({
+    title: m.reason_occupants_nothing_to_undo_title(),
+    text: m.reason_occupants_nothing_to_undo(),
   }),
   tenancy_has_changes_after_end: () => ({
     title: m.reason_tenancy_has_changes_after_end_title(),

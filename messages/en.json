@@ -387,6 +387,8 @@
   "reason_network": "Check your network connection and try again.",
   "reason_network_title": "No connection",
   "reason_occupants_invalid": "Enter the number of occupants as a whole number from 1 to 20.",
+  "reason_occupants_nothing_to_undo": "The occupants have only one period, so there is no change to undo. Reload the page.",
+  "reason_occupants_nothing_to_undo_title": "No change to undo",
   "reason_ownership_date_in_future": "The date can't be in the future.",
   "reason_ownership_date_too_early": "The change can't start before the current ownership period does.",
   "reason_ownership_date_too_late": "The date must be before the next ownership change.",

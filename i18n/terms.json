@@ -1045,6 +1045,27 @@
     },
     "code": "noticePeriod"
   },
+  "occupants": {
+    "code": "occupants",
+    "codeNotes": "Table `tenancy_occupants`: the persons living in the flat during a tenancy, as validity periods (1–20). The basis value `per_occupant` of usage charges and tenant fees multiplies by it.",
+    "definition": "The number of persons living in the flat during a tenancy. A per-occupant usage charge or tenant fee is multiplied by it.",
+    "fi": {
+      "term": "asukasmäärä",
+      "match": ["asuk[ak]\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "antal boende",
+      "match": ["(antal(et)? )?boende(t|n)?"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "occupants",
+      "match": ["occupants?"],
+      "status": "proposed"
+    },
+    "notes": "No authoritative source found for the count as a term; the Tax Administration doesn't use it. \"Asukkaat\" / \"boende\" / \"occupants\" are the plain words for the persons; \"henkilömäärä\" (as in per-person water billing) was not checked against landlord sources; the label for the count is \"asukasmäärä\" / \"antal boende\" / \"occupants\"."
+  },
   "open_ended": {
     "code": "openEnded",
     "codeNotes": "Contract type value `open_ended` (tenancies.contract_type); valid_to stays null until it is ended.",

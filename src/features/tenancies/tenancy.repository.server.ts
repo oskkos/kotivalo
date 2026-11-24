@@ -40,7 +40,11 @@ import {
 } from '#/server/db/schema'
 import type { Period } from '#/features/recurring-amounts/periods'
 import { atomically, type Db } from '#/server/platform/db.server'
-import { occupantsPeriods, periodWriteStatements } from '#/server/db/periods'
+import {
+  occupantsPeriods,
+  periodUndoStatements,
+  periodWriteStatements,
+} from '#/server/db/periods'
 
 /** What an owner enters for a tenancy. */
 export interface TenancyFields {
@@ -94,6 +98,18 @@ export interface RentWrite {
    * fills the months up to it instead of changing the latest period.
    */
   firstStart?: IsoDate
+}
+
+/** An occupants write's expectation: the latest period's start as read. */
+export interface OccupantsWrite {
+  actorId: string
+  propertyId: string
+  tenancyId: string
+  persons: number
+  from: IsoDate
+  latestStart: IsoDate | null
+  /** True when `from` is the latest period's start: it is corrected. */
+  corrects?: boolean
 }
 
 /** An undo's expectation: the latest and previous rent periods' starts. */
@@ -556,6 +572,45 @@ export function tenancyRepository(db: Db) {
     async setRent(write: RentWrite): Promise<boolean> {
       const results = await atomically(db, rentStatements(write))
       return (results.at(-1) as unknown[]).length > 0
+    },
+
+    /**
+     * Sets the tenancy's occupants from `write.from`: a new period, or a
+     * correction of the latest. False when nothing applied: the actor isn't
+     * an owner, the tenancy isn't the flat's, or the latest period changed
+     * since it was read.
+     */
+    async setOccupants(write: OccupantsWrite): Promise<boolean> {
+      const { actorId, propertyId, tenancyId, persons, from } = write
+      const results = await atomically(
+        db,
+        periodWriteStatements(db, occupantsPeriods, {
+          parentId: tenancyId,
+          value: persons,
+          from,
+          latestStart: write.latestStart,
+          corrects: write.corrects ?? false,
+          owned: ownsTenancy(actorId, propertyId, tenancyId),
+        }),
+      )
+      return (results.at(-1) as unknown[]).length > 0
+    },
+
+    /**
+     * Undoes the tenancy's latest occupants change: deletes the latest
+     * period and reopens the previous one. False when nothing applied.
+     */
+    async undoOccupants(undo: RentUndo): Promise<boolean> {
+      const results = await atomically(
+        db,
+        periodUndoStatements(db, occupantsPeriods, {
+          parentId: undo.tenancyId,
+          latestStart: undo.latestStart,
+          previousStart: undo.previousStart,
+          owned: ownsTenancy(undo.actorId, undo.propertyId, undo.tenancyId),
+        }),
+      )
+      return (results[0] as unknown[]).length > 0
     },
 
     /**

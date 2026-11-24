@@ -21,7 +21,9 @@ import {
   periodAfterEnd,
   rentAfterEnd,
   validateRentDate,
+  validateTenancyPeriodDate,
 } from './rent'
+import { MAX_OCCUPANTS } from './schemas'
 import { flatStatus } from './status'
 import type {
   Ending,
@@ -661,6 +663,100 @@ export async function undoTenancyRent(
     return refusal(deps, propertyId, changedMeanwhile)
   }
   deps.log.info('tenancy.rent_change_undone', { propertyId, tenancyId })
+  return { ok: true }
+}
+
+/**
+ * Sets a tenancy's occupants from a date (openspec: tenancies, "Changing the
+ * occupants"): a new period, or a correction on the latest period's start.
+ */
+export async function setTenancyOccupants(
+  deps: TenancyDeps,
+  propertyId: string,
+  tenancyId: string,
+  change: { persons: number; from: IsoDate },
+): Promise<{ ok: true } | Failure<FieldReason | AlertReason>> {
+  const refused = await roleCheck(deps, propertyId)
+  if (refused) {
+    return refused
+  }
+  const tenancy = await deps.tenancies.get(tenancyId)
+  if (tenancy?.propertyId !== propertyId) {
+    return tenancyNotFound
+  }
+  if (
+    !Number.isInteger(change.persons) ||
+    change.persons < 1 ||
+    change.persons > MAX_OCCUPANTS
+  ) {
+    return fail('occupants_invalid')
+  }
+  const periods =
+    (await deps.tenancies.occupantsFor([tenancyId]))[tenancyId] ?? []
+  const latestStart = periods.at(-1)?.validFrom
+  const problem = validateTenancyPeriodDate(change.from, {
+    tenancy,
+    latestStart,
+  })
+  if (problem) {
+    return fail(problem)
+  }
+  const corrects = latestStart === change.from
+  const set = await deps.tenancies.setOccupants({
+    actorId: deps.userId,
+    propertyId,
+    tenancyId,
+    persons: change.persons,
+    from: change.from,
+    latestStart: latestStart ?? null,
+    corrects,
+  })
+  if (!set) {
+    return refusal(deps, propertyId, changedMeanwhile)
+  }
+  deps.log.info(
+    corrects ? 'tenancy.occupants_corrected' : 'tenancy.occupants_changed',
+    { propertyId, tenancyId },
+  )
+  return { ok: true }
+}
+
+/**
+ * Undoes a tenancy's latest occupants change (openspec: tenancies, "Changing
+ * the occupants"). The first period stays: there is nothing to undo with
+ * fewer than two.
+ */
+export async function undoTenancyOccupants(
+  deps: TenancyDeps,
+  propertyId: string,
+  tenancyId: string,
+): Promise<{ ok: true } | Failure> {
+  const refused = await roleCheck(deps, propertyId)
+  if (refused) {
+    return refused
+  }
+  const tenancy = await deps.tenancies.get(tenancyId)
+  if (tenancy?.propertyId !== propertyId) {
+    return tenancyNotFound
+  }
+  const periods =
+    (await deps.tenancies.occupantsFor([tenancyId]))[tenancyId] ?? []
+  const latest = periods.at(-1)
+  const previous = periods.at(-2)
+  if (!latest || !previous) {
+    return fail('occupants_nothing_to_undo')
+  }
+  const undone = await deps.tenancies.undoOccupants({
+    actorId: deps.userId,
+    propertyId,
+    tenancyId,
+    latestStart: latest.validFrom,
+    previousStart: previous.validFrom,
+  })
+  if (!undone) {
+    return refusal(deps, propertyId, changedMeanwhile)
+  }
+  deps.log.info('tenancy.occupants_change_undone', { propertyId, tenancyId })
   return { ok: true }
 }
 
