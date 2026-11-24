@@ -191,3 +191,38 @@ describe('The transaction repository', () => {
     expect(await repo.storageUsage('jussi')).toEqual({ bytes: 4000, files: 1 })
   })
 })
+
+describe('Water charge entries are warned about', () => {
+  const water = (date: string, amount: number): TransactionFields => ({
+    type: 'income',
+    category: 'tenant_water_charge',
+    amount,
+    date,
+    note: null,
+  })
+
+  test('counts the entries of a category from a date on, with their total', async () => {
+    await repo.create('annika', flat, water('2026-01-05', 4400), null, now)
+    await repo.create('annika', flat, water('2026-02-05', 4400), null, now)
+    await repo.create('annika', flat, water('2026-03-05', 4400), null, now)
+    expect(
+      await repo.categoryTotalSince(flat, 'tenant_water_charge', '2026-01-01'),
+    ).toEqual({ count: 3, total: 13200 })
+  })
+
+  test('Entries before the start are not counted', async () => {
+    await repo.create('annika', flat, water('2025-12-05', 4400), null, now)
+    await repo.create('annika', flat, water('2026-02-05', 4400), null, now)
+    expect(
+      await repo.categoryTotalSince(flat, 'tenant_water_charge', '2026-01-01'),
+    ).toEqual({ count: 1, total: 4400 })
+  })
+
+  test("leaves other categories and other flats' entries out", async () => {
+    await repo.create('annika', flat, repair, null, now)
+    await repo.create('annika', other, water('2026-02-05', 4400), null, now)
+    expect(
+      await repo.categoryTotalSince(flat, 'tenant_water_charge', '2026-01-01'),
+    ).toEqual({ count: 0, total: 0 })
+  })
+})

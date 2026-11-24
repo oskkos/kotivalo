@@ -9,6 +9,7 @@ import { createCaptureLogger } from '#/server/platform/logger.server'
 import { addTestUser, emptyTables } from '#/test/users.server'
 import {
   cancelTenancyEnding,
+  addTenantFee,
   createTenancy,
   endTenancy,
   getNewTenancyOptions,
@@ -18,7 +19,9 @@ import {
   removeTenancy,
   setTenancyOccupants,
   setTenancyRent,
+  setTenantFee,
   undoTenancyOccupants,
+  undoTenantFee,
   undoTenancyRent,
   updateTenancy,
   type TenancyDeps,
@@ -998,26 +1001,34 @@ describe('Rent changes stay inside their tenancy', () => {
   })
 })
 
-/** A tenant fee stored directly, until the fee writes exist. */
+/** A tenant fee through the server functions, with its amount periods. */
 async function storeFee(
   tenancyId: string,
-  id: string,
-  kind: string,
-  basis: string,
-  ...amounts: [number, string, string | null][]
-) {
-  await env.DB.prepare(
-    'INSERT INTO tenant_fees (id, tenancy_id, kind, basis) VALUES (?, ?, ?, ?)',
-  )
-    .bind(id, tenancyId, kind, basis)
-    .run()
-  for (const [amount, from, to] of amounts) {
-    await env.DB.prepare(
-      'INSERT INTO tenant_fee_amounts (id, tenant_fee_id, amount, valid_from, valid_to) VALUES (?, ?, ?, ?, ?)',
-    )
-      .bind(crypto.randomUUID(), id, amount, from, to)
-      .run()
+  kind: 'water' | 'parking' | 'sauna' | 'other',
+  basis: 'fixed' | 'per_occupant',
+  first: [number, string, string | null],
+  ...later: [number, string, string | null][]
+): Promise<string> {
+  const added = await addTenantFee(deps(), flat, tenancyId, {
+    kind,
+    basis,
+    description: kind === 'other' ? 'Pyykkitupa' : null,
+    amount: first[0],
+    from: first[1],
+  })
+  if (!added.ok) {
+    throw new Error(added.reason)
   }
+  for (const [amount, from] of later) {
+    const set = await setTenantFee(deps(), flat, tenancyId, added.feeId, {
+      amount,
+      from,
+    })
+    if (!set.ok) {
+      throw new Error(set.reason)
+    }
+  }
+  return added.feeId
 }
 
 async function storeOccupants(
@@ -1087,7 +1098,6 @@ describe('Occupants and fees stay inside their tenancy', () => {
     await storeFee(
       id,
       'parking',
-      'parking',
       'fixed',
       [1500, '2026-02-01', '2027-02-28'],
       [2000, '2027-03-01', null],
@@ -1123,11 +1133,7 @@ describe('Occupants and fees stay inside their tenancy', () => {
 
   test('Ending after the latest changes is allowed', async () => {
     const id = await addId(aino)
-    await storeFee(id, 'parking', 'parking', 'fixed', [
-      1500,
-      '2026-02-01',
-      null,
-    ])
+    await storeFee(id, 'parking', 'fixed', [1500, '2026-02-01', null])
     expect(await endTenancy(deps(), flat, id, tenantNotice)).toEqual({
       ok: true,
     })
@@ -1135,11 +1141,7 @@ describe('Occupants and fees stay inside their tenancy', () => {
 
   test("a fixed term's end before a fee change is refused", async () => {
     const id = await addId(fixedTerm('2027-01-01', '2027-12-31'))
-    await storeFee(id, 'parking', 'parking', 'fixed', [
-      1500,
-      '2027-06-01',
-      null,
-    ])
+    await storeFee(id, 'parking', 'fixed', [1500, '2027-06-01', null])
     expect(
       await updateTenancy(
         deps(),
@@ -1152,16 +1154,8 @@ describe('Occupants and fees stay inside their tenancy', () => {
 
   test('Moving the start moves the first occupants and fees', async () => {
     const id = await addId(aino)
-    await storeFee(id, 'water', 'water', 'per_occupant', [
-      2200,
-      '2025-03-01',
-      null,
-    ])
-    await storeFee(id, 'parking', 'parking', 'fixed', [
-      1500,
-      '2026-02-01',
-      null,
-    ])
+    await storeFee(id, 'water', 'per_occupant', [2200, '2025-03-01', null])
+    await storeFee(id, 'parking', 'fixed', [1500, '2026-02-01', null])
     expect(
       await updateTenancy(deps(), flat, id, {
         ...aino,
@@ -1172,10 +1166,10 @@ describe('Occupants and fees stay inside their tenancy', () => {
       { validFrom: '2025-03-15', validTo: null, value: 1 },
     ])
     const fees = await feesOf(id)
-    expect(fees.find((f) => f.id === 'water')?.amounts[0]?.validFrom).toBe(
+    expect(fees.find((f) => f.kind === 'water')?.amounts[0]?.validFrom).toBe(
       '2025-03-15',
     )
-    expect(fees.find((f) => f.id === 'parking')?.amounts[0]?.validFrom).toBe(
+    expect(fees.find((f) => f.kind === 'parking')?.amounts[0]?.validFrom).toBe(
       '2026-02-01',
     )
   })
@@ -1203,7 +1197,6 @@ describe('Occupants and fees stay inside their tenancy', () => {
     await storeFee(
       id,
       'parking',
-      'parking',
       'fixed',
       [1500, '2025-03-01', '2026-08-31'],
       [2000, '2026-09-01', null],
@@ -1218,11 +1211,7 @@ describe('Occupants and fees stay inside their tenancy', () => {
 
   test('Removing a tenancy removes its fees', async () => {
     const id = await addId(fixedTerm('2027-01-01', '2027-12-31'))
-    await storeFee(id, 'parking', 'parking', 'fixed', [
-      1500,
-      '2027-01-01',
-      null,
-    ])
+    await storeFee(id, 'parking', 'fixed', [1500, '2027-01-01', null])
     expect(await removeTenancy(deps(), flat, id)).toEqual({ ok: true })
     expect(await feesOf(id)).toEqual([])
     expect(await occupantsOf(id)).toEqual([])
@@ -1343,6 +1332,234 @@ describe('Changing the occupants', () => {
         from: '2026-12-01',
       }),
     ).toEqual({ ok: false, reason: 'tenancy_not_found' })
+  })
+})
+
+describe('Adding a tenant fee', () => {
+  const parking = {
+    kind: 'parking',
+    basis: 'fixed',
+    description: null,
+    amount: 1500,
+    from: '2026-12-01',
+  } as const
+
+  test('Adding a parking fee', async () => {
+    const id = await addId(aino)
+    const result = await addTenantFee(deps(), flat, id, parking)
+    expect(result.ok).toBe(true)
+    expect(await feesOf(id)).toEqual([
+      expect.objectContaining({
+        kind: 'parking',
+        basis: 'fixed',
+        amounts: [{ validFrom: '2026-12-01', validTo: null, value: 1500 }],
+      }),
+    ])
+    expect(capture.lines.at(-1)).toMatchObject({
+      event: 'tenancy.fee_added',
+      propertyId: flat,
+      tenancyId: id,
+    })
+    expect(JSON.stringify(capture.lines.at(-1))).not.toContain('1500')
+  })
+
+  test('Other fee with a description', async () => {
+    const id = await addId(aino)
+    expect(
+      await addTenantFee(deps(), flat, id, {
+        kind: 'other',
+        basis: 'fixed',
+        description: ' Pyykkitupa ',
+        amount: 1000,
+        from: '2026-12-01',
+      }),
+    ).toMatchObject({ ok: true })
+    expect((await feesOf(id))[0]?.description).toBe('Pyykkitupa')
+    const refused = await addTenantFee(deps(), flat, id, {
+      kind: 'other',
+      basis: 'fixed',
+      description: '  ',
+      amount: 1000,
+      from: '2026-12-01',
+    })
+    expect(refused).toEqual({ ok: false, reason: 'description_required' })
+    expect(await feesOf(id)).toHaveLength(1)
+  })
+
+  test('the description is stored only for the kind other', async () => {
+    const id = await addId(aino)
+    await addTenantFee(deps(), flat, id, {
+      ...parking,
+      description: 'ignored',
+    })
+    expect((await feesOf(id))[0]?.description).toBeNull()
+  })
+
+  test('A fee before the tenancy is refused', async () => {
+    const id = await addId(aino)
+    expect(
+      await addTenantFee(deps(), flat, id, { ...parking, from: '2025-01-01' }),
+    ).toEqual({ ok: false, reason: 'rent_date_before_tenancy' })
+    expect(await feesOf(id)).toEqual([])
+  })
+
+  test('an amount out of range is refused', async () => {
+    const id = await addId(aino)
+    expect(
+      await addTenantFee(deps(), flat, id, { ...parking, amount: 10_000_000 }),
+    ).toEqual({ ok: false, reason: 'amount_invalid' })
+  })
+
+  test("A member can't add a tenant fee", async () => {
+    const id = await addId(aino)
+    expect(await addTenantFee(deps('jussi'), flat, id, parking)).toEqual({
+      ok: false,
+      reason: 'sharing_owner_only',
+    })
+    expect(await feesOf(id)).toEqual([])
+  })
+})
+
+describe('Changing a tenant fee', () => {
+  async function withParking() {
+    const id = await addId(fixedTerm('2026-01-01', '2027-01-31'))
+    const fee = await storeFee(id, 'parking', 'fixed', [
+      1500,
+      '2026-02-01',
+      null,
+    ])
+    return { id, fee }
+  }
+
+  test('The tenant gives up the parking space', async () => {
+    const { id, fee } = await withParking()
+    expect(
+      await setTenantFee(deps(), flat, id, fee, {
+        amount: 0,
+        from: '2026-12-01',
+      }),
+    ).toEqual({ ok: true })
+    expect((await feesOf(id))[0]?.amounts).toEqual([
+      { validFrom: '2026-02-01', validTo: '2026-11-30', value: 1500 },
+      { validFrom: '2026-12-01', validTo: null, value: 0 },
+    ])
+    expect(capture.lines.at(-1)).toMatchObject({
+      event: 'tenancy.fee_amount_set',
+      feeId: fee,
+    })
+  })
+
+  test("the latest period's start corrects it", async () => {
+    const { id, fee } = await withParking()
+    await setTenantFee(deps(), flat, id, fee, {
+      amount: 1800,
+      from: '2026-02-01',
+    })
+    expect((await feesOf(id))[0]?.amounts).toEqual([
+      { validFrom: '2026-02-01', validTo: null, value: 1800 },
+    ])
+    expect(capture.lines.at(-1)).toMatchObject({
+      event: 'tenancy.fee_amount_corrected',
+    })
+  })
+
+  test('A fee date after the tenancy is refused', async () => {
+    const { id, fee } = await withParking()
+    expect(
+      await setTenantFee(deps(), flat, id, fee, {
+        amount: 2000,
+        from: '2027-02-01',
+      }),
+    ).toEqual({ ok: false, reason: 'rent_date_after_tenancy' })
+  })
+
+  test('a date before the latest period is refused', async () => {
+    const { id, fee } = await withParking()
+    expect(
+      await setTenantFee(deps(), flat, id, fee, {
+        amount: 2000,
+        from: '2026-01-01',
+      }),
+    ).toEqual({ ok: false, reason: 'amount_date_too_early' })
+  })
+
+  test("Another tenancy's fee is not found", async () => {
+    const { fee } = await withParking()
+    const other = await addId(fixedTerm('2027-06-01', '2027-12-31'))
+    expect(
+      await setTenantFee(deps(), flat, other, fee, {
+        amount: 2000,
+        from: '2027-06-01',
+      }),
+    ).toEqual({ ok: false, reason: 'tenant_fee_not_found' })
+  })
+
+  test("A member can't change a tenant fee", async () => {
+    const { id, fee } = await withParking()
+    expect(
+      await setTenantFee(deps('jussi'), flat, id, fee, {
+        amount: 2000,
+        from: '2026-12-01',
+      }),
+    ).toEqual({ ok: false, reason: 'sharing_owner_only' })
+    expect((await feesOf(id))[0]?.amounts).toHaveLength(1)
+  })
+})
+
+describe('Undoing a tenant fee change', () => {
+  test("Undoing a fee's ending", async () => {
+    const id = await addId(aino)
+    const fee = await storeFee(
+      id,
+      'parking',
+      'fixed',
+      [1500, '2026-02-01', null],
+      [0, '2027-01-01', null],
+    )
+    expect(await undoTenantFee(deps(), flat, id, fee)).toEqual({ ok: true })
+    expect((await feesOf(id))[0]?.amounts).toEqual([
+      { validFrom: '2026-02-01', validTo: null, value: 1500 },
+    ])
+    expect(capture.lines.at(-1)).toMatchObject({
+      event: 'tenancy.fee_change_undone',
+    })
+  })
+
+  test("Undoing a fee's only amount removes it", async () => {
+    const id = await addId(aino)
+    await storeFee(id, 'parking', 'fixed', [1500, '2026-02-01', null])
+    const sauna = await storeFee(id, 'sauna', 'fixed', [
+      1000,
+      '2026-12-01',
+      null,
+    ])
+    expect(await undoTenantFee(deps(), flat, id, sauna)).toEqual({ ok: true })
+    expect((await feesOf(id)).map((f) => f.kind)).toEqual(['parking'])
+    expect(capture.lines.at(-1)).toMatchObject({ event: 'tenancy.fee_removed' })
+  })
+
+  test("A member can't undo a tenant fee change", async () => {
+    const id = await addId(aino)
+    const fee = await storeFee(
+      id,
+      'parking',
+      'fixed',
+      [1500, '2026-02-01', null],
+      [0, '2027-01-01', null],
+    )
+    expect(await undoTenantFee(deps('jussi'), flat, id, fee)).toEqual({
+      ok: false,
+      reason: 'sharing_owner_only',
+    })
+    expect((await feesOf(id))[0]?.amounts).toHaveLength(2)
+  })
+
+  test("another tenancy's fee is not found", async () => {
+    const id = await addId(fixedTerm('2027-06-01', '2027-12-31'))
+    expect(await undoTenantFee(deps(), flat, id, 'nope')).toEqual({
+      ok: false,
+      reason: 'tenant_fee_not_found',
+    })
   })
 })
 

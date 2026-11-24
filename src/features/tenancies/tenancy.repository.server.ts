@@ -43,6 +43,7 @@ import { atomically, type Db } from '#/server/platform/db.server'
 import {
   occupantsPeriods,
   periodUndoStatements,
+  tenantFeePeriods,
   periodWriteStatements,
 } from '#/server/db/periods'
 
@@ -110,6 +111,43 @@ export interface OccupantsWrite {
   latestStart: IsoDate | null
   /** True when `from` is the latest period's start: it is corrected. */
   corrects?: boolean
+}
+
+/** A new tenant fee with its first amount from `from`. */
+export interface NewFee {
+  actorId: string
+  propertyId: string
+  tenancyId: string
+  kind: ChargeKind
+  basis: ChargeBasis
+  /** Set for the kind `other`. */
+  description: string | null
+  /** Cents per month or per occupant per month. */
+  amount: number
+  from: IsoDate
+}
+
+/** A fee amount write's expectation: the latest period's start as read. */
+export interface FeeAmountWrite {
+  actorId: string
+  propertyId: string
+  tenancyId: string
+  feeId: string
+  amount: number
+  from: IsoDate
+  latestStart: IsoDate
+  /** True when `from` is the latest period's start: it is corrected. */
+  corrects?: boolean
+}
+
+/** A fee undo's expectation; no previous start means removing the fee. */
+export interface FeeUndo {
+  actorId: string
+  propertyId: string
+  tenancyId: string
+  feeId: string
+  latestStart: IsoDate
+  previousStart: IsoDate | null
 }
 
 /** An undo's expectation: the latest and previous rent periods' starts. */
@@ -307,6 +345,25 @@ export function tenancyRepository(db: Db) {
           .from(other)
           .where(
             and(eq(other.id, tenancyId), eq(other.propertyId, propertyId)),
+          ),
+      ),
+    )
+
+  /** The fee is the tenancy's and the actor owns the tenancy's flat. */
+  const ownsFee = (
+    actorId: string,
+    propertyId: string,
+    tenancyId: string,
+    feeId: string,
+  ) =>
+    and(
+      ownsTenancy(actorId, propertyId, tenancyId),
+      exists(
+        db
+          .select({ one: sql`1` })
+          .from(tenantFees)
+          .where(
+            and(eq(tenantFees.id, feeId), eq(tenantFees.tenancyId, tenancyId)),
           ),
       ),
     )
@@ -572,6 +629,121 @@ export function tenancyRepository(db: Db) {
     async setRent(write: RentWrite): Promise<boolean> {
       const results = await atomically(db, rentStatements(write))
       return (results.at(-1) as unknown[]).length > 0
+    },
+
+    /**
+     * Adds a tenant fee with its first amount period, both or neither: the
+     * period goes in only if the fee did. Returns the fee's id, or null when
+     * the actor isn't an owner or the tenancy isn't the flat's.
+     */
+    async addFee(fee: NewFee): Promise<string | null> {
+      const { actorId, propertyId, tenancyId } = fee
+      const feeId = crypto.randomUUID()
+      const [inserted] = await atomically(db, [
+        db
+          .insert(tenantFees)
+          .select(
+            db
+              .select({
+                id: sql<string>`${feeId}`.as('id'),
+                tenancyId: tenancies.id,
+                kind: sql<ChargeKind>`${fee.kind}`.as('kind'),
+                basis: sql<ChargeBasis>`${fee.basis}`.as('basis'),
+                description: sql<string | null>`${fee.description}`.as(
+                  'description',
+                ),
+              })
+              .from(tenancies)
+              .where(ownsTenancy(actorId, propertyId, tenancyId)),
+          )
+          .returning({ id: tenantFees.id }),
+        ...periodWriteStatements(db, tenantFeePeriods, {
+          parentId: feeId,
+          value: fee.amount,
+          from: fee.from,
+          latestStart: null,
+          owned: ownsFee(actorId, propertyId, tenancyId, feeId),
+        }),
+      ])
+      return inserted.length > 0 ? feeId : null
+    },
+
+    /**
+     * Gives a tenant fee a new amount from `write.from`: a new period, or a
+     * correction of the latest. False when nothing applied.
+     */
+    async setFeeAmount(write: FeeAmountWrite): Promise<boolean> {
+      const { actorId, propertyId, tenancyId, feeId } = write
+      const results = await atomically(
+        db,
+        periodWriteStatements(db, tenantFeePeriods, {
+          parentId: feeId,
+          value: write.amount,
+          from: write.from,
+          latestStart: write.latestStart,
+          corrects: write.corrects ?? false,
+          owned: ownsFee(actorId, propertyId, tenancyId, feeId),
+        }),
+      )
+      return (results.at(-1) as unknown[]).length > 0
+    },
+
+    /**
+     * Undoes a tenant fee's latest change: deletes the latest period and
+     * reopens the previous one, or removes the fee with its only period.
+     * False when nothing applied.
+     */
+    async undoFeeChange(undo: FeeUndo): Promise<boolean> {
+      const { actorId, propertyId, tenancyId, feeId, latestStart } = undo
+      const owned = ownsFee(actorId, propertyId, tenancyId, feeId)
+      if (undo.previousStart !== null) {
+        const results = await atomically(
+          db,
+          periodUndoStatements(db, tenantFeePeriods, {
+            parentId: feeId,
+            latestStart,
+            previousStart: undo.previousStart,
+            owned,
+          }),
+        )
+        return (results[0] as unknown[]).length > 0
+      }
+      const [removed] = await atomically(db, [
+        db
+          .delete(tenantFees)
+          .where(
+            and(
+              eq(tenantFees.id, feeId),
+              eq(tenantFees.tenancyId, tenancyId),
+              ownsTenancy(actorId, propertyId, tenancyId),
+              // Only the one period, still the latest.
+              exists(
+                db
+                  .select({ one: sql`1` })
+                  .from(tenantFeeAmounts)
+                  .where(
+                    and(
+                      eq(tenantFeeAmounts.tenantFeeId, feeId),
+                      eq(tenantFeeAmounts.validFrom, latestStart),
+                    ),
+                  ),
+              ),
+              notExists(
+                db
+                  .select({ one: sql`1` })
+                  .from(tenantFeeAmounts)
+                  .where(
+                    and(
+                      eq(tenantFeeAmounts.tenantFeeId, feeId),
+                      ne(tenantFeeAmounts.validFrom, latestStart),
+                    ),
+                  ),
+              ),
+            ),
+          )
+          .returning({ id: tenantFees.id }),
+      ])
+      return removed.length > 0
     },
 
     /**

@@ -20,6 +20,7 @@ import {
   deleteTransaction,
   getNewTransactionOptions,
   getTransaction,
+  getEntriesSince,
   getTransactions,
   receiptFilename,
   updateTransaction,
@@ -547,5 +548,44 @@ describe('New entry from the bottom bar', () => {
     expect(options).toMatchObject({ owned: [], hasFlats: true })
     const owner = await getNewTransactionOptions(deps('annika'))
     expect(owner.owned.map((flatOption) => flatOption.id)).toEqual([flat])
+  })
+})
+
+describe('Water charge entries are warned about', () => {
+  test('everyone with access gets the count and the total', async () => {
+    await createTransaction(
+      deps('annika'),
+      flat,
+      {
+        type: 'income',
+        category: 'tenant_water_charge',
+        amount: 4400,
+        date: '2026-02-05',
+        note: null,
+      },
+      null,
+    )
+    for (const user of ['annika', 'matti']) {
+      expect(
+        await getEntriesSince(
+          deps(user),
+          flat,
+          'tenant_water_charge',
+          '2026-01-01',
+        ),
+      ).toEqual({ ok: true, count: 1, total: 4400 })
+    }
+  })
+
+  test('a stranger gets not found', async () => {
+    await addTestUser('outsider')
+    expect(
+      await getEntriesSince(
+        deps('outsider'),
+        flat,
+        'tenant_water_charge',
+        '2026-01-01',
+      ),
+    ).toEqual({ ok: false, reason: 'property_not_found' })
   })
 })

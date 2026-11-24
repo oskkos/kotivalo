@@ -12,6 +12,7 @@ const repo = tenancyRepository(db)
 const now = new Date(Date.UTC(2026, 10, 24, 12, 0, 0))
 
 let tenancy = ''
+let flatId = ''
 
 beforeEach(async () => {
   await emptyTables(
@@ -26,6 +27,7 @@ beforeEach(async () => {
     'user',
   )
   await addTestUser('annika')
+  await addTestUser('jussi')
   const flat = (
     await propertyRepository(db).create(
       'annika',
@@ -40,6 +42,12 @@ beforeEach(async () => {
       '2025-01-01',
     )
   ).id
+  await env.DB.prepare(
+    "INSERT INTO property_access (property_id, user_id, role, created_at) VALUES (?, 'jussi', 'member', ?)",
+  )
+    .bind(flat, now.getTime())
+    .run()
+  flatId = flat
   tenancy =
     (await repo.create(
       'annika',
@@ -133,5 +141,177 @@ describe('The tenant fees of a tenancy', () => {
   test('a tenancy without any has no entry', async () => {
     expect(await repo.feesFor([tenancy])).toEqual({})
     expect(await repo.feesFor([])).toEqual({})
+  })
+})
+
+describe("a tenancy's fee writes", () => {
+  const newFee = (over: Partial<Parameters<typeof repo.addFee>[0]> = {}) => ({
+    actorId: 'annika',
+    propertyId: flatId,
+    tenancyId: tenancy,
+    kind: 'parking' as const,
+    basis: 'fixed' as const,
+    description: null,
+    amount: 1500,
+    from: '2026-02-01',
+    ...over,
+  })
+
+  async function addParking() {
+    const id = await repo.addFee(newFee())
+    if (id === null) {
+      throw new Error('the fee was not added')
+    }
+    return id
+  }
+
+  const amountsOf = async (feeId: string) =>
+    (await repo.feesFor([tenancy]))[tenancy]?.find((f) => f.id === feeId)
+      ?.amounts
+
+  test('adds the fee with its first period together', async () => {
+    const id = await addParking()
+    expect(await amountsOf(id)).toEqual([
+      { validFrom: '2026-02-01', validTo: null, value: 1500 },
+    ])
+  })
+
+  test('a member or a stranger adds nothing', async () => {
+    expect(await repo.addFee(newFee({ actorId: 'jussi' }))).toBeNull()
+    expect(await repo.addFee(newFee({ propertyId: 'elsewhere' }))).toBeNull()
+    expect(await repo.feesFor([tenancy])).toEqual({})
+    const row = await env.DB.prepare(
+      'SELECT count(*) AS n FROM tenant_fee_amounts',
+    ).first<{ n: number }>()
+    expect(row?.n).toBe(0)
+  })
+
+  test('a new amount closes the previous period the day before', async () => {
+    const id = await addParking()
+    expect(
+      await repo.setFeeAmount({
+        actorId: 'annika',
+        propertyId: flatId,
+        tenancyId: tenancy,
+        feeId: id,
+        amount: 2000,
+        from: '2027-03-01',
+        latestStart: '2026-02-01',
+      }),
+    ).toBe(true)
+    expect(await amountsOf(id)).toEqual([
+      { validFrom: '2026-02-01', validTo: '2027-02-28', value: 1500 },
+      { validFrom: '2027-03-01', validTo: null, value: 2000 },
+    ])
+  })
+
+  test('a stale latest start or a member changes nothing', async () => {
+    const id = await addParking()
+    const write = {
+      actorId: 'annika',
+      propertyId: flatId,
+      tenancyId: tenancy,
+      feeId: id,
+      amount: 2000,
+      from: '2027-03-01',
+      latestStart: '2026-01-01',
+    }
+    expect(await repo.setFeeAmount(write)).toBe(false)
+    expect(
+      await repo.setFeeAmount({
+        ...write,
+        latestStart: '2026-02-01',
+        actorId: 'jussi',
+      }),
+    ).toBe(false)
+    expect(await amountsOf(id)).toHaveLength(1)
+  })
+
+  test("another tenancy's fee id changes nothing", async () => {
+    const id = await addParking()
+    expect(
+      await repo.setFeeAmount({
+        actorId: 'annika',
+        propertyId: flatId,
+        tenancyId: 'other-tenancy',
+        feeId: id,
+        amount: 1,
+        from: '2027-03-01',
+        latestStart: '2026-02-01',
+      }),
+    ).toBe(false)
+  })
+
+  test('undoing reopens the previous period', async () => {
+    const id = await addParking()
+    await repo.setFeeAmount({
+      actorId: 'annika',
+      propertyId: flatId,
+      tenancyId: tenancy,
+      feeId: id,
+      amount: 0,
+      from: '2027-01-01',
+      latestStart: '2026-02-01',
+    })
+    expect(
+      await repo.undoFeeChange({
+        actorId: 'annika',
+        propertyId: flatId,
+        tenancyId: tenancy,
+        feeId: id,
+        latestStart: '2027-01-01',
+        previousStart: '2026-02-01',
+      }),
+    ).toBe(true)
+    expect(await amountsOf(id)).toEqual([
+      { validFrom: '2026-02-01', validTo: null, value: 1500 },
+    ])
+  })
+
+  test('undoing the only period removes the fee and leaves the others', async () => {
+    const parking = await addParking()
+    const sauna = await repo.addFee(
+      newFee({ kind: 'sauna', amount: 1000, from: '2026-12-01' }),
+    )
+    expect(
+      await repo.undoFeeChange({
+        actorId: 'annika',
+        propertyId: flatId,
+        tenancyId: tenancy,
+        feeId: sauna ?? '',
+        latestStart: '2026-12-01',
+        previousStart: null,
+      }),
+    ).toBe(true)
+    const fees = (await repo.feesFor([tenancy]))[tenancy] ?? []
+    expect(fees.map((f) => f.id)).toEqual([parking])
+    const row = await env.DB.prepare(
+      'SELECT count(*) AS n FROM tenant_fee_amounts',
+    ).first<{ n: number }>()
+    expect(row?.n).toBe(1)
+  })
+
+  test('a fee with several periods is not removed as the only one', async () => {
+    const id = await addParking()
+    await repo.setFeeAmount({
+      actorId: 'annika',
+      propertyId: flatId,
+      tenancyId: tenancy,
+      feeId: id,
+      amount: 2000,
+      from: '2027-03-01',
+      latestStart: '2026-02-01',
+    })
+    expect(
+      await repo.undoFeeChange({
+        actorId: 'annika',
+        propertyId: flatId,
+        tenancyId: tenancy,
+        feeId: id,
+        latestStart: '2027-03-01',
+        previousStart: null,
+      }),
+    ).toBe(false)
+    expect(await amountsOf(id)).toHaveLength(2)
   })
 })
