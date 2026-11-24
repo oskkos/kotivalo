@@ -434,3 +434,121 @@ describe('The tenancy repository', () => {
     expect(await repo.rentsFor([id ?? ''])).toEqual({})
   })
 })
+
+describe('The rent of a tenancy', () => {
+  test('A change ends the previous rent period the day before', async () => {
+    const id = (await repo.create('annika', flat, aino, now)) ?? ''
+    const write = { actorId: 'annika', propertyId: flat, tenancyId: id }
+    expect(
+      await repo.setRent({
+        ...write,
+        amount: 89000,
+        from: '2025-03-01',
+        latestStart: null,
+      }),
+    ).toBe(true)
+    expect(
+      await repo.setRent({
+        ...write,
+        amount: 92000,
+        from: '2027-03-01',
+        latestStart: '2025-03-01',
+      }),
+    ).toBe(true)
+    expect((await repo.rentsFor([id]))[id]).toEqual([
+      { validFrom: '2025-03-01', validTo: '2027-02-28', value: 89000 },
+      { validFrom: '2027-03-01', validTo: null, value: 92000 },
+    ])
+  })
+})
+
+describe("a tenancy's rent writes", () => {
+  let id = ''
+  const write = () => ({ actorId: 'annika', propertyId: flat, tenancyId: id })
+
+  beforeEach(async () => {
+    id = (await repo.create('annika', flat, aino, now)) ?? ''
+    await repo.setRent({
+      ...write(),
+      amount: 89000,
+      from: '2025-03-01',
+      latestStart: null,
+    })
+  })
+
+  test('a rent on the latest start corrects it', async () => {
+    expect(
+      await repo.setRent({
+        ...write(),
+        amount: 95000,
+        from: '2025-03-01',
+        latestStart: '2025-03-01',
+      }),
+    ).toBe(true)
+    expect((await repo.rentsFor([id]))[id]).toEqual([
+      { validFrom: '2025-03-01', validTo: null, value: 95000 },
+    ])
+  })
+
+  test('a stale latest start applies nothing', async () => {
+    expect(
+      await repo.setRent({
+        ...write(),
+        amount: 92000,
+        from: '2027-03-01',
+        latestStart: null,
+      }),
+    ).toBe(false)
+    expect(
+      await repo.setRent({
+        ...write(),
+        amount: 92000,
+        from: '2027-03-01',
+        latestStart: '2026-03-01',
+      }),
+    ).toBe(false)
+    expect((await repo.rentsFor([id]))[id]).toHaveLength(1)
+  })
+
+  test("another flat's tenancy or a member applies nothing", async () => {
+    const change = {
+      amount: 92000,
+      from: '2027-03-01',
+      latestStart: '2025-03-01',
+    }
+    expect(
+      await repo.setRent({ ...write(), ...change, propertyId: other }),
+    ).toBe(false)
+    expect(
+      await repo.setRent({ ...write(), ...change, actorId: 'matti' }),
+    ).toBe(false)
+    expect((await repo.rentsFor([id]))[id]).toHaveLength(1)
+  })
+
+  test('undoing reopens the previous period, never the first', async () => {
+    await repo.setRent({
+      ...write(),
+      amount: 92000,
+      from: '2027-03-01',
+      latestStart: '2025-03-01',
+    })
+    const undo = {
+      ...write(),
+      latestStart: '2027-03-01',
+      previousStart: '2025-03-01',
+    }
+    expect(await repo.undoLatestRent({ ...undo, actorId: 'matti' })).toBe(false)
+    expect(await repo.undoLatestRent(undo)).toBe(true)
+    expect((await repo.rentsFor([id]))[id]).toEqual([
+      { validFrom: '2025-03-01', validTo: null, value: 89000 },
+    ])
+    expect(
+      await repo.undoLatestRent({
+        ...write(),
+        latestStart: '2025-03-01',
+        previousStart: '2023-01-01',
+      }),
+    ).toBe(false)
+    expect((await repo.rentsFor([id]))[id]).toHaveLength(1)
+  })
+})
