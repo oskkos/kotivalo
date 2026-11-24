@@ -14,6 +14,7 @@ import { formatDate, formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 import { colors, radii } from '#/theme/tokens'
 import { contractLabel, datesLabel, endingLabel, statusLabel } from './labels'
+import { OccupantsCard } from './OccupantsCard'
 import { RentCard } from './RentCard'
 import { currentTenancy, flatStatus, tenancyStatus } from './status'
 import type { Tenancy } from './tenancy.repository.server'
@@ -25,6 +26,8 @@ export interface TenancyPageView {
   tenancies: Tenancy[]
   /** Each tenancy's rent periods, oldest first. */
   rents: Partial<Record<string, readonly Period<number>[]>>
+  /** Each tenancy's occupants periods, oldest first. */
+  occupants: Partial<Record<string, readonly Period<number>[]>>
 }
 
 interface Props {
@@ -43,6 +46,10 @@ interface Props {
   rentChange?: (tenancy: Tenancy) => ReactNode
   /** Owners only: undoing the current tenancy's latest rent change. */
   onUndoRent?: (tenancy: Tenancy) => void
+  /** Owners only: opening the dialog that changes the occupants. */
+  onChangeOccupants?: (tenancy: Tenancy) => void
+  /** Owners only: undoing the latest occupants change. */
+  onUndoOccupants?: (tenancy: Tenancy) => void
 }
 
 const card = {
@@ -346,6 +353,23 @@ export function TenancyPage(props: Props) {
             action={owner ? props.addAction : undefined}
           />
         )}
+        {current ? (
+          <OccupantsCard
+            tenancy={current}
+            occupants={view.occupants[current.id] ?? []}
+            today={view.today}
+            onChange={
+              owner && props.onChangeOccupants
+                ? () => props.onChangeOccupants?.(current)
+                : undefined
+            }
+            onUndo={
+              owner && props.onUndoOccupants
+                ? () => props.onUndoOccupants?.(current)
+                : undefined
+            }
+          />
+        ) : null}
         {current ? (
           <RentCard
             tenancy={current}
