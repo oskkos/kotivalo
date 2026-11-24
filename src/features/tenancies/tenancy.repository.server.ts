@@ -22,8 +22,9 @@ import {
   sql,
   type SQL,
 } from 'drizzle-orm'
+import type { BatchItem } from 'drizzle-orm/batch'
 import { alias } from 'drizzle-orm/sqlite-core'
-import type { IsoDate } from '#/lib/dates'
+import { dayBefore, type IsoDate } from '#/lib/dates'
 import {
   properties,
   propertyAccess,
@@ -69,6 +70,29 @@ export interface Ending {
   noticeGivenBy: NoticeGiver
   noticeDate: IsoDate
   lastDay: IsoDate
+}
+
+/**
+ * A rent write's expectation: the tenancy's latest rent period's start as
+ * read, or none, so a concurrent change makes the write apply nothing.
+ */
+export interface RentWrite {
+  actorId: string
+  propertyId: string
+  tenancyId: string
+  /** Cents per month. */
+  amount: number
+  from: IsoDate
+  latestStart: IsoDate | null
+}
+
+/** An undo's expectation: the latest and previous rent periods' starts. */
+export interface RentUndo {
+  actorId: string
+  propertyId: string
+  tenancyId: string
+  latestStart: IsoDate
+  previousStart: IsoDate
 }
 
 const columns = {
@@ -231,6 +255,125 @@ export function tenancyRepository(db: Db) {
     return { id, statement }
   }
 
+  /** The actor owns the flat, and the tenancy is the flat's. */
+  const ownsTenancy = (
+    actorId: string,
+    propertyId: string,
+    tenancyId: string,
+  ) =>
+    and(
+      isOwner(actorId, propertyId),
+      exists(
+        db
+          .select({ one: sql`1` })
+          .from(other)
+          .where(
+            and(eq(other.id, tenancyId), eq(other.propertyId, propertyId)),
+          ),
+      ),
+    )
+
+  const rentsOf = (tenancyId: string) => eq(tenancyRents.tenancyId, tenancyId)
+
+  /**
+   * The statements that set a tenancy's rent from `from`: on the latest
+   * period's start they correct it, otherwise they close the latest period
+   * the day before and add a new one. `onlyIf` joins every statement's
+   * condition. The last statement returns a row when it applied.
+   */
+  function rentStatements(
+    write: RentWrite,
+    onlyIf?: SQL,
+  ): [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]] {
+    const { actorId, propertyId, tenancyId, amount, from, latestStart } = write
+    const scope = rentsOf(tenancyId)
+    const owned = ownsTenancy(actorId, propertyId, tenancyId)
+    if (latestStart === from) {
+      return [
+        db
+          .update(tenancyRents)
+          .set({ amount })
+          .where(
+            and(
+              scope,
+              eq(tenancyRents.validFrom, from),
+              isNull(tenancyRents.validTo),
+              owned,
+              onlyIf,
+            ),
+          )
+          .returning({ id: tenancyRents.id }),
+      ]
+    }
+    const id = crypto.randomUUID()
+    // The latest period is closed by this write (or there was none), and
+    // nothing starts on or after `from`.
+    const ready = and(
+      eq(tenancies.id, tenancyId),
+      owned,
+      onlyIf,
+      notExists(
+        db
+          .select({ one: sql`1` })
+          .from(tenancyRents)
+          .where(and(scope, gte(tenancyRents.validFrom, from))),
+      ),
+      latestStart === null
+        ? notExists(
+            db
+              .select({ one: sql`1` })
+              .from(tenancyRents)
+              .where(scope),
+          )
+        : exists(
+            db
+              .select({ one: sql`1` })
+              .from(tenancyRents)
+              .where(
+                and(
+                  scope,
+                  eq(tenancyRents.validFrom, latestStart),
+                  eq(tenancyRents.validTo, dayBefore(from)),
+                ),
+              ),
+          ),
+    )
+    const insert = db
+      .insert(tenancyRents)
+      .select(
+        db
+          .select({
+            id: sql<string>`${id}`.as('id'),
+            tenancyId: tenancies.id,
+            amount: sql<number>`${amount}`.as('amount'),
+            validFrom: sql<string>`${from}`.as('valid_from'),
+            validTo: sql<null>`null`.as('valid_to'),
+          })
+          .from(tenancies)
+          .where(ready),
+      )
+      .returning({ id: tenancyRents.id })
+    if (latestStart === null) {
+      return [insert]
+    }
+    return [
+      db
+        .update(tenancyRents)
+        .set({ validTo: dayBefore(from) })
+        .where(
+          and(
+            scope,
+            eq(tenancyRents.validFrom, latestStart),
+            lt(tenancyRents.validFrom, from),
+            isNull(tenancyRents.validTo),
+            owned,
+            onlyIf,
+          ),
+        ),
+      insert,
+    ]
+  }
+
   return {
     /** The flat's tenancies, newest first. */
     async forProperty(propertyId: string): Promise<Tenancy[]> {
@@ -266,6 +409,67 @@ export function tenancyRepository(db: Db) {
         })
       }
       return rents
+    },
+
+    /**
+     * Sets a tenancy's rent from `write.from` (openspec: tenancies,
+     * "Changing a tenancy's rent"). False when nothing applied: the actor
+     * isn't an owner, the tenancy isn't the flat's, or the latest period
+     * changed since it was read.
+     */
+    async setRent(write: RentWrite): Promise<boolean> {
+      const results = await atomically(db, rentStatements(write))
+      return (results.at(-1) as unknown[]).length > 0
+    },
+
+    /**
+     * Undoes a tenancy's latest rent change: deletes the latest period and
+     * reopens the previous one. The first period is never deleted, because
+     * the previous one must be there. False when nothing applied.
+     */
+    async undoLatestRent(undo: RentUndo): Promise<boolean> {
+      const { actorId, propertyId, tenancyId, latestStart, previousStart } =
+        undo
+      const scope = rentsOf(tenancyId)
+      const previous = and(
+        scope,
+        eq(tenancyRents.validFrom, previousStart),
+        eq(tenancyRents.validTo, dayBefore(latestStart)),
+      )
+      const [removed] = await atomically(db, [
+        db
+          .delete(tenancyRents)
+          .where(
+            and(
+              scope,
+              eq(tenancyRents.validFrom, latestStart),
+              isNull(tenancyRents.validTo),
+              ownsTenancy(actorId, propertyId, tenancyId),
+              exists(
+                db
+                  .select({ one: sql`1` })
+                  .from(tenancyRents)
+                  .where(previous),
+              ),
+            ),
+          )
+          .returning({ id: tenancyRents.id }),
+        db
+          .update(tenancyRents)
+          .set({ validTo: null })
+          .where(
+            and(
+              previous,
+              notExists(
+                db
+                  .select({ one: sql`1` })
+                  .from(tenancyRents)
+                  .where(and(scope, eq(tenancyRents.validFrom, latestStart))),
+              ),
+            ),
+          ),
+      ])
+      return removed.length > 0
     },
 
     /** The months (`YYYY-MM`) the tenancy has rent payments for. */
