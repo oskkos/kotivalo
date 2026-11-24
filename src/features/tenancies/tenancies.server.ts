@@ -14,13 +14,8 @@ import type { NoticeGiver, PropertyRole } from '#/server/db/schema'
 import type { Logger } from '#/server/log/log'
 import { validateEnding } from './notice'
 import { paymentsOutside, validateTenancyDates } from './rules'
-import {
-  firstRentMove,
-  rentAfterEnd,
-  rentToday,
-  validateRentDate,
-} from './rent'
-import { currentTenancy, flatStatus } from './status'
+import { firstRentMove, rentAfterEnd, validateRentDate } from './rent'
+import { flatStatus } from './status'
 import type {
   Ending,
   Tenancy,
@@ -129,8 +124,6 @@ export async function getTenancies(
       ok: true
       /** Each tenancy's rent periods, oldest first. */
       rents: Partial<Record<string, Period<number>[]>>
-      /** The current tenancy's rent today, or its first rent. */
-      rentToday: number | null
     } & TenancyView)
   | typeof notFound
 > {
@@ -138,15 +131,7 @@ export async function getTenancies(
   if (!view) {
     return notFound
   }
-  const current = currentTenancy(view.tenancies, view.today)
-  return {
-    ok: true,
-    ...view,
-    rentToday:
-      (current &&
-        rentToday(view.rents[current.id] ?? [], current, view.today)) ??
-      null,
-  }
+  return { ok: true, ...view }
 }
 
 /** What the new tenant form needs: the rent periods and the limits. */
