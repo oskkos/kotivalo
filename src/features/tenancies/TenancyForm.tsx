@@ -63,6 +63,11 @@ interface Props {
   onClose: () => void
   /** Correcting a tenancy that hasn't started: opens the removal dialog. */
   onRemove?: () => void
+  /**
+   * Correcting: the link to the tenancy's rent form, which this form
+   * doesn't change (openspec: tenancies, "Correcting a tenancy").
+   */
+  rentChange?: ReactNode
 }
 
 type Field =
@@ -517,7 +522,9 @@ export function TenancyForm(props: Props) {
               )}
             </form.Field>
           </Box>
-          {editing ? null : (
+          {editing ? (
+            (props.rentChange ?? null)
+          ) : (
             <Typography variant="body2" color="text.secondary">
               {m.tenancy_form_rent_hint()}
             </Typography>
