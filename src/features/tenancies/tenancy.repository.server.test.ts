@@ -383,4 +383,54 @@ describe('The tenancy repository', () => {
     await env.DB.prepare('DELETE FROM properties WHERE id = ?').bind(flat).run()
     expect(await repo.forProperty(flat)).toEqual([])
   })
+
+  test("reads tenancies' rent periods oldest first, by tenancy", async () => {
+    const first = await repo.create(
+      'annika',
+      flat,
+      fixed('2023-06-01', '2025-02-28'),
+      now,
+    )
+    const second = await repo.create('annika', flat, aino, now)
+    const rent = (
+      tenancy: string | null,
+      amount: number,
+      from: string,
+      to: string | null,
+    ) =>
+      env.DB.prepare(
+        'INSERT INTO tenancy_rents (id, tenancy_id, amount, valid_from, valid_to) VALUES (?, ?, ?, ?, ?)',
+      )
+        .bind(crypto.randomUUID(), tenancy, amount, from, to)
+        .run()
+    await rent(second, 92000, '2026-03-01', null)
+    await rent(second, 89000, '2025-03-01', '2026-02-28')
+    await rent(first, 82000, '2023-06-01', null)
+    expect(await repo.rentsFor([])).toEqual({})
+    const rents = await repo.rentsFor([second ?? ''])
+    expect(rents).toEqual({
+      [second ?? '']: [
+        { validFrom: '2025-03-01', validTo: '2026-02-28', value: 89000 },
+        { validFrom: '2026-03-01', validTo: null, value: 92000 },
+      ],
+    })
+  })
+
+  test('removing a tenancy removes its rent periods', async () => {
+    const id = await repo.create(
+      'annika',
+      flat,
+      fixed('2027-01-01', '2027-12-31'),
+      now,
+    )
+    await env.DB.prepare(
+      'INSERT INTO tenancy_rents (id, tenancy_id, amount, valid_from, valid_to) VALUES (?, ?, 91000, ?, NULL)',
+    )
+      .bind(crypto.randomUUID(), id, '2027-01-01')
+      .run()
+    expect(
+      await repo.removeNotStarted('annika', flat, id ?? '', '2026-11-22'),
+    ).toBe(true)
+    expect(await repo.rentsFor([id ?? ''])).toEqual({})
+  })
 })

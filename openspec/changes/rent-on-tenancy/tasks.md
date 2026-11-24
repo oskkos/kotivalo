@@ -1,8 +1,8 @@
 ## 1. Tenancy rents in the database
 
-- [ ] 1.1 `schema.ts`: table `tenancy_rents` (`id()`, `tenancy_id` → `tenancies` with cascade, `amount` with `cents()`, `validity()`, index `(tenancy_id, valid_from)`); `pnpm db:generate`, then append the copy and the deletion of the old rent rows from design.md ("The migration in SQL") to the generated `0009` file before committing it
-- [ ] 1.2 Workers test for "Existing rents move to their tenancies": store rents and tenancies as the previous version did and run the migration's statements from `d1Migrations` on them, for all three scenarios; no `recurring_amounts` row of kind `rent` stays
-- [ ] 1.3 `tenancy.repository.server.ts`: the flat's tenancies are read with their rent periods, oldest first (`rents` on each tenancy), and `rentsFor(tenancyIds)` for the flats list; Workers tests
+- [x] 1.1 `schema.ts`: table `tenancy_rents` (`id()`, `tenancy_id` → `tenancies` with cascade, `amount` with `cents()`, `validity()`, index `(tenancy_id, valid_from)`); `pnpm db:generate`, then append the copy and the deletion of the old rent rows from design.md ("The migration in SQL") to the generated `0009` file before committing it
+- [x] 1.2 Workers test for "Existing rents move to their tenancies": store rents and tenancies as the previous version did and run the migration's statements from `d1Migrations` on them, for all three scenarios; no `recurring_amounts` row of kind `rent` stays
+- [x] 1.3 `tenancy.repository.server.ts`: `rentsFor(tenancyIds)`, each tenancy's rent periods oldest first, for every page that needs a rent; Workers tests
 
 ## 2. A tenancy's rent: rules and writes
 
