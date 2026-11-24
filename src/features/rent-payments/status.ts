@@ -1,7 +1,8 @@
 // A month's expected rent and rent status for a tenancy (openspec:
 // rent-payments, "Expected rent of a month", "The rent status of a month",
-// "Months not fully paid", "The rent summary on the flats list"). Pure: computed from the flat's rent periods, the
-// tenancy's dates and due day, and the recorded payments; never stored.
+// "Months not fully paid", "The rent summary on the flats list"). Pure:
+// computed from each tenancy's own rent periods, its dates and due day, and
+// the recorded payments; never stored.
 import {
   addMonths,
   daysBetween,
@@ -11,10 +12,10 @@ import {
 } from '#/lib/dates'
 import {
   monthOf,
-  valueInMonth,
   type Month,
   type Period,
 } from '#/features/recurring-amounts/periods'
+import { rentInMonth } from '#/features/tenancies/rent'
 import {
   currentTenancy,
   dueDate,
@@ -57,16 +58,20 @@ function daysRun(tenancy: RentTenancy, month: Month): number {
   return Math.max(0, daysBetween(first, last) + 1)
 }
 
+/** Each tenancy's rent periods by tenancy id, oldest first. */
+export type RentsByTenancy = Partial<Record<string, readonly Period<number>[]>>
+
 /**
- * The month's rent in proportion to the days the tenancy runs, rounded to
- * the cent, halves up; undefined when no rent is in effect in the month.
+ * The month's rent of the tenancy, from its own rent periods, in proportion
+ * to the days it runs, rounded to the cent, halves up; undefined when the
+ * tenancy has no rent in the month.
  */
 export function expectedRent(
-  rentPeriods: readonly Period<number>[],
+  rents: readonly Period<number>[],
   tenancy: RentTenancy,
   month: Month,
 ): number | undefined {
-  const rent = valueInMonth(rentPeriods, month)
+  const rent = rentInMonth(rents, tenancy, month)
   if (rent === undefined) {
     return undefined
   }
@@ -148,7 +153,7 @@ export function rentMonth<T extends RentTenancy>(
   tenancy: T,
   month: Month,
   data: {
-    rentPeriods: readonly Period<number>[]
+    rents: RentsByTenancy
     payments: readonly PaymentOfMonth[]
     today: IsoDate
   },
@@ -156,7 +161,7 @@ export function rentMonth<T extends RentTenancy>(
   const payments = data.payments.filter(
     (payment) => payment.tenancyId === tenancy.id && payment.month === month,
   )
-  const expected = expectedRent(data.rentPeriods, tenancy, month)
+  const expected = expectedRent(data.rents[tenancy.id] ?? [], tenancy, month)
   const due = rentDueDate(tenancy, month)
   const paid = payments.reduce((sum, payment) => sum + payment.amount, 0)
   return {
@@ -181,7 +186,7 @@ export function rentMonth<T extends RentTenancy>(
  */
 export function rentMonths<T extends RentTenancy>(data: {
   tenancies: readonly T[]
-  rentPeriods: readonly Period<number>[]
+  rents: RentsByTenancy
   payments: readonly PaymentOfMonth[]
   from: Month
   to: Month
@@ -206,7 +211,7 @@ export function rentMonths<T extends RentTenancy>(data: {
  */
 export function monthsNotFullyPaid<T extends RentTenancy>(data: {
   tenancies: readonly T[]
-  rentPeriods: readonly Period<number>[]
+  rents: RentsByTenancy
   payments: readonly PaymentOfMonth[]
   today: IsoDate
 }): RentMonth<T>[] {
@@ -225,7 +230,8 @@ export interface FlatRentData<T extends RentTenancy & StatusTenancy> {
   propertyId: string
   /** The tenancies that run in this month or later. */
   tenancies: readonly T[]
-  rentPeriods: readonly Period<number>[]
+  /** The tenancies' rent periods. */
+  rents: RentsByTenancy
   /** At least this month's payments of the flat's tenancies. */
   payments: readonly PaymentOfMonth[]
 }

@@ -134,30 +134,6 @@ describe('The recurring amount repository', () => {
     ])
   })
 
-  test('reads the rent periods of several flats, leaving other kinds and flats out', async () => {
-    await set('2025-03-01', 20500, null)
-    await set('2025-03-01', 89000, null, 'rent')
-    await set('2026-01-01', 90000, '2025-03-01', 'rent')
-    const third = (
-      await propertyRepository(db).create('annika', details, now, '2025-03-01')
-    ).id
-    await repo.setAmount({
-      propertyId: third,
-      actorId: 'annika',
-      kind: 'rent',
-      amount: 50000,
-      from: '2026-01-01',
-      latestStart: null,
-    })
-    expect(await repo.rentFor([flat, other])).toEqual({
-      [flat]: [
-        { validFrom: '2025-03-01', validTo: '2025-12-31', value: 89000 },
-        { validFrom: '2026-01-01', validTo: null, value: 90000 },
-      ],
-    })
-    expect(await repo.rentFor([])).toEqual({})
-  })
-
   test('undoing deletes the latest period and reopens the previous', async () => {
     await set('2025-03-01', 20500, null)
     await set('2026-01-01', 21400, '2025-03-01')

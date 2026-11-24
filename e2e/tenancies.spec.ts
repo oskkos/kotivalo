@@ -198,25 +198,16 @@ test.describe('The tenancy page', () => {
 })
 
 test.describe('The rent of a new tenancy', () => {
-  test('A changed rent starts from the start month', async ({ page }) => {
+  test("The rent starts on the tenancy's start day", async ({ page }) => {
     const id = await ownerWithFlat(page)
     await addTenant(page, id, {
       name: 'Mikko Lehtinen',
-      start: '01/03/2025',
-      termEnd: '31/12/2025',
-      rent: '890',
-    })
-    await addTenant(page, id, {
-      ...aino,
-      start: '15/01/2026',
-      contractMade: '10/01/2026',
+      start: `15/01/${nextYear}`,
+      termEnd: `31/12/${nextYear}`,
+      contractMade: new Date().toLocaleDateString('en-GB'),
       rent: '910',
     })
-    await page.goto(`/properties/${id}/amounts`)
-    await waitForHydration(page)
-    const rent = page.getByRole('region', { name: 'Rent' })
-    await expect(rent).toContainText('€910.00')
-    await expect(rent).toContainText('01/01/2026')
+    await expect(page.getByText('€910.00 a month')).toBeVisible()
   })
 })
 

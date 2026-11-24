@@ -6,6 +6,7 @@
 import type { OwnershipRepository } from '#/features/ownership/ownership.repository.server'
 import type { RentPayment } from '#/features/rent-payments/rent-payment.repository.server'
 import type { RentPaymentRepository } from '#/features/rent-payments/rent-payment.repository.server'
+import type { RentsByTenancy } from '#/features/rent-payments/status'
 import { accumulatedCapitalised } from '#/features/recurring-amounts/periods'
 import type {
   RecurringAmountRepository,
@@ -51,6 +52,8 @@ export interface FlatDetails extends RecurringAmounts {
   today: IsoDate
   /** Newest first. */
   tenancies: Tenancy[]
+  /** Each tenancy's rent periods, oldest first. */
+  tenancyRents: RentsByTenancy
   /** Cents of financing charges added to the acquisition cost so far. */
   capitalised: number
   payments: RentPayment[]
@@ -80,6 +83,7 @@ export async function getFlatDetails(
       deps.transactions.latest(propertyId, LATEST_ENTRIES),
     ])
   const today = isoDateInFinland(deps.now())
+  const tenancyRents = await deps.tenancies.rentsFor(tenancies.map((t) => t.id))
   return {
     ok: true,
     role,
@@ -93,6 +97,7 @@ export async function getFlatDetails(
       })),
     today,
     tenancies,
+    tenancyRents,
     ...amounts,
     capitalised: accumulatedCapitalised(
       amounts.financingCharges,

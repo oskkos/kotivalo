@@ -32,6 +32,19 @@ export function rentInMonth(
   return periodOn(rents, day)?.value
 }
 
+/**
+ * The tenancy's rent in effect `today`, or its first rent when it starts
+ * later; undefined without one.
+ */
+export function rentToday(
+  rents: readonly Period<number>[],
+  tenancy: Pick<RentDates, 'validFrom'>,
+  today: IsoDate,
+): number | undefined {
+  return periodOn(rents, today < tenancy.validFrom ? tenancy.validFrom : today)
+    ?.value
+}
+
 export type RentDateProblem =
   | 'amount_date_not_month_start'
   | 'rent_date_before_tenancy'
@@ -121,16 +134,4 @@ export function rentAfterEnd(
 ): boolean {
   const latest = rents.at(-1)
   return lastDay !== null && latest !== undefined && latest.validFrom > lastDay
-}
-
-/**
- * Whether the new tenant form asks for the rent (until the form always
- * does): with no rent period, or a start month on or after the latest one.
- */
-export function rentAsked(
-  rents: readonly Period<number>[],
-  start: IsoDate,
-): boolean {
-  const latest = rents.at(-1)
-  return latest === undefined || monthOf(start) >= monthOf(latest.validFrom)
 }

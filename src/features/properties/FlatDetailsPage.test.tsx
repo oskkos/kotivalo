@@ -55,10 +55,11 @@ const details = (over: Partial<FlatDetails> = {}): FlatDetails => ({
   owners: [{ name: 'Annika', share: 10000, isYou: true }],
   today: '2026-11-22',
   tenancies: [aino],
-  amounts: {
-    rent: [{ validFrom: '2025-03-01', validTo: null, value: 89000 }],
-    maintenance_charge: [],
+  tenancyRents: {
+    t1: [{ validFrom: '2025-03-01', validTo: null, value: 89000 }],
+    t0: [{ validFrom: '2024-01-01', validTo: null, value: 89000 }],
   },
+  amounts: { rent: [], maintenance_charge: [] },
   financingCharges: [],
   treatments: [],
   capitalised: 0,

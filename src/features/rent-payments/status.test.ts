@@ -61,14 +61,14 @@ describe('Expected rent of a month', () => {
   })
 
   test('A tenant change with a new rent mid-month', () => {
-    const changed = rent(
-      ['2025-03-01', '2026-10-31', 80000],
-      ['2026-11-01', null, 90000],
-    )
     const outgoing = { ...aino, validTo: '2026-11-14' }
     const incoming = { ...aino, id: 'next', validFrom: '2026-11-15' }
-    expect(expectedRent(changed, outgoing, '2026-11')).toBe(42000)
-    expect(expectedRent(changed, incoming, '2026-11')).toBe(48000)
+    expect(
+      expectedRent(rent(['2025-03-01', null, 80000]), outgoing, '2026-11'),
+    ).toBe(37333)
+    expect(
+      expectedRent(rent(['2026-11-15', null, 90000]), incoming, '2026-11'),
+    ).toBe(48000)
   })
 
   test('No rent set', () => {
@@ -150,7 +150,7 @@ describe('The rent status of a month', () => {
     expect(
       monthsNotFullyPaid({
         tenancies: [aino],
-        rentPeriods: rent(['2025-03-01', null, 0]),
+        rents: { aino: rent(['2025-03-01', null, 0]) },
         payments: [],
         today: '2026-11-22',
       }),
@@ -185,7 +185,7 @@ describe('Months not fully paid', () => {
   test('Earlier months of this and last year count', () => {
     const months = monthsNotFullyPaid({
       tenancies: [aino],
-      rentPeriods: flat,
+      rents: { aino: flat },
       payments: rentPaidThrough('2025-11'),
       today: '2026-01-20',
     })
@@ -202,7 +202,7 @@ describe('Months not fully paid', () => {
     expect(
       monthsNotFullyPaid({
         tenancies: [old],
-        rentPeriods: flat,
+        rents: { pekka: flat },
         payments: [],
         today: '2026-11-22',
       }),
@@ -212,7 +212,7 @@ describe('Months not fully paid', () => {
   test("A month before its due date doesn't count", () => {
     const months = monthsNotFullyPaid({
       tenancies: [aino],
-      rentPeriods: flat,
+      rents: { aino: flat },
       payments: rentPaidThrough('2026-10'),
       today: '2026-11-03',
     })
@@ -222,7 +222,7 @@ describe('Months not fully paid', () => {
   test('a partly paid month counts, a month without a rent does not', () => {
     const months = monthsNotFullyPaid({
       tenancies: [aino],
-      rentPeriods: rent(['2025-03-01', '2026-09-30', 89000]),
+      rents: { aino: rent(['2025-03-01', '2026-09-30', 89000]) },
       payments: [
         ...rentPaidThrough('2026-08'),
         pay('2026-09', 50000, '2026-09-04'),
@@ -260,7 +260,10 @@ describe('Months of a tenancy', () => {
     const ainoFromMid = { ...aino, validFrom: '2025-02-15' }
     const rows = rentMonths({
       tenancies: [pekka, ainoFromMid],
-      rentPeriods: rent(['2024-06-01', null, 89000]),
+      rents: {
+        pekka: rent(['2024-06-01', null, 89000]),
+        aino: rent(['2025-02-15', null, 89000]),
+      },
       payments: [],
       from: '2025-01',
       to: '2025-03',
@@ -305,7 +308,13 @@ describe('The rent summary on the flats list', () => {
     tenancies: T[],
     rentPeriods: Period<number>[],
     payments: PaymentOfMonth[] = [],
-  ): FlatRentData<T> => ({ propertyId, tenancies, rentPeriods, payments })
+  ): FlatRentData<T> => ({
+    propertyId,
+    tenancies,
+    // Each tenancy with the same rent periods.
+    rents: Object.fromEntries(tenancies.map((t) => [t.id, rentPeriods])),
+    payments,
+  })
 
   test("The summary adds up this month's rent of every flat", () => {
     const summary = rentThisMonth(

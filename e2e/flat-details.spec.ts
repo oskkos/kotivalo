@@ -146,8 +146,8 @@ test.describe('The flat details page', () => {
 
   test('The rent and charges with the capitalised total', async ({ page }) => {
     const id = await ownerWithFlat(page)
+    await addTenant(page, id, { ...aino, start: thisMonthStart })
     await openAmounts(page, id)
-    await setAmount(page, 'Rent', '890', thisMonthStart)
     await setAmount(page, 'Maintenance charge', '214', thisMonthStart)
     await addFinancingCharge(page, 'Putkiremontti', '86', thisMonthStart)
     await setTreatment(page, 'Placed in reserve', thisMonthStart)

@@ -4,7 +4,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { ownershipRepository } from '#/features/ownership/ownership.repository.server'
 import { propertyRepository } from '#/features/properties/property.repository.server'
-import { recurringAmountRepository } from '#/features/recurring-amounts/recurring-amount.repository.server'
 import { sharingRepository } from '#/features/sharing/sharing.repository.server'
 import { getRequestContext } from '#/server/platform/context.server'
 import {
@@ -41,7 +40,6 @@ async function tenancyDeps(): Promise<TenancyDeps> {
   return {
     userId: session.user.id,
     tenancies: tenancyRepository(context.db),
-    amounts: recurringAmountRepository(context.db),
     properties: propertyRepository(context.db),
     ownership: ownershipRepository(context.db),
     sharing: sharingRepository(context.db),

@@ -55,7 +55,7 @@ describe("The rent status on a flat's card", () => {
               {
                 propertyId: 'kuusikuja',
                 tenancies: [tenancy('aino')],
-                rentPeriods: rent,
+                rents: { aino: rent },
                 payments: [],
               },
             ],
@@ -74,13 +74,13 @@ describe("The rent status on a flat's card", () => {
           {
             propertyId: 'paid',
             tenancies: [tenancy('a')],
-            rentPeriods: rent,
+            rents: { a: rent },
             payments: [paid('a', 89000)],
           },
           {
             propertyId: 'partly',
             tenancies: [tenancy('b')],
-            rentPeriods: rent,
+            rents: { b: rent },
             payments: [paid('b', 50000)],
           },
         ],
@@ -93,7 +93,7 @@ describe("The rent status on a flat's card", () => {
           {
             propertyId: 'due',
             tenancies: [tenancy('c')],
-            rentPeriods: rent,
+            rents: { c: rent },
             payments: [],
           },
         ],
@@ -109,7 +109,7 @@ describe("The rent status on a flat's card", () => {
           {
             propertyId: 'flat',
             tenancies: [tenancy('a')],
-            rentPeriods: [],
+            rents: { a: [] },
             payments: [],
           },
         ],
@@ -125,13 +125,13 @@ describe("The rent status on a flat's card", () => {
           {
             propertyId: 'koivupolku',
             tenancies: [],
-            rentPeriods: [],
+            rents: {},
             payments: [],
           },
           {
             propertyId: 'rantatie',
             tenancies: [tenancy('a', '2026-12-01')],
-            rentPeriods: rent,
+            rents: { a: rent },
             payments: [],
           },
         ],

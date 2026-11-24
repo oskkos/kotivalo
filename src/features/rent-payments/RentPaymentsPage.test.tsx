@@ -36,7 +36,7 @@ const aino: Tenancy = {
 const view: RentPaymentsPageView = {
   today: '2026-01-20',
   tenancies: [aino],
-  rents: [{ validFrom: '2025-10-01', validTo: null, value: 89000 }],
+  rents: { t1: [{ validFrom: '2025-10-01', validTo: null, value: 89000 }] },
   payments: [
     {
       id: 'p1',

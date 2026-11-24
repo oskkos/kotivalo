@@ -4,7 +4,6 @@
 // check the session and wire in the request context.
 import { createServerFn } from '@tanstack/react-start'
 import { propertyRepository } from '#/features/properties/property.repository.server'
-import { recurringAmountRepository } from '#/features/recurring-amounts/recurring-amount.repository.server'
 import { sharingRepository } from '#/features/sharing/sharing.repository.server'
 import { tenancyRepository } from '#/features/tenancies/tenancy.repository.server'
 import { getRequestContext } from '#/server/platform/context.server'
@@ -38,7 +37,6 @@ async function rentPaymentDeps(): Promise<RentPaymentDeps> {
     userId: session.user.id,
     payments: rentPaymentRepository(context.db),
     tenancies: tenancyRepository(context.db),
-    amounts: recurringAmountRepository(context.db),
     properties: propertyRepository(context.db),
     sharing: sharingRepository(context.db),
     log: context.log,
