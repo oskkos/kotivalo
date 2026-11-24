@@ -722,7 +722,7 @@
   "tenancy_remove_title": "Remove the tenancy?",
   "tenancy_rent": "Rent",
   "tenancy_rent_changes": "Rent changes",
-  "tenancy_rent_form_hint": "The change applies to this tenancy only. The rent changes from the start of a month; an amount from the tenancy's start date corrects the first rent.",
+  "tenancy_rent_form_hint": "The change applies to this tenancy only. The rent changes from the start of a month. An amount from the start date of the tenancy or of a rent period sets or corrects that period's rent.",
   "tenancy_rent_not_set": "Not set",
   "tenancy_rent_value": "{amount} a month",
   "tenancy_start": "Start date",
