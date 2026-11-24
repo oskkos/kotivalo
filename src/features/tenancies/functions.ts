@@ -10,6 +10,7 @@ import {
   createTenancyInput,
   endTenancyInput,
   propertyRefInput,
+  setTenancyRentInput,
   tenancyRefInput,
   updateTenancyInput,
 } from './schemas'
@@ -22,6 +23,8 @@ import {
   getTenancy as getOne,
   listTenancyStatuses as listStatuses,
   removeTenancy as remove,
+  setTenancyRent as setRent,
+  undoTenancyRent as undoRent,
   updateTenancy as update,
   type TenancyDeps,
 } from './tenancies.server'
@@ -98,3 +101,16 @@ export const removeTenancy = createServerFn({ method: 'POST' })
 export const listTenancyStatuses = createServerFn({ method: 'GET' }).handler(
   async () => listStatuses(await tenancyDeps()),
 )
+
+export const setTenancyRent = createServerFn({ method: 'POST' })
+  .validator(setTenancyRentInput)
+  .handler(async ({ data }) => {
+    const { propertyId, tenancyId, amount, from } = data
+    return setRent(await tenancyDeps(), propertyId, tenancyId, { amount, from })
+  })
+
+export const undoTenancyRent = createServerFn({ method: 'POST' })
+  .validator(tenancyRefInput)
+  .handler(async ({ data }) =>
+    undoRent(await tenancyDeps(), data.propertyId, data.tenancyId),
+  )

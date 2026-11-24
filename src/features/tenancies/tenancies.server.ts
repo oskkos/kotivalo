@@ -14,7 +14,12 @@ import type { NoticeGiver, PropertyRole } from '#/server/db/schema'
 import type { Logger } from '#/server/log/log'
 import { validateEnding } from './notice'
 import { paymentsOutside, validateTenancyDates } from './rules'
-import { firstRentMove, rentAfterEnd, rentToday } from './rent'
+import {
+  firstRentMove,
+  rentAfterEnd,
+  rentToday,
+  validateRentDate,
+} from './rent'
 import { currentTenancy, flatStatus } from './status'
 import type {
   Ending,
@@ -120,19 +125,26 @@ export async function getTenancies(
   deps: TenancyDeps,
   propertyId: string,
 ): Promise<
-  ({ ok: true; rentToday: number | null } & TenancyView) | typeof notFound
+  | ({
+      ok: true
+      /** Each tenancy's rent periods, oldest first. */
+      rents: Partial<Record<string, Period<number>[]>>
+      /** The current tenancy's rent today, or its first rent. */
+      rentToday: number | null
+    } & TenancyView)
+  | typeof notFound
 > {
   const view = await loadView(deps, propertyId)
   if (!view) {
     return notFound
   }
-  const { rents, ...rest } = view
   const current = currentTenancy(view.tenancies, view.today)
   return {
     ok: true,
-    ...rest,
+    ...view,
     rentToday:
-      (current && rentToday(rents[current.id] ?? [], current, view.today)) ??
+      (current &&
+        rentToday(view.rents[current.id] ?? [], current, view.today)) ??
       null,
   }
 }
@@ -180,6 +192,8 @@ export async function getTenancy(
       property: Property
       today: IsoDate
       tenancy: Tenancy
+      /** The tenancy's rent periods, oldest first. */
+      rents: Period<number>[]
       /** The flat's other tenancies, for the form's checks. */
       others: Tenancy[]
       ownershipStart: IsoDate
@@ -200,12 +214,14 @@ export async function getTenancy(
   if (!tenancy) {
     return tenancyNotFound
   }
+  const rents = await deps.tenancies.rentsFor([tenancyId])
   return {
     ok: true,
     role,
     property,
     today: today(deps),
     tenancy,
+    rents: rents[tenancyId] ?? [],
     others: tenancies.filter((t) => t.id !== tenancyId),
     ownershipStart: start,
   }
@@ -497,6 +513,90 @@ export async function cancelTenancyEnding(
     return refusal(deps, propertyId, fail('tenancy_cancel_later_tenancy'))
   }
   deps.log.info('tenancy.ending_cancelled', { propertyId, tenancyId })
+  return { ok: true }
+}
+
+const changedMeanwhile = fail('amount_changed')
+
+/**
+ * Sets a tenancy's rent from a date (openspec: tenancies, "Changing a
+ * tenancy's rent"): a new period, or a correction on the latest one's start.
+ */
+export async function setTenancyRent(
+  deps: TenancyDeps,
+  propertyId: string,
+  tenancyId: string,
+  change: { amount: number; from: IsoDate },
+): Promise<{ ok: true } | Failure<FieldReason | AlertReason>> {
+  const refused = await roleCheck(deps, propertyId)
+  if (refused) {
+    return refused
+  }
+  const tenancy = await deps.tenancies.get(tenancyId)
+  if (tenancy?.propertyId !== propertyId) {
+    return tenancyNotFound
+  }
+  const rents = (await deps.tenancies.rentsFor([tenancyId]))[tenancyId] ?? []
+  const latestStart = rents.at(-1)?.validFrom
+  const problem = validateRentDate(change.from, { tenancy, latestStart })
+  if (problem) {
+    return fail(problem)
+  }
+  const set = await deps.tenancies.setRent({
+    actorId: deps.userId,
+    propertyId,
+    tenancyId,
+    amount: change.amount,
+    from: change.from,
+    latestStart: latestStart ?? null,
+  })
+  if (!set) {
+    return refusal(deps, propertyId, changedMeanwhile)
+  }
+  deps.log.info(
+    change.from === latestStart
+      ? 'tenancy.rent_corrected'
+      : 'tenancy.rent_changed',
+    { propertyId, tenancyId },
+  )
+  return { ok: true }
+}
+
+/**
+ * Undoes a tenancy's latest rent change (openspec: tenancies, "Undoing a
+ * tenancy's rent change"). The first rent stays: there is nothing to undo
+ * with fewer than two periods.
+ */
+export async function undoTenancyRent(
+  deps: TenancyDeps,
+  propertyId: string,
+  tenancyId: string,
+): Promise<{ ok: true } | Failure> {
+  const refused = await roleCheck(deps, propertyId)
+  if (refused) {
+    return refused
+  }
+  const tenancy = await deps.tenancies.get(tenancyId)
+  if (tenancy?.propertyId !== propertyId) {
+    return tenancyNotFound
+  }
+  const rents = (await deps.tenancies.rentsFor([tenancyId]))[tenancyId] ?? []
+  const latest = rents.at(-1)
+  const previous = rents.at(-2)
+  if (!latest || !previous) {
+    return fail('amount_nothing_to_undo')
+  }
+  const undone = await deps.tenancies.undoLatestRent({
+    actorId: deps.userId,
+    propertyId,
+    tenancyId,
+    latestStart: latest.validFrom,
+    previousStart: previous.validFrom,
+  })
+  if (!undone) {
+    return refusal(deps, propertyId, changedMeanwhile)
+  }
+  deps.log.info('tenancy.rent_change_undone', { propertyId, tenancyId })
   return { ok: true }
 }
 

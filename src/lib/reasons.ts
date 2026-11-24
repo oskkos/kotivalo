@@ -31,6 +31,8 @@ export type FieldReason =
   | 'amount_date_not_month_start'
   | 'amount_date_before_ownership'
   | 'amount_date_too_early'
+  | 'rent_date_before_tenancy'
+  | 'rent_date_after_tenancy'
   | 'treatment_required'
   | 'financing_charge_name_required'
   | 'financing_charge_name_too_long'
@@ -151,6 +153,12 @@ const texts: Record<Reason, () => ReasonText> = {
     text: m.reason_amount_date_before_ownership(),
   }),
   amount_date_too_early: () => ({ text: m.reason_amount_date_too_early() }),
+  rent_date_before_tenancy: () => ({
+    text: m.reason_rent_date_before_tenancy(),
+  }),
+  rent_date_after_tenancy: () => ({
+    text: m.reason_rent_date_after_tenancy(),
+  }),
   treatment_required: () => ({ text: m.reason_treatment_required() }),
   financing_charge_name_required: () => ({
     text: m.reason_financing_charge_name_required(),
