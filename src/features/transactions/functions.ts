@@ -20,7 +20,9 @@ import {
   createTransaction as create,
   deleteTransaction as remove,
   getNewTransactionOptions as newOptions,
+  getEntriesSince as entriesSinceOf,
   getTransaction as getOne,
+  WATER_CATEGORIES,
   getTransactions as getList,
   updateTransaction as update,
   type TransactionDeps,
@@ -172,4 +174,22 @@ export const deleteTransaction = createServerFn({ method: 'POST' })
   .validator(transactionRefInput)
   .handler(async ({ data }) =>
     remove(await transactionDeps(), data.propertyId, data.transactionId),
+  )
+
+/** The flat's water entries from a date on, for the charge and fee forms. */
+export const entriesSince = createServerFn({ method: 'GET' })
+  .validator(
+    z.object({
+      propertyId: z.string().min(1).max(64),
+      category: z.enum(WATER_CATEGORIES),
+      from: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+    }),
+  )
+  .handler(async ({ data }) =>
+    entriesSinceOf(
+      await transactionDeps(),
+      data.propertyId,
+      data.category,
+      data.from,
+    ),
   )

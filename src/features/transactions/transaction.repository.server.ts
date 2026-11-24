@@ -201,6 +201,29 @@ export function transactionRepository(db: Db) {
       }))
     },
 
+    /**
+     * How many entries of `category` the flat has dated on or after `from`,
+     * and their total in cents (openspec: "Water charge entries are warned
+     * about").
+     */
+    async categoryTotalSince(
+      propertyId: string,
+      category: TransactionCategory,
+      from: IsoDate,
+    ): Promise<{ count: number; total: number }> {
+      const [row] = await db
+        .select({ count: count(), total: sum(transactions.amount) })
+        .from(transactions)
+        .where(
+          and(
+            eq(transactions.propertyId, propertyId),
+            eq(transactions.category, category),
+            gte(transactions.date, from),
+          ),
+        )
+      return { count: row.count, total: Number(row.total ?? 0) }
+    },
+
     /** The years that have entries, newest first. */
     async years(propertyId: string): Promise<number[]> {
       const rows = await db

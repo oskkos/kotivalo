@@ -31,10 +31,10 @@
 
 ## 6. Tenant fees on the server
 
-- [ ] 6.1 `tenancy.repository.server.ts` fee writes: `addFee` (fee and first period in one batch), `setFeeAmount`, `undoFeeChange` (removing the fee with its only period), on the shared builder; Workers tests
-- [ ] 6.2 `tenancies.server.ts` and `functions.ts`: `addTenantFee`, `setTenantFee`, `undoTenantFee` (session, owner, `tenant_fee_not_found`, `description_required`, `amount_invalid`, `validateTenancyPeriodDate`, `amount_nothing_to_undo`, `amount_changed`); logs `tenancy.fee_added`, `tenancy.fee_amount_set`, `tenancy.fee_amount_corrected`, `tenancy.fee_change_undone`, `tenancy.fee_removed`; reasons `description_required` and `tenant_fee_not_found` with fi, sv and en
-- [ ] 6.3 `transaction.repository.server.ts`: `categoryTotalSince(propertyId, category, from)`; server function `entriesSince` for the forms' water warning (session, access); Workers tests
-- [ ] 6.4 Workers tests named after the server-side scenarios of "Adding a tenant fee", "Changing a tenant fee" and "Undoing a tenant fee change", asserting the log events; the fee scenarios of group 4's tests switched to `addTenantFee`
+- [x] 6.1 `tenancy.repository.server.ts` fee writes: `addFee` (fee and first period in one batch), `setFeeAmount`, `undoFeeChange` (removing the fee with its only period), on the shared builder; Workers tests
+- [x] 6.2 `tenancies.server.ts` and `functions.ts`: `addTenantFee`, `setTenantFee`, `undoTenantFee` (session, owner, `tenant_fee_not_found`, `description_required`, `amount_invalid`, `validateTenancyPeriodDate`, `amount_nothing_to_undo`, `amount_changed`); logs `tenancy.fee_added`, `tenancy.fee_amount_set`, `tenancy.fee_amount_corrected`, `tenancy.fee_change_undone`, `tenancy.fee_removed`; reasons `description_required` and `tenant_fee_not_found` with fi, sv and en
+- [x] 6.3 `transaction.repository.server.ts`: `categoryTotalSince(propertyId, category, from)`; server function `entriesSince` for the forms' water warning (session, access); Workers tests
+- [x] 6.4 Workers tests named after the server-side scenarios of "Adding a tenant fee", "Changing a tenant fee" and "Undoing a tenant fee change", asserting the log events; the fee scenarios of group 4's tests switched to `addTenantFee`
 
 ## 7. Tenant fees on the Tenancy page
 

@@ -23,6 +23,9 @@ import {
   validateRentDate,
   validateTenancyPeriodDate,
 } from './rent'
+import { MAX_AMOUNT } from '#/features/recurring-amounts/schemas'
+import { MAX_CHARGE_DESCRIPTION } from '#/lib/charge-fields'
+import type { ChargeBasis, ChargeKind } from '#/server/db/schema'
 import { MAX_OCCUPANTS } from './schemas'
 import { flatStatus } from './status'
 import type {
@@ -757,6 +760,197 @@ export async function undoTenancyOccupants(
     return refusal(deps, propertyId, changedMeanwhile)
   }
   deps.log.info('tenancy.occupants_change_undone', { propertyId, tenancyId })
+  return { ok: true }
+}
+
+/** A tenant fee's kind, basis and description, as the form sends them. */
+export interface FeeFields {
+  kind: ChargeKind
+  basis: ChargeBasis
+  /** Set for the kind `other`. */
+  description: string | null
+}
+
+/**
+ * Adds a tenant fee to a tenancy with its first amount from a date (openspec:
+ * tenancies, "Adding a tenant fee").
+ */
+export async function addTenantFee(
+  deps: TenancyDeps,
+  propertyId: string,
+  tenancyId: string,
+  fee: FeeFields & { amount: number; from: IsoDate },
+): Promise<{ ok: true; feeId: string } | Failure<FieldReason | AlertReason>> {
+  const refused = await roleCheck(deps, propertyId)
+  if (refused) {
+    return refused
+  }
+  const tenancy = await deps.tenancies.get(tenancyId)
+  if (tenancy?.propertyId !== propertyId) {
+    return tenancyNotFound
+  }
+  if (
+    !Number.isInteger(fee.amount) ||
+    fee.amount < 0 ||
+    fee.amount > MAX_AMOUNT
+  ) {
+    return fail('amount_invalid')
+  }
+  const description =
+    fee.kind === 'other' ? (fee.description?.trim() ?? '') : null
+  if (
+    fee.kind === 'other' &&
+    (description === null ||
+      description.length === 0 ||
+      description.length > MAX_CHARGE_DESCRIPTION)
+  ) {
+    return fail('description_required')
+  }
+  const problem = validateTenancyPeriodDate(fee.from, {
+    tenancy,
+    latestStart: undefined,
+  })
+  if (problem) {
+    return fail(problem)
+  }
+  const feeId = await deps.tenancies.addFee({
+    actorId: deps.userId,
+    propertyId,
+    tenancyId,
+    kind: fee.kind,
+    basis: fee.basis,
+    description,
+    amount: fee.amount,
+    from: fee.from,
+  })
+  if (feeId === null) {
+    return refusal(deps, propertyId, tenancyNotFound)
+  }
+  deps.log.info('tenancy.fee_added', { propertyId, tenancyId, feeId })
+  return { ok: true, feeId }
+}
+
+/** The tenancy's fee, with the tenancy it must belong to, or a reason. */
+async function loadFee(
+  deps: TenancyDeps,
+  propertyId: string,
+  tenancyId: string,
+  feeId: string,
+) {
+  const tenancy = await deps.tenancies.get(tenancyId)
+  if (tenancy?.propertyId !== propertyId) {
+    return { ok: false, failure: tenancyNotFound } as const
+  }
+  const fees = (await deps.tenancies.feesFor([tenancyId]))[tenancyId] ?? []
+  const fee = fees.find((f) => f.id === feeId)
+  if (!fee) {
+    return { ok: false, failure: fail('tenant_fee_not_found') } as const
+  }
+  return { ok: true, tenancy, fee } as const
+}
+
+/**
+ * Gives a tenant fee a new amount from a date (openspec: tenancies, "Changing
+ * a tenant fee"): a new period, or a correction on the latest period's start.
+ * An amount of 0 ends the fee.
+ */
+export async function setTenantFee(
+  deps: TenancyDeps,
+  propertyId: string,
+  tenancyId: string,
+  feeId: string,
+  change: { amount: number; from: IsoDate },
+): Promise<{ ok: true } | Failure<FieldReason | AlertReason>> {
+  const refused = await roleCheck(deps, propertyId)
+  if (refused) {
+    return refused
+  }
+  const loaded = await loadFee(deps, propertyId, tenancyId, feeId)
+  if (!loaded.ok) {
+    return loaded.failure
+  }
+  const { tenancy, fee } = loaded
+  if (
+    !Number.isInteger(change.amount) ||
+    change.amount < 0 ||
+    change.amount > MAX_AMOUNT
+  ) {
+    return fail('amount_invalid')
+  }
+  const latestStart = fee.amounts.at(-1)?.validFrom
+  const problem = validateTenancyPeriodDate(change.from, {
+    tenancy,
+    latestStart,
+  })
+  if (problem) {
+    return fail(problem)
+  }
+  if (latestStart === undefined) {
+    return fail('tenant_fee_not_found')
+  }
+  const corrects = latestStart === change.from
+  const set = await deps.tenancies.setFeeAmount({
+    actorId: deps.userId,
+    propertyId,
+    tenancyId,
+    feeId,
+    amount: change.amount,
+    from: change.from,
+    latestStart,
+    corrects,
+  })
+  if (!set) {
+    return refusal(deps, propertyId, changedMeanwhile)
+  }
+  deps.log.info(
+    corrects ? 'tenancy.fee_amount_corrected' : 'tenancy.fee_amount_set',
+    { propertyId, tenancyId, feeId },
+  )
+  return { ok: true }
+}
+
+/**
+ * Undoes a tenant fee's latest change (openspec: tenancies, "Undoing a tenant
+ * fee change"); the fee's only amount undone removes the fee.
+ */
+export async function undoTenantFee(
+  deps: TenancyDeps,
+  propertyId: string,
+  tenancyId: string,
+  feeId: string,
+): Promise<{ ok: true } | Failure> {
+  const refused = await roleCheck(deps, propertyId)
+  if (refused) {
+    return refused
+  }
+  const loaded = await loadFee(deps, propertyId, tenancyId, feeId)
+  if (!loaded.ok) {
+    return loaded.failure
+  }
+  const latest = loaded.fee.amounts.at(-1)
+  if (!latest) {
+    return fail('amount_nothing_to_undo')
+  }
+  const previous = loaded.fee.amounts.at(-2)
+  const undone = await deps.tenancies.undoFeeChange({
+    actorId: deps.userId,
+    propertyId,
+    tenancyId,
+    feeId,
+    latestStart: latest.validFrom,
+    previousStart: previous?.validFrom ?? null,
+  })
+  if (!undone) {
+    return refusal(deps, propertyId, changedMeanwhile)
+  }
+  deps.log.info(
+    previous ? 'tenancy.fee_change_undone' : 'tenancy.fee_removed',
+    {
+      propertyId,
+      tenancyId,
+      feeId,
+    },
+  )
   return { ok: true }
 }
 

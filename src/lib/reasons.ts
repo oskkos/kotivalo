@@ -62,6 +62,7 @@ export type FieldReason =
   | 'rent_payment_amount_invalid'
   | 'rent_payment_date_in_future'
   | 'occupants_invalid'
+  | 'description_required'
 
 /** Errors about the whole action, shown as an alert with a title. */
 export type AlertReason =
@@ -98,6 +99,7 @@ export type AlertReason =
   | 'tenancy_has_rent_after_end'
   | 'tenancy_start_after_rent_change'
   | 'occupants_nothing_to_undo'
+  | 'tenant_fee_not_found'
   | 'tenancy_has_changes_after_end'
   | 'tenancy_start_after_change'
   | 'rent_payment_month_outside_tenancy'
@@ -364,6 +366,11 @@ const texts: Record<Reason, () => ReasonText> = {
     text: m.reason_tenancy_has_payments(),
   }),
   occupants_invalid: () => ({ text: m.reason_occupants_invalid() }),
+  description_required: () => ({ text: m.reason_description_required() }),
+  tenant_fee_not_found: () => ({
+    title: m.reason_tenant_fee_not_found_title(),
+    text: m.reason_tenant_fee_not_found(),
+  }),
   rent_payment_amount_invalid: () => ({
     text: m.reason_rent_payment_amount_invalid(),
   }),

@@ -264,6 +264,31 @@ export async function getTransactions(
   }
 }
 
+/** The water charge categories a new charge or fee warns about. */
+export const WATER_CATEGORIES = ['water_charge', 'tenant_water_charge'] as const
+
+/**
+ * The flat's entries of a water category from a date on, for the warning the
+ * usage charge and tenant fee forms show (openspec: "Water charge entries are
+ * warned about"). For everyone with access.
+ */
+export async function getEntriesSince(
+  deps: TransactionDeps,
+  propertyId: string,
+  category: (typeof WATER_CATEGORIES)[number],
+  from: IsoDate,
+): Promise<{ ok: true; count: number; total: number } | typeof notFound> {
+  if ((await deps.sharing.roleOf(deps.userId, propertyId)) === undefined) {
+    return notFound
+  }
+  const found = await deps.transactions.categoryTotalSince(
+    propertyId,
+    category,
+    from,
+  )
+  return { ok: true, ...found }
+}
+
 export async function getTransaction(
   deps: TransactionDeps,
   propertyId: string,

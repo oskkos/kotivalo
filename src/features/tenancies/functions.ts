@@ -7,15 +7,19 @@ import { propertyRepository } from '#/features/properties/property.repository.se
 import { sharingRepository } from '#/features/sharing/sharing.repository.server'
 import { getRequestContext } from '#/server/platform/context.server'
 import {
+  addTenantFeeInput,
   createTenancyInput,
   endTenancyInput,
   propertyRefInput,
   setTenancyOccupantsInput,
   setTenancyRentInput,
+  setTenantFeeInput,
   tenancyRefInput,
+  tenantFeeRefInput,
   updateTenancyInput,
 } from './schemas'
 import {
+  addTenantFee as addFee,
   cancelTenancyEnding as cancel,
   createTenancy as create,
   endTenancy as end,
@@ -26,6 +30,8 @@ import {
   removeTenancy as remove,
   setTenancyOccupants as setOccupants,
   setTenancyRent as setRent,
+  setTenantFee as setFee,
+  undoTenantFee as undoFee,
   undoTenancyOccupants as undoOccupants,
   undoTenancyRent as undoRent,
   updateTenancy as update,
@@ -139,4 +145,34 @@ export const undoTenancyOccupants = createServerFn({ method: 'POST' })
   .validator(tenancyRefInput)
   .handler(async ({ data }) =>
     undoOccupants(await tenancyDeps(), data.propertyId, data.tenancyId),
+  )
+
+export const addTenantFee = createServerFn({ method: 'POST' })
+  .validator(addTenantFeeInput)
+  .handler(async ({ data }) => {
+    const { propertyId, tenancyId, kind, basis, description, amount, from } =
+      data
+    return addFee(await tenancyDeps(), propertyId, tenancyId, {
+      kind,
+      basis,
+      description,
+      amount,
+      from,
+    })
+  })
+
+export const setTenantFee = createServerFn({ method: 'POST' })
+  .validator(setTenantFeeInput)
+  .handler(async ({ data }) => {
+    const { propertyId, tenancyId, feeId, amount, from } = data
+    return setFee(await tenancyDeps(), propertyId, tenancyId, feeId, {
+      amount,
+      from,
+    })
+  })
+
+export const undoTenantFee = createServerFn({ method: 'POST' })
+  .validator(tenantFeeRefInput)
+  .handler(async ({ data }) =>
+    undoFee(await tenancyDeps(), data.propertyId, data.tenancyId, data.feeId),
   )

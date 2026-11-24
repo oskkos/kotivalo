@@ -4,6 +4,7 @@
 import { z } from 'zod'
 import { typedDate } from '#/features/ownership/schemas'
 import { typedAmount } from '#/features/recurring-amounts/schemas'
+import { chargeFields } from '#/lib/charge-fields'
 import type { FieldReason } from '#/lib/reasons'
 import { CONTRACT_TYPES, NOTICE_GIVERS } from '#/server/db/schema'
 
@@ -145,6 +146,20 @@ export const setTenancyOccupantsInput = tenancyRefInput.extend({
   persons: typedOccupants,
   from: typedDate,
 })
+
+/** A new tenant fee with its first amount (openspec: "Adding a tenant fee"). */
+export const addTenantFeeInput = tenancyRefInput
+  .and(chargeFields)
+  .and(z.object({ amount: typedAmount, from: typedDate }))
+
+/** A tenant fee's new amount from a date ("Changing a tenant fee"). */
+export const setTenantFeeInput = tenancyRefInput.extend({
+  feeId: id,
+  amount: typedAmount,
+  from: typedDate,
+})
+
+export const tenantFeeRefInput = tenancyRefInput.extend({ feeId: id })
 
 export const propertyRefInput = z.object({ propertyId: id })
 
