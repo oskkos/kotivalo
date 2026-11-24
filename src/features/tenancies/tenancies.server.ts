@@ -510,7 +510,7 @@ const changedMeanwhile = fail('amount_changed')
 
 /**
  * Sets a tenancy's rent from a date (openspec: tenancies, "Changing a
- * tenancy's rent"): a new period, or a correction on the latest one's start.
+ * tenancy's rent"): a new period, or a correction on a period's start.
  */
 export async function setTenancyRent(
   deps: TenancyDeps,
@@ -527,13 +527,11 @@ export async function setTenancyRent(
     return tenancyNotFound
   }
   const rents = (await deps.tenancies.rentsFor([tenancyId]))[tenancyId] ?? []
-  const firstStart = rents.at(0)?.validFrom
-  const latestStart = rents.at(-1)?.validFrom
-  const problem = validateRentDate(change.from, {
-    tenancy,
-    firstStart,
-    latestStart,
-  })
+  const starts = rents.map((rent) => rent.validFrom)
+  const firstStart = starts.at(0)
+  const latestStart = starts.at(-1)
+  const corrects = starts.includes(change.from)
+  const problem = validateRentDate(change.from, { tenancy, starts })
   if (problem) {
     return fail(problem)
   }
@@ -544,17 +542,16 @@ export async function setTenancyRent(
     amount: change.amount,
     from: change.from,
     latestStart: latestStart ?? null,
+    corrects,
     ...(fillsBeforeFirst(change.from, firstStart) && { firstStart }),
   })
   if (!set) {
     return refusal(deps, propertyId, changedMeanwhile)
   }
-  deps.log.info(
-    change.from === latestStart
-      ? 'tenancy.rent_corrected'
-      : 'tenancy.rent_changed',
-    { propertyId, tenancyId },
-  )
+  deps.log.info(corrects ? 'tenancy.rent_corrected' : 'tenancy.rent_changed', {
+    propertyId,
+    tenancyId,
+  })
   return { ok: true }
 }
 

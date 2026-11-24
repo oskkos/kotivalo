@@ -1100,6 +1100,28 @@ describe("Changing a tenancy's rent", () => {
     ).toEqual({ ok: false, reason: 'amount_date_too_early' })
   })
 
+  test('Correcting an earlier rent period', async () => {
+    const id = await addId(aino, 85000)
+    await setTenancyRent(deps(), flat, id, {
+      amount: 89000,
+      from: '2026-01-01',
+    })
+    expect(
+      await setTenancyRent(deps(), flat, id, {
+        amount: 80000,
+        from: '2025-03-01',
+      }),
+    ).toEqual({ ok: true })
+    expect(await tenancyRents(id)).toEqual([
+      { validFrom: '2025-03-01', validTo: '2025-12-31', value: 80000 },
+      { validFrom: '2026-01-01', validTo: null, value: 89000 },
+    ])
+    expect(capture.lines.at(-1)).toMatchObject({
+      event: 'tenancy.rent_corrected',
+      tenancyId: id,
+    })
+  })
+
   test("Another flat's tenancy is not found", async () => {
     const id = await addId(aino)
     const second = (
