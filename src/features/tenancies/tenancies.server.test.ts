@@ -16,6 +16,8 @@ import {
   getTenancy,
   listTenancyStatuses,
   removeTenancy,
+  setTenancyRent,
+  undoTenancyRent,
   updateTenancy,
   type TenancyDeps,
 } from './tenancies.server'
@@ -172,7 +174,9 @@ describe('Adding a tenant', () => {
         dueDay: 5,
       }),
     ])
-    expect(seen.rentToday).toBe(89000)
+    expect(seen.rents[id]).toEqual([
+      { validFrom: '2025-03-01', validTo: null, value: 89000 },
+    ])
   })
 
   test('Adding a fixed-term tenancy', async () => {
@@ -983,5 +987,163 @@ describe('Rent changes stay inside their tenancy', () => {
         fixedTerm('2027-01-01', '2027-05-31'),
       ),
     ).toEqual({ ok: false, reason: 'tenancy_has_rent_after_end' })
+  })
+})
+
+describe("Changing a tenancy's rent", () => {
+  test('Raising the rent from March', async () => {
+    const id = await addId(aino, 89000)
+    expect(
+      await setTenancyRent(deps(), flat, id, {
+        amount: 92000,
+        from: '2027-03-01',
+      }),
+    ).toEqual({ ok: true })
+    expect(await tenancyRents(id)).toEqual([
+      { validFrom: '2025-03-01', validTo: '2027-02-28', value: 89000 },
+      { validFrom: '2027-03-01', validTo: null, value: 92000 },
+    ])
+    expect(capture.lines.at(-1)).toMatchObject({
+      event: 'tenancy.rent_changed',
+      propertyId: flat,
+      tenancyId: id,
+    })
+    expect(JSON.stringify(capture.lines.at(-1))).not.toContain('92000')
+  })
+
+  test("Correcting the first rent on the tenancy's start", async () => {
+    const id = await addId(fixedTerm('2026-11-15', '2027-11-14'), 90000)
+    expect(
+      await setTenancyRent(deps(), flat, id, {
+        amount: 95000,
+        from: '2026-11-15',
+      }),
+    ).toEqual({ ok: true })
+    expect(await tenancyRents(id)).toEqual([
+      { validFrom: '2026-11-15', validTo: null, value: 95000 },
+    ])
+    expect(capture.lines.at(-1)?.event).toBe('tenancy.rent_corrected')
+  })
+
+  test('A mid-month date other than the start is refused', async () => {
+    const id = await addId(aino)
+    expect(
+      await setTenancyRent(deps(), flat, id, {
+        amount: 92000,
+        from: '2027-03-15',
+      }),
+    ).toEqual({ ok: false, reason: 'amount_date_not_month_start' })
+  })
+
+  test('A date before the tenancy is refused', async () => {
+    const id = await addId(aino)
+    expect(
+      await setTenancyRent(deps(), flat, id, {
+        amount: 92000,
+        from: '2025-01-01',
+      }),
+    ).toEqual({ ok: false, reason: 'rent_date_before_tenancy' })
+  })
+
+  test('A date after the tenancy is refused', async () => {
+    const id = await addId(fixedTerm('2026-02-01', '2027-01-31'))
+    expect(
+      await setTenancyRent(deps(), flat, id, {
+        amount: 92000,
+        from: '2027-02-01',
+      }),
+    ).toEqual({ ok: false, reason: 'rent_date_after_tenancy' })
+    expect(await tenancyRents(id)).toHaveLength(1)
+  })
+
+  test('A rent date before the latest change is refused', async () => {
+    const id = await addId(aino)
+    await setTenancyRent(deps(), flat, id, {
+      amount: 89000,
+      from: '2026-03-01',
+    })
+    expect(
+      await setTenancyRent(deps(), flat, id, {
+        amount: 92000,
+        from: '2025-06-01',
+      }),
+    ).toEqual({ ok: false, reason: 'amount_date_too_early' })
+  })
+
+  test("Another flat's tenancy is not found", async () => {
+    const id = await addId(aino)
+    const second = (
+      await propertyRepository(db).create(
+        'annika',
+        {
+          streetAddress: 'Koivupolku 7 A 4',
+          postcode: '33100',
+          city: 'Tampere',
+          roomCount: 1,
+          floorArea: 310,
+        },
+        now,
+        '2025-03-01',
+      )
+    ).id
+    expect(
+      await setTenancyRent(deps(), second, id, {
+        amount: 92000,
+        from: '2027-03-01',
+      }),
+    ).toEqual({ ok: false, reason: 'tenancy_not_found' })
+    expect(await tenancyRents(id)).toHaveLength(1)
+  })
+
+  test("A member can't change the rent", async () => {
+    const id = await addId(aino)
+    expect(
+      await setTenancyRent(deps('jussi'), flat, id, {
+        amount: 92000,
+        from: '2027-03-01',
+      }),
+    ).toEqual({ ok: false, reason: 'sharing_owner_only' })
+    expect(await tenancyRents(id)).toHaveLength(1)
+  })
+})
+
+describe("Undoing a tenancy's rent change", () => {
+  async function withIncrease() {
+    const id = await addId(aino, 89000)
+    await setTenancyRent(deps(), flat, id, {
+      amount: 92000,
+      from: '2027-03-01',
+    })
+    return id
+  }
+
+  test('Undoing a rent increase', async () => {
+    const id = await withIncrease()
+    expect(await undoTenancyRent(deps(), flat, id)).toEqual({ ok: true })
+    expect(await tenancyRents(id)).toEqual([
+      { validFrom: '2025-03-01', validTo: null, value: 89000 },
+    ])
+    expect(capture.lines.at(-1)).toMatchObject({
+      event: 'tenancy.rent_change_undone',
+      tenancyId: id,
+    })
+  })
+
+  test("The first rent can't be undone", async () => {
+    const id = await addId(aino)
+    expect(await undoTenancyRent(deps(), flat, id)).toEqual({
+      ok: false,
+      reason: 'amount_nothing_to_undo',
+    })
+    expect(await tenancyRents(id)).toHaveLength(1)
+  })
+
+  test("A member can't undo a rent change", async () => {
+    const id = await withIncrease()
+    expect(await undoTenancyRent(deps('jussi'), flat, id)).toEqual({
+      ok: false,
+      reason: 'sharing_owner_only',
+    })
+    expect(await tenancyRents(id)).toHaveLength(2)
   })
 })

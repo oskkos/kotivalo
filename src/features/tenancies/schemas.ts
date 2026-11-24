@@ -118,6 +118,12 @@ export const endTenancyInput = endingFields.extend({
 
 export const tenancyRefInput = z.object({ propertyId: id, tenancyId: id })
 
+/** A tenancy's new rent from a date (openspec: "Changing a tenancy's rent"). */
+export const setTenancyRentInput = tenancyRefInput.extend({
+  amount: typedAmount,
+  from: typedDate,
+})
+
 export const propertyRefInput = z.object({ propertyId: id })
 
 export type TenancyFieldsInput = z.input<typeof tenancyFields>
