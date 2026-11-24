@@ -39,7 +39,7 @@ export interface FinancingCharge {
 
 export interface RecurringAmounts {
   /** The rent's and the maintenance charge's periods, oldest first. */
-  amounts: Record<'rent' | 'maintenance_charge', Period<number>[]>
+  amounts: Record<'maintenance_charge', Period<number>[]>
   /** Ordered by their first period's start, then name. */
   financingCharges: FinancingCharge[]
   /** Oldest first. */
@@ -267,7 +267,6 @@ export function recurringAmountRepository(db: Db) {
       const of = (kind: RecurringAmountKind) =>
         amountRows.filter((row) => row.kind === kind).map(period)
       const amounts = {
-        rent: of('rent'),
         maintenance_charge: of('maintenance_charge'),
       }
       return {

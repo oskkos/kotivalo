@@ -3,7 +3,7 @@
 // RahoitusMuutos): the new amount, its start date, the difference and its
 // effect on that year, the history, and undoing the latest change, which
 // removes a financing charge with its only amount. A financing charge's form
-// also renames it and ends it (spec: "Setting a rent or charge", "Undoing
+// also renames it and ends it (spec: "Setting a charge", "Undoing
 // the latest rent or charge change", "Renaming a financing charge", "Ending a
 // financing charge").
 import Box from '@mui/material/Box'
@@ -56,10 +56,6 @@ interface Props {
 
 const titles: Record<SingleKind, { set: () => string; change: () => string }> =
   {
-    rent: {
-      set: () => m.amounts_form_set_rent(),
-      change: () => m.amounts_form_change_rent(),
-    },
     maintenance_charge: {
       set: () => m.amounts_form_set_maintenance_charge(),
       change: () => m.amounts_form_change_maintenance_charge(),
@@ -118,9 +114,6 @@ function targetOf(
   view: RecurringAmountsView,
   from: string,
 ): Target {
-  if (kind === 'rent') {
-    return 'rental_income'
-  }
   if (kind === 'maintenance_charge') {
     return 'expenses'
   }
@@ -549,9 +542,7 @@ export function AmountForm(props: Props) {
                 ? m.amounts_charge_end_hint()
                 : latest === undefined
                   ? m.amounts_form_hint_first()
-                  : kind === 'rent'
-                    ? m.amounts_form_hint_rent()
-                    : m.amounts_form_hint_charge()}
+                  : m.amounts_form_hint_charge()}
             </Typography>
           </>
         )}

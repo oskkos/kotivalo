@@ -138,11 +138,12 @@ describe('The entries page', () => {
     expect(screen.queryByRole('link', { name: /New entry/ })).toBeNull()
   })
 
-  test('the note links to the rent and charges page', () => {
+  test('the note links to the charges page', () => {
     setup(view())
-    expect(
-      screen.getByRole('link', { name: 'Rent and charges' }),
-    ).toHaveAttribute('href', '/properties/flat/amounts')
+    expect(screen.getByRole('link', { name: 'Charges' })).toHaveAttribute(
+      'href',
+      '/properties/flat/amounts',
+    )
   })
 })
 

@@ -11,7 +11,7 @@ const empty: RecurringAmountsView = {
   today: '2026-11-21',
   ownershipStart: '2025-03-01',
   capitalised: 0,
-  amounts: { rent: [], maintenance_charge: [] },
+  amounts: { maintenance_charge: [] },
   financingCharges: [],
   treatments: [],
 }
@@ -26,7 +26,6 @@ const filled: RecurringAmountsView = {
   ...empty,
   capitalised: 131600,
   amounts: {
-    rent: [{ validFrom: '2025-03-01', validTo: null, value: 89000 }],
     maintenance_charge: [
       { validFrom: '2026-01-01', validTo: '2026-12-31', value: 21400 },
       { validFrom: '2027-01-01', validTo: null, value: 22600 },
@@ -84,10 +83,10 @@ function setup(view: RecurringAmountsView) {
 
 const section = (name: string) => screen.getByRole('region', { name })
 
-describe('The rent and charges page', () => {
+describe('The charge amounts page', () => {
   test('A flat without amounts', () => {
     setup(empty)
-    for (const name of ['Rent', 'Maintenance charge', 'Financing charge']) {
+    for (const name of ['Maintenance charge', 'Financing charge']) {
       expect(within(section(name)).getAllByText('Not set')[0]).toBeVisible()
     }
     expect(
@@ -96,7 +95,15 @@ describe('The rent and charges page', () => {
     expect(
       screen.getByRole('button', { name: 'Add financing charge' }),
     ).toBeVisible()
-    expect(screen.getByRole('button', { name: 'Set: Rent' })).toBeVisible()
+    expect(
+      screen.getByRole('button', { name: 'Set: Maintenance charge' }),
+    ).toBeVisible()
+    expect(screen.queryByRole('region', { name: 'Rent' })).toBeNull()
+    expect(
+      screen.getByText(
+        /The rent belongs to the tenancy and is changed on the tenancy page\./,
+      ),
+    ).toBeVisible()
     expect(
       screen.getByRole('button', {
         name: 'Set: Treatment by the housing company',
@@ -120,7 +127,9 @@ describe('The rent and charges page', () => {
 
   test("A member sees the amounts but can't change them", () => {
     setup({ ...several, role: 'member' })
-    expect(within(section('Rent')).getByText('€890.00/month')).toBeVisible()
+    expect(
+      within(section('Maintenance charge')).getByText('€214.00/month'),
+    ).toBeVisible()
     expect(
       within(section('Financing charges')).getByText('Putkiremontti'),
     ).toBeVisible()
@@ -129,7 +138,7 @@ describe('The rent and charges page', () => {
       screen.queryByRole('button', { name: 'Add financing charge' }),
     ).toBeNull()
     expect(
-      screen.getByText('Only owners can change the amounts.'),
+      screen.getByText(/^Only owners can change the amounts\./),
     ).toBeVisible()
   })
 
@@ -146,13 +155,15 @@ describe('The rent and charges page', () => {
 
   test('the buttons open the forms', async () => {
     const { user, onEdit } = setup(filled)
-    await user.click(screen.getByRole('button', { name: 'Change: Rent' }))
+    await user.click(
+      screen.getByRole('button', { name: 'Change: Maintenance charge' }),
+    )
     await user.click(
       screen.getByRole('button', {
         name: 'Change: Treatment by the housing company',
       }),
     )
-    expect(onEdit.mock.calls).toEqual([['rent'], ['treatment']])
+    expect(onEdit.mock.calls).toEqual([['maintenance_charge'], ['treatment']])
   })
 
   test('Several financing charges with their sum', () => {

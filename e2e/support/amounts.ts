@@ -9,7 +9,7 @@ export async function openAmounts(page: Page, id: string) {
 }
 
 /**
- * On the Rent and charges page: sets or changes an amount via its form; a
+ * On the Charges page: sets or changes an amount via its form; a
  * financing charge by its name.
  */
 export async function setAmount(
@@ -26,11 +26,11 @@ export async function setAmount(
   await page.getByRole('textbox', { name: 'Valid from' }).fill(from)
   await page.getByRole('button', { name: /^Save/ }).click()
   await expect(
-    page.getByRole('heading', { name: 'Rent and charges' }),
+    page.getByRole('heading', { name: 'Charges', exact: true }),
   ).toBeVisible()
 }
 
-/** On the Rent and charges page: sets the treatment via its form. */
+/** On the Charges page: sets the treatment via its form. */
 export async function setTreatment(
   page: Page,
   treatment: string,
@@ -46,11 +46,11 @@ export async function setTreatment(
   await page.getByRole('textbox', { name: 'Valid from' }).fill(from)
   await page.getByRole('button', { name: 'Save' }).click()
   await expect(
-    page.getByRole('heading', { name: 'Rent and charges' }),
+    page.getByRole('heading', { name: 'Charges', exact: true }),
   ).toBeVisible()
 }
 
-/** On the Rent and charges page: adds a financing charge via its form. */
+/** On the Charges page: adds a financing charge via its form. */
 export async function addFinancingCharge(
   page: Page,
   name: string,
@@ -64,6 +64,6 @@ export async function addFinancingCharge(
   await page.getByRole('textbox', { name: 'Valid from' }).fill(from)
   await page.getByRole('button', { name: 'Add', exact: true }).click()
   await expect(
-    page.getByRole('heading', { name: 'Rent and charges' }),
+    page.getByRole('heading', { name: 'Charges', exact: true }),
   ).toBeVisible()
 }

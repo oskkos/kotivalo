@@ -209,9 +209,11 @@ export const ownershipPeriods = sqliteTable(
   ],
 )
 
-/** The monthly amounts a flat has (openspec: recurring-amounts). */
+/**
+ * The monthly charges a flat has (openspec: recurring-amounts). The rent is
+ * the tenancy's (tenancy_rents).
+ */
 export const RECURRING_AMOUNT_KINDS = [
-  'rent',
   'maintenance_charge',
   'financing_charge',
 ] as const
@@ -239,9 +241,8 @@ export const financingCharges = sqliteTable(
 )
 
 /**
- * Rent and charges over time (openspec: recurring-amounts). One row per
- * sequence and period: the rent, the maintenance charge, or one financing
- * charge (`financing_charge_id`, set on every financing_charge row). Every
+ * Charges over time (openspec: recurring-amounts). One row per sequence
+ * and period: the maintenance charge, or one financing charge (`financing_charge_id`, set on every financing_charge row). Every
  * period starts on the first of a month. A change closes the open row the
  * day before and adds the next, so rows are never overwritten. Monthly
  * amounts are computed from these rows, never stored.

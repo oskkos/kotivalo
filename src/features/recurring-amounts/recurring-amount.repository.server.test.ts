@@ -20,7 +20,7 @@ const details = {
   floorArea: 485,
 }
 
-const amounts = async (kind: 'rent' | 'maintenance_charge') =>
+const amounts = async (kind: 'maintenance_charge') =>
   (await repo.forProperty(flat)).amounts[kind]
 
 beforeEach(async () => {
@@ -53,7 +53,7 @@ const set = (
   from: '2025-03-01' | '2026-01-01' | '2027-01-01',
   amount: number,
   latestStart: string | null,
-  kind: 'rent' | 'maintenance_charge' = 'maintenance_charge',
+  kind: 'maintenance_charge' = 'maintenance_charge',
   actorId = 'annika',
 ) =>
   repo.setAmount({
@@ -68,7 +68,7 @@ const set = (
 describe('The recurring amount repository', () => {
   test('a flat without amounts has empty periods', async () => {
     expect(await repo.forProperty(flat)).toEqual({
-      amounts: { rent: [], maintenance_charge: [] },
+      amounts: { maintenance_charge: [] },
       financingCharges: [],
       treatments: [],
     })
@@ -115,20 +115,16 @@ describe('The recurring amount repository', () => {
     expect(await amounts('maintenance_charge')).toEqual([])
   })
 
-  test('kinds and flats are separate', async () => {
+  test('flats are separate', async () => {
     await set('2025-03-01', 20500, null)
-    await set('2025-03-01', 89000, null, 'rent')
     await repo.setAmount({
       propertyId: other,
       actorId: 'annika',
-      kind: 'rent',
+      kind: 'maintenance_charge',
       amount: 50000,
       from: '2026-01-01',
       latestStart: null,
     })
-    expect(await amounts('rent')).toEqual([
-      { validFrom: '2025-03-01', validTo: null, value: 89000 },
-    ])
     expect(await amounts('maintenance_charge')).toEqual([
       { validFrom: '2025-03-01', validTo: null, value: 20500 },
     ])
@@ -168,7 +164,6 @@ describe('The recurring amount repository', () => {
 
   test('undoing the only period leaves the amount unset', async () => {
     await set('2025-03-01', 20500, null)
-    await set('2025-03-01', 89000, null, 'rent')
     expect(
       await repo.undoLatestAmount({
         propertyId: flat,
@@ -179,7 +174,6 @@ describe('The recurring amount repository', () => {
       }),
     ).toBe(true)
     expect(await amounts('maintenance_charge')).toEqual([])
-    expect(await amounts('rent')).toHaveLength(1)
   })
 
   test('undoing the only period does not apply after a new one was added', async () => {
@@ -283,27 +277,13 @@ describe('The recurring amount repository', () => {
   })
 })
 
-describe('Rent and charges are recorded as monthly periods', () => {
+describe('Charges are recorded as monthly periods', () => {
   test('A new amount ends the previous period the month before', async () => {
-    await repo.setAmount({
-      propertyId: flat,
-      actorId: 'annika',
-      kind: 'rent',
-      amount: 89000,
-      from: '2025-03-01',
-      latestStart: null,
-    })
-    await repo.setAmount({
-      propertyId: flat,
-      actorId: 'annika',
-      kind: 'rent',
-      amount: 92000,
-      from: '2027-03-01',
-      latestStart: '2025-03-01',
-    })
-    expect(await amounts('rent')).toEqual([
-      { validFrom: '2025-03-01', validTo: '2027-02-28', value: 89000 },
-      { validFrom: '2027-03-01', validTo: null, value: 92000 },
+    await set('2026-01-01', 21400, null)
+    await set('2027-01-01', 22600, '2026-01-01')
+    expect(await amounts('maintenance_charge')).toEqual([
+      { validFrom: '2026-01-01', validTo: '2026-12-31', value: 21400 },
+      { validFrom: '2027-01-01', validTo: null, value: 22600 },
     ])
   })
 })
@@ -342,7 +322,7 @@ describe('Financing charges in the repository', () => {
     })
   const charges = async () => (await repo.forProperty(flat)).financingCharges
 
-  describe('Rent and charges are recorded as monthly periods', () => {
+  describe('Charges are recorded as monthly periods', () => {
     test('Each financing charge has its own periods', async () => {
       expect(await add('putki', 'Putkiremontti', 8600, '2025-03-01')).toBe(true)
       expect(await add('julkisivu', 'Julkisivu', 4200, '2026-01-01')).toBe(true)

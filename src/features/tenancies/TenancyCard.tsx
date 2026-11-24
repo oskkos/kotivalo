@@ -1,12 +1,14 @@
-// The tenancy card on a flat's details page (Design canvas: Asunnon tiedot):
-// the current tenant with the contract type, start and due day; it opens the
-// Tenancy page (openspec: properties, "The flat details page").
+// The tenancy card on a flat's details page (Design canvas: Asunnon tiedot
+// · vuokra vuokrasuhteella): the current tenant with the contract type,
+// start and due day, and the rent with its next change when given; it opens
+// the Tenancy page (openspec: properties, "The flat details page").
 import Box from '@mui/material/Box'
 import Link from '@mui/material/Link'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { createLink } from '@tanstack/react-router'
-import { formatDate } from '#/lib/format'
+import { periodOn, type Period } from '#/features/recurring-amounts/periods'
+import { formatDate, formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 import { colors, radii } from '#/theme/tokens'
 import { contractShortLabel } from './labels'
@@ -21,8 +23,24 @@ export function TenancyCard(props: {
   tenancy: Tenancy | null
   /** Adds the due day, as the flat details page shows it. */
   showDueDay?: boolean
+  /** The tenancy's rent periods, oldest first, to show the rent. */
+  rents?: readonly Period<number>[]
+  /** Today, for the rent in effect. */
+  today?: string
 }) {
-  const { tenancy } = props
+  const { tenancy, rents, today } = props
+  // The rent today, or the first rent of a tenancy that starts later.
+  const day =
+    tenancy && today !== undefined
+      ? today < tenancy.validFrom
+        ? tenancy.validFrom
+        : today
+      : undefined
+  const rent = rents && day !== undefined ? periodOn(rents, day) : undefined
+  const next =
+    rents && day !== undefined
+      ? rents.find((p) => p.validFrom > day)
+      : undefined
   return (
     <CardLink
       to="/properties/$propertyId/tenancy"
@@ -82,6 +100,24 @@ export function TenancyCard(props: {
           </Typography>
         ) : null}
       </Stack>
+      {rent ? (
+        <Stack sx={{ alignItems: 'flex-end', flexShrink: 0 }}>
+          <Typography sx={{ fontSize: 16, fontWeight: 900 }}>
+            {m.amounts_per_month({ amount: formatMoney(rent.value) })}
+          </Typography>
+          {next ? (
+            <Typography
+              variant="body2"
+              sx={{ fontSize: 11, fontWeight: 800, color: 'text.secondary' }}
+            >
+              {m.amounts_upcoming({
+                date: formatDate(next.validFrom),
+                amount: formatMoney(next.value),
+              })}
+            </Typography>
+          ) : null}
+        </Stack>
+      ) : null}
       <svg
         width="20"
         height="20"

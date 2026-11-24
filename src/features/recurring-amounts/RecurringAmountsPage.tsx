@@ -120,9 +120,7 @@ function AmountCard(props: {
           <Typography variant="body2" color="text.secondary">
             {current
               ? m.amounts_from({ date: formatDate(current.validFrom) })
-              : props.kind === 'rent'
-                ? m.amounts_rent_hint()
-                : m.amounts_charge_hint()}
+              : m.amounts_charge_hint()}
           </Typography>
         </Stack>
         {props.canEdit ? (
@@ -558,7 +556,8 @@ export function RecurringAmountsPage(props: Props) {
           </Box>
         ) : null}
         <Typography variant="body2" color="text.secondary">
-          {canEdit ? m.amounts_footnote() : m.amounts_member_note()}
+          {canEdit ? m.amounts_footnote() : m.amounts_member_note()}{' '}
+          {m.amounts_rent_note()}
         </Typography>
       </Stack>
     </Stack>

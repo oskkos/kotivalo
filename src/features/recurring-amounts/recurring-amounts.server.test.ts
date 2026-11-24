@@ -41,7 +41,7 @@ function deps(userId: string): RecurringAmountDeps {
 }
 
 const set = (
-  kind: 'rent' | 'maintenance_charge',
+  kind: 'maintenance_charge',
   amount: number,
   from: string,
   userId = 'annika',
@@ -90,12 +90,12 @@ beforeEach(async () => {
     .run()
 })
 
-describe('Getting the rent and charges', () => {
+describe('Getting the charges', () => {
   test('a member sees the amounts, someone without access does not', async () => {
-    await set('rent', 89000, '2025-03-01')
+    await set('maintenance_charge', 89000, '2025-03-01')
     const seen = await view('jussi')
     expect(seen.role).toBe('member')
-    expect(seen.amounts.rent).toEqual([
+    expect(seen.amounts.maintenance_charge).toEqual([
       { validFrom: '2025-03-01', validTo: null, value: 89000 },
     ])
     expect(await getRecurringAmounts(deps('liisa'), flat)).toEqual({
@@ -121,30 +121,34 @@ describe('Getting the rent and charges', () => {
   })
 })
 
-describe('Setting a rent or charge', () => {
-  test('Setting the first rent of a flat', async () => {
-    expect(await set('rent', 89000, '2025-03-01')).toEqual({ ok: true })
-    expect((await view()).amounts.rent).toEqual([
+describe('Setting a charge', () => {
+  test('Setting the first maintenance charge of a flat', async () => {
+    expect(await set('maintenance_charge', 89000, '2025-03-01')).toEqual({
+      ok: true,
+    })
+    expect((await view()).amounts.maintenance_charge).toEqual([
       { validFrom: '2025-03-01', validTo: null, value: 89000 },
     ])
   })
 
   test("An amount on the latest period's start corrects it", async () => {
-    await set('rent', 89000, '2025-03-01')
-    await set('rent', 92000, '2027-03-01')
-    expect(await set('rent', 95000, '2027-03-01')).toEqual({ ok: true })
-    expect((await view()).amounts.rent).toEqual([
+    await set('maintenance_charge', 89000, '2025-03-01')
+    await set('maintenance_charge', 92000, '2027-03-01')
+    expect(await set('maintenance_charge', 95000, '2027-03-01')).toEqual({
+      ok: true,
+    })
+    expect((await view()).amounts.maintenance_charge).toEqual([
       { validFrom: '2025-03-01', validTo: '2027-02-28', value: 89000 },
       { validFrom: '2027-03-01', validTo: null, value: 95000 },
     ])
   })
 
   test("A date before the flat's ownership is refused", async () => {
-    expect(await set('rent', 89000, '2025-01-01')).toEqual({
+    expect(await set('maintenance_charge', 89000, '2025-01-01')).toEqual({
       ok: false,
       reason: 'amount_date_before_ownership',
     })
-    expect((await view()).amounts.rent).toEqual([])
+    expect((await view()).amounts.maintenance_charge).toEqual([])
   })
 
   test('A date before the latest change is refused', async () => {
@@ -157,35 +161,39 @@ describe('Setting a rent or charge', () => {
   })
 
   test("A date that isn't the first of a month is refused", async () => {
-    expect(await set('rent', 89000, '2027-03-15')).toEqual({
+    expect(await set('maintenance_charge', 89000, '2027-03-15')).toEqual({
       ok: false,
       reason: 'amount_date_not_month_start',
     })
   })
 
   test("A member can't set an amount", async () => {
-    expect(await set('rent', 89000, '2025-03-01', 'jussi')).toEqual({
+    expect(
+      await set('maintenance_charge', 89000, '2025-03-01', 'jussi'),
+    ).toEqual({
       ok: false,
       reason: 'sharing_owner_only',
     })
-    expect((await view()).amounts.rent).toEqual([])
+    expect((await view()).amounts.maintenance_charge).toEqual([])
   })
 
   test('someone without access gets "not found"', async () => {
-    expect(await set('rent', 89000, '2025-03-01', 'liisa')).toEqual({
+    expect(
+      await set('maintenance_charge', 89000, '2025-03-01', 'liisa'),
+    ).toEqual({
       ok: false,
       reason: 'property_not_found',
     })
   })
 
   test('setting an amount is logged with ids, not values', async () => {
-    await set('rent', 89000, '2025-03-01')
+    await set('maintenance_charge', 89000, '2025-03-01')
     expect(logLines).toEqual([
       expect.objectContaining({
         level: 'info',
         event: 'recurring_amount.set',
         propertyId: flat,
-        kind: 'rent',
+        kind: 'maintenance_charge',
         from: '2025-03-01',
         corrected: false,
       }),
@@ -194,7 +202,7 @@ describe('Setting a rent or charge', () => {
   })
 })
 
-describe('Undoing the latest rent or charge change', () => {
+describe('Undoing the latest charge change', () => {
   test('Undoing a charge increase', async () => {
     await set('maintenance_charge', 21400, '2026-01-01')
     await set('maintenance_charge', 22600, '2027-01-01')
@@ -213,36 +221,44 @@ describe('Undoing the latest rent or charge change', () => {
     ])
   })
 
-  test('Undoing the only rent', async () => {
-    await set('rent', 89000, '2025-06-01')
-    expect(await undoRecurringAmount(deps('annika'), flat, 'rent')).toEqual({
+  test('Undoing the only maintenance charge', async () => {
+    await set('maintenance_charge', 89000, '2025-06-01')
+    expect(
+      await undoRecurringAmount(deps('annika'), flat, 'maintenance_charge'),
+    ).toEqual({
       ok: true,
     })
     expect(logLines).toEqual([
       expect.objectContaining({
         event: 'recurring_amount.undone',
-        kind: 'rent',
+        kind: 'maintenance_charge',
         from: '2025-06-01',
       }),
     ])
-    expect((await view()).amounts.rent).toEqual([])
-    expect(await set('rent', 89000, '2025-03-01')).toEqual({ ok: true })
-    expect((await view()).amounts.rent).toEqual([
+    expect((await view()).amounts.maintenance_charge).toEqual([])
+    expect(await set('maintenance_charge', 89000, '2025-03-01')).toEqual({
+      ok: true,
+    })
+    expect((await view()).amounts.maintenance_charge).toEqual([
       { validFrom: '2025-03-01', validTo: null, value: 89000 },
     ])
   })
 
   test('Nothing to undo is refused', async () => {
-    expect(await undoRecurringAmount(deps('annika'), flat, 'rent')).toEqual({
+    expect(
+      await undoRecurringAmount(deps('annika'), flat, 'maintenance_charge'),
+    ).toEqual({
       ok: false,
       reason: 'amount_nothing_to_undo',
     })
   })
 
   test("a member can't undo", async () => {
-    await set('rent', 89000, '2025-03-01')
-    await set('rent', 92000, '2027-03-01')
-    expect(await undoRecurringAmount(deps('jussi'), flat, 'rent')).toEqual({
+    await set('maintenance_charge', 89000, '2025-03-01')
+    await set('maintenance_charge', 92000, '2027-03-01')
+    expect(
+      await undoRecurringAmount(deps('jussi'), flat, 'maintenance_charge'),
+    ).toEqual({
       ok: false,
       reason: 'sharing_owner_only',
     })
@@ -539,7 +555,7 @@ describe('Renaming a financing charge', () => {
 })
 
 describe('Financing charges', () => {
-  describe('Setting a rent or charge', () => {
+  describe('Setting a charge', () => {
     test('Changing one financing charge leaves the others', async () => {
       const putki = await chargeId('Putkiremontti', 8600, '2025-03-01')
       const julkisivu = await chargeId('Julkisivu', 4200, '2026-01-01')
@@ -570,7 +586,7 @@ describe('Financing charges', () => {
     })
   })
 
-  describe('Undoing the latest rent or charge change', () => {
+  describe('Undoing the latest charge change', () => {
     test("Undoing a financing charge's only amount removes it", async () => {
       const putki = await chargeId('Putkiremontti', 8600, '2025-03-01')
       const julkisivu = await chargeId('Julkisivu', 4200, '2026-01-01')
