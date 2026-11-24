@@ -692,6 +692,7 @@
   "tenancy_end_who": "How does the tenancy end?",
   "tenancy_ending": "Ending",
   "tenancy_ending_value": "{how}, {date}",
+  "tenancy_form_change_rent": "Change rent",
   "tenancy_form_contract_type": "Contract type",
   "tenancy_form_edit_title": "Edit tenancy",
   "tenancy_form_email": "Email",

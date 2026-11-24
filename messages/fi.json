@@ -692,6 +692,7 @@
   "tenancy_end_who": "Miten vuokrasuhde päättyy?",
   "tenancy_ending": "Päättyminen",
   "tenancy_ending_value": "{how}, {date}",
+  "tenancy_form_change_rent": "Muuta vuokraa",
   "tenancy_form_contract_type": "Sopimustyyppi",
   "tenancy_form_edit_title": "Muokkaa vuokrasuhdetta",
   "tenancy_form_email": "Sähköposti",

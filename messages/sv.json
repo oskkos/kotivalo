@@ -692,6 +692,7 @@
   "tenancy_end_who": "Hur upphör hyresförhållandet?",
   "tenancy_ending": "Upphörande",
   "tenancy_ending_value": "{how}, {date}",
+  "tenancy_form_change_rent": "Ändra hyran",
   "tenancy_form_contract_type": "Avtalstyp",
   "tenancy_form_edit_title": "Redigera hyresförhållandet",
   "tenancy_form_email": "E-post",

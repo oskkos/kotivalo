@@ -264,6 +264,37 @@ test.describe('Correcting a tenancy', () => {
       page.getByRole('link', { name: 'Call: 040 765 4321' }),
     ).toBeVisible()
   })
+
+  test("Changing an earlier tenancy's rent from its correction form", async ({
+    page,
+  }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await addTenant(page, id, {
+      name: 'Pekka Virtanen',
+      start: '01/06/2023',
+      rent: '820',
+      ending: { by: 'Tenant', noticeDate: '20/01/2025' },
+    })
+    await waitForHydration(page)
+    const others = page.getByRole('region', { name: 'Other tenancies' })
+    await others.getByRole('link', { name: /Pekka Virtanen/ }).click()
+    await waitForHydration(page)
+    await page.getByRole('link', { name: 'Change rent' }).click()
+    await expect(page).toHaveURL(
+      new RegExp(`/properties/${id}/tenancy/[^/]+/rent$`),
+    )
+    await waitForHydration(page)
+    await page
+      .getByRole('textbox', { name: 'New amount (€/month)' })
+      .fill('850')
+    await page.getByRole('textbox', { name: 'Valid from' }).fill('01/06/2024')
+    await page.getByRole('button', { name: 'Save change' }).click()
+    await expect(page).toHaveURL(new RegExp(`/properties/${id}/tenancy$`))
+    await expect(
+      others.getByRole('link', { name: /Pekka Virtanen/ }),
+    ).toContainText('€850.00/month')
+  })
 })
 
 /** dd/mm/yyyy of a date, as the English UI writes it. */

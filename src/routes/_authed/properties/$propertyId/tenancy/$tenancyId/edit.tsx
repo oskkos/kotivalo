@@ -1,5 +1,7 @@
+import Button from '@mui/material/Button'
 import {
   createFileRoute,
+  createLink,
   notFound,
   redirect,
   useRouter,
@@ -10,6 +12,8 @@ import { getTenancy } from '#/features/tenancies/functions'
 import { RemoveTenancyDialog } from '#/features/tenancies/RemoveTenancyDialog'
 import { TenancyForm } from '#/features/tenancies/TenancyForm'
 import { m } from '#/paraglide/messages.js'
+
+const ButtonLink = createLink(Button)
 
 export const Route = createFileRoute(
   '/_authed/properties/$propertyId/tenancy/$tenancyId/edit',
@@ -72,6 +76,18 @@ function EditTenancyRoute() {
                 setRemoving(true)
               }
             : undefined
+        }
+        rentChange={
+          // Every tenancy's rent, not only the current one's (openspec:
+          // tenancies, "Correcting a tenancy").
+          <ButtonLink
+            to="/properties/$propertyId/tenancy/$tenancyId/rent"
+            params={{ propertyId, tenancyId: tenancy.id }}
+            variant="outlined"
+            sx={{ alignSelf: 'flex-start', minHeight: 44, px: 2 }}
+          >
+            {m.tenancy_form_change_rent()}
+          </ButtonLink>
         }
       />
       {removing ? (

@@ -76,7 +76,7 @@ The rent field is always shown and required (the schema's `rent` loses `.optiona
 
 ### 6. Routes and pages
 
-- `/properties/$propertyId/tenancy/$tenancyId/rent`: the rent change form (canvas "Muuta vuokraa · vuokrasuhteelle"), with the current rent, the difference, the date and its hint. The undo confirmation is a dialog on the Tenancy page, like the cancel-ending dialog, not on the form.
+- `/properties/$propertyId/tenancy/$tenancyId/rent`: the rent change form (canvas "Muuta vuokraa · vuokrasuhteelle"), with the current rent, the difference, the date and its hint. It is opened from the current tenancy's rent card and, for every tenancy, from *Muuta vuokraa* on its correction form, and returns to the Tenancy page. The undo confirmation is a dialog on the Tenancy page, like the cancel-ending dialog, not on the form.
 - The Tenancy page gets the rent card (canvas "Vuokrasuhde · vuokra ja muutokset"), and the other tenancies' rows show their latest rent.
 - The amounts page keeps `/properties/$propertyId/amounts` but drops the rent; `amounts/$kind` no longer accepts `rent` and shows not found for it. Its title becomes *Vastikkeet*.
 - **Title clash:** the charges-by-year page (`/charges`) is titled *Vastikkeet* today (`charges_title`). It becomes *Vastikkeet kuukausittain*, the words of the row that opens it, so the two pages don't share a title. Swedish and English follow the term bank (`vederlag`, `charges`).
