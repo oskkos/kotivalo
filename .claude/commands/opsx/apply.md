@@ -3,6 +3,8 @@ name: "OPSX: Apply"
 description: Implement tasks from an OpenSpec change (Experimental)
 category: Workflow
 tags: [workflow, artifacts, experimental]
+model: sonnet
+effort: medium
 ---
 
 Implement tasks from an OpenSpec change.

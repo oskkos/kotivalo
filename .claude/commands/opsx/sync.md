@@ -3,6 +3,8 @@ name: "OPSX: Sync"
 description: Sync delta specs from a change to main specs
 category: Workflow
 tags: [workflow, specs, experimental]
+model: haiku
+effort: low
 ---
 
 Sync delta specs from a change to main specs.
