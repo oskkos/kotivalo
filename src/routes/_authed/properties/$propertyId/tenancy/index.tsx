@@ -9,11 +9,13 @@ import {
 } from '@tanstack/react-router'
 import { useState } from 'react'
 import { NotFoundView } from '#/components/NotFoundView'
-import { getTenancies } from '#/features/tenancies/functions'
+import { UndoDialog } from '#/features/recurring-amounts/UndoDialog'
+import { getTenancies, undoTenancyRent } from '#/features/tenancies/functions'
 import { CancelEndingDialog } from '#/features/tenancies/CancelEndingDialog'
 import { tenancyStatus } from '#/features/tenancies/status'
 import type { Tenancy } from '#/features/tenancies/tenancy.repository.server'
 import { TenancyPage } from '#/features/tenancies/TenancyPage'
+import { formatDate, formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 
 export const Route = createFileRoute(
@@ -46,6 +48,10 @@ function TenancyRoute() {
   const { propertyId } = Route.useParams()
   const router = useRouter()
   const [cancelling, setCancelling] = useState<Tenancy>()
+  const [undoingRent, setUndoingRent] = useState<Tenancy>()
+  const undoRents = undoingRent ? (view.rents[undoingRent.id] ?? []) : []
+  const latestRent = undoRents.at(-1)
+  const previousRent = undoRents.at(-2)
   return (
     <>
       <TenancyPage
@@ -92,6 +98,7 @@ function TenancyRoute() {
             {m.tenancy_add_earlier()}
           </TextLink>
         }
+        onUndoRent={setUndoingRent}
         currentActions={(tenancy) => {
           const status = tenancyStatus(tenancy, view.today)
           return (
@@ -148,6 +155,31 @@ function TenancyRoute() {
           )
         }}
       />
+      {undoingRent && latestRent && previousRent ? (
+        <UndoDialog
+          open
+          onClose={() => {
+            setUndoingRent(undefined)
+          }}
+          title={m.amounts_undo_title({
+            date: formatDate(latestRent.validFrom),
+          })}
+          text={m.amounts_undo_text({
+            amount: formatMoney(previousRent.value),
+            date: formatDate(previousRent.validFrom),
+          })}
+          undo={() =>
+            undoTenancyRent({
+              data: { propertyId, tenancyId: undoingRent.id },
+            })
+          }
+          failureEvent="tenancy.rent_undo_failed"
+          onDone={async () => {
+            setUndoingRent(undefined)
+            await router.invalidate()
+          }}
+        />
+      ) : null}
       {cancelling ? (
         <CancelEndingDialog
           propertyId={propertyId}

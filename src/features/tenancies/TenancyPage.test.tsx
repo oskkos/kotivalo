@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { render, screen, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import { describe, expect, test, vi } from 'vitest'
 import type { Tenancy } from './tenancy.repository.server'
 import { TenancyPage, type TenancyPageView } from './TenancyPage'
@@ -34,6 +35,8 @@ const mikko: Tenancy = {
   termEnd: '2025-02-28',
 }
 
+const onUndoRent = vi.fn()
+
 function setup(view: Partial<TenancyPageView>) {
   render(
     <TenancyPage
@@ -41,13 +44,17 @@ function setup(view: Partial<TenancyPageView>) {
         role: 'owner',
         today: '2026-11-22',
         tenancies: [aino],
-        rentToday: 89000,
+        rents: {
+          [aino.id]: [{ validFrom: '2025-03-01', validTo: null, value: 89000 }],
+        },
         ...view,
       }}
       address="Kuusikuja 3 B 12"
       onBack={vi.fn()}
       addAction={<button type="button">Add tenant</button>}
       currentActions={() => <button type="button">End tenancy</button>}
+      rentChange={() => <a href="/rent">Change</a>}
+      onUndoRent={onUndoRent}
     />,
   )
 }
@@ -120,7 +127,8 @@ describe('tenancy page', () => {
 
   test('a tenancy without phone or email has no contact links', () => {
     setup({ tenancies: [{ ...aino, tenantPhone: null, tenantEmail: null }] })
-    expect(screen.queryByRole('link')).toBeNull()
+    const tenant = screen.getByRole('region', { name: 'Aino Koski' })
+    expect(within(tenant).queryByRole('link')).toBeNull()
   })
 
   test('a fixed term to come shows when it starts and ends', () => {
@@ -133,10 +141,73 @@ describe('tenancy page', () => {
           termEnd: '2027-12-31',
         },
       ],
-      rentToday: null,
+      rents: {},
     })
     expect(screen.getByText('Starts 01/01/2027')).toBeVisible()
     expect(screen.getByText('31/12/2027')).toBeVisible()
     expect(screen.getByText('Not set')).toBeVisible()
+  })
+})
+
+describe('The tenancy page', () => {
+  const rents = [
+    { validFrom: '2025-03-01', validTo: '2026-02-28', value: 85000 },
+    { validFrom: '2026-03-01', validTo: null, value: 89000 },
+  ]
+
+  test('The rent card with its changes', async () => {
+    setup({ rents: { [aino.id]: rents } })
+    const card = screen.getByRole('region', { name: 'Rent' })
+    expect(card).toHaveTextContent('€890.00 a month')
+    expect(card).toHaveTextContent('From 01/03/2026')
+    const changes = within(card).getByRole('list', { name: 'Rent changes' })
+    expect(
+      within(changes)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent),
+    ).toEqual(['From 01/03/2026€890.00', 'From 01/03/2025€850.00'])
+    expect(within(card).getByRole('link', { name: 'Change' })).toBeVisible()
+    await userEvent.click(
+      within(card).getByRole('button', { name: 'Undo the latest change' }),
+    )
+    expect(onUndoRent).toHaveBeenCalled()
+  })
+
+  test('an upcoming change shows below the rent', () => {
+    setup({
+      rents: {
+        [aino.id]: [
+          { validFrom: '2025-03-01', validTo: '2027-02-28', value: 89000 },
+          { validFrom: '2027-03-01', validTo: null, value: 92000 },
+        ],
+      },
+    })
+    expect(screen.getByText('From 01/03/2027: €920.00/month')).toBeVisible()
+  })
+
+  test('the first rent alone offers no undo', () => {
+    setup({})
+    expect(
+      screen.queryByRole('button', { name: 'Undo the latest change' }),
+    ).toBeNull()
+  })
+
+  test('Other tenancies show their latest rent', () => {
+    setup({
+      tenancies: [aino, mikko],
+      rents: {
+        [mikko.id]: [{ validFrom: '2023-06-01', validTo: null, value: 82000 }],
+      },
+    })
+    const others = screen.getByRole('region', { name: 'Other tenancies' })
+    expect(others).toHaveTextContent('€820.00/month')
+  })
+
+  test('a member sees the rent card without the change and undo', () => {
+    setup({ role: 'member', rents: { [aino.id]: rents } })
+    const card = screen.getByRole('region', { name: 'Rent' })
+    expect(card).toHaveTextContent('€890.00 a month')
+    expect(within(card).queryByRole('link')).toBeNull()
+    expect(within(card).queryByRole('button')).toBeNull()
   })
 })

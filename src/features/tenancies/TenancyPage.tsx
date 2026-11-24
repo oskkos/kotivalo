@@ -1,6 +1,7 @@
 // A flat's Tenancy page (Design canvas: Vuokrasuhde, · irtisanottu,
-// · vapaa): the current tenant with the status, contact links and contract
-// details, the flat's other tenancies, or the vacant prompt (openspec:
+// · vapaa, · vuokra ja muutokset): the current tenant with the status,
+// contact links and contract details, its rent card, the flat's other
+// tenancies with their latest rent, or the vacant prompt (openspec:
 // tenancies, "The tenancy page"). Owners get the actions from the route.
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
@@ -8,10 +9,12 @@ import Link from '@mui/material/Link'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import type { ReactNode } from 'react'
+import type { Period } from '#/features/recurring-amounts/periods'
 import { formatDate, formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 import { colors, radii } from '#/theme/tokens'
 import { contractLabel, datesLabel, endingLabel, statusLabel } from './labels'
+import { RentCard } from './RentCard'
 import { currentTenancy, flatStatus, tenancyStatus } from './status'
 import type { Tenancy } from './tenancy.repository.server'
 
@@ -20,7 +23,8 @@ export interface TenancyPageView {
   today: string
   /** Newest first. */
   tenancies: Tenancy[]
-  rentToday: number | null
+  /** Each tenancy's rent periods, oldest first. */
+  rents: Partial<Record<string, readonly Period<number>[]>>
 }
 
 interface Props {
@@ -35,6 +39,10 @@ interface Props {
   otherRow?: (tenancy: Tenancy, row: ReactNode) => ReactNode
   /** Owners only: adding an earlier tenancy while the flat has a current one. */
   earlierAction?: ReactNode
+  /** Owners only: the link to change the current tenancy's rent. */
+  rentChange?: (tenancy: Tenancy) => ReactNode
+  /** Owners only: undoing the current tenancy's latest rent change. */
+  onUndoRent?: (tenancy: Tenancy) => void
 }
 
 const card = {
@@ -175,18 +183,10 @@ function Current(props: {
   } else if (tenancy.termEnd !== null) {
     rows.push([m.tenancy_term_end(), formatDate(tenancy.termEnd)])
   }
-  rows.push(
-    [
-      m.tenancy_rent(),
-      view.rentToday === null
-        ? m.tenancy_rent_not_set()
-        : m.tenancy_rent_value({ amount: formatMoney(view.rentToday) }),
-    ],
-    [
-      m.tenancy_due_day(),
-      m.tenancy_due_day_value({ day: String(tenancy.dueDay) }),
-    ],
-  )
+  rows.push([
+    m.tenancy_due_day(),
+    m.tenancy_due_day_value({ day: String(tenancy.dueDay) }),
+  ])
   if (tenancy.noticeGivenBy !== null && tenancy.noticeDate !== null) {
     rows.push([
       m.tenancy_ending(),
@@ -294,6 +294,10 @@ function Vacant(props: { since: string | null; action?: ReactNode }) {
   )
 }
 
+/** A tenancy's latest rent, in cents. */
+const latestRent = (rents: readonly Period<number>[] | undefined) =>
+  rents?.at(-1)?.value
+
 export function TenancyPage(props: Props) {
   const { view } = props
   const owner = view.role === 'owner'
@@ -342,6 +346,19 @@ export function TenancyPage(props: Props) {
             action={owner ? props.addAction : undefined}
           />
         )}
+        {current ? (
+          <RentCard
+            tenancy={current}
+            rents={view.rents[current.id] ?? []}
+            today={view.today}
+            change={owner ? props.rentChange?.(current) : undefined}
+            onUndo={
+              owner && props.onUndoRent
+                ? () => props.onUndoRent?.(current)
+                : undefined
+            }
+          />
+        ) : null}
         {others.length > 0 ? (
           <Stack
             component="section"
@@ -376,12 +393,24 @@ export function TenancyPage(props: Props) {
                         })}
                       </Typography>
                     </Stack>
-                    <Typography
-                      variant="body2"
-                      sx={{ fontWeight: 800, color: 'text.secondary' }}
-                    >
-                      {statusLabel(tenancyStatus(tenancy, view.today))}
-                    </Typography>
+                    <Stack sx={{ alignItems: 'flex-end' }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 800, color: 'text.secondary' }}
+                      >
+                        {statusLabel(tenancyStatus(tenancy, view.today))}
+                      </Typography>
+                      {latestRent(view.rents[tenancy.id]) ===
+                      undefined ? null : (
+                        <Typography sx={{ fontSize: 13, fontWeight: 900 }}>
+                          {m.amounts_per_month({
+                            amount: formatMoney(
+                              latestRent(view.rents[tenancy.id]) ?? 0,
+                            ),
+                          })}
+                        </Typography>
+                      )}
+                    </Stack>
                   </Stack>
                 )
                 return (
