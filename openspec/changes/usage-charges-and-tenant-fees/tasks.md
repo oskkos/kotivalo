@@ -17,10 +17,10 @@
 
 ## 4. Tenancies keep their occupants and fees
 
-- [ ] 4.1 `schemas.ts` and `TenancyForm.tsx`: the occupants field (1–20, default 1, `occupants_invalid`); adding a tenancy stores its first occupants period from its start day in the tenancy's batch; `addTenant` in `e2e/support/tenancies.ts` keeps working with the default
-- [ ] 4.2 `tenancies.server.ts`: correcting the start moves the occupants' and each fee's first period (`firstPeriodMove`) in the same batch or is refused with `tenancy_start_after_change`; ending, ending early and correcting the fixed term's end are refused with `tenancy_has_changes_after_end` after the rent's check (`periodAfterEnd`)
-- [ ] 4.3 Reason codes `occupants_invalid`, `tenancy_start_after_change` and `tenancy_has_changes_after_end` in `src/lib/reasons.ts`, fi, sv and en messages with the translate skill
-- [ ] 4.4 Workers tests named after the scenarios of "Occupants and fees stay inside their tenancy" (fees inserted directly until group 6) and "The occupants of a new tenancy"; component test of the occupants field
+- [x] 4.1 `schemas.ts` and `TenancyForm.tsx`: the occupants field (1–20, default 1, `occupants_invalid`); adding a tenancy stores its first occupants period from its start day in the tenancy's batch; `addTenant` in `e2e/support/tenancies.ts` keeps working with the default
+- [x] 4.2 `tenancies.server.ts`: correcting the start moves the occupants' and each fee's first period (`firstPeriodMove`) in the same batch or is refused with `tenancy_start_after_change`; ending, ending early and correcting the fixed term's end are refused with `tenancy_has_changes_after_end` after the rent's check (`periodAfterEnd`)
+- [x] 4.3 Reason codes `occupants_invalid`, `tenancy_start_after_change` and `tenancy_has_changes_after_end` in `src/lib/reasons.ts`, fi, sv and en messages with the translate skill
+- [x] 4.4 Workers tests named after the scenarios of "Occupants and fees stay inside their tenancy" (fees inserted directly until group 6) and "The occupants of a new tenancy"; component test of the occupants field
 
 ## 5. Changing the occupants
 

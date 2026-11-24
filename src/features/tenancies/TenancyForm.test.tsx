@@ -133,6 +133,8 @@ describe('tenancy form', () => {
     await user.type(box('Starts'), '01/01/2027')
     await user.type(box('Ends'), '31/12/2027')
     await user.type(box('Monthly rent (€)'), '910')
+    await user.clear(box('Occupants'))
+    await user.type(box('Occupants'), '2')
     await user.type(box('Due day'), '5')
     await user.click(screen.getByRole('button', { name: 'Save tenant' }))
     await waitFor(() => {
@@ -149,9 +151,30 @@ describe('tenancy form', () => {
         validFrom: '01/01/2027',
         termEnd: '31/12/2027',
         rent: '910',
+        occupants: '2',
         dueDay: '5',
       },
     })
+  })
+
+  test('the occupants default to one and show only when adding', () => {
+    setup()
+    expect(box('Occupants')).toHaveValue('1')
+  })
+
+  test("the server's reason for the occupants shows under the field", async () => {
+    createTenancy.mockResolvedValue({ ok: false, reason: 'occupants_invalid' })
+    const { user } = setup()
+    await user.type(box('Name'), 'Mikko Lehtinen')
+    await user.type(box('Starts'), '01/12/2026')
+    await user.type(box('Monthly rent (€)'), '890')
+    await user.type(box('Due day'), '5')
+    await user.click(screen.getByRole('button', { name: 'Save tenant' }))
+    expect(
+      await screen.findByText(
+        'Enter the number of occupants as a whole number from 1 to 20.',
+      ),
+    ).toBeVisible()
   })
 
   test('the end date shows only for a fixed term', async () => {
