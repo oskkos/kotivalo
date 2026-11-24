@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Kotivalo ("Valoa vuokranantajan arkeen", roughly "light for a landlord's everyday work") is a mobile-first app for Finnish private landlords with 1–10 rental flats, often co-owned. It tracks flats, tenancies, income, expenses and receipts, and produces each owner's tax return figures (Finnish form 7H). MIT licensed.
 
-`CONCEPT.md` is the source of truth for the product, the domain rules, the chosen stack and the data model draft. Read it before designing or changing features. The UI design (logo, splash and 13 phone screens, 390 × 844) is on the [Design canvas](https://claude.ai/code/artifact/16231de4-89b5-4369-aabc-610e9c6893e6); read it with the Artifact tool, not WebFetch. Where the canvas and CONCEPT.md disagree, CONCEPT.md wins and the gap should be raised.
+`CONCEPT.md` is the source of truth for the product, the domain rules, the chosen stack and the data model draft. Read it before designing or changing features. The UI design (logo, splash and 13 phone screens, 390 × 844) is on the [Design canvas](https://claude.ai/artifact/DGX1pDjibhPqZjLUjm8jTb); read it with the Artifact tool, not WebFetch. Where the canvas and CONCEPT.md disagree, CONCEPT.md wins and the gap should be raised.
 
 ## Current state
 
