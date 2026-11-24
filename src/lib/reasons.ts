@@ -92,6 +92,8 @@ export type AlertReason =
   | 'tenancy_already_started'
   | 'tenancy_has_payments_outside'
   | 'tenancy_has_payments'
+  | 'tenancy_has_rent_after_end'
+  | 'tenancy_start_after_rent_change'
   | 'rent_payment_month_outside_tenancy'
   | 'rent_payment_not_found'
   /** The amounts changed since they were read; the page reloads them. */
@@ -324,6 +326,14 @@ const texts: Record<Reason, () => ReasonText> = {
   tenancy_has_payments_outside: () => ({
     title: m.reason_tenancy_has_payments_outside_title(),
     text: m.reason_tenancy_has_payments_outside(),
+  }),
+  tenancy_has_rent_after_end: () => ({
+    title: m.reason_tenancy_has_rent_after_end_title(),
+    text: m.reason_tenancy_has_rent_after_end(),
+  }),
+  tenancy_start_after_rent_change: () => ({
+    title: m.reason_tenancy_start_after_rent_change_title(),
+    text: m.reason_tenancy_start_after_rent_change(),
   }),
   tenancy_has_payments: () => ({
     title: m.reason_tenancy_has_payments_title(),

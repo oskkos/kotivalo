@@ -20,7 +20,7 @@ import type { NoticeGiver, PropertyRole } from '#/server/db/schema'
 import type { Logger } from '#/server/log/log'
 import { validateEnding } from './notice'
 import { paymentsOutside, validateTenancyDates } from './rules'
-import { rentAsked } from './rent'
+import { firstRentMove, rentAfterEnd, rentAsked } from './rent'
 import { flatStatus } from './status'
 import type {
   Ending,
@@ -155,8 +155,8 @@ export async function getNewTenancyOptions(
 ): Promise<
   | ({
       ok: true
-      /** Oldest first. */
-      rents: Period<number>[]
+      /** Each tenancy's rent periods, oldest first, for the suggestion. */
+      tenancyRents: Partial<Record<string, Period<number>[]>>
       ownershipStart: IsoDate
     } & TenancyView)
   | typeof notFound
@@ -168,11 +168,15 @@ export async function getNewTenancyOptions(
   if (!view || start === undefined) {
     return notFound
   }
-  const { amounts, ...rest } = view
   return {
     ok: true,
-    ...rest,
-    rents: amounts.amounts.rent,
+    role: view.role,
+    property: view.property,
+    today: view.today,
+    tenancies: view.tenancies,
+    tenancyRents: await deps.tenancies.rentsFor(
+      view.tenancies.map((t) => t.id),
+    ),
     ownershipStart: start,
   }
 }
@@ -224,8 +228,8 @@ export async function createTenancy(
   deps: TenancyDeps,
   propertyId: string,
   fields: TenancyFields,
-  /** The monthly rent in cents as entered; absent when it isn't asked. */
-  rent: number | undefined,
+  /** The monthly rent in cents, the tenancy's first rent from its start. */
+  rent: number,
   /** An earlier tenancy's ending, recorded with it. */
   ending?: Ending,
 ): Promise<
@@ -255,19 +259,17 @@ export async function createTenancy(
   if (problem) {
     return fail(problem)
   }
+  // Transitional, until the pages read the tenancy's rent: the flat's rent
+  // is still set as before, from the start month, when it changed.
   const rents = amounts.amounts.rent
   const asked = rentAsked(rents, fields.validFrom)
-  if (asked && rent === undefined) {
-    return fail('amount_invalid')
-  }
   const inEffect = periodOn(rents, fields.validFrom)?.value
   let rentWrite: {
     latestStart: IsoDate | null
     from: IsoDate
     amount: number
   } | null = null
-  // Before the latest rent period the rent stays on its own page.
-  if (asked && rent !== undefined && rent !== inEffect) {
+  if (asked && rent !== inEffect) {
     const from = `${monthOf(fields.validFrom)}-01`
     const latestStart = rents.at(-1)?.validFrom
     const rentProblem = validateAmountDate(from, {
@@ -284,6 +286,7 @@ export async function createTenancy(
     propertyId,
     fields,
     rentWrite,
+    rent,
     deps.now(),
     ending,
   )
@@ -363,16 +366,28 @@ export async function updateTenancy(
   ) {
     return fail('tenancy_correction_conflicts_ending')
   }
-  const months = await deps.tenancies.paymentMonths(tenancyId)
+  const [months, rentsById] = await Promise.all([
+    deps.tenancies.paymentMonths(tenancyId),
+    deps.tenancies.rentsFor([tenancyId]),
+  ])
   if (paymentsOutside(months, fields.validFrom, validTo)) {
     return fail('tenancy_has_payments_outside')
+  }
+  // The rent stays inside the tenancy: the first period follows the start.
+  const rents = rentsById[tenancyId] ?? []
+  const move = firstRentMove(rents, existing.validFrom, fields.validFrom)
+  if (!move.ok) {
+    return fail(move.reason)
+  }
+  if (rentAfterEnd(rents, validTo)) {
+    return fail('tenancy_has_rent_after_end')
   }
   const updated = await deps.tenancies.update(
     deps.userId,
     propertyId,
     tenancyId,
     fields,
-    { validTo, expectedValidTo: existing.validTo },
+    { validTo, expectedValidTo: existing.validTo, firstRent: move.move },
     deps.now(),
   )
   if (!updated) {
@@ -411,9 +426,15 @@ export async function endTenancy(
   if (problem) {
     return fail(problem)
   }
-  const months = await deps.tenancies.paymentMonths(tenancyId)
+  const [months, rentsById] = await Promise.all([
+    deps.tenancies.paymentMonths(tenancyId),
+    deps.tenancies.rentsFor([tenancyId]),
+  ])
   if (paymentsOutside(months, existing.validFrom, ending.lastDay)) {
     return fail('tenancy_has_payments_outside')
+  }
+  if (rentAfterEnd(rentsById[tenancyId] ?? [], ending.lastDay)) {
+    return fail('tenancy_has_rent_after_end')
   }
   const ended = await deps.tenancies.end(
     deps.userId,

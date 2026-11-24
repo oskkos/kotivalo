@@ -52,7 +52,7 @@ function NewTenancyRoute() {
     <TenancyForm
       propertyId={propertyId}
       address={options.property.streetAddress}
-      rents={options.rents}
+      tenancyRents={options.tenancyRents}
       tenancies={options.tenancies}
       today={options.today}
       onSaved={async () => {

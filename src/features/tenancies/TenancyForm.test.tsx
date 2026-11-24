@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
+import type { Period } from '#/features/recurring-amounts/periods'
 import type { Tenancy } from './tenancy.repository.server'
 import { previousTenancy, TenancyForm } from './TenancyForm'
 
@@ -28,12 +29,18 @@ const aino: Tenancy = {
   noticeDate: null,
 }
 
-const twoRents = [
-  { validFrom: '2025-03-01', validTo: '2026-12-31', value: 89000 },
-  { validFrom: '2027-01-01', validTo: null, value: 91000 },
-]
+const ainoRents = {
+  t1: [
+    { validFrom: '2025-03-01', validTo: '2026-02-28', value: 85000 },
+    { validFrom: '2026-03-01', validTo: null, value: 89000 },
+  ],
+}
 
-function setup(editing?: Tenancy, rents = twoRents) {
+function setup(
+  editing?: Tenancy,
+  tenancies: Tenancy[] = [],
+  tenancyRents: Record<string, Period<number>[]> = {},
+) {
   const user = userEvent.setup()
   const onSaved = vi.fn(() => Promise.resolve())
   render(
@@ -41,7 +48,8 @@ function setup(editing?: Tenancy, rents = twoRents) {
       propertyId="flat"
       address="Kuusikuja 3 B 12"
       editing={editing}
-      rents={rents}
+      tenancies={tenancies}
+      tenancyRents={tenancyRents}
       today="2026-11-22"
       onSaved={onSaved}
       onClose={vi.fn()}
@@ -66,24 +74,53 @@ describe('Adding a tenant', () => {
 })
 
 describe('The rent of a new tenancy', () => {
-  test('The form shows the rent in effect on the start date', async () => {
-    const { user } = setup(undefined, [
-      { validFrom: '2025-03-01', validTo: null, value: 89000 },
-    ])
+  const ending: Tenancy = {
+    ...aino,
+    validTo: '2026-12-31',
+    noticeGivenBy: 'tenant',
+    noticeDate: '2026-11-22',
+  }
+
+  test("The form suggests the previous tenancy's rent", async () => {
+    const { user } = setup(undefined, [ending], ainoRents)
+    expect(box('Monthly rent (€)')).toHaveValue('890.00')
     await user.type(box('Starts'), '01/01/2027')
     expect(box('Monthly rent (€)')).toHaveValue('890.00')
   })
 
-  test('the rent follows the start and is not asked before the latest rent period', async () => {
+  test("The first tenancy's rent field is empty", () => {
+    setup()
+    expect(box('Monthly rent (€)')).toHaveValue('')
+  })
+
+  test('The rent is required', async () => {
     const { user } = setup()
+    await user.type(box('Name'), 'Mikko Lehtinen')
     await user.type(box('Starts'), '01/01/2027')
-    expect(box('Monthly rent (€)')).toHaveValue('910.00')
-    await user.clear(box('Starts'))
-    await user.type(box('Starts'), '01/12/2026')
+    await user.type(box('Due day'), '5')
+    await user.click(screen.getByRole('button', { name: 'Save tenant' }))
     expect(
-      screen.queryByRole('textbox', { name: 'Monthly rent (€)' }),
-    ).toBeNull()
-    expect(screen.getByText(/the rent isn't saved here/)).toBeInTheDocument()
+      await screen.findByText(
+        'Enter the amount in euros, for example 214 or 214.50.',
+      ),
+    ).toBeVisible()
+    expect(createTenancy).not.toHaveBeenCalled()
+  })
+
+  test('an earlier start suggests the tenancy before it', async () => {
+    const pekka: Tenancy = {
+      ...aino,
+      id: 't0',
+      tenantName: 'Pekka Virtanen',
+      validFrom: '2023-06-01',
+      validTo: '2025-02-28',
+    }
+    const { user } = setup(undefined, [ending, pekka], {
+      ...ainoRents,
+      t0: [{ validFrom: '2023-06-01', validTo: null, value: 82000 }],
+    })
+    await user.type(box('Starts'), '01/03/2024')
+    expect(box('Monthly rent (€)')).toHaveValue('820.00')
   })
 })
 
@@ -95,6 +132,7 @@ describe('tenancy form', () => {
     await user.click(screen.getByRole('button', { name: 'Fixed-term' }))
     await user.type(box('Starts'), '01/01/2027')
     await user.type(box('Ends'), '31/12/2027')
+    await user.type(box('Monthly rent (€)'), '910')
     await user.type(box('Due day'), '5')
     await user.click(screen.getByRole('button', { name: 'Save tenant' }))
     await waitFor(() => {
@@ -110,7 +148,7 @@ describe('tenancy form', () => {
         contractMade: '01/01/2027',
         validFrom: '01/01/2027',
         termEnd: '31/12/2027',
-        rent: '910.00',
+        rent: '910',
         dueDay: '5',
       },
     })
@@ -128,6 +166,7 @@ describe('tenancy form', () => {
     const { user } = setup()
     await user.type(box('Name'), 'Mikko Lehtinen')
     await user.type(box('Starts'), '01/12/2026')
+    await user.type(box('Monthly rent (€)'), '890')
     await user.type(box('Due day'), '5')
     await user.click(screen.getByRole('button', { name: 'Save tenant' }))
     expect(

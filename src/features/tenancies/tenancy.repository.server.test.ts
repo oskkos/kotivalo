@@ -268,6 +268,7 @@ describe('The tenancy repository', () => {
       flat,
       fixed('2027-01-15', '2027-12-31'),
       rent,
+      91000,
       now,
     )
     expect(refused).toEqual({ outcome: 'overlaps' })
@@ -278,6 +279,7 @@ describe('The tenancy repository', () => {
       other,
       fixed('2027-01-15', '2027-12-31'),
       null,
+      91000,
       now,
     )
     expect(added.outcome).toBe('created')
@@ -288,9 +290,14 @@ describe('The tenancy repository', () => {
       flat,
       fixed('2027-01-15', '2027-12-31'),
       rent,
+      91000,
       now,
     )
     expect(both.outcome).toBe('created')
+    const bothId = both.outcome === 'created' ? both.id : ''
+    expect((await repo.rentsFor([bothId]))[bothId]).toEqual([
+      { validFrom: '2027-01-15', validTo: null, value: 91000 },
+    ])
     expect((await rents.forProperty(flat)).amounts.rent).toEqual([
       { validFrom: '2025-03-01', validTo: '2026-12-31', value: 89000 },
       { validFrom: '2027-01-01', validTo: null, value: 91000 },
@@ -303,10 +310,15 @@ describe('The tenancy repository', () => {
       flat,
       aino,
       { latestStart: '2024-01-01', from: '2025-03-01', amount: 89000 },
+      89000,
       now,
     )
     expect(result).toEqual({ outcome: 'rent_changed' })
     expect(await repo.forProperty(flat)).toEqual([])
+    const left = await env.DB.prepare(
+      'SELECT count(*) AS n FROM tenancy_rents',
+    ).first<{ n: number }>()
+    expect(left?.n).toBe(0)
     expect(
       (await recurringAmountRepository(db).forProperty(flat)).amounts.rent,
     ).toEqual([])
@@ -320,11 +332,11 @@ describe('The tenancy repository', () => {
       validFrom: '2023-06-01',
     }
     // Without the ending it runs indefinitely and overlaps Aino's.
-    expect(await repo.createWithRent('annika', flat, pekka, null, now)).toEqual(
-      {
-        outcome: 'overlaps',
-      },
-    )
+    expect(
+      await repo.createWithRent('annika', flat, pekka, null, 82000, now),
+    ).toEqual({
+      outcome: 'overlaps',
+    })
     const ending = {
       noticeGivenBy: 'tenant' as const,
       noticeDate: '2025-01-20',
@@ -335,6 +347,7 @@ describe('The tenancy repository', () => {
       flat,
       pekka,
       null,
+      82000,
       now,
       ending,
     )
@@ -347,7 +360,7 @@ describe('The tenancy repository', () => {
     })
     // The ending's last day is the end for the overlap.
     expect(
-      await repo.createWithRent('annika', flat, pekka, null, now, {
+      await repo.createWithRent('annika', flat, pekka, null, 82000, now, {
         ...ending,
         lastDay: '2025-03-01',
       }),

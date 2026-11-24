@@ -1,7 +1,7 @@
 // Adding a tenant and correcting a tenancy (Design canvas: Uusi vuokralainen,
 // · virheet): the tenant, the contract type, contract made (following the
 // start until edited), the start, a fixed term's end, the rent (new tenants
-// only, from the rent in effect on the start date) and the due day
+// only, suggested from the previous tenancy's latest rent) and the due day
 // (openspec: tenancies, "Adding a tenant", "The rent of a new tenancy",
 // "Correcting a tenancy").
 import Box from '@mui/material/Box'
@@ -17,7 +17,7 @@ import { ReasonAlert } from '#/components/ReasonAlert'
 import { ChoiceField } from '#/components/form/ChoiceField'
 import { TextField } from '#/components/form/TextField'
 import { typedDate } from '#/features/ownership/schemas'
-import { periodOn, type Period } from '#/features/recurring-amounts/periods'
+import type { Period } from '#/features/recurring-amounts/periods'
 import { typedAmount } from '#/features/recurring-amounts/schemas'
 import { clientLog } from '#/lib/client-log'
 import { parseFiDate, type IsoDate } from '#/lib/dates'
@@ -39,7 +39,7 @@ import {
   waysFor,
 } from './ending'
 import { contractShortLabel } from './labels'
-import { rentAsked } from './rent'
+import { suggestedRent } from './rent'
 import {
   typedDueDay,
   typedTenantEmail,
@@ -53,8 +53,8 @@ interface Props {
   address: string
   /** Correcting: the tenancy. Adding: none. */
   editing?: Tenancy
-  /** Adding: the flat's rent periods, oldest first. */
-  rents?: readonly Period<number>[]
+  /** Adding: each tenancy's rent periods by id, for the suggested rent. */
+  tenancyRents?: Partial<Record<string, readonly Period<number>[]>>
   /** Adding: the flat's tenancies, newest first, for the previous one. */
   tenancies?: readonly Tenancy[]
   /** Adding: today in Finland. */
@@ -89,8 +89,6 @@ const FIELD_OF_TENANCY: Partial<Record<FieldReason, Field>> = {
   tenancy_end_before_start: 'termEnd',
   tenancy_due_day_invalid: 'dueDay',
   amount_invalid: 'rent',
-  amount_date_too_early: 'rent',
-  amount_date_before_ownership: 'rent',
 }
 
 /**
@@ -157,7 +155,18 @@ const pair = {
 } as const
 
 export function TenancyForm(props: Props) {
-  const { editing, rents = [] } = props
+  const { editing } = props
+  // The rent the form suggests for a start: the previous tenancy's latest.
+  const suggestion = (start: IsoDate) => {
+    const rent = suggestedRent(
+      (props.tenancies ?? []).map((t) => ({
+        validFrom: t.validFrom,
+        rents: props.tenancyRents?.[t.id] ?? [],
+      })),
+      start,
+    )
+    return rent === undefined ? '' : formatAmountInput(rent)
+  }
   const [alert, setAlert] = useState<AlertReason>()
   const [reasons, setReasons] = useState<Partial<Record<Field, FieldReason>>>(
     {},
@@ -179,7 +188,7 @@ export function TenancyForm(props: Props) {
       contractMade: editing ? formatDate(editing.contractMade) : '',
       validFrom: editing ? formatDate(editing.validFrom) : '',
       termEnd: editing?.termEnd ? formatDate(editing.termEnd) : '',
-      rent: '',
+      rent: editing ? '' : suggestion('9999-12-31'),
       dueDay: editing ? String(editing.dueDay) : '',
       noticeDate: '',
       lastDay: '',
@@ -189,9 +198,7 @@ export function TenancyForm(props: Props) {
       setReasons({})
       const { rent, noticeDate, lastDay, ...fields } = value
       const start = parseFiDate(fields.validFrom)
-      // As the form shows them: the rent from the latest rent period on, the
-      // ending for a start before today.
-      const askRent = start === undefined || rentAsked(rents, start)
+      // As the form shows it: the ending for a start before today.
       const withEnding =
         ended && start !== undefined && start < (props.today ?? start)
       try {
@@ -207,7 +214,7 @@ export function TenancyForm(props: Props) {
               data: {
                 propertyId: props.propertyId,
                 ...fields,
-                ...(askRent ? { rent } : {}),
+                rent,
                 ...(withEnding
                   ? {
                       ending: {
@@ -248,8 +255,7 @@ export function TenancyForm(props: Props) {
   const noticeDate = useSelector(form.store, (s) =>
     parseFiDate(s.values.noticeDate),
   )
-  const askRent =
-    editing === undefined && (start === undefined || rentAsked(rents, start))
+  const askRent = editing === undefined
   const canEnd =
     editing === undefined &&
     start !== undefined &&
@@ -410,11 +416,7 @@ export function TenancyForm(props: Props) {
                 }
                 const start = parseFiDate(value)
                 if (!editing && !rentEditedRef.current && start !== undefined) {
-                  const rent = periodOn(rents, start)?.value
-                  form.setFieldValue(
-                    'rent',
-                    rent === undefined ? '' : formatAmountInput(rent),
-                  )
+                  form.setFieldValue('rent', suggestion(start))
                 }
               },
             }}
@@ -517,9 +519,7 @@ export function TenancyForm(props: Props) {
           </Box>
           {editing ? null : (
             <Typography variant="body2" color="text.secondary">
-              {askRent
-                ? m.tenancy_form_rent_hint()
-                : m.tenancy_form_rent_not_asked()}
+              {m.tenancy_form_rent_hint()}
             </Typography>
           )}
         </Section>

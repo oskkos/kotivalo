@@ -13,7 +13,7 @@ export interface TenantDetails {
   start: string
   /** As typed; the form's default (the start) otherwise. */
   contractMade?: string
-  /** As typed; the rent in effect on the start date otherwise. */
+  /** As typed; the suggested rent otherwise, or 890 € without one. */
   rent?: string
   dueDay?: string
   /** An earlier tenancy's ending, recorded in the same form. */
@@ -54,10 +54,12 @@ export async function addTenant(
       .getByRole('textbox', { name: 'Contract made' })
       .fill(tenant.contractMade)
   }
+  const rent = page.getByRole('textbox', { name: 'Monthly rent (€)' })
   if (tenant.rent !== undefined) {
-    await page
-      .getByRole('textbox', { name: 'Monthly rent (€)' })
-      .fill(tenant.rent)
+    await rent.fill(tenant.rent)
+  } else if ((await rent.inputValue()) === '') {
+    // The rent is required: the previous tenancy's suggestion, or 890 €.
+    await rent.fill('890')
   }
   await page
     .getByRole('textbox', { name: 'Due day' })

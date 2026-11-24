@@ -522,8 +522,11 @@ export function tenancyRepository(db: Db) {
       actorId: string,
       propertyId: string,
       fields: TenancyFields,
+      /** Transitional: the flat-level rent to set with it, or none. */
       rent:
         (Omit<Expected, 'propertyId' | 'actorId'> & { amount: number }) | null,
+      /** The tenancy's first rent, in cents, from its start. */
+      tenancyRent: number,
       now: Date,
       /** An ending recorded with the tenancy, for an earlier one. */
       ending?: Ending,
@@ -539,8 +542,17 @@ export function tenancyRepository(db: Db) {
         now,
         ending,
       )
+      // The tenancy's first rent goes in only if the tenancy row did.
+      const firstRent = rentStatements({
+        actorId,
+        propertyId,
+        tenancyId: id,
+        amount: tenancyRent,
+        from: fields.validFrom,
+        latestStart: null,
+      })
       if (rent === null) {
-        const [inserted] = await atomically(db, [statement])
+        const [inserted] = await atomically(db, [statement, ...firstRent])
         return inserted.length > 0
           ? { outcome: 'created', id }
           : { outcome: 'overlaps' }
@@ -568,6 +580,7 @@ export function tenancyRepository(db: Db) {
       )
       const results = await atomically(db, [
         statement,
+        ...firstRent,
         ...recurringAmountRepository(db).amountStatements(
           { ...rent, propertyId, actorId, kind: 'rent' },
           added,
@@ -609,9 +622,15 @@ export function tenancyRepository(db: Db) {
       propertyId: string,
       tenancyId: string,
       fields: TenancyFields,
-      change: { validTo: IsoDate | null; expectedValidTo: IsoDate | null },
+      change: {
+        validTo: IsoDate | null
+        expectedValidTo: IsoDate | null
+        /** The first rent period's move with a corrected start, or none. */
+        firstRent?: { from: IsoDate; to: IsoDate } | null
+      },
       now: Date,
     ): Promise<boolean> {
+      const move = change.firstRent
       const [updated] = await atomically(db, [
         db
           .update(tenancies)
@@ -632,6 +651,31 @@ export function tenancyRepository(db: Db) {
             ),
           )
           .returning({ id: tenancies.id }),
+        // Only once the tenancy has its new start, i.e. the update applied.
+        ...(move
+          ? [
+              db
+                .update(tenancyRents)
+                .set({ validFrom: move.to })
+                .where(
+                  and(
+                    rentsOf(tenancyId),
+                    eq(tenancyRents.validFrom, move.from),
+                    exists(
+                      db
+                        .select({ one: sql`1` })
+                        .from(other)
+                        .where(
+                          and(
+                            eq(other.id, tenancyId),
+                            eq(other.validFrom, fields.validFrom),
+                          ),
+                        ),
+                    ),
+                  ),
+                ),
+            ]
+          : []),
       ])
       return updated.length > 0
     },
