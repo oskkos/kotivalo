@@ -29,7 +29,12 @@ import {
   propertyAccess,
   rentPayments,
   tenancies,
+  tenancyOccupants,
   tenancyRents,
+  tenantFeeAmounts,
+  tenantFees,
+  type ChargeBasis,
+  type ChargeKind,
   type ContractType,
   type NoticeGiver,
 } from '#/server/db/schema'
@@ -97,6 +102,18 @@ export interface RentUndo {
   tenancyId: string
   latestStart: IsoDate
   previousStart: IsoDate
+}
+
+/** A fee the tenant pays on top of the rent, with its amount periods. */
+export interface TenantFee {
+  id: string
+  tenancyId: string
+  kind: ChargeKind
+  basis: ChargeBasis
+  /** Set for the kind `other`. */
+  description: string | null
+  /** Cents per month or per occupant per month, oldest first. */
+  amounts: Period<number>[]
 }
 
 const columns = {
@@ -456,6 +473,77 @@ export function tenancyRepository(db: Db) {
         })
       }
       return rents
+    },
+
+    /**
+     * The occupants of tenancies as periods, oldest first (openspec:
+     * tenancies, "Occupants of a tenancy"). A tenancy without any has no
+     * entry.
+     */
+    async occupantsFor(
+      tenancyIds: string[],
+    ): Promise<Partial<Record<string, Period<number>[]>>> {
+      if (tenancyIds.length === 0) {
+        return {}
+      }
+      const rows = await db
+        .select()
+        .from(tenancyOccupants)
+        .where(inArray(tenancyOccupants.tenancyId, tenancyIds))
+        .orderBy(asc(tenancyOccupants.validFrom))
+      const occupants: Partial<Record<string, Period<number>[]>> = {}
+      for (const row of rows) {
+        ;(occupants[row.tenancyId] ??= []).push({
+          validFrom: row.validFrom,
+          validTo: row.validTo,
+          value: row.persons,
+        })
+      }
+      return occupants
+    },
+
+    /**
+     * The tenant fees of tenancies with their amount periods (openspec:
+     * tenancies, "Tenant fees are recorded as periods"). A tenancy without
+     * fees has no entry.
+     */
+    async feesFor(
+      tenancyIds: string[],
+    ): Promise<Partial<Record<string, TenantFee[]>>> {
+      if (tenancyIds.length === 0) {
+        return {}
+      }
+      const feeRows = await db
+        .select()
+        .from(tenantFees)
+        .where(inArray(tenantFees.tenancyId, tenancyIds))
+      if (feeRows.length === 0) {
+        return {}
+      }
+      const amountRows = await db
+        .select()
+        .from(tenantFeeAmounts)
+        .where(
+          inArray(
+            tenantFeeAmounts.tenantFeeId,
+            feeRows.map((fee) => fee.id),
+          ),
+        )
+        .orderBy(asc(tenantFeeAmounts.validFrom))
+      const fees: Partial<Record<string, TenantFee[]>> = {}
+      for (const row of feeRows) {
+        ;(fees[row.tenancyId] ??= []).push({
+          ...row,
+          amounts: amountRows
+            .filter((amount) => amount.tenantFeeId === row.id)
+            .map((amount) => ({
+              validFrom: amount.validFrom,
+              validTo: amount.validTo,
+              value: amount.amount,
+            })),
+        })
+      }
+      return fees
     },
 
     /**
