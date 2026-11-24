@@ -91,3 +91,20 @@ export const aino: TenantDetails = {
   start: '01/03/2025',
   rent: '890',
 }
+
+/**
+ * Changes the current tenancy's rent from the Tenancy page's rent card and
+ * lands back on the page. Amount and date as typed.
+ */
+export async function changeRent(page: Page, amount: string, from: string) {
+  await waitForHydration(page)
+  await page
+    .getByRole('region', { name: 'Rent' })
+    .getByRole('link', { name: 'Change' })
+    .click()
+  await waitForHydration(page)
+  await page.getByRole('textbox', { name: 'New amount (€/month)' }).fill(amount)
+  await page.getByRole('textbox', { name: 'Valid from' }).fill(from)
+  await page.getByRole('button', { name: 'Save change' }).click()
+  await expect(page).toHaveURL(/\/tenancy$/)
+}
