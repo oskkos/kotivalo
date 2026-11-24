@@ -10,7 +10,12 @@ import {
 import { useState } from 'react'
 import { NotFoundView } from '#/components/NotFoundView'
 import { UndoDialog } from '#/features/recurring-amounts/UndoDialog'
-import { getTenancies, undoTenancyRent } from '#/features/tenancies/functions'
+import {
+  getTenancies,
+  undoTenancyOccupants,
+  undoTenancyRent,
+} from '#/features/tenancies/functions'
+import { OccupantsDialog } from '#/features/tenancies/OccupantsDialog'
 import { CancelEndingDialog } from '#/features/tenancies/CancelEndingDialog'
 import { tenancyStatus } from '#/features/tenancies/status'
 import type { Tenancy } from '#/features/tenancies/tenancy.repository.server'
@@ -49,6 +54,13 @@ function TenancyRoute() {
   const router = useRouter()
   const [cancelling, setCancelling] = useState<Tenancy>()
   const [undoingRent, setUndoingRent] = useState<Tenancy>()
+  const [changingOccupants, setChangingOccupants] = useState<Tenancy>()
+  const [undoingOccupants, setUndoingOccupants] = useState<Tenancy>()
+  const undoPeriods = undoingOccupants
+    ? (view.occupants[undoingOccupants.id] ?? [])
+    : []
+  const latestOccupants = undoPeriods.at(-1)
+  const previousOccupants = undoPeriods.at(-2)
   const undoRents = undoingRent ? (view.rents[undoingRent.id] ?? []) : []
   const latestRent = undoRents.at(-1)
   const previousRent = undoRents.at(-2)
@@ -109,6 +121,8 @@ function TenancyRoute() {
           </ButtonLink>
         )}
         onUndoRent={setUndoingRent}
+        onChangeOccupants={setChangingOccupants}
+        onUndoOccupants={setUndoingOccupants}
         currentActions={(tenancy) => {
           const status = tenancyStatus(tenancy, view.today)
           return (
@@ -165,6 +179,45 @@ function TenancyRoute() {
           )
         }}
       />
+      {changingOccupants ? (
+        <OccupantsDialog
+          open
+          propertyId={propertyId}
+          tenancyId={changingOccupants.id}
+          onClose={() => {
+            setChangingOccupants(undefined)
+          }}
+          onDone={async () => {
+            setChangingOccupants(undefined)
+            await router.invalidate()
+          }}
+        />
+      ) : null}
+      {undoingOccupants && latestOccupants && previousOccupants ? (
+        <UndoDialog
+          open
+          onClose={() => {
+            setUndoingOccupants(undefined)
+          }}
+          title={m.tenancy_occupants_undo_title({
+            date: formatDate(latestOccupants.validFrom),
+          })}
+          text={m.tenancy_occupants_undo_text({
+            persons: String(previousOccupants.value),
+            date: formatDate(previousOccupants.validFrom),
+          })}
+          undo={() =>
+            undoTenancyOccupants({
+              data: { propertyId, tenancyId: undoingOccupants.id },
+            })
+          }
+          failureEvent="tenancy.occupants_undo_failed"
+          onDone={async () => {
+            setUndoingOccupants(undefined)
+            await router.invalidate()
+          }}
+        />
+      ) : null}
       {undoingRent && latestRent && previousRent ? (
         <UndoDialog
           open

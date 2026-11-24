@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { addFlat, card } from './support/flats'
 import { accepted, ownerWithFlat } from './support/sharing'
 import { waitForHydration } from './support/sign-in'
-import { addTenant, aino, changeRent } from './support/tenancies'
+import { addTenant, aino, changeRent, setOccupants } from './support/tenancies'
 
 // The browser's language is English, so the app is in English.
 
@@ -427,6 +427,54 @@ test.describe("Undoing a tenancy's rent change", () => {
     await expect(rent).not.toContainText('€920.00')
     await expect(
       rent.getByRole('button', { name: 'Undo the latest change' }),
+    ).toHaveCount(0)
+  })
+})
+
+test.describe('Changing the occupants', () => {
+  test('A second occupant moves in', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await setOccupants(page, '2', `01/03/${nextYear}`)
+    const occupants = page.getByRole('region', { name: 'Occupants' })
+    await expect(occupants).toContainText('1')
+    await expect(occupants).toContainText(`From 01/03/${nextYear}: 2`)
+  })
+
+  test("Correcting the occupants on the tenancy's start", async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await setOccupants(page, '2', '01/03/2025')
+    const occupants = page.getByRole('region', { name: 'Occupants' })
+    await expect(occupants).toContainText('From 01/03/2025')
+    await expect(occupants.getByText('2', { exact: true })).toBeVisible()
+    await expect(
+      occupants.getByRole('button', { name: 'Undo the latest change' }),
+    ).toHaveCount(0)
+  })
+
+  test('Undoing an occupants change', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await setOccupants(page, '2', `01/03/${nextYear}`)
+    const occupants = page.getByRole('region', { name: 'Occupants' })
+    await occupants
+      .getByRole('button', { name: 'Undo the latest change' })
+      .click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toContainText('(from 01/03/2025)')
+    await dialog.getByRole('button', { name: 'Undo change' }).click()
+    await expect(dialog).toBeHidden()
+    await expect(occupants).not.toContainText(`From 01/03/${nextYear}`)
+  })
+
+  test("A member can't change the occupants", async ({ page, browser }) => {
+    const { id, jussi } = await accepted(page, browser)
+    await addTenant(page, id, aino)
+    await jussi.goto(`/properties/${id}/tenancy`)
+    await expect(jussi.getByRole('region', { name: 'Occupants' })).toBeVisible()
+    await expect(
+      jussi.getByRole('button', { name: 'Change the occupants' }),
     ).toHaveCount(0)
   })
 })

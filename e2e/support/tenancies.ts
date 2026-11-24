@@ -108,3 +108,22 @@ export async function changeRent(page: Page, amount: string, from: string) {
   await page.getByRole('button', { name: 'Save change' }).click()
   await expect(page).toHaveURL(/\/tenancy$/)
 }
+
+/**
+ * Changes the current tenancy's occupants from the occupants card's dialog.
+ * Number and date as typed.
+ */
+export async function setOccupants(page: Page, persons: string, from: string) {
+  await waitForHydration(page)
+  await page
+    .getByRole('region', { name: 'Occupants' })
+    .getByRole('button', { name: 'Change the occupants' })
+    .click()
+  const dialog = page.getByRole('dialog')
+  await dialog
+    .getByRole('textbox', { name: 'New number of occupants' })
+    .fill(persons)
+  await dialog.getByRole('textbox', { name: 'Valid from' }).fill(from)
+  await dialog.getByRole('button', { name: 'Save change' }).click()
+  await expect(dialog).toBeHidden()
+}

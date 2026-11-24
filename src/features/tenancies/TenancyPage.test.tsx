@@ -36,6 +36,8 @@ const mikko: Tenancy = {
 }
 
 const onUndoRent = vi.fn()
+const onChangeOccupants = vi.fn()
+const onUndoOccupants = vi.fn()
 
 function setup(view: Partial<TenancyPageView>) {
   render(
@@ -47,6 +49,9 @@ function setup(view: Partial<TenancyPageView>) {
         rents: {
           [aino.id]: [{ validFrom: '2025-03-01', validTo: null, value: 89000 }],
         },
+        occupants: {
+          [aino.id]: [{ validFrom: '2025-03-01', validTo: null, value: 1 }],
+        },
         ...view,
       }}
       address="Kuusikuja 3 B 12"
@@ -55,6 +60,8 @@ function setup(view: Partial<TenancyPageView>) {
       currentActions={() => <button type="button">End tenancy</button>}
       rentChange={() => <a href="/rent">Change</a>}
       onUndoRent={onUndoRent}
+      onChangeOccupants={onChangeOccupants}
+      onUndoOccupants={onUndoOccupants}
     />,
   )
 }
@@ -209,5 +216,47 @@ describe('The tenancy page', () => {
     expect(card).toHaveTextContent('€890.00 a month')
     expect(within(card).queryByRole('link')).toBeNull()
     expect(within(card).queryByRole('button')).toBeNull()
+  })
+})
+
+describe('the occupants on the tenancy page', () => {
+  const two = [
+    { validFrom: '2025-03-01', validTo: '2026-11-30', value: 1 },
+    { validFrom: '2026-12-01', validTo: null, value: 2 },
+  ]
+
+  test("today's occupants with the upcoming change", () => {
+    setup({ occupants: { [aino.id]: two } })
+    const card = screen.getByRole('region', { name: 'Occupants' })
+    expect(within(card).getByText('1')).toBeVisible()
+    expect(within(card).getByText('From 01/12/2026: 2')).toBeVisible()
+  })
+
+  test('owners change and undo the occupants', async () => {
+    const user = userEvent.setup()
+    setup({ occupants: { [aino.id]: two } })
+    await user.click(
+      screen.getByRole('button', { name: 'Change the occupants' }),
+    )
+    expect(onChangeOccupants).toHaveBeenCalled()
+    await user.click(
+      screen.getByRole('button', { name: 'Undo the latest change' }),
+    )
+    expect(onUndoOccupants).toHaveBeenCalled()
+  })
+
+  test('the first period alone offers no undo', () => {
+    setup({})
+    expect(
+      screen.queryByRole('button', { name: 'Undo the latest change' }),
+    ).toBeNull()
+  })
+
+  test("a member sees the occupants but can't change them", () => {
+    setup({ role: 'member', occupants: { [aino.id]: two } })
+    expect(screen.getByRole('region', { name: 'Occupants' })).toBeVisible()
+    expect(
+      screen.queryByRole('button', { name: 'Change the occupants' }),
+    ).toBeNull()
   })
 })
