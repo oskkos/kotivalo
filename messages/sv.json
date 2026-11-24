@@ -722,7 +722,7 @@
   "tenancy_remove_title": "Ta bort hyresförhållandet?",
   "tenancy_rent": "Hyra",
   "tenancy_rent_changes": "Ändringar av hyran",
-  "tenancy_rent_form_hint": "Ändringen gäller bara det här hyresförhållandet. Hyran ändras från början av en månad; ett belopp från hyresförhållandets startdag rättar den första hyran.",
+  "tenancy_rent_form_hint": "Ändringen gäller bara det här hyresförhållandet. Hyran ändras från början av en månad. Ett belopp från hyresförhållandets eller en hyresperiods startdag anger eller rättar den periodens hyra.",
   "tenancy_rent_not_set": "Inte angiven",
   "tenancy_rent_value": "{amount}/mån.",
   "tenancy_start": "Startdatum",

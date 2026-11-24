@@ -722,7 +722,7 @@
   "tenancy_remove_title": "Poistetaanko vuokrasuhde?",
   "tenancy_rent": "Vuokra",
   "tenancy_rent_changes": "Vuokran muutokset",
-  "tenancy_rent_form_hint": "Muutos koskee vain tätä vuokrasuhdetta. Vuokra muuttuu kuukauden alusta; vuokrasuhteen alkupäivästä annettu summa korjaa ensimmäisen vuokran.",
+  "tenancy_rent_form_hint": "Muutos koskee vain tätä vuokrasuhdetta. Vuokra muuttuu kuukauden alusta. Vuokrasuhteen tai vuokrajakson alkupäivästä annettu summa asettaa tai korjaa sen jakson vuokran.",
   "tenancy_rent_not_set": "Ei asetettu",
   "tenancy_rent_value": "{amount}/kk",
   "tenancy_start": "Alkupäivä",
