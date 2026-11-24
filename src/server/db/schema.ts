@@ -460,6 +460,105 @@ export const tenancyRents = sqliteTable(
 )
 
 /**
+ * What a monthly charge or fee is for, and how its amount is counted
+ * (openspec: usage-charges, tenancies). The kinds and bases are shared by the
+ * flat's usage charges and the tenancy's fees.
+ */
+export const CHARGE_KINDS = ['water', 'parking', 'sauna', 'other'] as const
+export const CHARGE_BASES = ['fixed', 'per_occupant'] as const
+export type ChargeKind = (typeof CHARGE_KINDS)[number]
+export type ChargeBasis = (typeof CHARGE_BASES)[number]
+
+/**
+ * A usage charge the housing company bills the flat's owners monthly
+ * (openspec: usage-charges). `description` is set only for the kind `other`.
+ * Its amounts are periods in usage_charge_amounts.
+ */
+export const usageCharges = sqliteTable(
+  'usage_charges',
+  {
+    id: id(),
+    propertyId: text('property_id')
+      .notNull()
+      .references(() => properties.id, { onDelete: 'cascade' }),
+    kind: text('kind', { enum: CHARGE_KINDS }).notNull(),
+    basis: text('basis', { enum: CHARGE_BASES }).notNull(),
+    description: text('description'),
+  },
+  (t) => [index('usage_charges_property_idx').on(t.propertyId)],
+)
+
+/**
+ * A usage charge's amount over time, per month or per occupant per month.
+ * Periods like recurring_amounts: from the first of a month, the latest open.
+ */
+export const usageChargeAmounts = sqliteTable(
+  'usage_charge_amounts',
+  {
+    id: id(),
+    usageChargeId: text('usage_charge_id')
+      .notNull()
+      .references(() => usageCharges.id, { onDelete: 'cascade' }),
+    amount: cents('amount').notNull(),
+    ...validity(),
+  },
+  (t) => [
+    index('usage_charge_amounts_charge_idx').on(t.usageChargeId, t.validFrom),
+  ],
+)
+
+/**
+ * The number of persons living in the flat during a tenancy, as periods
+ * (openspec: tenancies, "Occupants of a tenancy"). The first starts on the
+ * tenancy's start day, changes on the first of a month.
+ */
+export const tenancyOccupants = sqliteTable(
+  'tenancy_occupants',
+  {
+    id: id(),
+    tenancyId: text('tenancy_id')
+      .notNull()
+      .references(() => tenancies.id, { onDelete: 'cascade' }),
+    persons: integer('persons', { mode: 'number' }).notNull(),
+    ...validity(),
+  },
+  (t) => [index('tenancy_occupants_tenancy_idx').on(t.tenancyId, t.validFrom)],
+)
+
+/**
+ * A fee the tenant pays the owner on top of the rent (openspec: tenancies,
+ * "Tenant fees"). Not linked to the usage charges. Amounts are periods in
+ * tenant_fee_amounts inside the tenancy.
+ */
+export const tenantFees = sqliteTable(
+  'tenant_fees',
+  {
+    id: id(),
+    tenancyId: text('tenancy_id')
+      .notNull()
+      .references(() => tenancies.id, { onDelete: 'cascade' }),
+    kind: text('kind', { enum: CHARGE_KINDS }).notNull(),
+    basis: text('basis', { enum: CHARGE_BASES }).notNull(),
+    description: text('description'),
+  },
+  (t) => [index('tenant_fees_tenancy_idx').on(t.tenancyId)],
+)
+
+/** A tenant fee's amount over time, per month or per occupant per month. */
+export const tenantFeeAmounts = sqliteTable(
+  'tenant_fee_amounts',
+  {
+    id: id(),
+    tenantFeeId: text('tenant_fee_id')
+      .notNull()
+      .references(() => tenantFees.id, { onDelete: 'cascade' }),
+    amount: cents('amount').notNull(),
+    ...validity(),
+  },
+  (t) => [index('tenant_fee_amounts_fee_idx').on(t.tenantFeeId, t.validFrom)],
+)
+
+/**
  * Rent received for a month of a tenancy (openspec: rent-payments). `month`
  * (`YYYY-MM`) is the rent's month, `paid_on` the day it was received, which
  * decides its tax year. A month may have several payments. Never edited: a

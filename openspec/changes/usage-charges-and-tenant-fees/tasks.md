@@ -1,8 +1,8 @@
 ## 1. Tables and the migration
 
-- [ ] 1.1 `schema.ts`: `CHARGE_KINDS`, `CHARGE_BASES` and the tables `usage_charges`, `usage_charge_amounts`, `tenancy_occupants`, `tenant_fees` and `tenant_fee_amounts` (design.md, decision 1; `id()`, `cents()`, `validity()`, cascades and indexes); `pnpm db:generate`, then append the occupants statement from design.md (decision 2) to the generated `0010` file before committing it
-- [ ] 1.2 Workers test for "Existing tenancies get one occupant": tenancies stored as the previous version did, the migration's statements run from `d1Migrations`, each tenancy with one occupant from its start
-- [ ] 1.3 `tenancy.repository.server.ts`: `occupantsFor(tenancyIds)` and `feesFor(tenancyIds)` (each fee with its amount periods, oldest first) beside `rentsFor`; Workers tests
+- [x] 1.1 `schema.ts`: `CHARGE_KINDS`, `CHARGE_BASES` and the tables `usage_charges`, `usage_charge_amounts`, `tenancy_occupants`, `tenant_fees` and `tenant_fee_amounts` (design.md, decision 1; `id()`, `cents()`, `validity()`, cascades and indexes); `pnpm db:generate`, then append the occupants statement from design.md (decision 2) to the generated `0010` file before committing it
+- [x] 1.2 Workers test for "Existing tenancies get one occupant": tenancies stored as the previous version did, the migration's statements run from `d1Migrations`, each tenancy with one occupant from its start
+- [x] 1.3 `tenancy.repository.server.ts`: `occupantsFor(tenancyIds)` and `feesFor(tenancyIds)` (each fee with its amount periods, oldest first) beside `rentsFor`; Workers tests
 
 ## 2. Period rules and the shared period writes
 

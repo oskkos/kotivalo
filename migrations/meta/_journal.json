@@ -71,6 +71,13 @@
       "when": 1795532530630,
       "tag": "0009_tenancy_rents",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "6",
+      "when": 1795555606285,
+      "tag": "0010_usage_charges_and_fees",
+      "breakpoints": true
     }
   ]
 }
