@@ -1,11 +1,11 @@
-// Setting or changing the rent, the maintenance charge or one financing
-// charge (Design canvas: VastikeMuutos, VastikeEnsimmainen, VastikePeru,
+// Setting or changing the maintenance charge or one financing charge
+// (Design canvas: VastikeMuutos, VastikeEnsimmainen, VastikePeru,
 // RahoitusMuutos): the new amount, its start date, the difference and its
 // effect on that year, the history, and undoing the latest change, which
 // removes a financing charge with its only amount. A financing charge's form
-// also renames it and ends it (spec: "Setting a charge", "Undoing
-// the latest rent or charge change", "Renaming a financing charge", "Ending a
-// financing charge").
+// also renames it and ends it (spec: "Setting a charge", "Undoing the latest
+// charge change", "Renaming a financing charge", "Ending a financing
+// charge").
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
@@ -45,7 +45,7 @@ import { UndoButton, UndoDialog } from './UndoDialog'
 
 interface Props {
   propertyId: string
-  /** The rent or maintenance charge, or one of the financing charges. */
+  /** The maintenance charge, or one of the financing charges. */
   what: SingleKind | FinancingCharge
   view: RecurringAmountsView
   address: string
@@ -63,7 +63,7 @@ const titles: Record<SingleKind, { set: () => string; change: () => string }> =
   }
 
 /**
- * The form's title: "Set rent" before the first amount, then "Change …"; a
+ * The form's title: "Set …" before the first amount, then "Change …"; a
  * financing charge's name.
  */
 export function amountFormTitle(
