@@ -16,7 +16,6 @@ import {
   lt,
   lte,
   ne,
-  not,
   notExists,
   or,
   sql,
@@ -28,17 +27,12 @@ import { dayBefore, type IsoDate } from '#/lib/dates'
 import {
   properties,
   propertyAccess,
-  recurringAmounts,
   rentPayments,
   tenancies,
   tenancyRents,
   type ContractType,
   type NoticeGiver,
 } from '#/server/db/schema'
-import {
-  recurringAmountRepository,
-  type Expected,
-} from '#/features/recurring-amounts/recurring-amount.repository.server'
 import type { Period } from '#/features/recurring-amounts/periods'
 import { atomically, type Db } from '#/server/platform/db.server'
 
@@ -513,28 +507,20 @@ export function tenancyRepository(db: Db) {
     },
 
     /**
-     * Adds a tenancy and, when given, sets the flat's rent, all or nothing:
-     * the rent statements apply only if the tenancy row went in, and the
-     * batch's last statement takes the tenancy out again unless the rent
-     * period it needs is there. `overlaps` also covers a lost owner role.
+     * Adds a tenancy with its first rent period from its start, both or
+     * neither: the rent goes in only if the tenancy row did. `overlaps` also
+     * covers a lost owner role.
      */
     async createWithRent(
       actorId: string,
       propertyId: string,
       fields: TenancyFields,
-      /** Transitional: the flat-level rent to set with it, or none. */
-      rent:
-        (Omit<Expected, 'propertyId' | 'actorId'> & { amount: number }) | null,
-      /** The tenancy's first rent, in cents, from its start. */
-      tenancyRent: number,
+      /** Cents per month. */
+      rent: number,
       now: Date,
       /** An ending recorded with the tenancy, for an earlier one. */
       ending?: Ending,
-    ): Promise<
-      | { outcome: 'created'; id: string }
-      | { outcome: 'overlaps' }
-      | { outcome: 'rent_changed' }
-    > {
+    ): Promise<{ outcome: 'created'; id: string } | { outcome: 'overlaps' }> {
       const { id, statement } = createStatement(
         actorId,
         propertyId,
@@ -542,62 +528,20 @@ export function tenancyRepository(db: Db) {
         now,
         ending,
       )
-      // The tenancy's first rent goes in only if the tenancy row did.
-      const firstRent = rentStatements({
-        actorId,
-        propertyId,
-        tenancyId: id,
-        amount: tenancyRent,
-        from: fields.validFrom,
-        latestStart: null,
-      })
-      if (rent === null) {
-        const [inserted] = await atomically(db, [statement, ...firstRent])
-        return inserted.length > 0
-          ? { outcome: 'created', id }
-          : { outcome: 'overlaps' }
-      }
-      const added = exists(
-        db
-          .select({ one: sql`1` })
-          .from(other)
-          .where(eq(other.id, id)),
-      )
-      // The rent the tenancy was saved with: the latest period, from `from`.
-      const rentSet = exists(
-        db
-          .select({ one: sql`1` })
-          .from(recurringAmounts)
-          .where(
-            and(
-              eq(recurringAmounts.propertyId, propertyId),
-              eq(recurringAmounts.kind, 'rent'),
-              eq(recurringAmounts.validFrom, rent.from),
-              isNull(recurringAmounts.validTo),
-              eq(recurringAmounts.amount, rent.amount),
-            ),
-          ),
-      )
-      const results = await atomically(db, [
+      const [inserted] = await atomically(db, [
         statement,
-        ...firstRent,
-        ...recurringAmountRepository(db).amountStatements(
-          { ...rent, propertyId, actorId, kind: 'rent' },
-          added,
-        ),
-        db
-          .delete(tenancies)
-          .where(and(eq(tenancies.id, id), not(rentSet)))
-          .returning({ id: tenancies.id }),
+        ...rentStatements({
+          actorId,
+          propertyId,
+          tenancyId: id,
+          amount: rent,
+          from: fields.validFrom,
+          latestStart: null,
+        }),
       ])
-      const inserted = results[0]
-      const removed = results.at(-1) as unknown[]
-      if (inserted.length === 0) {
-        return { outcome: 'overlaps' }
-      }
-      return removed.length > 0
-        ? { outcome: 'rent_changed' }
-        : { outcome: 'created', id }
+      return inserted.length > 0
+        ? { outcome: 'created', id }
+        : { outcome: 'overlaps' }
     },
 
     /** Adds a tenancy. Null when the actor isn't an owner or it overlaps. */

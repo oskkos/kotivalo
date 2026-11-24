@@ -36,7 +36,7 @@ const view = (over: Partial<RentMonthView> = {}): RentMonthView => ({
   today: '2026-11-22',
   tenancy: aino,
   month: '2026-11',
-  rents: [{ validFrom: '2025-03-01', validTo: null, value: 89000 }],
+  rents: { t1: [{ validFrom: '2025-03-01', validTo: null, value: 89000 }] },
   payments: [
     {
       id: 'p1',

@@ -20,10 +20,10 @@
 
 ## 4. Rent read from the tenancy
 
-- [ ] 4.1 `rent-payments/status.ts`: `expectedRent` and the month, year and summary functions take each tenancy's rent periods (`rentInMonth`) instead of the flat's; unit tests of "Expected rent of a month" updated to its new scenarios
-- [ ] 4.2 `rent-payments.server.ts`, `properties/details.server.ts`, the flats list and `tenancies.server.ts` read the tenancies' rents from the tenancy repository; `recurringAmountRepository.rentFor`, the transitional flat-level rent write from 3.2 and `rentAsked` are removed
-- [ ] 4.3 `e2e/support/`: tests that set the rent on the Rent and charges page to get a rent for payments (rent payments, flat details, flats list) give it with `addTenant` instead; the Rent and charges page's own rent tests stay until group 6
-- [ ] 4.4 Workers and e2e tests of rent payments, the flats list and the details page still passing; `pnpm test` and `pnpm test:e2e`
+- [x] 4.1 `rent-payments/status.ts`: `expectedRent` and the month, year and summary functions take each tenancy's rent periods (`rentInMonth`) instead of the flat's; unit tests of "Expected rent of a month" updated to its new scenarios
+- [x] 4.2 `rent-payments.server.ts`, `properties/details.server.ts`, the flats list and `tenancies.server.ts` read the tenancies' rents from the tenancy repository; `recurringAmountRepository.rentFor`, the transitional flat-level rent write from 3.2 and `rentAsked` are removed
+- [x] 4.3 e2e: the flat details test that set the rent on the Rent and charges page gives it with `addTenant` instead, and the old "A changed rent starts from the start month" test is replaced by "The rent starts on the tenancy's start day"; the Rent and charges page's own rent tests stay until group 6
+- [x] 4.4 Workers and e2e tests of rent payments, the flats list and the details page still passing; `pnpm test` and `pnpm test:e2e`
 
 ## 5. The rent card and changing the rent
 

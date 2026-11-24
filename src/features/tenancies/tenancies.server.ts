@@ -6,13 +6,7 @@
 import type { OwnershipRepository } from '#/features/ownership/ownership.repository.server'
 import type { Property } from '#/features/properties/property'
 import type { PropertyRepository } from '#/features/properties/property.repository.server'
-import type { RecurringAmountRepository } from '#/features/recurring-amounts/recurring-amount.repository.server'
-import {
-  monthOf,
-  periodOn,
-  validateAmountDate,
-  type Period,
-} from '#/features/recurring-amounts/periods'
+import type { Period } from '#/features/recurring-amounts/periods'
 import type { SharingRepository } from '#/features/sharing/sharing.repository.server'
 import { isoDateInFinland, type IsoDate } from '#/lib/dates'
 import type { AlertReason, FieldReason } from '#/lib/reasons'
@@ -20,8 +14,8 @@ import type { NoticeGiver, PropertyRole } from '#/server/db/schema'
 import type { Logger } from '#/server/log/log'
 import { validateEnding } from './notice'
 import { paymentsOutside, validateTenancyDates } from './rules'
-import { firstRentMove, rentAfterEnd, rentAsked } from './rent'
-import { flatStatus } from './status'
+import { firstRentMove, rentAfterEnd, rentToday } from './rent'
+import { currentTenancy, flatStatus } from './status'
 import type {
   Ending,
   Tenancy,
@@ -33,7 +27,6 @@ export interface TenancyDeps {
   /** The signed-in user. */
   userId: string
   tenancies: TenancyRepository
-  amounts: RecurringAmountRepository
   properties: PropertyRepository
   ownership: OwnershipRepository
   sharing: SharingRepository
@@ -58,11 +51,6 @@ const tenancyNotFound = {
   ok: false,
   reason: 'tenancy_not_found',
 } as const satisfies Failure
-const changedMeanwhile = {
-  ok: false,
-  reason: 'amount_changed',
-} as const satisfies Failure
-
 const fail = <R extends FieldReason | AlertReason>(reason: R): Failure<R> => ({
   ok: false,
   reason,
@@ -107,26 +95,24 @@ async function ownershipStart(
 
 const today = (deps: TenancyDeps) => isoDateInFinland(deps.now())
 
-/** The flat's tenancies and its amounts, or undefined without access. */
+/** The flat's tenancies and their rents, or undefined without access. */
 async function loadView(
   deps: TenancyDeps,
   propertyId: string,
 ): Promise<
-  | (TenancyView & {
-      amounts: Awaited<ReturnType<RecurringAmountRepository['forProperty']>>
-    })
+  | (TenancyView & { rents: Partial<Record<string, Period<number>[]>> })
   | undefined
 > {
-  const [role, property, tenancies, amounts] = await Promise.all([
+  const [role, property, tenancies] = await Promise.all([
     deps.sharing.roleOf(deps.userId, propertyId),
     deps.properties.findForUser(deps.userId, propertyId),
     deps.tenancies.forProperty(propertyId),
-    deps.amounts.forProperty(propertyId),
   ])
   if (!role || !property) {
     return undefined
   }
-  return { role, property, today: today(deps), tenancies, amounts }
+  const rents = await deps.tenancies.rentsFor(tenancies.map((t) => t.id))
+  return { role, property, today: today(deps), tenancies, rents }
 }
 
 /** The flat's tenancies, for everyone with access. */
@@ -140,11 +126,14 @@ export async function getTenancies(
   if (!view) {
     return notFound
   }
-  const { amounts, ...rest } = view
+  const { rents, ...rest } = view
+  const current = currentTenancy(view.tenancies, view.today)
   return {
     ok: true,
     ...rest,
-    rentToday: periodOn(amounts.amounts.rent, view.today)?.value ?? null,
+    rentToday:
+      (current && rentToday(rents[current.id] ?? [], current, view.today)) ??
+      null,
   }
 }
 
@@ -174,9 +163,7 @@ export async function getNewTenancyOptions(
     property: view.property,
     today: view.today,
     tenancies: view.tenancies,
-    tenancyRents: await deps.tenancies.rentsFor(
-      view.tenancies.map((t) => t.id),
-    ),
+    tenancyRents: view.rents,
     ownershipStart: start,
   }
 }
@@ -239,10 +226,9 @@ export async function createTenancy(
   if (refused) {
     return refused
   }
-  const [start, others, amounts] = await Promise.all([
+  const [start, others] = await Promise.all([
     ownershipStart(deps, propertyId),
     deps.tenancies.forProperty(propertyId),
-    deps.amounts.forProperty(propertyId),
   ])
   if (start === undefined) {
     return notFound
@@ -259,33 +245,10 @@ export async function createTenancy(
   if (problem) {
     return fail(problem)
   }
-  // Transitional, until the pages read the tenancy's rent: the flat's rent
-  // is still set as before, from the start month, when it changed.
-  const rents = amounts.amounts.rent
-  const asked = rentAsked(rents, fields.validFrom)
-  const inEffect = periodOn(rents, fields.validFrom)?.value
-  let rentWrite: {
-    latestStart: IsoDate | null
-    from: IsoDate
-    amount: number
-  } | null = null
-  if (asked && rent !== inEffect) {
-    const from = `${monthOf(fields.validFrom)}-01`
-    const latestStart = rents.at(-1)?.validFrom
-    const rentProblem = validateAmountDate(from, {
-      ownershipStart: start,
-      latestStart,
-    })
-    if (rentProblem) {
-      return fail(rentProblem)
-    }
-    rentWrite = { latestStart: latestStart ?? null, from, amount: rent }
-  }
   const created = await deps.tenancies.createWithRent(
     deps.userId,
     propertyId,
     fields,
-    rentWrite,
     rent,
     deps.now(),
     ending,
@@ -293,26 +256,12 @@ export async function createTenancy(
   if (created.outcome === 'overlaps') {
     return refusal(deps, propertyId, fail('tenancy_overlaps'))
   }
-  if (created.outcome === 'rent_changed') {
-    // Another write changed the rent between the read and this save, so the
-    // batch took the tenancy out again.
-    deps.log.warn('tenancy.rent_conflict', { propertyId })
-    return changedMeanwhile
-  }
   deps.log.info('tenancy.created', {
     propertyId,
     tenancyId: created.id,
     contractType: fields.contractType,
     ended: ending !== undefined,
   })
-  if (rentWrite) {
-    deps.log.info('recurring_amount.set', {
-      propertyId,
-      kind: 'rent',
-      from: rentWrite.from,
-      corrected: rentWrite.from === rentWrite.latestStart,
-    })
-  }
   return { ok: true, tenancyId: created.id }
 }
 

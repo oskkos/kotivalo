@@ -2,7 +2,6 @@ import { env } from 'cloudflare:workers'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { ownershipRepository } from '#/features/ownership/ownership.repository.server'
 import { propertyRepository } from '#/features/properties/property.repository.server'
-import { recurringAmountRepository } from '#/features/recurring-amounts/recurring-amount.repository.server'
 import { rentPaymentRepository } from '#/features/rent-payments/rent-payment.repository.server'
 import { sharingRepository } from '#/features/sharing/sharing.repository.server'
 import { createDb } from '#/server/platform/db.server'
@@ -36,7 +35,6 @@ function deps(userId = 'annika'): TenancyDeps {
   return {
     userId,
     tenancies: tenancyRepository(db),
-    amounts: recurringAmountRepository(db),
     properties: propertyRepository(db),
     ownership: ownershipRepository(db),
     sharing: sharingRepository(db),
@@ -67,20 +65,6 @@ const fixedTerm = (validFrom: string, termEnd: string): TenancyFields => ({
   termEnd,
 })
 
-const rents = async () =>
-  (await recurringAmountRepository(db).forProperty(flat)).amounts.rent
-
-async function setRent(amount: number, from: string) {
-  await recurringAmountRepository(db).setAmount({
-    propertyId: flat,
-    actorId: 'annika',
-    kind: 'rent',
-    amount,
-    from,
-    latestStart: (await rents()).at(-1)?.validFrom ?? null,
-  })
-}
-
 const tenancyRents = async (id: string) =>
   (await tenancyRepository(db).rentsFor([id]))[id] ?? []
 
@@ -104,8 +88,8 @@ async function view(userId = 'annika') {
   return result
 }
 
-/** Makes `flat` a flat owned since `since`, with a rent from `rentFrom`. */
-async function flatOwnedSince(since: string, rentFrom: string) {
+/** Makes `flat` a flat owned since `since`. */
+async function flatOwnedSince(since: string) {
   flat = (
     await propertyRepository(db).create(
       'annika',
@@ -120,7 +104,6 @@ async function flatOwnedSince(since: string, rentFrom: string) {
       since,
     )
   ).id
-  await setRent(89000, rentFrom)
 }
 
 const pekka: TenancyFields = {
@@ -172,7 +155,6 @@ beforeEach(async () => {
   )
     .bind(flat, now.getTime())
     .run()
-  await setRent(89000, '2025-03-01')
 })
 
 describe('Adding a tenant', () => {
@@ -204,7 +186,7 @@ describe('Adding a tenant', () => {
   })
 
   test('Adding an earlier tenancy with its ending', async () => {
-    await flatOwnedSince('2022-06-12', '2025-03-01')
+    await flatOwnedSince('2022-06-12')
     await addId(aino)
     expect(
       await createTenancy(deps(), flat, pekka, 82000, {
@@ -222,7 +204,7 @@ describe('Adding a tenant', () => {
   })
 
   test('The ending of an earlier tenancy follows the notice rules', async () => {
-    await flatOwnedSince('2022-06-12', '2025-03-01')
+    await flatOwnedSince('2022-06-12')
     // Made before 2026-10-01 and over a year on the notice date: 6 months.
     expect(
       await createTenancy(deps(), flat, pekka, 82000, {
@@ -312,7 +294,7 @@ describe('Tenancy dates and details', () => {
   })
 
   test('An earlier open-ended tenancy without its ending is refused', async () => {
-    await flatOwnedSince('2022-06-12', '2025-03-01')
+    await flatOwnedSince('2022-06-12')
     await addId(aino)
     expect(await createTenancy(deps(), flat, pekka, 82000)).toEqual({
       ok: false,
@@ -349,38 +331,6 @@ describe('Tenancy dates and details', () => {
 })
 
 describe('The rent of a new tenancy', () => {
-  test('A changed rent starts from the start month', async () => {
-    expect((await add(fixedTerm('2027-01-15', '2027-12-31'), 91000)).ok).toBe(
-      true,
-    )
-    expect(await rents()).toEqual([
-      { validFrom: '2025-03-01', validTo: '2026-12-31', value: 89000 },
-      { validFrom: '2027-01-01', validTo: null, value: 91000 },
-    ])
-    expect(capture.lines.map((line) => line.event)).toEqual([
-      'tenancy.created',
-      'recurring_amount.set',
-    ])
-  })
-
-  test('A tenancy starting before the latest rent period leaves the rent alone', async () => {
-    await flatOwnedSince('2022-06-12', '2025-01-01')
-    expect((await createTenancy(deps(), flat, pekka, 82000)).ok).toBe(true)
-    expect(await rents()).toEqual([
-      { validFrom: '2025-01-01', validTo: null, value: 89000 },
-    ])
-  })
-
-  test('a rent sent for a tenancy before the latest rent period is ignored', async () => {
-    await setRent(92000, '2027-03-01')
-    expect((await add(fixedTerm('2027-01-01', '2027-12-31'), 91000)).ok).toBe(
-      true,
-    )
-    expect((await rents()).map((period) => period.value)).toEqual([
-      89000, 92000,
-    ])
-  })
-
   test("The rent starts on the tenancy's start day", async () => {
     const id = await addId(fixedTerm('2027-01-15', '2027-12-31'), 91000)
     expect(await tenancyRents(id)).toEqual([
@@ -389,7 +339,7 @@ describe('The rent of a new tenancy', () => {
   })
 
   test('An earlier tenancy gets its own rent', async () => {
-    await flatOwnedSince('2022-06-12', '2025-03-01')
+    await flatOwnedSince('2022-06-12')
     const ainoId = await addId(aino, 89000)
     const result = await createTenancy(deps(), flat, pekka, 82000, {
       noticeGivenBy: 'tenant',
@@ -404,39 +354,6 @@ describe('The rent of a new tenancy', () => {
     ])
     expect(await tenancyRents(ainoId)).toEqual([
       { validFrom: '2025-03-01', validTo: null, value: 89000 },
-    ])
-  })
-
-  test('An unchanged rent leaves the periods alone', async () => {
-    expect((await add(fixedTerm('2027-01-01', '2027-12-31'), 89000)).ok).toBe(
-      true,
-    )
-    expect(await rents()).toEqual([
-      { validFrom: '2025-03-01', validTo: null, value: 89000 },
-    ])
-  })
-})
-
-describe('the rent of a new tenancy', () => {
-  test('a rent changed meanwhile saves neither the tenancy nor the rent', async () => {
-    const read = await recurringAmountRepository(db).forProperty(flat)
-    // Another owner changes the rent after this save read it.
-    await setRent(95000, '2026-01-01')
-    const stale = {
-      ...recurringAmountRepository(db),
-      forProperty: () => Promise.resolve(read),
-    }
-    expect(
-      await createTenancy(
-        { ...deps(), amounts: stale },
-        flat,
-        fixedTerm('2027-01-15', '2027-12-31'),
-        91000,
-      ),
-    ).toEqual({ ok: false, reason: 'amount_changed' })
-    expect((await view()).tenancies).toEqual([])
-    expect((await rents()).map((period) => period.value)).toEqual([
-      89000, 95000,
     ])
   })
 })

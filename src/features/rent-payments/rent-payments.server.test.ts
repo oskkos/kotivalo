@@ -1,7 +1,6 @@
 import { env } from 'cloudflare:workers'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { propertyRepository } from '#/features/properties/property.repository.server'
-import { recurringAmountRepository } from '#/features/recurring-amounts/recurring-amount.repository.server'
 import { sharingRepository } from '#/features/sharing/sharing.repository.server'
 import {
   tenancyRepository,
@@ -32,7 +31,6 @@ function deps(userId = 'annika'): RentPaymentDeps {
     userId,
     payments: rentPaymentRepository(db),
     tenancies: tenancyRepository(db),
-    amounts: recurringAmountRepository(db),
     properties: propertyRepository(db),
     sharing: sharingRepository(db),
     log: capture.log,
@@ -92,16 +90,16 @@ beforeEach(async () => {
   )
     .bind(flat, now.getTime())
     .run()
-  await recurringAmountRepository(db).setAmount({
-    propertyId: flat,
+  tenancy =
+    (await tenancyRepository(db).create('annika', flat, aino, now)) ?? ''
+  await tenancyRepository(db).setRent({
     actorId: 'annika',
-    kind: 'rent',
+    propertyId: flat,
+    tenancyId: tenancy,
     amount: 89000,
     from: '2025-03-01',
     latestStart: null,
   })
-  tenancy =
-    (await tenancyRepository(db).create('annika', flat, aino, now)) ?? ''
 })
 
 describe('Recording a rent payment', () => {
@@ -196,7 +194,9 @@ describe('The rent payment views', () => {
       ok: true,
       role: 'member',
       today: '2026-11-22',
-      rents: [{ validFrom: '2025-03-01', validTo: null, value: 89000 }],
+      rents: {
+        [tenancy]: [{ validFrom: '2025-03-01', validTo: null, value: 89000 }],
+      },
     })
     expect(view.ok && view.tenancies.map((t) => t.tenantName)).toEqual([
       'Aino Koski',
@@ -244,9 +244,11 @@ describe("This month's rent across the user's flats", () => {
         {
           propertyId: flat,
           tenancies: [expect.objectContaining({ id: tenancy })],
-          rentPeriods: [
-            { validFrom: '2025-03-01', validTo: null, value: 89000 },
-          ],
+          rents: {
+            [tenancy]: [
+              { validFrom: '2025-03-01', validTo: null, value: 89000 },
+            ],
+          },
           payments: [
             {
               tenancyId: tenancy,

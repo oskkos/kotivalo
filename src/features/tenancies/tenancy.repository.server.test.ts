@@ -1,7 +1,6 @@
 import { env } from 'cloudflare:workers'
 import { beforeEach, describe, expect, test } from 'vitest'
 import { propertyRepository } from '#/features/properties/property.repository.server'
-import { recurringAmountRepository } from '#/features/recurring-amounts/recurring-amount.repository.server'
 import { createDb } from '#/server/platform/db.server'
 import { addTestUser, emptyTables } from '#/test/users.server'
 import {
@@ -247,81 +246,33 @@ describe('The tenancy repository', () => {
     expect(await repo.currentFor([], '2026-11-22')).toEqual([])
   })
 
-  test('the rent is set with a new tenancy, and only if the tenancy went in', async () => {
-    const rents = recurringAmountRepository(db)
-    await rents.setAmount({
-      propertyId: flat,
-      actorId: 'annika',
-      kind: 'rent',
-      latestStart: null,
-      from: '2025-03-01',
-      amount: 89000,
-    })
-    const rent = {
-      latestStart: '2025-03-01',
-      from: '2027-01-01',
-      amount: 91000,
-    }
+  test('the rent goes in with a new tenancy, and only if the tenancy did', async () => {
     await repo.create('annika', flat, aino, now)
     const refused = await repo.createWithRent(
       'annika',
       flat,
       fixed('2027-01-15', '2027-12-31'),
-      rent,
       91000,
       now,
     )
     expect(refused).toEqual({ outcome: 'overlaps' })
-    expect((await rents.forProperty(flat)).amounts.rent).toHaveLength(1)
+    const left = await env.DB.prepare(
+      'SELECT count(*) AS n FROM tenancy_rents',
+    ).first<{ n: number }>()
+    expect(left?.n).toBe(0)
 
     const added = await repo.createWithRent(
       'annika',
       other,
       fixed('2027-01-15', '2027-12-31'),
-      null,
       91000,
       now,
     )
     expect(added.outcome).toBe('created')
-
-    await emptyTables('tenancies')
-    const both = await repo.createWithRent(
-      'annika',
-      flat,
-      fixed('2027-01-15', '2027-12-31'),
-      rent,
-      91000,
-      now,
-    )
-    expect(both.outcome).toBe('created')
-    const bothId = both.outcome === 'created' ? both.id : ''
-    expect((await repo.rentsFor([bothId]))[bothId]).toEqual([
+    const id = added.outcome === 'created' ? added.id : ''
+    expect((await repo.rentsFor([id]))[id]).toEqual([
       { validFrom: '2027-01-15', validTo: null, value: 91000 },
     ])
-    expect((await rents.forProperty(flat)).amounts.rent).toEqual([
-      { validFrom: '2025-03-01', validTo: '2026-12-31', value: 89000 },
-      { validFrom: '2027-01-01', validTo: null, value: 91000 },
-    ])
-  })
-
-  test('a stale rent leaves neither the tenancy nor the rent', async () => {
-    const result = await repo.createWithRent(
-      'annika',
-      flat,
-      aino,
-      { latestStart: '2024-01-01', from: '2025-03-01', amount: 89000 },
-      89000,
-      now,
-    )
-    expect(result).toEqual({ outcome: 'rent_changed' })
-    expect(await repo.forProperty(flat)).toEqual([])
-    const left = await env.DB.prepare(
-      'SELECT count(*) AS n FROM tenancy_rents',
-    ).first<{ n: number }>()
-    expect(left?.n).toBe(0)
-    expect(
-      (await recurringAmountRepository(db).forProperty(flat)).amounts.rent,
-    ).toEqual([])
   })
 
   test('an earlier tenancy with its ending goes in before a later one', async () => {
@@ -333,7 +284,7 @@ describe('The tenancy repository', () => {
     }
     // Without the ending it runs indefinitely and overlaps Aino's.
     expect(
-      await repo.createWithRent('annika', flat, pekka, null, 82000, now),
+      await repo.createWithRent('annika', flat, pekka, 82000, now),
     ).toEqual({
       outcome: 'overlaps',
     })
@@ -346,7 +297,6 @@ describe('The tenancy repository', () => {
       'annika',
       flat,
       pekka,
-      null,
       82000,
       now,
       ending,
@@ -360,7 +310,7 @@ describe('The tenancy repository', () => {
     })
     // The ending's last day is the end for the overlap.
     expect(
-      await repo.createWithRent('annika', flat, pekka, null, 82000, now, {
+      await repo.createWithRent('annika', flat, pekka, 82000, now, {
         ...ending,
         lastDay: '2025-03-01',
       }),

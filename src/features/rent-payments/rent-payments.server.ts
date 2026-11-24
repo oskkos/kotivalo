@@ -5,8 +5,6 @@
 // statement. Amounts and names are never logged.
 import type { Property } from '#/features/properties/property'
 import type { PropertyRepository } from '#/features/properties/property.repository.server'
-import type { RecurringAmountRepository } from '#/features/recurring-amounts/recurring-amount.repository.server'
-import type { Period } from '#/features/recurring-amounts/periods'
 import type { SharingRepository } from '#/features/sharing/sharing.repository.server'
 import type {
   Tenancy,
@@ -21,14 +19,13 @@ import type {
   RentPayment,
   RentPaymentRepository,
 } from './rent-payment.repository.server'
-import { tenancyMonths, type FlatRentData } from './status'
+import { tenancyMonths, type FlatRentData, type RentsByTenancy } from './status'
 
 export interface RentPaymentDeps {
   /** The signed-in user. */
   userId: string
   payments: RentPaymentRepository
   tenancies: TenancyRepository
-  amounts: RecurringAmountRepository
   properties: PropertyRepository
   sharing: SharingRepository
   log: Logger
@@ -60,8 +57,8 @@ export interface RentPaymentsView {
   today: IsoDate
   /** Newest first. */
   tenancies: Tenancy[]
-  /** The flat's rent periods, oldest first. */
-  rents: Period<number>[]
+  /** Each tenancy's rent periods, oldest first. */
+  rents: RentsByTenancy
   /** Every payment of the flat's tenancies, by month and payment date. */
   payments: RentPayment[]
 }
@@ -71,23 +68,23 @@ export async function getRentPayments(
   deps: RentPaymentDeps,
   propertyId: string,
 ): Promise<({ ok: true } & RentPaymentsView) | typeof notFound> {
-  const [role, property, tenancies, amounts, payments] = await Promise.all([
+  const [role, property, tenancies, payments] = await Promise.all([
     deps.sharing.roleOf(deps.userId, propertyId),
     deps.properties.findForUser(deps.userId, propertyId),
     deps.tenancies.forProperty(propertyId),
-    deps.amounts.forProperty(propertyId),
     deps.payments.forProperty(propertyId),
   ])
   if (!role || !property) {
     return notFound
   }
+  const rents = await deps.tenancies.rentsFor(tenancies.map((t) => t.id))
   return {
     ok: true,
     role,
     property,
     today: today(deps),
     tenancies,
-    rents: amounts.amounts.rent,
+    rents,
     payments,
   }
 }
@@ -112,17 +109,17 @@ export async function listRentThisMonth(
   const ids = (await deps.properties.listForUser(deps.userId)).map(
     (flat) => flat.id,
   )
-  const [tenancies, rents, payments] = await Promise.all([
+  const [tenancies, payments] = await Promise.all([
     deps.tenancies.currentFor(ids, `${month}-01`),
-    deps.amounts.rentFor(ids),
     deps.payments.forMonth(ids, month),
   ])
+  const rents = await deps.tenancies.rentsFor(tenancies.map((t) => t.id))
   return {
     today: day,
     flats: ids.map((propertyId) => ({
       propertyId,
       tenancies: tenancies.filter((t) => t.propertyId === propertyId),
-      rentPeriods: rents[propertyId] ?? [],
+      rents,
       payments: payments
         .filter((p) => p.propertyId === propertyId)
         .map(({ tenancyId, month, amount, paidOn }) => ({

@@ -10,7 +10,6 @@ import Typography from '@mui/material/Typography'
 import { createLink } from '@tanstack/react-router'
 import { YearChoice } from '#/components/YearChoice'
 import { monthOf } from '#/features/recurring-amounts/periods'
-import type { Period } from '#/features/recurring-amounts/periods'
 import type { Tenancy } from '#/features/tenancies/tenancy.repository.server'
 import {
   formatDayMonth,
@@ -27,6 +26,7 @@ import {
   rentMonths,
   tenancyMonths,
   type RentMonth,
+  type RentsByTenancy,
 } from './status'
 import { StatusChip } from './StatusChip'
 
@@ -34,7 +34,7 @@ export interface RentPaymentsPageView {
   today: string
   /** Newest first. */
   tenancies: Tenancy[]
-  rents: Period<number>[]
+  rents: RentsByTenancy
   payments: RentPayment[]
 }
 
@@ -168,7 +168,7 @@ export function RentPaymentsPage(props: Props) {
   const year = props.year ?? currentYear
   const data = {
     tenancies: view.tenancies,
-    rentPeriods: view.rents,
+    rents: view.rents,
     payments: view.payments,
     today: view.today,
   }

@@ -8,7 +8,6 @@ import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { useState } from 'react'
-import type { Period } from '#/features/recurring-amounts/periods'
 import type { Tenancy } from '#/features/tenancies/tenancy.repository.server'
 import { formatDate, formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
@@ -17,7 +16,7 @@ import { DeletePaymentDialog } from './DeletePaymentDialog'
 import { dueText, rentMonthTitle } from './labels'
 import { RecordPaymentDialog } from './RecordPaymentDialog'
 import type { RentPayment } from './rent-payment.repository.server'
-import { rentMonth } from './status'
+import { rentMonth, type RentsByTenancy } from './status'
 import { StatusChip } from './StatusChip'
 
 export interface RentMonthView {
@@ -25,7 +24,7 @@ export interface RentMonthView {
   today: string
   tenancy: Tenancy
   month: string
-  rents: Period<number>[]
+  rents: RentsByTenancy
   /** The month's payments of the tenancy. */
   payments: RentPayment[]
 }
@@ -100,7 +99,7 @@ export function RentMonthPage(props: Props) {
   const { view } = props
   const owner = view.role === 'owner'
   const row = rentMonth(view.tenancy, view.month, {
-    rentPeriods: view.rents,
+    rents: view.rents,
     payments: view.payments,
     today: view.today,
   })
