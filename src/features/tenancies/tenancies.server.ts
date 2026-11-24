@@ -26,6 +26,7 @@ import type {
   Tenancy,
   TenancyFields,
   TenancyRepository,
+  TenantFee,
 } from './tenancy.repository.server'
 
 export interface TenancyDeps {
@@ -100,12 +101,19 @@ async function ownershipStart(
 
 const today = (deps: TenancyDeps) => isoDateInFinland(deps.now())
 
-/** The flat's tenancies and their rents, or undefined without access. */
+/**
+ * The flat's tenancies with their rents, occupants and tenant fees, or
+ * undefined without access.
+ */
 async function loadView(
   deps: TenancyDeps,
   propertyId: string,
 ): Promise<
-  | (TenancyView & { rents: Partial<Record<string, Period<number>[]>> })
+  | (TenancyView & {
+      rents: Partial<Record<string, Period<number>[]>>
+      occupants: Partial<Record<string, Period<number>[]>>
+      fees: Partial<Record<string, TenantFee[]>>
+    })
   | undefined
 > {
   const [role, property, tenancies] = await Promise.all([
@@ -116,8 +124,21 @@ async function loadView(
   if (!role || !property) {
     return undefined
   }
-  const rents = await deps.tenancies.rentsFor(tenancies.map((t) => t.id))
-  return { role, property, today: today(deps), tenancies, rents }
+  const ids = tenancies.map((t) => t.id)
+  const [rents, occupants, fees] = await Promise.all([
+    deps.tenancies.rentsFor(ids),
+    deps.tenancies.occupantsFor(ids),
+    deps.tenancies.feesFor(ids),
+  ])
+  return {
+    role,
+    property,
+    today: today(deps),
+    tenancies,
+    rents,
+    occupants,
+    fees,
+  }
 }
 
 /** The flat's tenancies, for everyone with access. */
@@ -129,6 +150,10 @@ export async function getTenancies(
       ok: true
       /** Each tenancy's rent periods, oldest first. */
       rents: Partial<Record<string, Period<number>[]>>
+      /** Each tenancy's occupants periods, oldest first. */
+      occupants: Partial<Record<string, Period<number>[]>>
+      /** Each tenancy's tenant fees. */
+      fees: Partial<Record<string, TenantFee[]>>
     } & TenancyView)
   | typeof notFound
 > {

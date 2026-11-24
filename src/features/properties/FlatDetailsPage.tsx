@@ -695,6 +695,8 @@ export function FlatDetailsPage(props: Props) {
   const data = {
     tenancies: view.tenancies,
     rents: view.tenancyRents,
+    occupants: view.tenancyOccupants,
+    fees: view.tenancyFees,
     payments: view.payments,
     today: view.today,
   }

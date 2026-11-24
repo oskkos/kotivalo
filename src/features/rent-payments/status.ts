@@ -1,8 +1,8 @@
 // A month's expected rent and rent status for a tenancy (openspec:
 // rent-payments, "Expected rent of a month", "The rent status of a month",
 // "Months not fully paid", "The rent summary on the flats list"). Pure:
-// computed from each tenancy's own rent periods, its dates and due day, and
-// the recorded payments; never stored.
+// computed from each tenancy's own rent, occupants and tenant fee periods, its
+// dates and due day, and the recorded payments; never stored.
 import {
   addMonths,
   daysBetween,
@@ -15,7 +15,13 @@ import {
   type Month,
   type Period,
 } from '#/features/recurring-amounts/periods'
+import {
+  feeInMonth,
+  occupantsInMonth,
+  type FeeOfTenancy,
+} from '#/features/tenancies/fees'
 import { rentInMonth } from '#/features/tenancies/rent'
+import type { ChargeKind } from '#/server/db/schema'
 import {
   currentTenancy,
   dueDate,
@@ -61,27 +67,106 @@ function daysRun(tenancy: RentTenancy, month: Month): number {
 /** Each tenancy's rent periods by tenancy id, oldest first. */
 export type RentsByTenancy = Partial<Record<string, readonly Period<number>[]>>
 
+/** Each tenancy's occupants periods by tenancy id, oldest first. */
+export type OccupantsByTenancy = RentsByTenancy
+
+/** Each tenancy's tenant fees by tenancy id. */
+export type FeesByTenancy = Partial<Record<string, readonly FeeOfTenancy[]>>
+
+/** What a tenancy's expected rent is made of. */
+export interface TenancyAmounts {
+  rent: readonly Period<number>[]
+  occupants: readonly Period<number>[]
+  fees: readonly FeeOfTenancy[]
+}
+
+/** One part of a month's expected rent, prorated by days. */
+export type RentPart =
+  | { type: 'rent'; amount: number }
+  | {
+      type: 'fee'
+      feeId: string
+      kind: ChargeKind
+      description: string | null
+      /** The month's occupants for a per-occupant fee, else null. */
+      persons: number | null
+      amount: number
+    }
+
+/** The month's expected rent: the rent and the fees, and what makes it up. */
+export interface ExpectedRent {
+  /** Cents: the parts' sum. */
+  total: number
+  /** The rent first, then each fee in effect with an amount above zero. */
+  parts: RentPart[]
+}
+
+/** The data every month calculation reads the amounts from. */
+export interface AmountsData {
+  rents: RentsByTenancy
+  occupants?: OccupantsByTenancy
+  fees?: FeesByTenancy
+}
+
+/** The tenancy's amounts out of the maps by tenancy id. */
+export function amountsOf(
+  data: AmountsData,
+  tenancyId: string,
+): TenancyAmounts {
+  return {
+    rent: data.rents[tenancyId] ?? [],
+    occupants: data.occupants?.[tenancyId] ?? [],
+    fees: data.fees?.[tenancyId] ?? [],
+  }
+}
+
+/** `amount` in proportion to `days` of `all`, rounded to the cent, halves up. */
+function prorate(amount: number, days: number, all: number): number {
+  if (days === all) {
+    return amount
+  }
+  // Integer arithmetic: floor(amount × days ÷ all + ½).
+  return Math.floor((2 * amount * days + all) / (2 * all))
+}
+
 /**
- * The month's rent of the tenancy, from its own rent periods, in proportion
- * to the days it runs, rounded to the cent, halves up; undefined when the
- * tenancy has no rent in the month.
+ * The month's expected rent of the tenancy: its rent and its tenant fees from
+ * its own periods, each in proportion to the days the tenancy runs, rounded
+ * to the cent, halves up; null when the tenancy has no rent in the month.
  */
 export function expectedRent(
-  rents: readonly Period<number>[],
+  amounts: TenancyAmounts,
   tenancy: RentTenancy,
   month: Month,
-): number | undefined {
-  const rent = rentInMonth(rents, tenancy, month)
+): ExpectedRent | null {
+  const rent = rentInMonth(amounts.rent, tenancy, month)
   if (rent === undefined) {
-    return undefined
+    return null
   }
   const days = daysRun(tenancy, month)
   const all = daysInMonth(month)
-  if (days === all) {
-    return rent
+  const parts: RentPart[] = [{ type: 'rent', amount: prorate(rent, days, all) }]
+  for (const fee of amounts.fees) {
+    const full = feeInMonth(fee, amounts.occupants, tenancy, month)
+    if (full === undefined || full === 0) {
+      continue
+    }
+    parts.push({
+      type: 'fee',
+      feeId: fee.id,
+      kind: fee.kind,
+      description: fee.description,
+      persons:
+        fee.basis === 'per_occupant'
+          ? (occupantsInMonth(amounts.occupants, tenancy, month) ?? 1)
+          : null,
+      amount: prorate(full, days, all),
+    })
   }
-  // Integer arithmetic: floor(rent × days ÷ all + ½).
-  return Math.floor((2 * rent * days + all) / (2 * all))
+  return {
+    total: parts.reduce((sum, part) => sum + part.amount, 0),
+    parts,
+  }
 }
 
 /** The due date in `month`: the due day, but no earlier than the start. */
@@ -139,7 +224,10 @@ export function tenancyMonths(
 export interface RentMonth<T extends RentTenancy = RentTenancy> {
   tenancy: T
   month: Month
+  /** The month's expected rent and fees in cents; undefined without a rent. */
   expected: number | undefined
+  /** What the expected amount is made of; empty without a rent. */
+  parts: RentPart[]
   /** Cents paid so far. */
   paid: number
   /** What's still missing, never below zero; undefined without a rent. */
@@ -152,8 +240,7 @@ export interface RentMonth<T extends RentTenancy = RentTenancy> {
 export function rentMonth<T extends RentTenancy>(
   tenancy: T,
   month: Month,
-  data: {
-    rents: RentsByTenancy
+  data: AmountsData & {
     payments: readonly PaymentOfMonth[]
     today: IsoDate
   },
@@ -161,13 +248,15 @@ export function rentMonth<T extends RentTenancy>(
   const payments = data.payments.filter(
     (payment) => payment.tenancyId === tenancy.id && payment.month === month,
   )
-  const expected = expectedRent(data.rents[tenancy.id] ?? [], tenancy, month)
+  const expectation = expectedRent(amountsOf(data, tenancy.id), tenancy, month)
+  const expected = expectation?.total
   const due = rentDueDate(tenancy, month)
   const paid = payments.reduce((sum, payment) => sum + payment.amount, 0)
   return {
     tenancy,
     month,
     expected,
+    parts: expectation?.parts ?? [],
     paid,
     missing: expected === undefined ? undefined : Math.max(0, expected - paid),
     dueDate: due,
@@ -184,14 +273,15 @@ export function rentMonth<T extends RentTenancy>(
  * The months of the tenancies from `from` to `to`, newest first; two
  * tenancies in the same month give two rows, the later tenancy first.
  */
-export function rentMonths<T extends RentTenancy>(data: {
-  tenancies: readonly T[]
-  rents: RentsByTenancy
-  payments: readonly PaymentOfMonth[]
-  from: Month
-  to: Month
-  today: IsoDate
-}): RentMonth<T>[] {
+export function rentMonths<T extends RentTenancy>(
+  data: AmountsData & {
+    tenancies: readonly T[]
+    payments: readonly PaymentOfMonth[]
+    from: Month
+    to: Month
+    today: IsoDate
+  },
+): RentMonth<T>[] {
   return data.tenancies
     .flatMap((tenancy) =>
       tenancyMonths(tenancy, data.from, data.to).map((month) =>
@@ -209,12 +299,13 @@ export function rentMonths<T extends RentTenancy>(data: {
  * The months of this and the previous calendar year, up to the current one,
  * that are late or partly paid on `today`, newest first.
  */
-export function monthsNotFullyPaid<T extends RentTenancy>(data: {
-  tenancies: readonly T[]
-  rents: RentsByTenancy
-  payments: readonly PaymentOfMonth[]
-  today: IsoDate
-}): RentMonth<T>[] {
+export function monthsNotFullyPaid<T extends RentTenancy>(
+  data: AmountsData & {
+    tenancies: readonly T[]
+    payments: readonly PaymentOfMonth[]
+    today: IsoDate
+  },
+): RentMonth<T>[] {
   const year = Number(data.today.slice(0, 4))
   return rentMonths({
     ...data,
@@ -226,12 +317,13 @@ export function monthsNotFullyPaid<T extends RentTenancy>(data: {
 }
 
 /** One flat's data for this month's rent on the flats list. */
-export interface FlatRentData<T extends RentTenancy & StatusTenancy> {
+export interface FlatRentData<
+  T extends RentTenancy & StatusTenancy,
+> extends AmountsData {
   propertyId: string
   /** The tenancies that run in this month or later. */
   tenancies: readonly T[]
   /** The tenancies' rent periods. */
-  rents: RentsByTenancy
   /** At least this month's payments of the flat's tenancies. */
   payments: readonly PaymentOfMonth[]
 }
