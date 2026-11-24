@@ -97,11 +97,27 @@ const endingFields = z.object({
   lastDay: typedDate,
 })
 
+/** The number of persons living in the flat: a whole number from 1 to 20. */
+export const MAX_OCCUPANTS = 20
+export const typedOccupants = z
+  .string(reason('occupants_invalid'))
+  .trim()
+  .transform((text, context) => {
+    const persons = /^\d{1,3}$/.test(text) ? Number(text) : Number.NaN
+    if (!Number.isInteger(persons) || persons < 1 || persons > MAX_OCCUPANTS) {
+      context.addIssue({ code: 'custom', message: 'occupants_invalid' })
+      return z.NEVER
+    }
+    return persons
+  })
+
 export const createTenancyInput = tenancyFields.and(
   z.object({
     propertyId: id,
     /** The tenancy's first rent, from its start. */
     rent: typedAmount,
+    /** The persons living in the flat from the start. */
+    occupants: typedOccupants,
     /** An earlier tenancy's ending, recorded with it. */
     ending: endingFields.optional(),
   }),

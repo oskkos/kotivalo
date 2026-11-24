@@ -61,6 +61,7 @@ export type FieldReason =
   | 'tenancy_fixed_term_notice'
   | 'rent_payment_amount_invalid'
   | 'rent_payment_date_in_future'
+  | 'occupants_invalid'
 
 /** Errors about the whole action, shown as an alert with a title. */
 export type AlertReason =
@@ -96,6 +97,8 @@ export type AlertReason =
   | 'tenancy_has_payments'
   | 'tenancy_has_rent_after_end'
   | 'tenancy_start_after_rent_change'
+  | 'tenancy_has_changes_after_end'
+  | 'tenancy_start_after_change'
   | 'rent_payment_month_outside_tenancy'
   | 'rent_payment_not_found'
   /** The amounts changed since they were read; the page reloads them. */
@@ -339,6 +342,14 @@ const texts: Record<Reason, () => ReasonText> = {
     title: m.reason_tenancy_has_rent_after_end_title(),
     text: m.reason_tenancy_has_rent_after_end(),
   }),
+  tenancy_has_changes_after_end: () => ({
+    title: m.reason_tenancy_has_changes_after_end_title(),
+    text: m.reason_tenancy_has_changes_after_end(),
+  }),
+  tenancy_start_after_change: () => ({
+    title: m.reason_tenancy_start_after_change_title(),
+    text: m.reason_tenancy_start_after_change(),
+  }),
   tenancy_start_after_rent_change: () => ({
     title: m.reason_tenancy_start_after_rent_change_title(),
     text: m.reason_tenancy_start_after_rent_change(),
@@ -347,6 +358,7 @@ const texts: Record<Reason, () => ReasonText> = {
     title: m.reason_tenancy_has_payments_title(),
     text: m.reason_tenancy_has_payments(),
   }),
+  occupants_invalid: () => ({ text: m.reason_occupants_invalid() }),
   rent_payment_amount_invalid: () => ({
     text: m.reason_rent_payment_amount_invalid(),
   }),

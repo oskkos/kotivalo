@@ -40,6 +40,7 @@ import {
 } from '#/server/db/schema'
 import type { Period } from '#/features/recurring-amounts/periods'
 import { atomically, type Db } from '#/server/platform/db.server'
+import { occupantsPeriods, periodWriteStatements } from '#/server/db/periods'
 
 /** What an owner enters for a tenancy. */
 export interface TenancyFields {
@@ -648,9 +649,9 @@ export function tenancyRepository(db: Db) {
     },
 
     /**
-     * Adds a tenancy with its first rent period from its start, both or
-     * neither: the rent goes in only if the tenancy row did. `overlaps` also
-     * covers a lost owner role.
+     * Adds a tenancy with its first rent period and its first occupants
+     * period from its start, all or none: they go in only if the tenancy row
+     * did. `overlaps` also covers a lost owner role.
      */
     async createWithRent(
       actorId: string,
@@ -661,6 +662,8 @@ export function tenancyRepository(db: Db) {
       now: Date,
       /** An ending recorded with the tenancy, for an earlier one. */
       ending?: Ending,
+      /** The persons living in the flat from the start; one by default. */
+      occupants = 1,
     ): Promise<{ outcome: 'created'; id: string } | { outcome: 'overlaps' }> {
       const { id, statement } = createStatement(
         actorId,
@@ -678,6 +681,13 @@ export function tenancyRepository(db: Db) {
           amount: rent,
           from: fields.validFrom,
           latestStart: null,
+        }),
+        ...periodWriteStatements(db, occupantsPeriods, {
+          parentId: id,
+          value: occupants,
+          from: fields.validFrom,
+          latestStart: null,
+          owned: ownsTenancy(actorId, propertyId, id),
         }),
       ])
       return inserted.length > 0
@@ -712,10 +722,24 @@ export function tenancyRepository(db: Db) {
         expectedValidTo: IsoDate | null
         /** The first rent period's move with a corrected start, or none. */
         firstRent?: { from: IsoDate; to: IsoDate } | null
+        /** The first occupants period's move with a corrected start. */
+        firstOccupants?: { from: IsoDate; to: IsoDate } | null
+        /** Each fee's first amount period's move with a corrected start. */
+        firstFees?: { feeId: string; from: IsoDate; to: IsoDate }[]
       },
       now: Date,
     ): Promise<boolean> {
       const move = change.firstRent
+      const occupantsMove = change.firstOccupants
+      // Only once the tenancy has its new start, i.e. the update applied.
+      const hasNewStart = exists(
+        db
+          .select({ one: sql`1` })
+          .from(other)
+          .where(
+            and(eq(other.id, tenancyId), eq(other.validFrom, fields.validFrom)),
+          ),
+      )
       const [updated] = await atomically(db, [
         db
           .update(tenancies)
@@ -761,6 +785,32 @@ export function tenancyRepository(db: Db) {
                 ),
             ]
           : []),
+        ...(occupantsMove
+          ? [
+              db
+                .update(tenancyOccupants)
+                .set({ validFrom: occupantsMove.to })
+                .where(
+                  and(
+                    eq(tenancyOccupants.tenancyId, tenancyId),
+                    eq(tenancyOccupants.validFrom, occupantsMove.from),
+                    hasNewStart,
+                  ),
+                ),
+            ]
+          : []),
+        ...(change.firstFees ?? []).map((fee) =>
+          db
+            .update(tenantFeeAmounts)
+            .set({ validFrom: fee.to })
+            .where(
+              and(
+                eq(tenantFeeAmounts.tenantFeeId, fee.feeId),
+                eq(tenantFeeAmounts.validFrom, fee.from),
+                hasNewStart,
+              ),
+            ),
+        ),
       ])
       return updated.length > 0
     },

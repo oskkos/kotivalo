@@ -42,6 +42,7 @@ import { contractShortLabel } from './labels'
 import { suggestedRent } from './rent'
 import {
   typedDueDay,
+  typedOccupants,
   typedTenantEmail,
   typedTenantName,
   typedTenantPhone,
@@ -78,6 +79,7 @@ type Field =
   | 'validFrom'
   | 'termEnd'
   | 'rent'
+  | 'occupants'
   | 'dueDay'
   | 'noticeDate'
   | 'lastDay'
@@ -94,6 +96,7 @@ const FIELD_OF_TENANCY: Partial<Record<FieldReason, Field>> = {
   tenancy_end_before_start: 'termEnd',
   tenancy_due_day_invalid: 'dueDay',
   amount_invalid: 'rent',
+  occupants_invalid: 'occupants',
 }
 
 /**
@@ -194,6 +197,7 @@ export function TenancyForm(props: Props) {
       validFrom: editing ? formatDate(editing.validFrom) : '',
       termEnd: editing?.termEnd ? formatDate(editing.termEnd) : '',
       rent: editing ? '' : suggestion('9999-12-31'),
+      occupants: '1',
       dueDay: editing ? String(editing.dueDay) : '',
       noticeDate: '',
       lastDay: '',
@@ -201,7 +205,7 @@ export function TenancyForm(props: Props) {
     onSubmit: async ({ value }) => {
       setAlert(undefined)
       setReasons({})
-      const { rent, noticeDate, lastDay, ...fields } = value
+      const { rent, occupants, noticeDate, lastDay, ...fields } = value
       const start = parseFiDate(fields.validFrom)
       // As the form shows it: the ending for a start before today.
       const withEnding =
@@ -220,6 +224,7 @@ export function TenancyForm(props: Props) {
                 propertyId: props.propertyId,
                 ...fields,
                 rent,
+                occupants,
                 ...(withEnding
                   ? {
                       ending: {
@@ -503,6 +508,22 @@ export function TenancyForm(props: Props) {
                     onFocus={() => {
                       rentEditedRef.current = true
                     }}
+                  />
+                )}
+              </form.Field>
+            ) : null}
+            {askRent ? (
+              <form.Field
+                name="occupants"
+                validators={{ onChange: typedOccupants }}
+                listeners={{ onChange: clear('occupants') }}
+              >
+                {(field) => (
+                  <TextField
+                    field={field}
+                    reason={reasons.occupants}
+                    label={m.tenancy_form_occupants()}
+                    slotProps={{ htmlInput: { inputMode: 'numeric' } }}
                   />
                 )}
               </form.Field>

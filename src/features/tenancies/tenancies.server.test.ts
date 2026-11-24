@@ -70,8 +70,13 @@ const fixedTerm = (validFrom: string, termEnd: string): TenancyFields => ({
 const tenancyRents = async (id: string) =>
   (await tenancyRepository(db).rentsFor([id]))[id] ?? []
 
-async function add(fields: TenancyFields, rent = 89000, userId = 'annika') {
-  return createTenancy(deps(userId), flat, fields, rent)
+async function add(
+  fields: TenancyFields,
+  rent = 89000,
+  userId = 'annika',
+  occupants = 1,
+) {
+  return createTenancy(deps(userId), flat, fields, rent, occupants)
 }
 
 async function addId(fields: TenancyFields, rent = 89000) {
@@ -193,7 +198,7 @@ describe('Adding a tenant', () => {
     await flatOwnedSince('2022-06-12')
     await addId(aino)
     expect(
-      await createTenancy(deps(), flat, pekka, 82000, {
+      await createTenancy(deps(), flat, pekka, 82000, 1, {
         noticeGivenBy: 'tenant',
         noticeDate: '2025-01-20',
         lastDay: '2025-02-28',
@@ -211,7 +216,7 @@ describe('Adding a tenant', () => {
     await flatOwnedSince('2022-06-12')
     // Made before 2026-10-01 and over a year on the notice date: 6 months.
     expect(
-      await createTenancy(deps(), flat, pekka, 82000, {
+      await createTenancy(deps(), flat, pekka, 82000, 1, {
         noticeGivenBy: 'landlord',
         noticeDate: '2025-01-10',
         lastDay: '2025-02-28',
@@ -227,6 +232,7 @@ describe('Adding a tenant', () => {
         flat,
         fixedTerm('2027-01-01', '2027-12-31'),
         89000,
+        1,
         {
           noticeGivenBy: 'agreed',
           noticeDate: '2026-11-20',
@@ -300,7 +306,7 @@ describe('Tenancy dates and details', () => {
   test('An earlier open-ended tenancy without its ending is refused', async () => {
     await flatOwnedSince('2022-06-12')
     await addId(aino)
-    expect(await createTenancy(deps(), flat, pekka, 82000)).toEqual({
+    expect(await createTenancy(deps(), flat, pekka, 82000, 1)).toEqual({
       ok: false,
       reason: 'tenancy_overlaps',
     })
@@ -345,7 +351,7 @@ describe('The rent of a new tenancy', () => {
   test('An earlier tenancy gets its own rent', async () => {
     await flatOwnedSince('2022-06-12')
     const ainoId = await addId(aino, 89000)
-    const result = await createTenancy(deps(), flat, pekka, 82000, {
+    const result = await createTenancy(deps(), flat, pekka, 82000, 1, {
       noticeGivenBy: 'tenant',
       noticeDate: '2025-01-20',
       lastDay: '2025-02-28',
@@ -987,6 +993,241 @@ describe('Rent changes stay inside their tenancy', () => {
         fixedTerm('2027-01-01', '2027-05-31'),
       ),
     ).toEqual({ ok: false, reason: 'tenancy_has_rent_after_end' })
+  })
+})
+
+/** A tenant fee stored directly, until the fee writes exist. */
+async function storeFee(
+  tenancyId: string,
+  id: string,
+  kind: string,
+  basis: string,
+  ...amounts: [number, string, string | null][]
+) {
+  await env.DB.prepare(
+    'INSERT INTO tenant_fees (id, tenancy_id, kind, basis) VALUES (?, ?, ?, ?)',
+  )
+    .bind(id, tenancyId, kind, basis)
+    .run()
+  for (const [amount, from, to] of amounts) {
+    await env.DB.prepare(
+      'INSERT INTO tenant_fee_amounts (id, tenant_fee_id, amount, valid_from, valid_to) VALUES (?, ?, ?, ?, ?)',
+    )
+      .bind(crypto.randomUUID(), id, amount, from, to)
+      .run()
+  }
+}
+
+async function storeOccupants(
+  tenancyId: string,
+  persons: number,
+  from: string,
+  to: string | null,
+) {
+  await env.DB.prepare(
+    'INSERT INTO tenancy_occupants (id, tenancy_id, persons, valid_from, valid_to) VALUES (?, ?, ?, ?, ?)',
+  )
+    .bind(crypto.randomUUID(), tenancyId, persons, from, to)
+    .run()
+}
+
+const occupantsOf = async (id: string) =>
+  (await tenancyRepository(db).occupantsFor([id]))[id] ?? []
+
+const feesOf = async (id: string) =>
+  (await tenancyRepository(db).feesFor([id]))[id] ?? []
+
+describe('The occupants of a new tenancy', () => {
+  test('The occupants of a new tenancy', async () => {
+    const result = await add(
+      fixedTerm('2027-01-15', '2027-12-31'),
+      89000,
+      'annika',
+      2,
+    )
+    if (!result.ok) {
+      throw new Error(result.reason)
+    }
+    expect(await occupantsOf(result.tenancyId)).toEqual([
+      { validFrom: '2027-01-15', validTo: null, value: 2 },
+    ])
+  })
+
+  test('an earlier tenancy gets its occupants from its own start', async () => {
+    await flatOwnedSince('2022-06-12')
+    await addId(aino)
+    const result = await createTenancy(deps(), flat, pekka, 82000, 3, {
+      noticeGivenBy: 'tenant',
+      noticeDate: '2025-01-20',
+      lastDay: '2025-02-28',
+    })
+    if (!result.ok) {
+      throw new Error(result.reason)
+    }
+    expect(await occupantsOf(result.tenancyId)).toEqual([
+      { validFrom: '2023-06-01', validTo: null, value: 3 },
+    ])
+  })
+
+  test('a refused tenancy stores no occupants', async () => {
+    await addId(aino)
+    expect((await add(fixedTerm('2026-01-01', '2026-12-31'))).ok).toBe(false)
+    const row = await env.DB.prepare(
+      'SELECT count(*) AS n FROM tenancy_occupants',
+    ).first<{ n: number }>()
+    expect(row?.n).toBe(1)
+  })
+})
+
+describe('Occupants and fees stay inside their tenancy', () => {
+  test('Ending before a fee change is refused', async () => {
+    const id = await addId(aino)
+    await storeFee(
+      id,
+      'parking',
+      'parking',
+      'fixed',
+      [1500, '2026-02-01', '2027-02-28'],
+      [2000, '2027-03-01', null],
+    )
+    expect(
+      await endTenancy(deps(), flat, id, {
+        noticeGivenBy: 'tenant',
+        noticeDate: '2026-11-22',
+        lastDay: '2027-01-31',
+      }),
+    ).toEqual({ ok: false, reason: 'tenancy_has_changes_after_end' })
+    expect((await view()).tenancies[0]?.validTo).toBeNull()
+    expect(await feesOf(id)).toHaveLength(1)
+  })
+
+  test('Ending before an occupants change is refused', async () => {
+    const id = await addId(aino)
+    await env.DB.prepare(
+      'UPDATE tenancy_occupants SET valid_to = ? WHERE tenancy_id = ?',
+    )
+      .bind('2027-02-28', id)
+      .run()
+    await storeOccupants(id, 2, '2027-03-01', null)
+    expect(
+      await endTenancy(deps(), flat, id, {
+        noticeGivenBy: 'tenant',
+        noticeDate: '2026-11-22',
+        lastDay: '2027-01-31',
+      }),
+    ).toEqual({ ok: false, reason: 'tenancy_has_changes_after_end' })
+    expect(await occupantsOf(id)).toHaveLength(2)
+  })
+
+  test('Ending after the latest changes is allowed', async () => {
+    const id = await addId(aino)
+    await storeFee(id, 'parking', 'parking', 'fixed', [
+      1500,
+      '2026-02-01',
+      null,
+    ])
+    expect(await endTenancy(deps(), flat, id, tenantNotice)).toEqual({
+      ok: true,
+    })
+  })
+
+  test("a fixed term's end before a fee change is refused", async () => {
+    const id = await addId(fixedTerm('2027-01-01', '2027-12-31'))
+    await storeFee(id, 'parking', 'parking', 'fixed', [
+      1500,
+      '2027-06-01',
+      null,
+    ])
+    expect(
+      await updateTenancy(
+        deps(),
+        flat,
+        id,
+        fixedTerm('2027-01-01', '2027-05-31'),
+      ),
+    ).toEqual({ ok: false, reason: 'tenancy_has_changes_after_end' })
+  })
+
+  test('Moving the start moves the first occupants and fees', async () => {
+    const id = await addId(aino)
+    await storeFee(id, 'water', 'water', 'per_occupant', [
+      2200,
+      '2025-03-01',
+      null,
+    ])
+    await storeFee(id, 'parking', 'parking', 'fixed', [
+      1500,
+      '2026-02-01',
+      null,
+    ])
+    expect(
+      await updateTenancy(deps(), flat, id, {
+        ...aino,
+        validFrom: '2025-03-15',
+      }),
+    ).toEqual({ ok: true })
+    expect(await occupantsOf(id)).toEqual([
+      { validFrom: '2025-03-15', validTo: null, value: 1 },
+    ])
+    const fees = await feesOf(id)
+    expect(fees.find((f) => f.id === 'water')?.amounts[0]?.validFrom).toBe(
+      '2025-03-15',
+    )
+    expect(fees.find((f) => f.id === 'parking')?.amounts[0]?.validFrom).toBe(
+      '2026-02-01',
+    )
+  })
+
+  test('A start after an occupants change is refused', async () => {
+    const id = await addId(aino)
+    await env.DB.prepare(
+      'UPDATE tenancy_occupants SET valid_to = ? WHERE tenancy_id = ?',
+    )
+      .bind('2026-08-31', id)
+      .run()
+    await storeOccupants(id, 2, '2026-09-01', null)
+    expect(
+      await updateTenancy(deps(), flat, id, {
+        ...aino,
+        validFrom: '2026-10-01',
+      }),
+    ).toEqual({ ok: false, reason: 'tenancy_start_after_change' })
+    expect((await view()).tenancies[0]?.validFrom).toBe('2025-03-01')
+    expect((await occupantsOf(id))[0]?.validFrom).toBe('2025-03-01')
+  })
+
+  test('a start after a fee change is refused', async () => {
+    const id = await addId(aino)
+    await storeFee(
+      id,
+      'parking',
+      'parking',
+      'fixed',
+      [1500, '2025-03-01', '2026-08-31'],
+      [2000, '2026-09-01', null],
+    )
+    expect(
+      await updateTenancy(deps(), flat, id, {
+        ...aino,
+        validFrom: '2026-10-01',
+      }),
+    ).toEqual({ ok: false, reason: 'tenancy_start_after_change' })
+  })
+
+  test('Removing a tenancy removes its fees', async () => {
+    const id = await addId(fixedTerm('2027-01-01', '2027-12-31'))
+    await storeFee(id, 'parking', 'parking', 'fixed', [
+      1500,
+      '2027-01-01',
+      null,
+    ])
+    expect(await removeTenancy(deps(), flat, id)).toEqual({ ok: true })
+    expect(await feesOf(id)).toEqual([])
+    expect(await occupantsOf(id)).toEqual([])
+    const rows = await env.DB.prepare(
+      'SELECT (SELECT count(*) FROM tenant_fee_amounts) AS amounts',
+    ).first<{ amounts: number }>()
+    expect(rows?.amounts).toBe(0)
   })
 })
 

@@ -16,7 +16,9 @@ import { validateEnding } from './notice'
 import { paymentsOutside, validateTenancyDates } from './rules'
 import {
   fillsBeforeFirst,
+  firstPeriodMove,
   firstRentMove,
+  periodAfterEnd,
   rentAfterEnd,
   validateRentDate,
 } from './rent'
@@ -248,6 +250,8 @@ export async function createTenancy(
   fields: TenancyFields,
   /** The monthly rent in cents, the tenancy's first rent from its start. */
   rent: number,
+  /** The persons living in the flat, from the tenancy's start. */
+  occupants: number,
   /** An earlier tenancy's ending, recorded with it. */
   ending?: Ending,
 ): Promise<
@@ -283,6 +287,7 @@ export async function createTenancy(
     rent,
     deps.now(),
     ending,
+    occupants,
   )
   if (created.outcome === 'overlaps') {
     return refusal(deps, propertyId, fail('tenancy_overlaps'))
@@ -346,14 +351,17 @@ export async function updateTenancy(
   ) {
     return fail('tenancy_correction_conflicts_ending')
   }
-  const [months, rentsById] = await Promise.all([
+  const [months, rentsById, occupantsById, feesById] = await Promise.all([
     deps.tenancies.paymentMonths(tenancyId),
     deps.tenancies.rentsFor([tenancyId]),
+    deps.tenancies.occupantsFor([tenancyId]),
+    deps.tenancies.feesFor([tenancyId]),
   ])
   if (paymentsOutside(months, fields.validFrom, validTo)) {
     return fail('tenancy_has_payments_outside')
   }
-  // The rent stays inside the tenancy: the first period follows the start.
+  // The rent, the occupants and the fees stay inside the tenancy: their first
+  // periods follow the start, and none starts after the last day.
   const rents = rentsById[tenancyId] ?? []
   const move = firstRentMove(rents, existing.validFrom, fields.validFrom)
   if (!move.ok) {
@@ -362,12 +370,40 @@ export async function updateTenancy(
   if (rentAfterEnd(rents, validTo)) {
     return fail('tenancy_has_rent_after_end')
   }
+  const occupants = occupantsById[tenancyId] ?? []
+  const fees = feesById[tenancyId] ?? []
+  const occupantsMove = firstPeriodMove(
+    occupants,
+    existing.validFrom,
+    fields.validFrom,
+  )
+  const feeMoves = fees.map((fee) => ({
+    fee,
+    move: firstPeriodMove(fee.amounts, existing.validFrom, fields.validFrom),
+  }))
+  if (!occupantsMove.ok || feeMoves.some(({ move }) => !move.ok)) {
+    return fail('tenancy_start_after_change')
+  }
+  if (
+    periodAfterEnd(occupants, validTo) ||
+    fees.some((fee) => periodAfterEnd(fee.amounts, validTo))
+  ) {
+    return fail('tenancy_has_changes_after_end')
+  }
   const updated = await deps.tenancies.update(
     deps.userId,
     propertyId,
     tenancyId,
     fields,
-    { validTo, expectedValidTo: existing.validTo, firstRent: move.move },
+    {
+      validTo,
+      expectedValidTo: existing.validTo,
+      firstRent: move.move,
+      firstOccupants: occupantsMove.move,
+      firstFees: feeMoves.flatMap(({ fee, move }) =>
+        move.ok && move.move ? [{ feeId: fee.id, ...move.move }] : [],
+      ),
+    },
     deps.now(),
   )
   if (!updated) {
@@ -406,15 +442,25 @@ export async function endTenancy(
   if (problem) {
     return fail(problem)
   }
-  const [months, rentsById] = await Promise.all([
+  const [months, rentsById, occupantsById, feesById] = await Promise.all([
     deps.tenancies.paymentMonths(tenancyId),
     deps.tenancies.rentsFor([tenancyId]),
+    deps.tenancies.occupantsFor([tenancyId]),
+    deps.tenancies.feesFor([tenancyId]),
   ])
   if (paymentsOutside(months, existing.validFrom, ending.lastDay)) {
     return fail('tenancy_has_payments_outside')
   }
   if (rentAfterEnd(rentsById[tenancyId] ?? [], ending.lastDay)) {
     return fail('tenancy_has_rent_after_end')
+  }
+  if (
+    periodAfterEnd(occupantsById[tenancyId] ?? [], ending.lastDay) ||
+    (feesById[tenancyId] ?? []).some((fee) =>
+      periodAfterEnd(fee.amounts, ending.lastDay),
+    )
+  ) {
+    return fail('tenancy_has_changes_after_end')
   }
   const ended = await deps.tenancies.end(
     deps.userId,
