@@ -1,11 +1,15 @@
 import { describe, expect, test } from 'vitest'
 import {
   fillsBeforeFirst,
+  firstPeriodMove,
   firstRentMove,
+  periodAfterEnd,
   rentAfterEnd,
   rentInMonth,
   suggestedRent,
   validateRentDate,
+  validateTenancyPeriodDate,
+  valueInTenancyMonth,
 } from './rent'
 
 const period = (validFrom: string, validTo: string | null, value: number) => ({
@@ -208,5 +212,104 @@ describe('Rent changes stay inside their tenancy', () => {
     expect(rentAfterEnd(rents, '2027-03-01')).toBe(false)
     expect(rentAfterEnd(rents, null)).toBe(false)
     expect(rentAfterEnd([], '2027-01-31')).toBe(false)
+  })
+})
+
+describe('Occupants of a tenancy', () => {
+  test("The first occupants start on the tenancy's start day", () => {
+    const occupants = [period('2026-11-15', null, 2)]
+    const tenancy = { validFrom: '2026-11-15' }
+    expect(valueInTenancyMonth(occupants, tenancy, '2026-11')).toBe(2)
+    expect(valueInTenancyMonth(occupants, tenancy, '2026-10')).toBeUndefined()
+  })
+
+  test('A change of occupants ends the previous period the day before', () => {
+    const occupants = [
+      period('2025-03-01', '2026-08-31', 1),
+      period('2026-09-01', null, 2),
+    ]
+    const tenancy = { validFrom: '2025-03-01' }
+    expect(valueInTenancyMonth(occupants, tenancy, '2026-08')).toBe(1)
+    expect(valueInTenancyMonth(occupants, tenancy, '2026-09')).toBe(2)
+  })
+})
+
+describe('the date of a new occupants or fee period', () => {
+  const tenancy = { validFrom: '2025-03-15', validTo: '2027-01-31' }
+
+  test('the first of a month or the start day inside the tenancy', () => {
+    const limits = { tenancy, latestStart: undefined }
+    expect(validateTenancyPeriodDate('2026-02-01', limits)).toBeUndefined()
+    expect(validateTenancyPeriodDate('2025-03-15', limits)).toBeUndefined()
+    expect(validateTenancyPeriodDate('2026-02-10', limits)).toBe(
+      'amount_date_not_month_start',
+    )
+    expect(validateTenancyPeriodDate('2025-03-01', limits)).toBe(
+      'rent_date_before_tenancy',
+    )
+    expect(validateTenancyPeriodDate('2027-02-01', limits)).toBe(
+      'rent_date_after_tenancy',
+    )
+  })
+
+  test('not before the latest period, on its start it corrects it', () => {
+    const limits = { tenancy, latestStart: '2026-06-01' }
+    expect(validateTenancyPeriodDate('2026-06-01', limits)).toBeUndefined()
+    expect(validateTenancyPeriodDate('2026-07-01', limits)).toBeUndefined()
+    expect(validateTenancyPeriodDate('2026-05-01', limits)).toBe(
+      'amount_date_too_early',
+    )
+  })
+
+  test('a date before the first period is not a fill', () => {
+    expect(
+      validateTenancyPeriodDate('2025-04-01', {
+        tenancy,
+        latestStart: '2026-02-01',
+      }),
+    ).toBe('amount_date_too_early')
+  })
+})
+
+describe('Occupants and fees stay inside their tenancy', () => {
+  test('Moving the start moves the first occupants and fees', () => {
+    const water = [period('2025-03-01', null, 2200)]
+    const parking = [period('2026-02-01', null, 1500)]
+    expect(firstPeriodMove(water, '2025-03-01', '2025-03-15')).toEqual({
+      ok: true,
+      move: { from: '2025-03-01', to: '2025-03-15' },
+    })
+    expect(firstPeriodMove(parking, '2025-03-01', '2025-03-15')).toEqual({
+      ok: true,
+      move: null,
+    })
+  })
+
+  test('A start after an occupants change is refused', () => {
+    const occupants = [
+      period('2025-03-01', '2026-08-31', 1),
+      period('2026-09-01', null, 2),
+    ]
+    expect(firstPeriodMove(occupants, '2025-03-01', '2026-10-01')).toEqual({
+      ok: false,
+    })
+  })
+
+  test('Ending before an occupants change is refused', () => {
+    const occupants = [
+      period('2025-03-01', '2027-02-28', 1),
+      period('2027-03-01', null, 2),
+    ]
+    expect(periodAfterEnd(occupants, '2027-01-31')).toBe(true)
+    expect(periodAfterEnd(occupants, '2027-03-31')).toBe(false)
+    expect(periodAfterEnd(occupants, null)).toBe(false)
+  })
+
+  test('Ending before a fee change is refused', () => {
+    const parking = [
+      period('2026-02-01', '2027-02-28', 1500),
+      period('2027-03-01', null, 2000),
+    ]
+    expect(periodAfterEnd(parking, '2027-01-31')).toBe(true)
   })
 })

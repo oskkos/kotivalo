@@ -19,17 +19,27 @@ export interface RentDates {
 }
 
 /**
- * A month's rent: the period on the month's first day, or on the tenancy's
- * start day in the month it starts. Undefined when no rent is in effect.
+ * A month's value of a tenancy's periods (rent, occupants, a fee's amount):
+ * the period on the month's first day, or on the tenancy's start day in the
+ * month it starts. Undefined when none is in effect.
  */
+export function valueInTenancyMonth<T>(
+  periods: readonly Period<T>[],
+  tenancy: Pick<RentDates, 'validFrom'>,
+  month: Month,
+): T | undefined {
+  const day =
+    monthOf(tenancy.validFrom) === month ? tenancy.validFrom : `${month}-01`
+  return periodOn(periods, day)?.value
+}
+
+/** A month's rent; undefined when no rent is in effect. */
 export function rentInMonth(
   rents: readonly Period<number>[],
   tenancy: Pick<RentDates, 'validFrom'>,
   month: Month,
 ): number | undefined {
-  const day =
-    monthOf(tenancy.validFrom) === month ? tenancy.validFrom : `${month}-01`
-  return periodOn(rents, day)?.value
+  return valueInTenancyMonth(rents, tenancy, month)
 }
 
 /**
@@ -84,6 +94,33 @@ export function validateRentDate(
 }
 
 /**
+ * The date of a new occupants or fee amount period: the first of a month or
+ * the tenancy's start day, inside the tenancy, and not before the latest
+ * period's start (`latestStart`, none for a fee's first amount). On that
+ * start itself it corrects the latest period. Unlike the rent, a date before
+ * the first period is never a fill: a fee may start mid-tenancy.
+ */
+export function validateTenancyPeriodDate(
+  from: IsoDate,
+  limits: { tenancy: RentDates; latestStart: IsoDate | undefined },
+): RentDateProblem | undefined {
+  const { tenancy, latestStart } = limits
+  if (!from.endsWith('-01') && from !== tenancy.validFrom) {
+    return 'amount_date_not_month_start'
+  }
+  if (from < tenancy.validFrom) {
+    return 'rent_date_before_tenancy'
+  }
+  if (tenancy.validTo !== null && from > tenancy.validTo) {
+    return 'rent_date_after_tenancy'
+  }
+  if (latestStart !== undefined && from < latestStart) {
+    return 'amount_date_too_early'
+  }
+  return undefined
+}
+
+/**
  * A rent dated before the first period's start adds a period from that
  * date to the day before the first period, instead of a change.
  */
@@ -118,22 +155,20 @@ export function suggestedRent(
 }
 
 /**
- * Where a corrected start leaves the first rent period: moved to the new
- * start when it started on the old one or the new start is after it, else
- * where it is (`move` null). A start on or after the second period's start
- * is refused.
+ * Where a corrected start leaves the first period of a tenancy's rent,
+ * occupants or a fee: moved to the new start when it started on the old one
+ * or the new start is after it, else where it is (`move` null). A start on
+ * or after the second period's start is refused.
  */
-export function firstRentMove(
-  rents: readonly Period<number>[],
+export function firstPeriodMove<T>(
+  periods: readonly Period<T>[],
   oldStart: IsoDate,
   newStart: IsoDate,
-):
-  | { ok: true; move: { from: IsoDate; to: IsoDate } | null }
-  | { ok: false; reason: 'tenancy_start_after_rent_change' } {
-  const first = rents.at(0)
-  const second = rents.at(1)
+): { ok: true; move: { from: IsoDate; to: IsoDate } | null } | { ok: false } {
+  const first = periods.at(0)
+  const second = periods.at(1)
   if (second !== undefined && newStart >= second.validFrom) {
-    return { ok: false, reason: 'tenancy_start_after_rent_change' }
+    return { ok: false }
   }
   if (
     first === undefined ||
@@ -145,11 +180,33 @@ export function firstRentMove(
   return { ok: true, move: { from: first.validFrom, to: newStart } }
 }
 
-/** A last day before the latest rent period's start would leave it outside. */
+/** `firstPeriodMove` for the rent, with the rent's reason. */
+export function firstRentMove(
+  rents: readonly Period<number>[],
+  oldStart: IsoDate,
+  newStart: IsoDate,
+):
+  | { ok: true; move: { from: IsoDate; to: IsoDate } | null }
+  | { ok: false; reason: 'tenancy_start_after_rent_change' } {
+  const moved = firstPeriodMove(rents, oldStart, newStart)
+  return moved.ok
+    ? moved
+    : { ok: false, reason: 'tenancy_start_after_rent_change' }
+}
+
+/** A last day before the latest period's start would leave it outside. */
+export function periodAfterEnd<T>(
+  periods: readonly Period<T>[],
+  lastDay: IsoDate | null,
+): boolean {
+  const latest = periods.at(-1)
+  return lastDay !== null && latest !== undefined && latest.validFrom > lastDay
+}
+
+/** `periodAfterEnd` for the rent. */
 export function rentAfterEnd(
   rents: readonly Period<number>[],
   lastDay: IsoDate | null,
 ): boolean {
-  const latest = rents.at(-1)
-  return lastDay !== null && latest !== undefined && latest.validFrom > lastDay
+  return periodAfterEnd(rents, lastDay)
 }
