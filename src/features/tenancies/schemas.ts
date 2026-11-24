@@ -100,8 +100,8 @@ const endingFields = z.object({
 export const createTenancyInput = tenancyFields.and(
   z.object({
     propertyId: id,
-    /** Absent when the form doesn't ask for it (rent.ts). */
-    rent: typedAmount.optional(),
+    /** The tenancy's first rent, from its start. */
+    rent: typedAmount,
     /** An earlier tenancy's ending, recorded with it. */
     ending: endingFields.optional(),
   }),
