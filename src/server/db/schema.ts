@@ -438,6 +438,26 @@ export const tenancies = sqliteTable(
 )
 
 /**
+ * A tenancy's rent over time (openspec: tenancies, "The rent of a tenancy").
+ * The first period starts on the tenancy's start day, later ones on the
+ * first of a month. A change closes the open row the day before and adds
+ * the next; the latest row stays open, bounded by the tenancy's own dates.
+ */
+export const tenancyRents = sqliteTable(
+  'tenancy_rents',
+  {
+    id: id(),
+    tenancyId: text('tenancy_id')
+      .notNull()
+      .references(() => tenancies.id, { onDelete: 'cascade' }),
+    /** Per month, in cents. */
+    amount: cents('amount').notNull(),
+    ...validity(),
+  },
+  (t) => [index('tenancy_rents_tenancy_idx').on(t.tenancyId, t.validFrom)],
+)
+
+/**
  * Rent received for a month of a tenancy (openspec: rent-payments). `month`
  * (`YYYY-MM`) is the rent's month, `paid_on` the day it was received, which
  * decides its tax year. A month may have several payments. Never edited: a

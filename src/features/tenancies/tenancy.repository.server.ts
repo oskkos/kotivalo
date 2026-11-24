@@ -30,6 +30,7 @@ import {
   recurringAmounts,
   rentPayments,
   tenancies,
+  tenancyRents,
   type ContractType,
   type NoticeGiver,
 } from '#/server/db/schema'
@@ -37,6 +38,7 @@ import {
   recurringAmountRepository,
   type Expected,
 } from '#/features/recurring-amounts/recurring-amount.repository.server'
+import type { Period } from '#/features/recurring-amounts/periods'
 import { atomically, type Db } from '#/server/platform/db.server'
 
 /** What an owner enters for a tenancy. */
@@ -237,6 +239,33 @@ export function tenancyRepository(db: Db) {
         .from(tenancies)
         .where(eq(tenancies.propertyId, propertyId))
         .orderBy(desc(tenancies.validFrom))
+    },
+
+    /**
+     * The tenancies' rent periods by tenancy id, oldest first (openspec:
+     * tenancies, "The rent of a tenancy"). A tenancy without a rent has no
+     * entry.
+     */
+    async rentsFor(
+      tenancyIds: string[],
+    ): Promise<Partial<Record<string, Period<number>[]>>> {
+      if (tenancyIds.length === 0) {
+        return {}
+      }
+      const rows = await db
+        .select()
+        .from(tenancyRents)
+        .where(inArray(tenancyRents.tenancyId, tenancyIds))
+        .orderBy(asc(tenancyRents.validFrom))
+      const rents: Partial<Record<string, Period<number>[]>> = {}
+      for (const row of rows) {
+        ;(rents[row.tenancyId] ??= []).push({
+          validFrom: row.validFrom,
+          validTo: row.validTo,
+          value: row.amount,
+        })
+      }
+      return rents
     },
 
     /** The months (`YYYY-MM`) the tenancy has rent payments for. */
