@@ -56,8 +56,10 @@ describe("Changing a tenancy's rent", () => {
     expect(screen.getByRole('heading', { name: 'Change rent' })).toBeVisible()
     await user.type(box('New amount (€/month)'), '920')
     await user.type(box('Valid from'), '01/03/2027')
-    expect(screen.getByRole('status')).toHaveTextContent(
-      '+€30.00/month (+3.4%)',
+    const status = screen.getByRole('status')
+    expect(status).toHaveTextContent('+€30.00/month (+3.4%)')
+    expect(status).toHaveTextContent(
+      'In 2027, rental income goes up by €300.00 over 10 months',
     )
   })
 

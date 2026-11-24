@@ -16,7 +16,7 @@ const maintenance: Period<number>[] = [
   { validFrom: '2026-01-01', validTo: null, value: 21400 },
 ]
 
-describe('Rent and charges are recorded as monthly periods', () => {
+describe('Charges are recorded as monthly periods', () => {
   test("A month's amount comes from the period containing its first day", () => {
     expect(valueInMonth(maintenance, '2025-12')).toBe(20500)
     expect(valueInMonth(maintenance, '2026-01')).toBe(21400)

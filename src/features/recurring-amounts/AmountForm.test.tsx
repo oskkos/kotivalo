@@ -30,7 +30,6 @@ const view: RecurringAmountsView = {
   ownershipStart: '2025-03-01',
   capitalised: 0,
   amounts: {
-    rent: [],
     maintenance_charge: [
       { validFrom: '2025-03-01', validTo: '2025-12-31', value: 20500 },
       { validFrom: '2026-01-01', validTo: null, value: 21400 },
@@ -51,10 +50,13 @@ const view: RecurringAmountsView = {
 
 const charge = view.financingCharges[0]
 
-function setup(
-  what: 'rent' | 'maintenance_charge' | 'financing_charge',
-  data = view,
-) {
+/** No maintenance charge set. */
+const unset: RecurringAmountsView = {
+  ...view,
+  amounts: { maintenance_charge: [] },
+}
+
+function setup(what: 'maintenance_charge' | 'financing_charge', data = view) {
   const user = userEvent.setup()
   const onDone = vi.fn(() => Promise.resolve())
   render(
@@ -79,7 +81,7 @@ async function enter(
   await user.type(screen.getByRole('textbox', { name: 'Valid from' }), from)
 }
 
-describe('Setting a rent or charge', () => {
+describe('Setting a charge', () => {
   test('The change form shows the effect on the year', async () => {
     const { user } = setup('maintenance_charge')
     await enter(user, '226', '01/01/2027')
@@ -91,9 +93,11 @@ describe('Setting a rent or charge', () => {
   })
 
   test('the first amount has no current amount, difference or history', async () => {
-    const { user } = setup('rent')
-    expect(screen.getByRole('heading', { name: 'Set rent' })).toBeVisible()
-    await enter(user, '890', '01/03/2025')
+    const { user } = setup('maintenance_charge', unset)
+    expect(
+      screen.getByRole('heading', { name: 'Set maintenance charge' }),
+    ).toBeVisible()
+    await enter(user, '205', '01/03/2025')
     expect(screen.queryByRole('status')).toBeNull()
     expect(screen.queryByRole('list', { name: 'Change history' })).toBeNull()
     expect(screen.getByRole('button', { name: 'Save' })).toBeVisible()
@@ -123,20 +127,6 @@ describe('Setting a rent or charge', () => {
     )
     expect(screen.getByRole('status')).toHaveTextContent(
       'In 2027, deductible expenses go up by €48.00 over 12 months',
-    )
-  })
-
-  test('a rent change adds to rental income', async () => {
-    const { user } = setup('rent', {
-      ...view,
-      amounts: {
-        ...view.amounts,
-        rent: [{ validFrom: '2025-03-01', validTo: null, value: 89000 }],
-      },
-    })
-    await enter(user, '850', '01/12/2026')
-    expect(screen.getByRole('status')).toHaveTextContent(
-      'In 2026, rental income goes down by €40.00 over 1 month',
     )
   })
 
@@ -178,7 +168,7 @@ describe('Setting a rent or charge', () => {
   })
 })
 
-describe('Undoing the latest rent or charge change', () => {
+describe('Undoing the latest charge change', () => {
   test('undoing asks first and names the amount that applies again', async () => {
     undo.mockResolvedValue({ ok: true })
     const { user, onDone } = setup('maintenance_charge')
@@ -238,7 +228,7 @@ describe('Undoing the latest rent or charge change', () => {
   })
 
   test('there is nothing to undo without a period', () => {
-    setup('rent')
+    setup('maintenance_charge', unset)
     expect(
       screen.queryByRole('button', { name: 'Undo the latest change' }),
     ).toBeNull()

@@ -35,8 +35,8 @@ async function raisedCharge(page: Page) {
   return id
 }
 
-test.describe('The rent and charges page', () => {
-  test('Opening the rent and charges page from the details page', async ({
+test.describe('The charge amounts page', () => {
+  test('Opening the charge amounts page from the details page', async ({
     page,
   }) => {
     const id = await ownerWithFlat(page)
@@ -44,13 +44,13 @@ test.describe('The rent and charges page', () => {
     await waitForHydration(page)
 
     await page
-      .getByRole('region', { name: 'Rent and charges' })
+      .getByRole('region', { name: 'Charges', exact: true })
       .getByRole('link', { name: 'Change' })
       .click()
 
     await expect(page).toHaveURL(new RegExp(`/properties/${id}/amounts$`))
     await expect(
-      page.getByRole('heading', { name: 'Rent and charges' }),
+      page.getByRole('heading', { name: 'Charges', exact: true }),
     ).toBeVisible()
     await expect(page.getByText('Kuusikuja 3 B 12')).toBeVisible()
   })
@@ -60,14 +60,15 @@ test.describe('The rent and charges page', () => {
     await openAmounts(page, id)
 
     await expect(
-      page.getByRole('heading', { name: 'Rent and charges' }),
+      page.getByRole('heading', { name: 'Charges', exact: true }),
     ).toBeVisible()
-    for (const name of ['Rent', 'Maintenance charge']) {
-      await expect(section(page, name).getByText('Not set')).toBeVisible()
-      await expect(
-        page.getByRole('button', { name: `Set: ${name}` }),
-      ).toBeVisible()
-    }
+    await expect(
+      section(page, 'Maintenance charge').getByText('Not set'),
+    ).toBeVisible()
+    await expect(
+      page.getByRole('button', { name: 'Set: Maintenance charge' }),
+    ).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Rent' })).toHaveCount(0)
     const financing = section(page, 'Financing charge')
     await expect(financing.getByText('No financing charges')).toBeVisible()
     await expect(financing.getByText('Not set')).toBeVisible()
@@ -88,9 +89,11 @@ test.describe('The rent and charges page', () => {
     const { id, jussi } = await accepted(page, browser)
     await openAmounts(jussi, id)
 
-    await expect(section(jussi, 'Rent').getByText('Not set')).toBeVisible()
     await expect(
-      jussi.getByText('Only owners can change the amounts.'),
+      section(jussi, 'Maintenance charge').getByText('Not set'),
+    ).toBeVisible()
+    await expect(
+      jussi.getByText(/^Only owners can change the amounts\./),
     ).toBeVisible()
     await expect(
       jussi.getByRole('button', { name: /^(Set|Change):/ }),
@@ -163,16 +166,16 @@ test.describe('Adding a financing charge', () => {
   })
 })
 
-test.describe('Setting a rent or charge', () => {
-  test('Setting the first rent of a flat', async ({ page }) => {
+test.describe('Setting a charge', () => {
+  test('Setting the first maintenance charge of a flat', async ({ page }) => {
     const id = await ownerWithFlat(page)
     await openAmounts(page, id)
 
-    await setAmount(page, 'Rent', '890', '01/03/2025')
+    await setAmount(page, 'Maintenance charge', '205', '01/03/2025')
 
-    const rent = section(page, 'Rent')
-    await expect(rent.getByText('€890.00/month')).toBeVisible()
-    await expect(rent.getByText('From 01/03/2025')).toBeVisible()
+    const charge = section(page, 'Maintenance charge')
+    await expect(charge.getByText('€205.00/month')).toBeVisible()
+    await expect(charge.getByText('From 01/03/2025')).toBeVisible()
   })
 
   test('Raising the maintenance charge from next year', async ({ page }) => {
@@ -221,7 +224,7 @@ test.describe('Setting a rent or charge', () => {
   })
 })
 
-test.describe('Undoing the latest rent or charge change', () => {
+test.describe('Undoing the latest charge change', () => {
   test('Undoing a charge increase', async ({ page }) => {
     await raisedCharge(page)
 
@@ -239,24 +242,26 @@ test.describe('Undoing the latest rent or charge change', () => {
     await expect(charge.getByText(/: €226.00\/month/)).toHaveCount(0)
   })
 
-  test('Undoing the only rent', async ({ page }) => {
+  test('Undoing the only maintenance charge', async ({ page }) => {
     const id = await ownerWithFlat(page)
     await openAmounts(page, id)
-    await setAmount(page, 'Rent', '890', '01/06/2025')
+    await setAmount(page, 'Maintenance charge', '214', '01/06/2025')
 
-    await page.getByRole('button', { name: 'Change: Rent' }).click()
+    await page
+      .getByRole('button', { name: 'Change: Maintenance charge' })
+      .click()
     await page.getByRole('button', { name: 'Undo the latest change' }).click()
     const dialog = page.getByRole('dialog')
     await expect(dialog).toContainText('The amount is removed.')
     await dialog.getByRole('button', { name: 'Undo change' }).click()
     await expect(
-      page.getByRole('heading', { name: 'Rent and charges' }),
+      page.getByRole('heading', { name: 'Charges', exact: true }),
     ).toBeVisible()
-    await setAmount(page, 'Rent', '890', '01/03/2025')
+    await setAmount(page, 'Maintenance charge', '214', '01/03/2025')
 
-    const rent = section(page, 'Rent')
-    await expect(rent.getByText('€890.00/month')).toBeVisible()
-    await expect(rent.getByText('From 01/03/2025')).toBeVisible()
+    const charge = section(page, 'Maintenance charge')
+    await expect(charge.getByText('€214.00/month')).toBeVisible()
+    await expect(charge.getByText('From 01/03/2025')).toBeVisible()
   })
 
   test("Undoing a financing charge's only amount removes it", async ({
@@ -361,7 +366,7 @@ test.describe('Accumulated capitalised financing charges', () => {
   })
 })
 
-/** Opens the form of a financing charge from the Rent and charges page. */
+/** Opens the form of a financing charge from the Charges page. */
 async function openCharge(page: Page, name: string) {
   await page.getByRole('button', { name: `Change: ${name}` }).click()
   await waitForHydration(page)
@@ -376,7 +381,7 @@ async function endCharge(page: Page, name: string, from: string) {
     .fill(from)
   await page.getByRole('button', { name: 'Mark the charge as ended' }).click()
   await expect(
-    page.getByRole('heading', { name: 'Rent and charges' }),
+    page.getByRole('heading', { name: 'Charges', exact: true }),
   ).toBeVisible()
 }
 

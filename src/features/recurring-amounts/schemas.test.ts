@@ -9,7 +9,7 @@ import {
 
 const amount = (text: string) => typedAmount.safeParse(text)
 
-describe('Rent and charges are recorded as monthly periods', () => {
+describe('Charges are recorded as monthly periods', () => {
   test('An invalid amount is refused', () => {
     for (const text of ['-5', '100000', '12,345', '', 'abc']) {
       const result = amount(text)
@@ -31,13 +31,17 @@ describe('typed amounts', () => {
 
 describe('start dates', () => {
   test('the first of a month is accepted, other days are not', () => {
-    const base = { propertyId: 'flat', kind: 'rent', amount: '890' }
+    const base = {
+      propertyId: 'flat',
+      kind: 'maintenance_charge',
+      amount: '214',
+    }
     expect(
       setAmountInput.safeParse({ ...base, from: '1.3.2025' }).data,
     ).toEqual({
       propertyId: 'flat',
-      kind: 'rent',
-      amount: 89000,
+      kind: 'maintenance_charge',
+      amount: 21400,
       from: '2025-03-01',
     })
     expect(

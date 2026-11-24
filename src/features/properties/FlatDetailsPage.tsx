@@ -25,7 +25,6 @@ import {
   type RentMonth,
 } from '#/features/rent-payments/status'
 import { StatusChip } from '#/features/rent-payments/StatusChip'
-import { rentToday } from '#/features/tenancies/rent'
 import { currentTenancy, flatStatus } from '#/features/tenancies/status'
 import { TenancyCard } from '#/features/tenancies/TenancyCard'
 import type { Tenancy } from '#/features/tenancies/tenancy.repository.server'
@@ -441,7 +440,6 @@ interface AmountRow {
  * before; several show their names and the treatment once below them.
  */
 function amountRows(view: FlatDetails): AmountRow[] {
-  const current = currentTenancy(view.tenancies, view.today)
   const perMonth = (cents: number | undefined) =>
     cents === undefined
       ? m.amounts_not_set()
@@ -450,15 +448,6 @@ function amountRows(view: FlatDetails): AmountRow[] {
   const treatmentText =
     treatment === undefined ? undefined : treatmentLabel[treatment]()
   const rows: AmountRow[] = [
-    {
-      key: 'rent',
-      label: kindLabel.rent(),
-      value: perMonth(
-        current === null
-          ? undefined
-          : rentToday(view.tenancyRents[current.id] ?? [], current, view.today),
-      ),
-    },
     {
       key: 'maintenance',
       label: kindLabel.maintenance_charge(),
@@ -755,6 +744,8 @@ export function FlatDetailsPage(props: Props) {
           <TenancyCard
             propertyId={view.property.id}
             tenancy={current}
+            rents={view.tenancyRents[current.id] ?? []}
+            today={view.today}
             showDueDay
           />
         ) : null}

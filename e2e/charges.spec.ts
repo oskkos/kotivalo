@@ -121,7 +121,7 @@ test.describe('The charges page', () => {
     await expect(page.getByText('No charges set')).toBeVisible()
     await page.getByRole('link', { name: 'Set charges' }).click()
     await expect(
-      page.getByRole('heading', { name: 'Rent and charges' }),
+      page.getByRole('heading', { name: 'Charges', exact: true }),
     ).toBeVisible()
   })
 

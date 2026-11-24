@@ -59,7 +59,7 @@ const details = (over: Partial<FlatDetails> = {}): FlatDetails => ({
     t1: [{ validFrom: '2025-03-01', validTo: null, value: 89000 }],
     t0: [{ validFrom: '2024-01-01', validTo: null, value: 89000 }],
   },
-  amounts: { rent: [], maintenance_charge: [] },
+  amounts: { maintenance_charge: [] },
   financingCharges: [],
   treatments: [],
   capitalised: 0,
@@ -127,11 +127,27 @@ describe('The flat details page', () => {
     expect(screen.queryByRole('region', { name: 'November rent' })).toBeNull()
   })
 
-  test('the rent and charges show what is set', () => {
+  test('the charges show what is set, without the rent', () => {
     renderPage(details())
-    const amounts = screen.getByRole('region', { name: 'Rent and charges' })
-    expect(amounts).toHaveTextContent('€890.00')
+    const amounts = screen.getByRole('region', { name: 'Charges' })
+    expect(amounts).not.toHaveTextContent('€890.00')
     expect(within(amounts).getAllByText('Not set')).toHaveLength(2)
+  })
+
+  test('The tenancy card shows the rent and its upcoming change', () => {
+    renderPage(
+      details({
+        tenancyRents: {
+          t1: [
+            { validFrom: '2026-03-01', validTo: '2027-02-28', value: 89000 },
+            { validFrom: '2027-03-01', validTo: null, value: 92000 },
+          ],
+        },
+      }),
+    )
+    const card = screen.getByRole('link', { name: /Aino Koski/ })
+    expect(card).toHaveTextContent('€890.00/month')
+    expect(card).toHaveTextContent('From 01/03/2027: €920.00')
   })
 
   test('Each financing charge in effect today', () => {
@@ -168,7 +184,7 @@ describe('The flat details page', () => {
         ],
       }),
     )
-    const amounts = screen.getByRole('region', { name: 'Rent and charges' })
+    const amounts = screen.getByRole('region', { name: 'Charges' })
     expect(amounts).toHaveTextContent(
       'Financing chargePutkiremontti€86.00/month',
     )

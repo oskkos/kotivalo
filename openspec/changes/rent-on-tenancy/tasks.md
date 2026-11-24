@@ -35,11 +35,11 @@
 
 ## 6. Charges without the rent
 
-- [ ] 6.1 `recurring-amounts`: the rent removed from the repository's view, `RecurringAmountsPage.tsx`, `AmountForm.tsx`, `labels.ts` and the `$kind` route (`rent` is not found); `rent` removed from `RECURRING_AMOUNT_KINDS`, so `setRecurringAmount` and `undoRecurringAmount` refuse it; the page says the rent is changed on the Tenancy page
-- [ ] 6.2 Titles: the amounts page *Vastikkeet*, the charges-by-year page *Vastikkeet kuukausittain* (design.md, "Routes and pages"), the details page's card and menu entry *Vastikkeet*; fi, sv and en with the translate skill and the term-critic on the diff
-- [ ] 6.3 `FlatDetailsPage.tsx`: the tenancy card shows the rent in effect today, or the first rent of a tenancy that starts later, and the upcoming change; the charges card without the rent; component tests
-- [ ] 6.4 Tests renamed and rewritten after the renamed requirements of `recurring-amounts` ("Charges are recorded as monthly periods", "The charge amounts page", "Setting a charge", "Undoing the latest charge change") with their rent scenarios turned into maintenance charge scenarios; Playwright tests for "The flat details page" scenarios "A tenancy that starts later", "The tenancy card shows the rent and its upcoming change" and "The charges with the capitalised total"
-- [ ] 6.5 CLAUDE.md "Current state": the rent on the tenancy (`tenancy_rents`, the rent card and form), the amounts page as *Vastikkeet* without the rent; `openspec/config.yaml` if its summary mentions the rent and charges page
+- [x] 6.1 `recurring-amounts`: the rent removed from the repository's view, `RecurringAmountsPage.tsx`, `AmountForm.tsx`, `labels.ts` and the `$kind` route (`rent` is not found); `rent` removed from `RECURRING_AMOUNT_KINDS`, so `setRecurringAmount` and `undoRecurringAmount` refuse it; the page says the rent is changed on the Tenancy page
+- [x] 6.2 Titles: the amounts page *Vastikkeet*, the charges-by-year page *Vastikkeet kuukausittain* (design.md, "Routes and pages"), the details page's card and menu entry *Vastikkeet*; fi, sv and en with the translate skill and the term-critic on the diff
+- [x] 6.3 `FlatDetailsPage.tsx`: the tenancy card shows the rent in effect today, or the first rent of a tenancy that starts later, and the upcoming change; the charges card without the rent; component tests
+- [x] 6.4 Tests renamed and rewritten after the renamed requirements of `recurring-amounts` ("Charges are recorded as monthly periods", "The charge amounts page", "Setting a charge", "Undoing the latest charge change") with their rent scenarios turned into maintenance charge scenarios; Playwright tests for "The flat details page" scenarios "A tenancy that starts later", "The tenancy card shows the rent and its upcoming change" and "The charges with the capitalised total"
+- [x] 6.5 CLAUDE.md "Current state": the rent on the tenancy (`tenancy_rents`, the rent card and form), the amounts page as *Vastikkeet* without the rent, and the e2e helpers it lists; `openspec/config.yaml` doesn't name the page, so it stays
 
 ## 7. Archive
 

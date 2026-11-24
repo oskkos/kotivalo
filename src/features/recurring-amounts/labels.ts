@@ -8,13 +8,11 @@ import type {
 
 /** The amounts with one sequence per flat; financing charges are several. */
 export const KINDS = [
-  'rent',
   'maintenance_charge',
 ] as const satisfies readonly RecurringAmountKind[]
 export type SingleKind = (typeof KINDS)[number]
 
 export const kindLabel: Record<RecurringAmountKind, () => string> = {
-  rent: () => m.amounts_rent(),
   maintenance_charge: () => m.amounts_maintenance_charge(),
   financing_charge: () => m.amounts_financing_charge(),
 }

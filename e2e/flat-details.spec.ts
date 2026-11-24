@@ -140,11 +140,14 @@ test.describe('The flat details page', () => {
     await openDetails(page, id)
     await expect(rentCard(page)).toContainText(`Starts 01/01/${next}`)
     await expect(
+      page.getByRole('link', { name: /Mikko Lehtinen/ }),
+    ).toContainText('€910.00/month')
+    await expect(
       rentCard(page).getByRole('button', { name: 'Mark as paid' }),
     ).toHaveCount(0)
   })
 
-  test('The rent and charges with the capitalised total', async ({ page }) => {
+  test('The charges with the capitalised total', async ({ page }) => {
     const id = await ownerWithFlat(page)
     await addTenant(page, id, { ...aino, start: thisMonthStart })
     await openAmounts(page, id)
@@ -152,8 +155,11 @@ test.describe('The flat details page', () => {
     await addFinancingCharge(page, 'Putkiremontti', '86', thisMonthStart)
     await setTreatment(page, 'Placed in reserve', thisMonthStart)
     await openDetails(page, id)
-    const amounts = page.getByRole('region', { name: 'Rent and charges' })
-    await expect(amounts).toContainText('€890.00')
+    const amounts = page.getByRole('region', { name: 'Charges', exact: true })
+    await expect(amounts).not.toContainText('€890.00')
+    await expect(page.getByRole('link', { name: /Aino Koski/ })).toContainText(
+      '€890.00/month',
+    )
     await expect(amounts).toContainText('€214.00')
     await expect(amounts).toContainText('€86.00')
     await expect(amounts).toContainText('Placed in reserve')
@@ -161,7 +167,7 @@ test.describe('The flat details page', () => {
 
     await amounts.getByRole('link', { name: 'Change' }).click()
     await expect(
-      page.getByRole('heading', { name: 'Rent and charges' }),
+      page.getByRole('heading', { name: 'Charges', exact: true }),
     ).toBeVisible()
   })
 
@@ -190,7 +196,9 @@ test.describe('The flat details page', () => {
     await expect(row).toContainText(`${String(thisYear)} so far: ${soFar}`)
 
     await row.click()
-    await expect(page.getByRole('heading', { name: 'Charges' })).toBeVisible()
+    await expect(
+      page.getByRole('heading', { name: 'Charges by month' }),
+    ).toBeVisible()
   })
 
   test('Each financing charge in effect today', async ({ page }) => {
@@ -208,12 +216,12 @@ test.describe('The flat details page', () => {
       .fill(`01/01/${String(thisYear)}`)
     await page.getByRole('button', { name: 'Mark the charge as ended' }).click()
     await expect(
-      page.getByRole('heading', { name: 'Rent and charges' }),
+      page.getByRole('heading', { name: 'Charges', exact: true }),
     ).toBeVisible()
     await setTreatment(page, 'Placed in reserve', start)
 
     await openDetails(page, id)
-    const amounts = page.getByRole('region', { name: 'Rent and charges' })
+    const amounts = page.getByRole('region', { name: 'Charges', exact: true })
     await expect(amounts).toContainText(
       'Financing chargePutkiremontti€86.00/month',
     )
