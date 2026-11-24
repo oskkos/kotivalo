@@ -6,9 +6,9 @@
 
 ## 2. Period rules and the shared period writes
 
-- [ ] 2.1 `tenancies/rent.ts`: `validateTenancyPeriodDate`, `valueInTenancyMonth` (generalising `rentInMonth`, which keeps its name as a wrapper or is replaced at its callers), `firstPeriodMove` and `periodAfterEnd` (generalising `firstRentMove` and `rentAfterEnd`); unit tests named after the scenarios of "Occupants of a tenancy" and the start and end scenarios of "Occupants and fees stay inside their tenancy"
-- [ ] 2.2 `tenancies/fees.ts`: `occupantsInMonth` and `feeInMonth`; unit tests named after "Tenant fees are recorded as periods"
-- [ ] 2.3 `src/server/db/periods.ts`: the statement builder for the three new period tables (close the open period the day before and add the next, correct the latest, delete the latest and reopen the previous; the expected latest start and a caller-given owner check inside every statement); Workers tests on `tenancy_occupants` and `usage_charge_amounts`, including a concurrent write that applies nothing
+- [x] 2.1 `tenancies/rent.ts`: `validateTenancyPeriodDate`, `valueInTenancyMonth` (generalising `rentInMonth`, which keeps its name as a wrapper or is replaced at its callers), `firstPeriodMove` and `periodAfterEnd` (generalising `firstRentMove` and `rentAfterEnd`); unit tests named after the scenarios of "Occupants of a tenancy" and the start and end scenarios of "Occupants and fees stay inside their tenancy"
+- [x] 2.2 `tenancies/fees.ts`: `occupantsInMonth` and `feeInMonth`; unit tests named after "Tenant fees are recorded as periods"
+- [x] 2.3 `src/server/db/periods.ts`: the statement builder for the three new period tables (close the open period the day before and add the next, correct the latest, delete the latest and reopen the previous; the expected latest start and a caller-given owner check inside every statement); Workers tests on `tenancy_occupants` and `usage_charge_amounts`, including a concurrent write that applies nothing
 
 ## 3. The expected rent with the fees
 
