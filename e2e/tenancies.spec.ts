@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 import { addFlat, card } from './support/flats'
 import { accepted, ownerWithFlat } from './support/sharing'
 import { waitForHydration } from './support/sign-in'
-import { addTenant, aino } from './support/tenancies'
+import { addTenant, aino, changeRent } from './support/tenancies'
 
 // The browser's language is English, so the app is in English.
 
@@ -365,5 +365,37 @@ test.describe('Listing flats', () => {
     )
     await expect(kuusikujaCard).toContainText('Aino Koski')
     await expect(card(page, 'Koivupolku 7 A 4')).toContainText('Vacant')
+  })
+})
+
+test.describe("Changing a tenancy's rent", () => {
+  test('Raising the rent from March', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await changeRent(page, '920', `01/03/${nextYear}`)
+    const rent = page.getByRole('region', { name: 'Rent' })
+    await expect(rent).toContainText('€890.00 a month')
+    await expect(rent).toContainText(`From 01/03/${nextYear}: €920.00/month`)
+    await expect(
+      rent.getByRole('list', { name: 'Rent changes' }).getByRole('listitem'),
+    ).toHaveText([`From 01/03/${nextYear}€920.00`, 'From 01/03/2025€890.00'])
+  })
+})
+
+test.describe("Undoing a tenancy's rent change", () => {
+  test('Undoing a rent increase', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await changeRent(page, '920', `01/03/${nextYear}`)
+    const rent = page.getByRole('region', { name: 'Rent' })
+    await rent.getByRole('button', { name: 'Undo the latest change' }).click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toContainText('€890.00')
+    await dialog.getByRole('button', { name: 'Undo change' }).click()
+    await expect(dialog).toBeHidden()
+    await expect(rent).not.toContainText('€920.00')
+    await expect(
+      rent.getByRole('button', { name: 'Undo the latest change' }),
+    ).toHaveCount(0)
   })
 })

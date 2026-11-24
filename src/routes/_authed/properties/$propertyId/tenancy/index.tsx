@@ -98,6 +98,16 @@ function TenancyRoute() {
             {m.tenancy_add_earlier()}
           </TextLink>
         }
+        rentChange={(tenancy) => (
+          <ButtonLink
+            to="/properties/$propertyId/tenancy/$tenancyId/rent"
+            params={{ propertyId, tenancyId: tenancy.id }}
+            variant="outlined"
+            sx={{ minHeight: 44, px: 2, flexShrink: 0 }}
+          >
+            {m.amounts_change()}
+          </ButtonLink>
+        )}
         onUndoRent={setUndoingRent}
         currentActions={(tenancy) => {
           const status = tenancyStatus(tenancy, view.today)
