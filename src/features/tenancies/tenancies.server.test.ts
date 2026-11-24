@@ -1070,6 +1070,36 @@ describe("Changing a tenancy's rent", () => {
     ).toEqual({ ok: false, reason: 'amount_date_too_early' })
   })
 
+  test('Filling the first months of a migrated tenancy', async () => {
+    const id = await addId(aino, 89000)
+    // As the migration leaves it: the flat's rent was set after the start.
+    await env.DB.prepare(
+      "UPDATE tenancy_rents SET valid_from = '2026-01-01' WHERE tenancy_id = ?",
+    )
+      .bind(id)
+      .run()
+    expect(
+      await setTenancyRent(deps(), flat, id, {
+        amount: 85000,
+        from: '2025-03-01',
+      }),
+    ).toEqual({ ok: true })
+    expect(await tenancyRents(id)).toEqual([
+      { validFrom: '2025-03-01', validTo: '2025-12-31', value: 85000 },
+      { validFrom: '2026-01-01', validTo: null, value: 89000 },
+    ])
+    expect(capture.lines.at(-1)).toMatchObject({
+      event: 'tenancy.rent_changed',
+      tenancyId: id,
+    })
+    expect(
+      await setTenancyRent(deps(), flat, id, {
+        amount: 86000,
+        from: '2025-06-01',
+      }),
+    ).toEqual({ ok: false, reason: 'amount_date_too_early' })
+  })
+
   test("Another flat's tenancy is not found", async () => {
     const id = await addId(aino)
     const second = (

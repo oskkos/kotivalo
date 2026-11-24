@@ -14,7 +14,12 @@ import type { NoticeGiver, PropertyRole } from '#/server/db/schema'
 import type { Logger } from '#/server/log/log'
 import { validateEnding } from './notice'
 import { paymentsOutside, validateTenancyDates } from './rules'
-import { firstRentMove, rentAfterEnd, validateRentDate } from './rent'
+import {
+  fillsBeforeFirst,
+  firstRentMove,
+  rentAfterEnd,
+  validateRentDate,
+} from './rent'
 import { flatStatus } from './status'
 import type {
   Ending,
@@ -522,8 +527,13 @@ export async function setTenancyRent(
     return tenancyNotFound
   }
   const rents = (await deps.tenancies.rentsFor([tenancyId]))[tenancyId] ?? []
+  const firstStart = rents.at(0)?.validFrom
   const latestStart = rents.at(-1)?.validFrom
-  const problem = validateRentDate(change.from, { tenancy, latestStart })
+  const problem = validateRentDate(change.from, {
+    tenancy,
+    firstStart,
+    latestStart,
+  })
   if (problem) {
     return fail(problem)
   }
@@ -534,6 +544,7 @@ export async function setTenancyRent(
     amount: change.amount,
     from: change.from,
     latestStart: latestStart ?? null,
+    ...(fillsBeforeFirst(change.from, firstStart) && { firstStart }),
   })
   if (!set) {
     return refusal(deps, propertyId, changedMeanwhile)

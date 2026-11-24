@@ -78,6 +78,11 @@ export interface RentWrite {
   amount: number
   from: IsoDate
   latestStart: IsoDate | null
+  /**
+   * The first period's start as read, when `from` is before it: the write
+   * fills the months up to it instead of changing the latest period.
+   */
+  firstStart?: IsoDate
 }
 
 /** An undo's expectation: the latest and previous rent periods' starts. */
@@ -272,8 +277,9 @@ export function tenancyRepository(db: Db) {
   /**
    * The statements that set a tenancy's rent from `from`: on the latest
    * period's start they correct it, otherwise they close the latest period
-   * the day before and add a new one. `onlyIf` joins every statement's
-   * condition. The last statement returns a row when it applied.
+   * the day before and add a new one; before the first period's start they
+   * add a period up to it. `onlyIf` joins every statement's condition. The
+   * last statement returns a row when it applied.
    */
   function rentStatements(
     write: RentWrite,
@@ -282,6 +288,9 @@ export function tenancyRepository(db: Db) {
     const { actorId, propertyId, tenancyId, amount, from, latestStart } = write
     const scope = rentsOf(tenancyId)
     const owned = ownsTenancy(actorId, propertyId, tenancyId)
+    if (write.firstStart !== undefined) {
+      return [fillStatement(write, write.firstStart, owned, onlyIf)]
+    }
     if (latestStart === from) {
       return [
         db
@@ -366,6 +375,53 @@ export function tenancyRepository(db: Db) {
         ),
       insert,
     ]
+  }
+
+  /**
+   * Adds a period from `write.from` to the day before the first period,
+   * while the first period still starts on `write.firstStart`.
+   */
+  function fillStatement(
+    write: RentWrite,
+    firstStart: IsoDate,
+    owned: SQL | undefined,
+    onlyIf?: SQL,
+  ): BatchItem<'sqlite'> {
+    const { tenancyId, amount, from } = write
+    const scope = rentsOf(tenancyId)
+    return db
+      .insert(tenancyRents)
+      .select(
+        db
+          .select({
+            id: sql<string>`${crypto.randomUUID()}`.as('id'),
+            tenancyId: tenancies.id,
+            amount: sql<number>`${amount}`.as('amount'),
+            validFrom: sql<string>`${from}`.as('valid_from'),
+            validTo: sql<string>`${dayBefore(firstStart)}`.as('valid_to'),
+          })
+          .from(tenancies)
+          .where(
+            and(
+              eq(tenancies.id, tenancyId),
+              owned,
+              onlyIf,
+              exists(
+                db
+                  .select({ one: sql`1` })
+                  .from(tenancyRents)
+                  .where(and(scope, eq(tenancyRents.validFrom, firstStart))),
+              ),
+              notExists(
+                db
+                  .select({ one: sql`1` })
+                  .from(tenancyRents)
+                  .where(and(scope, lt(tenancyRents.validFrom, firstStart))),
+              ),
+            ),
+          ),
+      )
+      .returning({ id: tenancyRents.id })
   }
 
   return {

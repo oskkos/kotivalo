@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import {
+  fillsBeforeFirst,
   firstRentMove,
   rentAfterEnd,
   rentInMonth,
@@ -56,14 +57,22 @@ describe('the date of a new rent', () => {
   const tenancy = { validFrom: '2025-03-15', validTo: '2027-01-31' }
 
   test('the first of a month or the start day inside the tenancy', () => {
-    const limits = { tenancy, latestStart: '2025-03-15' }
+    const limits = {
+      tenancy,
+      firstStart: '2025-03-15',
+      latestStart: '2025-03-15',
+    }
     expect(validateRentDate('2026-03-01', limits)).toBeUndefined()
     expect(validateRentDate('2025-03-15', limits)).toBeUndefined()
     expect(validateRentDate('2027-01-01', limits)).toBeUndefined()
   })
 
   test('refused in the order of the rules', () => {
-    const limits = { tenancy, latestStart: '2026-03-01' }
+    const limits = {
+      tenancy,
+      firstStart: '2025-03-15',
+      latestStart: '2026-03-01',
+    }
     expect(validateRentDate('2026-03-15', limits)).toBe(
       'amount_date_not_month_start',
     )
@@ -76,10 +85,31 @@ describe('the date of a new rent', () => {
     expect(validateRentDate('2025-06-01', limits)).toBe('amount_date_too_early')
   })
 
+  test('a date before the first period fills the months up to it', () => {
+    const migrated = { validFrom: '2024-06-01', validTo: null }
+    const limits = {
+      tenancy: migrated,
+      firstStart: '2025-01-01',
+      latestStart: '2026-03-01',
+    }
+    expect(validateRentDate('2024-06-01', limits)).toBeUndefined()
+    expect(validateRentDate('2024-09-01', limits)).toBeUndefined()
+    expect(fillsBeforeFirst('2024-06-01', limits.firstStart)).toBe(true)
+    expect(validateRentDate('2024-09-15', limits)).toBe(
+      'amount_date_not_month_start',
+    )
+    expect(validateRentDate('2024-05-01', limits)).toBe(
+      'rent_date_before_tenancy',
+    )
+    expect(fillsBeforeFirst('2025-01-01', limits.firstStart)).toBe(false)
+    expect(validateRentDate('2025-06-01', limits)).toBe('amount_date_too_early')
+  })
+
   test('an open-ended tenancy has no last day', () => {
     expect(
       validateRentDate('2040-01-01', {
         tenancy: { validFrom: '2025-03-01', validTo: null },
+        firstStart: undefined,
         latestStart: undefined,
       }),
     ).toBeUndefined()

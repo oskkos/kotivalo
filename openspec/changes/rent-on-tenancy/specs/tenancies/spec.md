@@ -1,7 +1,7 @@
 ## ADDED Requirements
 
 ### Requirement: The rent of a tenancy
-Each tenancy SHALL have its own rent as a sequence of periods; a flat without a tenancy has no rent. The first period SHALL start on the tenancy's start day, and every later period on the first of a month after it. Periods SHALL follow each other without gaps or overlaps: a new period SHALL end the previous one on the day before it starts, and the latest period SHALL have no end, because the tenancy's own end bounds it. A month's rent SHALL be that of the period containing the month's first day, or the tenancy's start day in the month it starts. A tenancy moved from the flat's earlier rent ("Existing rents move to their tenancies") MAY have no rent for its first months, which then have no rent. A rent SHALL be from 0 to 99 999,99 € with at most two decimals (`amount_invalid`).
+Each tenancy SHALL have its own rent as a sequence of periods; a flat without a tenancy has no rent. The first period SHALL start on the tenancy's start day, and every later period on the first of a month after it. Periods SHALL follow each other without gaps or overlaps: a new period SHALL end the previous one on the day before it starts, and the latest period SHALL have no end, because the tenancy's own end bounds it. A month's rent SHALL be that of the period containing the month's first day, or the tenancy's start day in the month it starts. A tenancy moved from the flat's earlier rent ("Existing rents move to their tenancies") MAY have no rent for its first months, which then have no rent until an owner fills them ("Changing a tenancy's rent"). A rent SHALL be from 0 to 99 999,99 € with at most two decimals (`amount_invalid`).
 
 **No Playwright test:** these are rules for stored periods and pure calculations; Vitest covers them with the functions and the repository, and the browser tests of "Changing a tenancy's rent" and "The tenancy page" use them.
 
@@ -18,7 +18,7 @@ Each tenancy SHALL have its own rent as a sequence of periods; a flat without a 
 - **THEN** the rent of `2026-11` is 80000 cents for `Pekka Virtanen`'s tenancy and 90000 cents for `Aino Koski`'s
 
 ### Requirement: Changing a tenancy's rent
-An owner of a flat SHALL be able to change a tenancy's rent from a date, from the rent card on the Tenancy page ("The tenancy page"). The date SHALL be the first of a month, or the tenancy's start day (`amount_date_not_month_start`); SHALL NOT be before the tenancy's start (`rent_date_before_tenancy`) or after its last day when it has one (`rent_date_after_tenancy`); and SHALL NOT be before the start of the latest rent period (`amount_date_too_early`). It MAY be in the future. A rent dated on the latest period's own start SHALL correct that period's amount instead of starting a new period, so the first rent is corrected by dating it on the tenancy's start. A tenancy without a rent SHALL get its first rent the same way. The form SHALL show the current rent and the difference per month and in percent. A tenancy that isn't the flat's SHALL be refused with the reason `tenancy_not_found`. A member SHALL NOT be able to change the rent.
+An owner of a flat SHALL be able to change a tenancy's rent from a date, from the rent card on the Tenancy page ("The tenancy page"). The date SHALL be the first of a month, or the tenancy's start day (`amount_date_not_month_start`); SHALL NOT be before the tenancy's start (`rent_date_before_tenancy`) or after its last day when it has one (`rent_date_after_tenancy`); and SHALL NOT be before the start of the latest rent period (`amount_date_too_early`), unless it is before the first rent period's start, where no rent is in effect: such a rent SHALL fill those months with a period from the date to the day before the first period's start. It MAY be in the future. A rent dated on the latest period's own start SHALL correct that period's amount instead of starting a new period, so the first rent is corrected by dating it on the tenancy's start. A tenancy without a rent SHALL get its first rent the same way. The form SHALL show the current rent and the difference per month and in percent. A tenancy that isn't the flat's SHALL be refused with the reason `tenancy_not_found`. A member SHALL NOT be able to change the rent.
 
 #### Scenario: Raising the rent from March
 - **WHEN** today is `2026-11-22`, `Aino Koski`'s rent is 89000 cents from `2026-03-01`, and Annika sets `920` from `1.3.2027` on her Tenancy page
@@ -47,6 +47,10 @@ An owner of a flat SHALL be able to change a tenancy's rent from a date, from th
 #### Scenario: A rent date before the latest change is refused
 - **WHEN** a tenancy's latest rent period starts on `2026-03-01`, and an owner sets the rent from `1.6.2025`
 - **THEN** it is refused with the reason `amount_date_too_early`, and nothing changes
+
+#### Scenario: Filling the first months of a migrated tenancy
+- **WHEN** a tenancy runs from `2025-03-01`, its only rent period is 89000 cents from `2026-01-01`, and Annika sets `850` from `1.3.2025`
+- **THEN** the tenancy's rent is 85000 cents from `2025-03-01` to `2025-12-31` and 89000 cents from `2026-01-01` with no end, and a rent from `1.6.2025` is then refused with the reason `amount_date_too_early`
 
 #### Scenario: Another flat's tenancy is not found
 - **WHEN** an owner sends a new rent for a tenancy of another flat to the server
