@@ -19,7 +19,13 @@ import type {
   RentPayment,
   RentPaymentRepository,
 } from './rent-payment.repository.server'
-import { tenancyMonths, type FlatRentData, type RentsByTenancy } from './status'
+import {
+  tenancyMonths,
+  type FeesByTenancy,
+  type FlatRentData,
+  type OccupantsByTenancy,
+  type RentsByTenancy,
+} from './status'
 
 export interface RentPaymentDeps {
   /** The signed-in user. */
@@ -59,6 +65,10 @@ export interface RentPaymentsView {
   tenancies: Tenancy[]
   /** Each tenancy's rent periods, oldest first. */
   rents: RentsByTenancy
+  /** Each tenancy's occupants periods, oldest first. */
+  occupants: OccupantsByTenancy
+  /** Each tenancy's tenant fees. */
+  fees: FeesByTenancy
   /** Every payment of the flat's tenancies, by month and payment date. */
   payments: RentPayment[]
 }
@@ -77,7 +87,12 @@ export async function getRentPayments(
   if (!role || !property) {
     return notFound
   }
-  const rents = await deps.tenancies.rentsFor(tenancies.map((t) => t.id))
+  const ids = tenancies.map((t) => t.id)
+  const [rents, occupants, fees] = await Promise.all([
+    deps.tenancies.rentsFor(ids),
+    deps.tenancies.occupantsFor(ids),
+    deps.tenancies.feesFor(ids),
+  ])
   return {
     ok: true,
     role,
@@ -85,6 +100,8 @@ export async function getRentPayments(
     today: today(deps),
     tenancies,
     rents,
+    occupants,
+    fees,
     payments,
   }
 }
@@ -113,13 +130,20 @@ export async function listRentThisMonth(
     deps.tenancies.currentFor(ids, `${month}-01`),
     deps.payments.forMonth(ids, month),
   ])
-  const rents = await deps.tenancies.rentsFor(tenancies.map((t) => t.id))
+  const tenancyIds = tenancies.map((t) => t.id)
+  const [rents, occupants, fees] = await Promise.all([
+    deps.tenancies.rentsFor(tenancyIds),
+    deps.tenancies.occupantsFor(tenancyIds),
+    deps.tenancies.feesFor(tenancyIds),
+  ])
   return {
     today: day,
     flats: ids.map((propertyId) => ({
       propertyId,
       tenancies: tenancies.filter((t) => t.propertyId === propertyId),
       rents,
+      occupants,
+      fees,
       payments: payments
         .filter((p) => p.propertyId === propertyId)
         .map(({ tenancyId, month, amount, paidOn }) => ({

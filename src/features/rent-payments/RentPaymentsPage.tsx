@@ -26,6 +26,8 @@ import {
   rentMonths,
   tenancyMonths,
   type RentMonth,
+  type FeesByTenancy,
+  type OccupantsByTenancy,
   type RentsByTenancy,
 } from './status'
 import { StatusChip } from './StatusChip'
@@ -35,6 +37,8 @@ export interface RentPaymentsPageView {
   /** Newest first. */
   tenancies: Tenancy[]
   rents: RentsByTenancy
+  occupants: OccupantsByTenancy
+  fees: FeesByTenancy
   payments: RentPayment[]
 }
 
@@ -169,6 +173,8 @@ export function RentPaymentsPage(props: Props) {
   const data = {
     tenancies: view.tenancies,
     rents: view.rents,
+    occupants: view.occupants,
+    fees: view.fees,
     payments: view.payments,
     today: view.today,
   }

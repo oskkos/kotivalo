@@ -221,6 +221,35 @@ describe('The rent payment views', () => {
     })
   })
 
+  test('give the occupants and the tenant fees with the rent', async () => {
+    await env.DB.prepare(
+      "INSERT INTO tenancy_occupants (id, tenancy_id, persons, valid_from) VALUES ('o1', ?, 2, '2025-03-01')",
+    )
+      .bind(tenancy)
+      .run()
+    await env.DB.prepare(
+      "INSERT INTO tenant_fees (id, tenancy_id, kind, basis) VALUES ('f1', ?, 'water', 'per_occupant')",
+    )
+      .bind(tenancy)
+      .run()
+    await env.DB.prepare(
+      "INSERT INTO tenant_fee_amounts (id, tenant_fee_id, amount, valid_from) VALUES ('a1', 'f1', 2200, '2025-03-01')",
+    ).run()
+    const view = await getRentPayments(deps('jussi'), flat)
+    expect(view.ok && view.occupants).toEqual({
+      [tenancy]: [{ validFrom: '2025-03-01', validTo: null, value: 2 }],
+    })
+    expect(view.ok && view.fees[tenancy]).toEqual([
+      expect.objectContaining({
+        id: 'f1',
+        kind: 'water',
+        amounts: [{ validFrom: '2025-03-01', validTo: null, value: 2200 }],
+      }),
+    ])
+    const month = await listRentThisMonth(deps('jussi'))
+    expect(month.flats[0]?.fees?.[tenancy]).toHaveLength(1)
+  })
+
   test('a stranger gets not found', async () => {
     expect(await getRentPayments(deps('stranger'), flat)).toEqual({
       ok: false,
@@ -249,6 +278,8 @@ describe("This month's rent across the user's flats", () => {
               { validFrom: '2025-03-01', validTo: null, value: 89000 },
             ],
           },
+          occupants: {},
+          fees: {},
           payments: [
             {
               tenancyId: tenancy,

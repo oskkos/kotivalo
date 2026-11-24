@@ -12,8 +12,8 @@
 
 ## 3. The expected rent with the fees
 
-- [ ] 3.1 `rent-payments/status.ts`: `TenancyAmounts` (rent, occupants, fees) and `expectedRent` returning `{ total, parts } | null`, each part prorated by days (design.md, decision 4); the month, year, not-fully-paid and this-month functions read `total`; unit tests for the new scenarios of "Expected rent of a month", the existing ones unchanged
-- [ ] 3.2 `rent-payments.server.ts`, `properties/details.server.ts`, the flats list and `tenancies.server.ts` read the occupants and fees with the rents (`occupantsFor`, `feesFor`); Workers tests of rent payments, the flats list and the details page still passing
+- [x] 3.1 `rent-payments/status.ts`: `TenancyAmounts` (rent, occupants, fees) and `expectedRent` returning `{ total, parts } | null`, each part prorated by days (design.md, decision 4); the month, year, not-fully-paid and this-month functions read `total`; unit tests for the new scenarios of "Expected rent of a month", the existing ones unchanged
+- [x] 3.2 `rent-payments.server.ts`, `properties/details.server.ts`, the flats list and `tenancies.server.ts` read the occupants and fees with the rents (`occupantsFor`, `feesFor`); Workers tests of rent payments, the flats list and the details page still passing
 
 ## 4. Tenancies keep their occupants and fees
 

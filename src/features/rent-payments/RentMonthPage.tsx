@@ -16,7 +16,12 @@ import { DeletePaymentDialog } from './DeletePaymentDialog'
 import { dueText, rentMonthTitle } from './labels'
 import { RecordPaymentDialog } from './RecordPaymentDialog'
 import type { RentPayment } from './rent-payment.repository.server'
-import { rentMonth, type RentsByTenancy } from './status'
+import {
+  rentMonth,
+  type FeesByTenancy,
+  type OccupantsByTenancy,
+  type RentsByTenancy,
+} from './status'
 import { StatusChip } from './StatusChip'
 
 export interface RentMonthView {
@@ -25,6 +30,8 @@ export interface RentMonthView {
   tenancy: Tenancy
   month: string
   rents: RentsByTenancy
+  occupants: OccupantsByTenancy
+  fees: FeesByTenancy
   /** The month's payments of the tenancy. */
   payments: RentPayment[]
 }
@@ -100,6 +107,8 @@ export function RentMonthPage(props: Props) {
   const owner = view.role === 'owner'
   const row = rentMonth(view.tenancy, view.month, {
     rents: view.rents,
+    occupants: view.occupants,
+    fees: view.fees,
     payments: view.payments,
     today: view.today,
   })

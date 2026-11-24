@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import type { Period } from '#/features/recurring-amounts/periods'
+import type { FeeOfTenancy } from '#/features/tenancies/fees'
 import {
   expectedRent,
   monthStatus,
@@ -17,6 +18,14 @@ const rent = (
   ...periods: [string, string | null, number][]
 ): Period<number>[] =>
   periods.map(([validFrom, validTo, value]) => ({ validFrom, validTo, value }))
+
+/** The month's expected rent of a tenancy with a rent only. */
+const expectedTotal = (
+  rents: Period<number>[],
+  tenancy: RentTenancy,
+  month: string,
+): number | undefined =>
+  expectedRent({ rent: rents, occupants: [], fees: [] }, tenancy, month)?.total
 
 const aino: RentTenancy = {
   id: 'aino',
@@ -36,18 +45,18 @@ describe('Expected rent of a month', () => {
   const flat = rent(['2025-03-01', null, 89000])
 
   test('A full month', () => {
-    expect(expectedRent(flat, aino, '2026-11')).toBe(89000)
+    expect(expectedTotal(flat, aino, '2026-11')).toBe(89000)
   })
 
   test('A tenancy starting mid-month', () => {
     expect(
-      expectedRent(flat, { ...aino, validFrom: '2026-11-15' }, '2026-11'),
+      expectedTotal(flat, { ...aino, validFrom: '2026-11-15' }, '2026-11'),
     ).toBe(47467)
   })
 
   test('A tenancy ending mid-month', () => {
     expect(
-      expectedRent(flat, { ...aino, validTo: '2027-01-14' }, '2027-01'),
+      expectedTotal(flat, { ...aino, validTo: '2027-01-14' }, '2027-01'),
     ).toBe(40194)
   })
 
@@ -56,23 +65,23 @@ describe('Expected rent of a month', () => {
       ['2025-03-01', '2026-02-28', 89000],
       ['2026-03-01', null, 92000],
     )
-    expect(expectedRent(changed, aino, '2026-02')).toBe(89000)
-    expect(expectedRent(changed, aino, '2026-03')).toBe(92000)
+    expect(expectedTotal(changed, aino, '2026-02')).toBe(89000)
+    expect(expectedTotal(changed, aino, '2026-03')).toBe(92000)
   })
 
   test('A tenant change with a new rent mid-month', () => {
     const outgoing = { ...aino, validTo: '2026-11-14' }
     const incoming = { ...aino, id: 'next', validFrom: '2026-11-15' }
     expect(
-      expectedRent(rent(['2025-03-01', null, 80000]), outgoing, '2026-11'),
+      expectedTotal(rent(['2025-03-01', null, 80000]), outgoing, '2026-11'),
     ).toBe(37333)
     expect(
-      expectedRent(rent(['2026-11-15', null, 90000]), incoming, '2026-11'),
+      expectedTotal(rent(['2026-11-15', null, 90000]), incoming, '2026-11'),
     ).toBe(48000)
   })
 
   test('No rent set', () => {
-    expect(expectedRent([], aino, '2026-11')).toBeUndefined()
+    expect(expectedTotal([], aino, '2026-11')).toBeUndefined()
     expect(
       monthStatus({
         expected: undefined,
@@ -86,7 +95,7 @@ describe('Expected rent of a month', () => {
   test('rounds halves up', () => {
     // 1 cent × 15 / 30 = 0,5 → 1
     expect(
-      expectedRent(
+      expectedTotal(
         rent(['2026-11-01', null, 1]),
         { ...aino, validFrom: '2026-11-16' },
         '2026-11',
@@ -96,12 +105,115 @@ describe('Expected rent of a month', () => {
 
   test('a tenancy starting and ending in the same month', () => {
     expect(
-      expectedRent(
+      expectedTotal(
         flat,
         { ...aino, validFrom: '2026-11-10', validTo: '2026-11-19' },
         '2026-11',
       ),
     ).toBe(29667)
+  })
+})
+
+describe('Expected rent of a month with the tenant fees', () => {
+  const water: FeeOfTenancy = {
+    id: 'water',
+    kind: 'water',
+    basis: 'per_occupant',
+    description: null,
+    amounts: rent(['2025-03-01', null, 2200]),
+  }
+  const parking: FeeOfTenancy = {
+    id: 'parking',
+    kind: 'parking',
+    basis: 'fixed',
+    description: null,
+    amounts: rent(['2025-03-01', null, 1500]),
+  }
+  const amounts = (
+    fees: FeeOfTenancy[],
+    occupants = rent(['2025-03-01', null, 2]),
+    rents = rent(['2025-03-01', null, 89000]),
+  ) => ({ rent: rents, occupants, fees })
+
+  test('The rent with the tenant fees', () => {
+    const expected = expectedRent(amounts([water, parking]), aino, '2026-11')
+    expect(expected?.total).toBe(94900)
+    expect(expected?.parts).toEqual([
+      { type: 'rent', amount: 89000 },
+      {
+        type: 'fee',
+        feeId: 'water',
+        kind: 'water',
+        description: null,
+        persons: 2,
+        amount: 4400,
+      },
+      {
+        type: 'fee',
+        feeId: 'parking',
+        kind: 'parking',
+        description: null,
+        persons: null,
+        amount: 1500,
+      },
+    ])
+  })
+
+  test('Fees by days in a partial month', () => {
+    const started = expectedRent(
+      amounts(
+        [{ ...water, amounts: rent(['2026-11-15', null, 2200]) }],
+        rent(['2026-11-15', null, 1]),
+        rent(['2026-11-15', null, 89000]),
+      ),
+      { ...aino, validFrom: '2026-11-15' },
+      '2026-11',
+    )
+    expect(started?.total).toBe(48640)
+    expect(started?.parts.map((part) => part.amount)).toEqual([47467, 1173])
+  })
+
+  test('Fees without a rent', () => {
+    expect(expectedRent(amounts([parking], [], []), aino, '2026-11')).toBeNull()
+    const [row] = rentMonths({
+      tenancies: [aino],
+      rents: {},
+      fees: { aino: [parking] },
+      payments: [],
+      from: '2026-11',
+      to: '2026-11',
+      today: '2026-11-22',
+    })
+    expect(row.status).toEqual({ kind: 'rent_not_set' })
+  })
+
+  test('an ended fee and a fee not yet started add nothing', () => {
+    const ended = {
+      ...parking,
+      amounts: rent(
+        ['2025-03-01', '2026-10-31', 1500],
+        ['2026-11-01', null, 0],
+      ),
+    }
+    const later = { ...parking, amounts: rent(['2027-01-01', null, 1500]) }
+    expect(
+      expectedRent(amounts([ended, later]), aino, '2026-11')?.parts,
+    ).toEqual([{ type: 'rent', amount: 89000 }])
+  })
+
+  test('the status reads the total', () => {
+    const [row] = rentMonths({
+      tenancies: [aino],
+      rents: { aino: rent(['2025-03-01', null, 89000]) },
+      occupants: { aino: rent(['2025-03-01', null, 2]) },
+      fees: { aino: [water, parking] },
+      payments: [pay('2026-11', 89000, '2026-11-03')],
+      from: '2026-11',
+      to: '2026-11',
+      today: '2026-11-22',
+    })
+    expect(row.expected).toBe(94900)
+    expect(row.status).toEqual({ kind: 'partly_paid', missing: 5900 })
   })
 })
 

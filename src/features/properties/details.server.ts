@@ -6,7 +6,11 @@
 import type { OwnershipRepository } from '#/features/ownership/ownership.repository.server'
 import type { RentPayment } from '#/features/rent-payments/rent-payment.repository.server'
 import type { RentPaymentRepository } from '#/features/rent-payments/rent-payment.repository.server'
-import type { RentsByTenancy } from '#/features/rent-payments/status'
+import type {
+  FeesByTenancy,
+  OccupantsByTenancy,
+  RentsByTenancy,
+} from '#/features/rent-payments/status'
 import { accumulatedCapitalised } from '#/features/recurring-amounts/periods'
 import type {
   RecurringAmountRepository,
@@ -54,6 +58,10 @@ export interface FlatDetails extends RecurringAmounts {
   tenancies: Tenancy[]
   /** Each tenancy's rent periods, oldest first. */
   tenancyRents: RentsByTenancy
+  /** Each tenancy's occupants periods, oldest first. */
+  tenancyOccupants: OccupantsByTenancy
+  /** Each tenancy's tenant fees. */
+  tenancyFees: FeesByTenancy
   /** Cents of financing charges added to the acquisition cost so far. */
   capitalised: number
   payments: RentPayment[]
@@ -83,7 +91,12 @@ export async function getFlatDetails(
       deps.transactions.latest(propertyId, LATEST_ENTRIES),
     ])
   const today = isoDateInFinland(deps.now())
-  const tenancyRents = await deps.tenancies.rentsFor(tenancies.map((t) => t.id))
+  const tenancyIds = tenancies.map((t) => t.id)
+  const [tenancyRents, tenancyOccupants, tenancyFees] = await Promise.all([
+    deps.tenancies.rentsFor(tenancyIds),
+    deps.tenancies.occupantsFor(tenancyIds),
+    deps.tenancies.feesFor(tenancyIds),
+  ])
   return {
     ok: true,
     role,
@@ -98,6 +111,8 @@ export async function getFlatDetails(
     today,
     tenancies,
     tenancyRents,
+    tenancyOccupants,
+    tenancyFees,
     ...amounts,
     capitalised: accumulatedCapitalised(
       amounts.financingCharges,
