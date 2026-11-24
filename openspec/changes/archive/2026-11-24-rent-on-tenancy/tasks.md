@@ -43,6 +43,6 @@
 
 ## 7. Archive
 
-- [ ] 7.1 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
-- [ ] 7.2 The Purpose lines of the `recurring-amounts` and `tenancies` specs updated for the rent's move (archive doesn't touch them)
-- [ ] 7.3 `openspec archive rent-on-tenancy` as the last commit
+- [x] 7.1 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
+- [x] 7.2 The Purpose lines of the `recurring-amounts` and `tenancies` specs updated for the rent's move (archive doesn't touch them)
+- [x] 7.3 `openspec archive rent-on-tenancy` as the last commit
