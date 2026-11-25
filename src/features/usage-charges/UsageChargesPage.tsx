@@ -59,7 +59,8 @@ export function unitAmount(
 export function UsageChargesPage(props: Props) {
   const { view } = props
   const owner = view.role === 'owner'
-  const persons = occupantsOn(view.tenancies, view.today)
+  // This month's occupants: those on its first day, as the charges count.
+  const persons = occupantsOn(view.tenancies, `${view.today.slice(0, 7)}-01`)
   const active = view.charges.filter((c) => !isEnded(c.periods, view.today))
   const ended = view.charges.filter((c) => isEnded(c.periods, view.today))
   return (

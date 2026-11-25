@@ -898,7 +898,7 @@
   "usage_charge_form_kind": "What the usage charge is for",
   "usage_charge_form_row": "In the year summary: {row}",
   "usage_charge_form_title": "Change the usage charge",
-  "usage_charge_form_today": "Today {amount}/month ({occupants})",
+  "usage_charge_form_today": "This month {amount}/month ({occupants})",
   "usage_charge_per_occupant_amount": "{amount}/occupant/month",
   "usage_charge_per_occupant_detail": "{amount}/occupant/month · {occupants}",
   "usage_charge_per_occupant_short": "{amount}/occupant · {occupants}",

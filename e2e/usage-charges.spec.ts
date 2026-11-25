@@ -91,7 +91,7 @@ test.describe('Adding a usage charge', () => {
     await waitForHydration(page)
     await page.getByRole('textbox', { name: /^Amount/ }).fill('22')
     await expect(
-      page.getByText('Today €44.00/month (2 occupants)'),
+      page.getByText('This month €44.00/month (2 occupants)'),
     ).toBeVisible()
     await expect(
       page.getByText(

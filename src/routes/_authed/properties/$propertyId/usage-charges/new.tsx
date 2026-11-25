@@ -57,7 +57,7 @@ function NewUsageChargeRoute() {
     <UsageChargeForm
       propertyId={propertyId}
       address={view.property.streetAddress}
-      persons={occupantsOn(view.tenancies, view.today)}
+      persons={occupantsOn(view.tenancies, `${view.today.slice(0, 7)}-01`)}
       onDone={async () => {
         await router.invalidate()
         await toPage()

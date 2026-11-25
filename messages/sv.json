@@ -898,7 +898,7 @@
   "usage_charge_form_kind": "Vad bruksavgiften gäller",
   "usage_charge_form_row": "I årssammandraget: {row}",
   "usage_charge_form_title": "Ändra bruksavgiften",
-  "usage_charge_form_today": "I dag {amount}/mån ({occupants})",
+  "usage_charge_form_today": "Den här månaden {amount}/mån ({occupants})",
   "usage_charge_per_occupant_amount": "{amount}/boende/mån",
   "usage_charge_per_occupant_detail": "{amount}/boende/mån · {occupants}",
   "usage_charge_per_occupant_short": "{amount}/boende · {occupants}",
