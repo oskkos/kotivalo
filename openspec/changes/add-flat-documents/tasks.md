@@ -7,8 +7,8 @@
 
 ## 2. The documents repository
 
-- [ ] 2.1 `features/documents/document.repository.server.ts`: guarded `add`, `update` and `remove` (owner role, quota and the lease's tenancy inside the statement, kind other than lease clears the tenancy), `listForProperty`, `latestForProperty`, `countForProperty`, `findForAccess`, `findDetails`
-- [ ] 2.2 Workers tests: an owner adds, a member's add misses, a tenancy of another flat misses, quota full misses, update clears the tenancy when the kind changes, remove returns the key, removing a tenancy keeps the lease with `tenancy_id` null ("A lease stays when its tenancy is removed"), listing order newest first
+- [x] 2.1 `features/documents/document.repository.server.ts`: guarded `add`, `update` and `remove` (owner role, quota and the lease's tenancy inside the statement, kind other than lease clears the tenancy), `listForProperty`, `latestForProperty`, `countForProperty`, `findForAccess`, `findDetails`
+- [x] 2.2 Workers tests: an owner adds, a member's add misses, a tenancy of another flat misses, quota full misses, update clears the tenancy when the kind changes, remove returns the key, removing a tenancy keeps the lease with `tenancy_id` null ("A lease stays when its tenancy is removed"), listing order newest first
 
 ## 3. Shared file handling on the server
 
