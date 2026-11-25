@@ -8,7 +8,7 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 import Stack from '@mui/material/Stack'
-import { useNavigate } from '@tanstack/react-router'
+import { useRouter } from '@tanstack/react-router'
 import { useState } from 'react'
 import { noticeState } from '#/components/NavigationNotice'
 import { ReasonAlert } from '#/components/ReasonAlert'
@@ -24,7 +24,7 @@ export function ArchiveDialog(props: {
   open: boolean
   onClose: () => void
 }) {
-  const navigate = useNavigate()
+  const router = useRouter()
   const [alert, setAlert] = useState<AlertReason>()
   const [busy, setBusy] = useState(false)
   const address = props.property.streetAddress
@@ -35,10 +35,13 @@ export function ArchiveDialog(props: {
     try {
       const result = await archiveProperty({ data: { id: props.property.id } })
       if (result.ok) {
-        await navigate({
+        await router.navigate({
           to: '/',
           state: noticeState(m.property_archived_notice({ address })),
         })
+        // The router shows the list it kept from before while it loads the
+        // new one; without this the flat is still on it.
+        await router.invalidate()
         return
       }
       setAlert(result.reason)
