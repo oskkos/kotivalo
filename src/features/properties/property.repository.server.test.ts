@@ -373,7 +373,7 @@ describe('propertyRepository', () => {
       expect(await repository.findForUser('anna', other.id)).toBeDefined()
     })
 
-    test('lists the receipt keys of the flat only', async () => {
+    test('lists the receipt and document keys of the flat only', async () => {
       const flat = await repository.create('anna', kuusikuja, now, '2022-06-12')
       const other = await repository.create(
         'anna',
@@ -384,7 +384,10 @@ describe('propertyRepository', () => {
       await fill(flat.id, 'anna', 'receipts/one')
       await fill(other.id, 'anna', 'receipts/two')
 
-      expect(await repository.receiptKeys(flat.id)).toEqual(['receipts/one'])
+      expect(await repository.fileKeys(flat.id)).toEqual([
+        'receipts/one',
+        'documents/receipts/one',
+      ])
     })
 
     test('the guard refuses a flat that has had another owner', async () => {
@@ -440,7 +443,13 @@ describe('propertyRepository', () => {
 
       expect(await repository.deletionSummary(flat.id)).toEqual({
         hasData: false,
-        counts: { tenancies: 0, rentPayments: 0, transactions: 0, receipts: 0 },
+        counts: {
+          tenancies: 0,
+          rentPayments: 0,
+          transactions: 0,
+          receipts: 0,
+          documents: 0,
+        },
         members: [],
       })
     })
@@ -456,7 +465,13 @@ describe('propertyRepository', () => {
 
       expect(await repository.deletionSummary(flat.id)).toEqual({
         hasData: true,
-        counts: { tenancies: 1, rentPayments: 1, transactions: 1, receipts: 1 },
+        counts: {
+          tenancies: 1,
+          rentPayments: 1,
+          transactions: 1,
+          receipts: 1,
+          documents: 1,
+        },
         members: ['Jussi Virtanen'],
       })
     })

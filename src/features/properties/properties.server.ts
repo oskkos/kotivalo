@@ -246,7 +246,7 @@ export async function deleteProperty(
   if (await refusalFor(deps, id)) {
     return refuse()
   }
-  const keys = await deps.properties.receiptKeys(id)
+  const keys = await deps.properties.fileKeys(id)
   if (!(await deps.properties.deleteGuarded(deps.userId, id))) {
     return refuse()
   }
@@ -254,7 +254,7 @@ export async function deleteProperty(
     deps.storage,
     deps.log,
     keys,
-    'property.receipt_delete_failed',
+    'property.file_delete_failed',
   )
   deps.log.info('property.deleted', { propertyId: id })
   return { ok: true }

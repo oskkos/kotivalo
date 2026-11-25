@@ -3,6 +3,10 @@
 // rent and charges, rent payments and latest entries. Statuses and amounts
 // are computed from these by the page with the pure functions of each
 // feature, as the other pages do.
+import type {
+  DocumentRepository,
+  DocumentRow,
+} from '#/features/documents/document.repository.server'
 import type { OwnershipRepository } from '#/features/ownership/ownership.repository.server'
 import type { RentPayment } from '#/features/rent-payments/rent-payment.repository.server'
 import type { RentPaymentRepository } from '#/features/rent-payments/rent-payment.repository.server'
@@ -36,6 +40,9 @@ import type { PropertyRepository } from './property.repository.server'
 /** How many entries the page lists. */
 export const LATEST_ENTRIES = 3
 
+/** How many documents the page lists. */
+export const LATEST_DOCUMENTS = 3
+
 export interface FlatDetailsDeps {
   /** The signed-in user. */
   userId: string
@@ -46,6 +53,7 @@ export interface FlatDetailsDeps {
   amounts: RecurringAmountRepository
   payments: RentPaymentRepository
   transactions: TransactionRepository
+  documents: DocumentRepository
   usageCharges: UsageChargeRepository
   now: () => Date
 }
@@ -74,6 +82,8 @@ export interface FlatDetails extends RecurringAmounts {
   payments: RentPayment[]
   /** Newest first. */
   latestEntries: TransactionRow[]
+  /** The latest documents by date, newest first, and how many there are. */
+  documents: { latest: DocumentRow[]; count: number }
 }
 
 const notFound = { ok: false, reason: 'property_not_found' } as const
@@ -89,15 +99,25 @@ export async function getFlatDetails(
   if (!role || !property) {
     return notFound
   }
-  const [shares, tenancies, amounts, payments, latestEntries, usageCharges] =
-    await Promise.all([
-      deps.ownership.currentForUser(deps.userId),
-      deps.tenancies.forProperty(propertyId),
-      deps.amounts.forProperty(propertyId),
-      deps.payments.forProperty(propertyId),
-      deps.transactions.latest(propertyId, LATEST_ENTRIES),
-      deps.usageCharges.forProperty(propertyId),
-    ])
+  const [
+    shares,
+    tenancies,
+    amounts,
+    payments,
+    latestEntries,
+    usageCharges,
+    latestDocuments,
+    documentCount,
+  ] = await Promise.all([
+    deps.ownership.currentForUser(deps.userId),
+    deps.tenancies.forProperty(propertyId),
+    deps.amounts.forProperty(propertyId),
+    deps.payments.forProperty(propertyId),
+    deps.transactions.latest(propertyId, LATEST_ENTRIES),
+    deps.usageCharges.forProperty(propertyId),
+    deps.documents.latestForProperty(propertyId, LATEST_DOCUMENTS),
+    deps.documents.countForProperty(propertyId),
+  ])
   const today = isoDateInFinland(deps.now())
   const tenancyIds = tenancies.map((t) => t.id)
   const [tenancyRents, tenancyOccupants, tenancyFees] = await Promise.all([
@@ -140,5 +160,6 @@ export async function getFlatDetails(
     ),
     payments,
     latestEntries,
+    documents: { latest: latestDocuments, count: documentCount },
   }
 }

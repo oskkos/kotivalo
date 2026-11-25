@@ -2,6 +2,7 @@
 // properties.server.ts; these validate the input with the shared schemas,
 // check the session and wire in the request context.
 import { createServerFn } from '@tanstack/react-start'
+import { documentRepository } from '#/features/documents/document.repository.server'
 import { ownershipRepository } from '#/features/ownership/ownership.repository.server'
 import { recurringAmountRepository } from '#/features/recurring-amounts/recurring-amount.repository.server'
 import { rentPaymentRepository } from '#/features/rent-payments/rent-payment.repository.server'
@@ -109,6 +110,7 @@ export const getFlatDetails = createServerFn({ method: 'GET' })
         amounts: recurringAmountRepository(db),
         payments: rentPaymentRepository(db),
         transactions: transactionRepository(db),
+        documents: documentRepository(db),
         usageCharges: usageChargeRepository(db),
         now: () => new Date(),
       },

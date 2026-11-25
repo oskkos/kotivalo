@@ -24,7 +24,7 @@ describe('deleteStoredFiles', () => {
       }),
       log,
       ['receipts/a', 'receipts/b'],
-      'property.receipt_delete_failed',
+      'property.file_delete_failed',
     )
 
     expect(calls).toEqual([['receipts/a', 'receipts/b']])
@@ -37,7 +37,7 @@ describe('deleteStoredFiles', () => {
       storageWith(() => Promise.reject(new Error('called'))),
       log,
       [],
-      'property.receipt_delete_failed',
+      'property.file_delete_failed',
     )
     expect(lines).toEqual([])
   })
@@ -49,13 +49,13 @@ describe('deleteStoredFiles', () => {
       storageWith(() => Promise.reject(new Error('R2 is down'))),
       log,
       ['receipts/a', 'receipts/b'],
-      'property.receipt_delete_failed',
+      'property.file_delete_failed',
     )
 
     expect(lines).toContainEqual(
       expect.objectContaining({
         level: 'error',
-        event: 'property.receipt_delete_failed',
+        event: 'property.file_delete_failed',
         count: 2,
       }),
     )

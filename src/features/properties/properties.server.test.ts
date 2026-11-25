@@ -281,6 +281,21 @@ async function addReceipt(propertyId: string, userId: string) {
   return key
 }
 
+/** A document with its file in storage; returns the file's key. */
+async function addDocument(propertyId: string, userId: string) {
+  const key = `attachments/${crypto.randomUUID()}`
+  await env.FILES.put(key, new Uint8Array([37, 80, 68, 70]))
+  await exec(
+    `INSERT INTO property_documents (id, property_id, kind, name, date, key, content_type, size, filename, uploaded_by, created_at, updated_at)
+     VALUES (?, ?, 'financial_statement', 'Tilinpäätös 2025', '2026-04-28', ?, 'application/pdf', 4, 'tilinpaatos.pdf', ?, 0, 0)`,
+    crypto.randomUUID(),
+    propertyId,
+    key,
+    userId,
+  )
+  return key
+}
+
 const inStorage = async (key: string) => (await env.FILES.head(key)) !== null
 
 describe('Archiving a flat', () => {
@@ -407,6 +422,22 @@ describe('Deleting a flat', () => {
         propertyId: id,
       }),
     )
+  })
+
+  test("Deleting removes the flat's documents and their files", async () => {
+    const id = await add('anna')
+    const key = await addDocument(id, 'anna')
+    const receipt = await addReceipt(id, 'anna')
+    const { deps } = depsFor('anna')
+
+    expect(await deleteProperty(deps, id)).toEqual({ ok: true })
+
+    const { results } = await env.DB.prepare(
+      'SELECT 1 FROM property_documents',
+    ).all()
+    expect(results).toEqual([])
+    expect(await inStorage(key)).toBe(false)
+    expect(await inStorage(receipt)).toBe(false)
   })
 
   test('A member loses access when the flat is deleted', async () => {
@@ -552,7 +583,7 @@ describe('Deleting a flat', () => {
     expect(lines).toContainEqual(
       expect.objectContaining({
         level: 'error',
-        event: 'property.receipt_delete_failed',
+        event: 'property.file_delete_failed',
         count: 1,
       }),
     )
@@ -568,9 +599,9 @@ describe('Deleting a flat', () => {
     const repository = deps.properties
     deps.properties = {
       ...repository,
-      receiptKeys: async (propertyId) => {
+      fileKeys: async (propertyId) => {
         await addCoOwner(id, 'bertta', 5000)
-        return repository.receiptKeys(propertyId)
+        return repository.fileKeys(propertyId)
       },
     }
 
@@ -601,7 +632,13 @@ describe('Confirming the deletion of a flat', () => {
       ok: true,
       allowed: true,
       hasData: false,
-      counts: { tenancies: 0, rentPayments: 0, transactions: 0, receipts: 0 },
+      counts: {
+        tenancies: 0,
+        rentPayments: 0,
+        transactions: 0,
+        receipts: 0,
+        documents: 0,
+      },
       members: [],
     })
   })
@@ -609,14 +646,27 @@ describe('Confirming the deletion of a flat', () => {
   test('The confirmation lists what is removed', async () => {
     const id = await add('anna')
     await addReceipt(id, 'anna')
+    await addDocument(id, 'anna')
+    await addDocument(id, 'anna')
     await exec(`UPDATE user SET name = 'Jussi' WHERE id = 'bertta'`)
     await addMember(id, 'bertta')
 
     expect(await getPropertyDeletion(depsFor('anna').deps, id)).toMatchObject({
       allowed: true,
       hasData: true,
-      counts: { transactions: 1, receipts: 1 },
+      counts: { transactions: 1, receipts: 1, documents: 2 },
       members: ['Jussi'],
+    })
+  })
+
+  test('A flat with only documents asks for the address', async () => {
+    const id = await add('anna')
+    await addDocument(id, 'anna')
+
+    expect(await getPropertyDeletion(depsFor('anna').deps, id)).toMatchObject({
+      allowed: true,
+      hasData: true,
+      counts: { tenancies: 0, transactions: 0, documents: 1 },
     })
   })
 })

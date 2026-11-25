@@ -1,5 +1,9 @@
 import { env } from 'cloudflare:workers'
 import { beforeEach, describe, expect, test } from 'vitest'
+import {
+  documentRepository,
+  type DocumentFields,
+} from '#/features/documents/document.repository.server'
 import { ownershipRepository } from '#/features/ownership/ownership.repository.server'
 import { recurringAmountRepository } from '#/features/recurring-amounts/recurring-amount.repository.server'
 import { rentPaymentRepository } from '#/features/rent-payments/rent-payment.repository.server'
@@ -26,6 +30,7 @@ function deps(userId = 'annika'): FlatDetailsDeps {
     amounts: recurringAmountRepository(db),
     payments: rentPaymentRepository(db),
     transactions: transactionRepository(db),
+    documents: documentRepository(db),
     usageCharges: usageChargeRepository(db),
     now: () => now,
   }
@@ -43,6 +48,7 @@ async function expense(date: string, note: string) {
 
 beforeEach(async () => {
   await emptyTables(
+    'property_documents',
     'rent_payments',
     'receipts',
     'transactions',
@@ -188,5 +194,39 @@ describe('The flat details page', () => {
       ok: false,
       reason: 'property_not_found',
     })
+  })
+
+  test('gives the latest three documents by date and their number', async () => {
+    const repository = documentRepository(db)
+    const add = (name: string, date: DocumentFields['date']) =>
+      repository.add(
+        'annika',
+        flat,
+        { kind: 'other', name, date, tenancyId: null },
+        {
+          key: `attachments/${name}`,
+          contentType: 'application/pdf',
+          size: 10,
+          filename: 'a.pdf',
+        },
+        now,
+      )
+    await add('Isännöitsijäntodistus', '2025-01-10')
+    await add('Yhtiökokous 2026', '2026-05-15')
+    await add('Vastikkeet 2026', '2026-01-02')
+    await add('Tilinpäätös 2025', '2026-04-28')
+
+    for (const userId of ['annika', 'jussi']) {
+      const result = await getFlatDetails(deps(userId), flat)
+      expect(result.ok && result.documents.count).toBe(4)
+      expect(
+        result.ok && result.documents.latest.map((document) => document.name),
+      ).toEqual(['Yhtiökokous 2026', 'Tilinpäätös 2025', 'Vastikkeet 2026'])
+    }
+  })
+
+  test('a flat without documents has none', async () => {
+    const result = await getFlatDetails(deps(), flat)
+    expect(result.ok && result.documents).toEqual({ latest: [], count: 0 })
   })
 })
