@@ -1,5 +1,5 @@
 import { expect, test, type Page } from '@playwright/test'
-import { addFlat, card, kuusikuja } from './support/flats'
+import { addFlat, card, flatId, kuusikuja } from './support/flats'
 import { accepted, coOwned, ownerWithFlat } from './support/sharing'
 import { waitForHydration } from './support/sign-in'
 import { addTenant, aino } from './support/tenancies'
@@ -237,5 +237,29 @@ test.describe('First run without flats', () => {
     await expect(
       page.getByRole('button', { name: 'Archived flats (1)' }),
     ).toBeVisible()
+  })
+})
+
+test.describe('New entry from the bottom bar', () => {
+  test('A user whose owned flats are all archived', async ({
+    page,
+    browser,
+  }) => {
+    const { jussi } = await accepted(page, browser)
+    await addFlat(jussi, koivupolku)
+    await archive(jussi, await flatId(jussi, koivupolku.streetAddress))
+    await waitForHydration(jussi)
+
+    await jussi
+      .getByRole('navigation', { name: 'Main navigation' })
+      .getByRole('link', { name: 'New entry' })
+      .click()
+
+    await expect(
+      jussi.getByRole('heading', { name: 'Your flats are archived' }),
+    ).toBeVisible()
+    await expect(jussi.getByRole('textbox', { name: 'Amount' })).toHaveCount(0)
+    await jussi.getByRole('link', { name: 'Back to flats' }).click()
+    await expect(jussi).toHaveURL(/\/$/)
   })
 })

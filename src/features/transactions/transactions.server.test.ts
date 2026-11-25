@@ -557,6 +557,38 @@ describe('New entry from the bottom bar', () => {
 
     expect(options.owned).toEqual([])
   })
+
+  test('A user whose owned flats are all archived', async () => {
+    const repository = propertyRepository(db)
+    // Matti is a member of Annika's flat: archiving it he owns none.
+    await repository.setArchived('matti', flat, now)
+    expect(await getNewTransactionOptions(deps('matti'))).toMatchObject({
+      owned: [],
+      ownsArchived: false,
+    })
+    await repository.setArchived('matti', flat, null)
+    const own = await repository.create(
+      'matti',
+      {
+        streetAddress: 'Koivupolku 7 A 4',
+        postcode: '00100',
+        city: 'Helsinki',
+        roomCount: 1,
+        floorArea: 310,
+      },
+      now,
+      '2025-03-01',
+    )
+    await repository.setArchived('matti', own.id, now)
+
+    const options = await getNewTransactionOptions(deps('matti'))
+
+    expect(options).toMatchObject({
+      owned: [],
+      hasFlats: true,
+      ownsArchived: true,
+    })
+  })
 })
 
 describe('Archiving a flat', () => {
