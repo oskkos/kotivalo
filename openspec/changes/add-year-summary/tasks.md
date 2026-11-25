@@ -74,7 +74,7 @@
 
 ## 7. The form 7H page of a flat
 
-- [ ] 7.1 Route `src/routes/_authed/year-summary/$propertyId.tsx` and `features/year-summary/FlatTaxPage.tsx`:
+- [x] 7.1 Route `src/routes/_authed/year-summary/$propertyId.tsx` and `features/year-summary/FlatTaxPage.tsx`:
   - the checks with their links (rent payments of the year, charge amounts)
   - the flat details with Add to `/properties/$propertyId/edit` for each missing one, and the personal identity code row
   - rows 2.1–2.5 with their numbers, names, parts and amounts, and the case law note under row 2.3 when it is above 0
@@ -82,8 +82,8 @@
   - the note on how the figures are counted
   - Back to the summary with the same year
   - not found, and no share
-- [ ] 7.2 The copy buttons: `navigator.clipboard.writeText` with `amountForCopy` and `shareForCopy`, an `aria-label` naming the value, the notice "Kopioitu: <value>", and on failure a notice plus `clientLog.warn('year_summary.copy_failed')` without the value.
-- [ ] 7.3 fi, sv and en messages with the translate skill; component tests, including the copy failure.
+- [x] 7.2 The copy buttons: `navigator.clipboard.writeText` with `amountForCopy` and `shareForCopy`, an `aria-label` naming the value, the notice "Kopioitu: <value>", and on failure a notice plus `clientLog.warn('year_summary.copy_failed')` without the value.
+- [x] 7.3 fi, sv and en messages with the translate skill; component tests, including the copy failure.
 - [ ] 7.4 Playwright tests:
   - "The form 7H page of a flat"
   - "Flat details for form 7H": "Missing housing company details"

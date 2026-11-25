@@ -19,6 +19,7 @@ import { Route as ApiLogRouteImport } from './routes/api/log'
 import { Route as AuthedPropertiesNewRouteImport } from './routes/_authed/properties/new'
 import { Route as AuthedTransactionsNewRouteImport } from './routes/_authed/transactions/new'
 import { Route as AuthedYearSummaryIndexRouteImport } from './routes/_authed/year-summary/index'
+import { Route as AuthedYearSummaryPropertyIdRouteImport } from './routes/_authed/year-summary/$propertyId'
 import { Route as ApiDocumentsDocumentIdRouteImport } from './routes/api/documents/$documentId'
 import { Route as ApiReceiptsReceiptIdRouteImport } from './routes/api/receipts/$receiptId'
 import { Route as ApiTestInboxRouteImport } from './routes/api/test/inbox'
@@ -101,6 +102,12 @@ const AuthedYearSummaryIndexRoute = AuthedYearSummaryIndexRouteImport.update({
   path: '/year-summary/',
   getParentRoute: () => AuthedRoute,
 } as any)
+const AuthedYearSummaryPropertyIdRoute =
+  AuthedYearSummaryPropertyIdRouteImport.update({
+    id: '/year-summary/$propertyId',
+    path: '/year-summary/$propertyId',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 const ApiDocumentsDocumentIdRoute = ApiDocumentsDocumentIdRouteImport.update({
   id: '/api/documents/$documentId',
   path: '/api/documents/$documentId',
@@ -300,6 +307,7 @@ export interface FileRoutesByFullPath {
   '/api/log': typeof ApiLogRoute
   '/properties/new': typeof AuthedPropertiesNewRoute
   '/transactions/new': typeof AuthedTransactionsNewRoute
+  '/year-summary/$propertyId': typeof AuthedYearSummaryPropertyIdRoute
   '/api/documents/$documentId': typeof ApiDocumentsDocumentIdRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
@@ -343,6 +351,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthedIndexRoute
   '/properties/new': typeof AuthedPropertiesNewRoute
   '/transactions/new': typeof AuthedTransactionsNewRoute
+  '/year-summary/$propertyId': typeof AuthedYearSummaryPropertyIdRoute
   '/api/documents/$documentId': typeof ApiDocumentsDocumentIdRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
@@ -388,6 +397,7 @@ export interface FileRoutesById {
   '/_authed/': typeof AuthedIndexRoute
   '/_authed/properties/new': typeof AuthedPropertiesNewRoute
   '/_authed/transactions/new': typeof AuthedTransactionsNewRoute
+  '/_authed/year-summary/$propertyId': typeof AuthedYearSummaryPropertyIdRoute
   '/api/documents/$documentId': typeof ApiDocumentsDocumentIdRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
@@ -433,6 +443,7 @@ export interface FileRouteTypes {
     | '/api/log'
     | '/properties/new'
     | '/transactions/new'
+    | '/year-summary/$propertyId'
     | '/api/documents/$documentId'
     | '/api/receipts/$receiptId'
     | '/api/test/inbox'
@@ -476,6 +487,7 @@ export interface FileRouteTypes {
     | '/'
     | '/properties/new'
     | '/transactions/new'
+    | '/year-summary/$propertyId'
     | '/api/documents/$documentId'
     | '/api/receipts/$receiptId'
     | '/api/test/inbox'
@@ -520,6 +532,7 @@ export interface FileRouteTypes {
     | '/_authed/'
     | '/_authed/properties/new'
     | '/_authed/transactions/new'
+    | '/_authed/year-summary/$propertyId'
     | '/api/documents/$documentId'
     | '/api/receipts/$receiptId'
     | '/api/test/inbox'
@@ -635,6 +648,13 @@ declare module '@tanstack/react-router' {
       path: '/year-summary'
       fullPath: '/year-summary/'
       preLoaderRoute: typeof AuthedYearSummaryIndexRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/year-summary/$propertyId': {
+      id: '/_authed/year-summary/$propertyId'
+      path: '/year-summary/$propertyId'
+      fullPath: '/year-summary/$propertyId'
+      preLoaderRoute: typeof AuthedYearSummaryPropertyIdRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/api/documents/$documentId': {
@@ -870,6 +890,7 @@ interface AuthedRouteChildren {
   AuthedIndexRoute: typeof AuthedIndexRoute
   AuthedPropertiesNewRoute: typeof AuthedPropertiesNewRoute
   AuthedTransactionsNewRoute: typeof AuthedTransactionsNewRoute
+  AuthedYearSummaryPropertyIdRoute: typeof AuthedYearSummaryPropertyIdRoute
   AuthedYearSummaryIndexRoute: typeof AuthedYearSummaryIndexRoute
   AuthedPropertiesPropertyIdChargesRoute: typeof AuthedPropertiesPropertyIdChargesRoute
   AuthedPropertiesPropertyIdEditRoute: typeof AuthedPropertiesPropertyIdEditRoute
@@ -908,6 +929,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedIndexRoute: AuthedIndexRoute,
   AuthedPropertiesNewRoute: AuthedPropertiesNewRoute,
   AuthedTransactionsNewRoute: AuthedTransactionsNewRoute,
+  AuthedYearSummaryPropertyIdRoute: AuthedYearSummaryPropertyIdRoute,
   AuthedYearSummaryIndexRoute: AuthedYearSummaryIndexRoute,
   AuthedPropertiesPropertyIdChargesRoute:
     AuthedPropertiesPropertyIdChargesRoute,
