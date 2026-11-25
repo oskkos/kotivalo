@@ -13,8 +13,8 @@
 ## 3. Shared file handling on the server
 
 - [x] 3.1 `src/server/files/stored.ts`: `withStoredFile` and `uploadFilename(name, contentType, fallback)` moved from `transactions.server.ts`, which uses them with its tests passing
-- [ ] 3.2 Reasons `document_unsupported_type`, `document_too_large`, `document_unreadable` (`FieldReason`) and `document_not_found` (`AlertReason`) in `src/lib/reasons.ts`; `storage_quota_full` reworded for receipts and documents; fi, sv and en messages (translate skill, term-critic on the diff)
-- [ ] 3.3 Term bank: `attachment` replaced by `document`; CONCEPT.md data model: `property_documents` in place of `attachments`, and the R2 row's text (translate skill, term-critic on the diff)
+- [x] 3.2 Reasons `document_unsupported_type`, `document_too_large`, `document_unreadable` (`FieldReason`) and `document_not_found` (`AlertReason`) in `src/lib/reasons.ts`; `storage_quota_full` reworded for receipts and documents; fi, sv and en messages (translate skill, term-critic on the diff)
+- [x] 3.3 Term bank: `attachment` replaced by `document`; CONCEPT.md data model: `property_documents` in place of `attachments`, and the R2 row's text (translate skill, term-critic on the diff)
 
 ## 4. Server functions and the file route
 

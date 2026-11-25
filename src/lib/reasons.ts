@@ -45,6 +45,9 @@ export type FieldReason =
   | 'receipt_unsupported_type'
   | 'receipt_too_large'
   | 'receipt_unreadable'
+  | 'document_unsupported_type'
+  | 'document_too_large'
+  | 'document_unreadable'
   | 'tenant_name_required'
   | 'tenant_name_too_long'
   | 'tenant_phone_too_long'
@@ -87,6 +90,7 @@ export type AlertReason =
   | 'treatment_nothing_to_undo'
   | 'financing_charge_not_found'
   | 'transaction_not_found'
+  | 'document_not_found'
   | 'storage_quota_full'
   | 'tenancy_not_found'
   | 'tenancy_already_ending'
@@ -197,6 +201,11 @@ const texts: Record<Reason, () => ReasonText> = {
   }),
   receipt_too_large: () => ({ text: m.reason_receipt_too_large() }),
   receipt_unreadable: () => ({ text: m.reason_receipt_unreadable() }),
+  document_unsupported_type: () => ({
+    text: m.reason_document_unsupported_type(),
+  }),
+  document_too_large: () => ({ text: m.reason_document_too_large() }),
+  document_unreadable: () => ({ text: m.reason_document_unreadable() }),
   tenant_name_required: () => ({ text: m.reason_tenant_name_required() }),
   tenant_name_too_long: () => ({ text: m.reason_tenant_name_too_long() }),
   tenant_phone_too_long: () => ({ text: m.reason_tenant_phone_too_long() }),
@@ -310,6 +319,10 @@ const texts: Record<Reason, () => ReasonText> = {
   transaction_not_found: () => ({
     title: m.reason_transaction_not_found_title(),
     text: m.reason_transaction_not_found(),
+  }),
+  document_not_found: () => ({
+    title: m.reason_document_not_found_title(),
+    text: m.reason_document_not_found(),
   }),
   storage_quota_full: () => ({
     title: m.reason_storage_quota_full_title(),

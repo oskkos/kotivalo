@@ -124,26 +124,6 @@
     },
     "codeNotes": "Category value `annual_repair` (expense, row 2.4)."
   },
-  "attachment": {
-    "code": "attachment",
-    "codeNotes": "E.g. a tenancy contract",
-    "definition": "A file kept with a tenancy, such as the signed contract.",
-    "fi": {
-      "term": "liite",
-      "match": ["liite(ttä)?", "liittee\\p{L}*", "liitteit\\p{L}*"],
-      "status": "proposed"
-    },
-    "sv": {
-      "term": "bilaga",
-      "match": ["bilag\\p{L}*"],
-      "status": "proposed"
-    },
-    "en": {
-      "term": "attachment",
-      "match": ["attachments?"],
-      "status": "proposed"
-    }
-  },
   "basic_improvement": {
     "codeNotes": "Category value `improvement` (expense; its amount fills no form 7H row as such). For a flat in a housing company that the owner pays: a tenth a year in row 2.5 for 10 years from the year paid, or deducted on sale. For a building (form 7K): added to the undepreciated acquisition cost and depreciated at 4 % a year (residential), or deducted on sale.",
     "definition": "An extension, alteration or modernisation of a flat; not deducted at once, but depreciated or deducted on sale.",
@@ -506,6 +486,26 @@
     "en": {
       "term": "deposit return",
       "match": ["deposit returns?"],
+      "status": "proposed"
+    }
+  },
+  "document": {
+    "code": "document",
+    "codeNotes": "The table is property_documents; the kinds are lease, financial_statement, charge_notice, minutes and other.",
+    "definition": "A file kept with a flat, such as a lease or a financial statement.",
+    "fi": {
+      "term": "dokumentti",
+      "match": ["dokument\\p{L}*"],
+      "status": "proposed"
+    },
+    "sv": {
+      "term": "dokument",
+      "match": ["dokument\\p{L}*"],
+      "status": "proposed"
+    },
+    "en": {
+      "term": "document",
+      "match": ["documents?"],
       "status": "proposed"
     }
   },
