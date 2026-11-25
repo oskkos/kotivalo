@@ -50,6 +50,6 @@
 
 ## 9. Review and archive
 
-- [ ] 9.1 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
+- [x] 9.1 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
 - [ ] 9.2 The `pr-review` skill on the PR
 - [ ] 9.3 `openspec archive add-flat-documents` as the last commit
