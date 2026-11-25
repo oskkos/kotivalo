@@ -498,6 +498,8 @@
   "reason_treatment_required": "Choose a treatment.",
   "reason_unexpected": "Try again in a moment.",
   "reason_unexpected_title": "Something went wrong",
+  "reason_usage_charge_not_found": "The usage charge wasn't found for this flat. Reload the page.",
+  "reason_usage_charge_not_found_title": "The usage charge wasn't found",
   "rent_month_back_to_payments": "Back to rent payments",
   "rent_month_breakdown": "The rent and the fees",
   "rent_month_breakdown_link": "The fees on the tenancy page",

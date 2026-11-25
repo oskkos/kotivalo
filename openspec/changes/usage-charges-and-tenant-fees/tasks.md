@@ -57,9 +57,9 @@
 
 ## 10. Usage charges on the server
 
-- [ ] 10.1 `features/usage-charges/months.ts` (`usageChargesOfMonth`, `usageChargesOfYear`, `usageChargeYears`) and `rows.ts`; unit tests named after "Usage charges of a month", "Usage charges are recorded as monthly periods" (the pure scenarios) and "Usage charge rows on form 7H"
-- [ ] 10.2 `usage-charge.repository.server.ts`: the flat's usage charges with their periods, `add`, `setAmount`, `undoLatest` on the shared builder; Workers tests
-- [ ] 10.3 `usage-charges.server.ts` and `functions.ts`: `listUsageCharges` (page data with today's occupants), `addUsageCharge`, `setUsageCharge`, `undoUsageCharge`, `usageChargesByYear` (session, access, owner, `usage_charge_not_found`, `description_required`, `validateAmountDate`, `amount_nothing_to_undo`, `amount_changed`); logs `usage_charge.added`, `usage_charge.amount_set`, `usage_charge.amount_corrected`, `usage_charge.change_undone`, `usage_charge.removed`; reason `usage_charge_not_found` with fi, sv and en; Workers tests named after the server-side scenarios of "Adding a usage charge", "Changing a usage charge" and "Undoing the latest usage charge change", asserting the log events
+- [x] 10.1 `features/usage-charges/months.ts` (`usageChargesOfMonth`, `usageChargesOfYear`, `usageChargeYears`) and `rows.ts`; unit tests named after "Usage charges of a month", "Usage charges are recorded as monthly periods" (the pure scenarios) and "Usage charge rows on form 7H"
+- [x] 10.2 `usage-charge.repository.server.ts`: the flat's usage charges with their periods, `add`, `setAmount`, `undoLatest` on the shared builder; Workers tests
+- [x] 10.3 `usage-charges.server.ts` and `functions.ts`: `getUsageCharges` (page data: the charges and the tenancies with their occupants, which both pages compute from, so no separate by-year function), `addUsageCharge`, `setUsageCharge`, `undoUsageCharge` (session, access, owner, `usage_charge_not_found`, `description_required`, `validateAmountDate`, `amount_nothing_to_undo`, `amount_changed`); logs `usage_charge.added`, `usage_charge.amount_set`, `usage_charge.amount_corrected`, `usage_charge.change_undone`, `usage_charge.removed`; reason `usage_charge_not_found` with fi, sv and en; Workers tests named after the server-side scenarios of "Adding a usage charge", "Changing a usage charge" and "Undoing the latest usage charge change", asserting the log events
 
 ## 11. The usage charges page and forms
 

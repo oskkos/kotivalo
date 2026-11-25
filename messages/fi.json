@@ -498,6 +498,8 @@
   "reason_treatment_required": "Valitse käsittely.",
   "reason_unexpected": "Yritä uudelleen hetken kuluttua.",
   "reason_unexpected_title": "Jokin meni pieleen",
+  "reason_usage_charge_not_found": "Käyttömaksua ei löytynyt tästä asunnosta. Lataa sivu uudelleen.",
+  "reason_usage_charge_not_found_title": "Käyttömaksua ei löytynyt",
   "rent_month_back_to_payments": "Takaisin vuokranmaksuihin",
   "rent_month_breakdown": "Vuokran ja maksujen erittely",
   "rent_month_breakdown_link": "Maksut vuokrasuhteen sivulla",

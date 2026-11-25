@@ -498,6 +498,8 @@
   "reason_treatment_required": "Välj behandling.",
   "reason_unexpected": "Försök igen om en stund.",
   "reason_unexpected_title": "Något gick fel",
+  "reason_usage_charge_not_found": "Bruksavgiften hittades inte för den här bostaden. Ladda om sidan.",
+  "reason_usage_charge_not_found_title": "Bruksavgiften hittades inte",
   "rent_month_back_to_payments": "Tillbaka till hyresbetalningarna",
   "rent_month_breakdown": "Specifikation av hyran och avgifterna",
   "rent_month_breakdown_link": "Avgifterna på sidan för hyresförhållandet",
