@@ -223,6 +223,28 @@ describe('The shared period statements', () => {
     ).toBe(false)
   })
 
+  test('a correction of a period no longer the latest applies nothing', async () => {
+    await write(occupantsPeriods, { value: 1, from: '2025-03-01' })
+    await write(occupantsPeriods, {
+      value: 2,
+      from: '2026-09-01',
+      latestStart: '2025-03-01',
+    })
+    // A second writer read 2025-03-01 as the latest start before the change.
+    expect(
+      await write(occupantsPeriods, {
+        value: 3,
+        from: '2025-03-01',
+        latestStart: '2025-03-01',
+        corrects: true,
+      }),
+    ).toBe(false)
+    expect(await occupantRows()).toEqual([
+      { persons: 1, validFrom: '2025-03-01', validTo: '2026-08-31' },
+      { persons: 2, validFrom: '2026-09-01', validTo: null },
+    ])
+  })
+
   test('a write without the owner check applies nothing', async () => {
     expect(
       await write(occupantsPeriods, {
