@@ -204,33 +204,36 @@ export function propertyRepository(db: Db) {
 
     /**
      * Archives (`at`) or restores (`null`) the flat for the user, on their own
-     * access row. An archived flat keeps its first date. Returns whether the
-     * user has access to the flat.
+     * access row. An archived flat keeps its first date. Returns whether it
+     * changed, was already so (`unchanged`), or the user has no access.
      */
     async setArchived(
       userId: string,
       propertyId: string,
       at: Date | null,
-    ): Promise<boolean> {
+    ): Promise<'changed' | 'unchanged' | 'not_found'> {
       const own = and(
         eq(propertyAccess.propertyId, propertyId),
         eq(propertyAccess.userId, userId),
       )
-      const found = await db
+      const changed = await db
         .update(propertyAccess)
         .set({ archivedAt: at })
-        .where(at === null ? own : and(own, isNull(propertyAccess.archivedAt)))
+        .where(
+          and(
+            own,
+            at === null
+              ? isNotNull(propertyAccess.archivedAt)
+              : isNull(propertyAccess.archivedAt),
+          ),
+        )
         .returning({ id: propertyAccess.propertyId })
-      if (found.length > 0 || at === null) {
-        return found.length > 0
+      if (changed.length > 0) {
+        return 'changed'
       }
-      // Already archived: the first date stays, but the user has access.
-      return (
-        (await db.$count(
-          propertyAccess,
-          and(own, isNotNull(propertyAccess.archivedAt)),
-        )) > 0
-      )
+      return (await db.$count(propertyAccess, own)) > 0
+        ? 'unchanged'
+        : 'not_found'
     },
 
     /**

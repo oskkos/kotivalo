@@ -110,7 +110,9 @@ describe('propertyRepository', () => {
       const flat = await repository.create('anna', kuusikuja, now, '2022-06-12')
       await share(flat.id, 'bertta')
 
-      expect(await repository.setArchived('anna', flat.id, later)).toBe(true)
+      expect(await repository.setArchived('anna', flat.id, later)).toBe(
+        'changed',
+      )
 
       expect(await repository.listForUser('anna')).toEqual([])
       expect(await repository.listArchivedForUser('anna')).toEqual([
@@ -127,7 +129,12 @@ describe('propertyRepository', () => {
       const flat = await repository.create('anna', kuusikuja, now, '2022-06-12')
       await repository.setArchived('anna', flat.id, later)
 
-      expect(await repository.setArchived('anna', flat.id, null)).toBe(true)
+      expect(await repository.setArchived('anna', flat.id, null)).toBe(
+        'changed',
+      )
+      expect(await repository.setArchived('anna', flat.id, null)).toBe(
+        'unchanged',
+      )
 
       expect(await repository.listForUser('anna')).toEqual([flat])
       expect(await repository.listArchivedForUser('anna')).toEqual([])
@@ -138,7 +145,9 @@ describe('propertyRepository', () => {
       await repository.setArchived('anna', flat.id, later)
 
       const again = new Date(later.getTime() + 86_400_000)
-      expect(await repository.setArchived('anna', flat.id, again)).toBe(true)
+      expect(await repository.setArchived('anna', flat.id, again)).toBe(
+        'unchanged',
+      )
 
       expect(await repository.findForUser('anna', flat.id)).toMatchObject({
         archivedAt: later,
@@ -148,8 +157,12 @@ describe('propertyRepository', () => {
     test("a user can't archive a flat without access", async () => {
       const flat = await repository.create('anna', kuusikuja, now, '2022-06-12')
 
-      expect(await repository.setArchived('bertta', flat.id, later)).toBe(false)
-      expect(await repository.setArchived('bertta', flat.id, null)).toBe(false)
+      expect(await repository.setArchived('bertta', flat.id, later)).toBe(
+        'not_found',
+      )
+      expect(await repository.setArchived('bertta', flat.id, null)).toBe(
+        'not_found',
+      )
       expect(await repository.listForUser('anna')).toEqual([flat])
     })
 

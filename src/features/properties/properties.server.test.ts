@@ -319,10 +319,21 @@ describe('Archiving a flat', () => {
     await archiveProperty(depsFor('anna').deps, id)
     const later = depsFor('anna').deps
     later.now = () => new Date(Date.UTC(2026, 11, 1, 12))
-    await archiveProperty(later, id)
+    expect(await archiveProperty(later, id)).toEqual({ ok: true })
 
     const { archived } = await listProperties(depsFor('anna').deps)
     expect(archived[0]?.archivedOn).toBe('2026-11-19')
+  })
+
+  test('archiving an archived flat, or restoring one that is not, logs nothing', async () => {
+    const id = await add('anna')
+    const { deps, lines } = depsFor('anna')
+
+    expect(await restoreProperty(deps, id)).toEqual({ ok: true })
+    await archiveProperty(deps, id)
+    expect(await archiveProperty(deps, id)).toEqual({ ok: true })
+
+    expect(lines.map((line) => line.event)).toEqual(['property.archived'])
   })
 
   test('An archived flat still counts towards the limit', async () => {
