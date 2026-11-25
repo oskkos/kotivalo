@@ -3,6 +3,7 @@ import { addFlat, card, kuusikuja } from './support/flats'
 import { accepted, coOwned, ownerWithFlat } from './support/sharing'
 import { waitForHydration } from './support/sign-in'
 import { addTenant, aino } from './support/tenancies'
+import { fillEntry } from './support/transactions'
 
 // The browser's language is English, so the app is in English.
 
@@ -97,6 +98,32 @@ test.describe('Archiving a flat', () => {
     )
     await expect(jussi.getByText('/ €890.00 received')).toBeVisible()
     await expect(archivedToggle(jussi)).toHaveCount(0)
+  })
+
+  test("An archived flat's own new entry form keeps the flat", async ({
+    page,
+  }) => {
+    const id = await ownerWithFlat(page)
+    await addFlat(page, koivupolku)
+    await archive(page, id)
+    await page.goto(`/properties/${id}/transactions`)
+    await waitForHydration(page)
+
+    await page.getByRole('link', { name: 'New entry' }).click()
+    await waitForHydration(page)
+
+    await expect(page.getByText('Kuusikuja 3 B 12')).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Flat/ })).toHaveCount(0)
+    await fillEntry(page, {
+      category: 'Annual repair',
+      amount: '145,50',
+      date: todayText,
+    })
+    await page.getByRole('button', { name: 'Save expense' }).click()
+    await expect(page).toHaveURL(
+      new RegExp(`/properties/${id}/transactions\\?year=`),
+    )
+    await expect(page.getByRole('listitem')).toContainText('Annual repair')
   })
 
   test('A member can archive', async ({ page, browser }) => {

@@ -559,6 +559,20 @@ describe('New entry from the bottom bar', () => {
   })
 })
 
+describe('Archiving a flat', () => {
+  test("An archived flat's own new entry form keeps the flat", async () => {
+    await propertyRepository(db).setArchived('annika', flat, new Date())
+
+    const options = await getNewTransactionOptions(deps('annika'), flat)
+
+    expect(options.owned).toEqual([])
+    expect(options.fixed?.id).toBe(flat)
+    // Only an owner gets the flat fixed.
+    const member = await getNewTransactionOptions(deps('matti'), flat)
+    expect(member.fixed).toBeNull()
+  })
+})
+
 describe('Water charge entries are warned about', () => {
   test('everyone with access gets the count and the total', async () => {
     await createTransaction(

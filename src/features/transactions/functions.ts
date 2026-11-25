@@ -115,9 +115,11 @@ export const getTransaction = createServerFn({ method: 'GET' })
     getOne(await transactionDeps(), data.propertyId, data.transactionId),
   )
 
-export const getNewTransactionOptions = createServerFn({
-  method: 'GET',
-}).handler(async () => newOptions(await transactionDeps()))
+export const getNewTransactionOptions = createServerFn({ method: 'GET' })
+  .validator(z.object({ propertyId: z.string().max(64).optional() }))
+  .handler(async ({ data }) =>
+    newOptions(await transactionDeps(), data.propertyId),
+  )
 
 export const createTransaction = createServerFn({ method: 'POST' })
   .validator(readForm)

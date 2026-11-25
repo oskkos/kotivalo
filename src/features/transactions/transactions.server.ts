@@ -328,24 +328,49 @@ export async function getTransaction(
   }
 }
 
-/** The flats the user may log entries for, and whether they have any. */
-export async function getNewTransactionOptions(deps: TransactionDeps): Promise<{
+/**
+ * The flats the user may log entries for, and whether they have any. With
+ * `propertyId` (a flat's own Entries page), that flat as `fixed` if the user
+ * owns it, archived or not: archiving leaves a flat out of the choice only.
+ */
+export async function getNewTransactionOptions(
+  deps: TransactionDeps,
+  propertyId?: string,
+): Promise<{
   ok: true
   /** Owned flats, unsorted: the page sorts them in the user's language. */
   owned: Property[]
+  /** The flat of `propertyId`, when the user owns it; else null. */
+  fixed: Property | null
   hasFlats: boolean
   today: IsoDate
 }> {
-  const flats = await deps.properties.listForUser(deps.userId)
+  const [flats, fixed] = await Promise.all([
+    deps.properties.listForUser(deps.userId),
+    propertyId === undefined ? null : ownedFlat(deps, propertyId),
+  ])
   const roles = await Promise.all(
     flats.map((flat) => deps.sharing.roleOf(deps.userId, flat.id)),
   )
   return {
     ok: true,
     owned: flats.filter((_, i) => roles[i] === 'owner'),
+    fixed,
     hasFlats: flats.length > 0,
     today: isoDateInFinland(deps.now()),
   }
+}
+
+/** The flat, archived or not, if the user owns it; else null. */
+async function ownedFlat(
+  deps: TransactionDeps,
+  propertyId: string,
+): Promise<Property | null> {
+  const [role, found] = await Promise.all([
+    deps.sharing.roleOf(deps.userId, propertyId),
+    deps.properties.findForUser(deps.userId, propertyId),
+  ])
+  return role === 'owner' && found ? found : null
 }
 
 export async function createTransaction(

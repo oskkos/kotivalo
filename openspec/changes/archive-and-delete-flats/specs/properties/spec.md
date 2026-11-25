@@ -19,6 +19,10 @@ Everyone with access to a flat, owners and members alike, SHALL be able to archi
 - **WHEN** Jussi, a member of `Kuusikuja 3 B 12`, archives it
 - **THEN** his flats list no longer shows it among the flats, and he can still open its details page
 
+#### Scenario: An archived flat's own new entry form keeps the flat
+- **WHEN** Annika owns `Koivupolku 7 A 4` and `Kuusikuja 3 B 12`, has archived `Kuusikuja 3 B 12`, and opens New entry on its Entries page
+- **THEN** the form is for `Kuusikuja 3 B 12` and doesn't ask for the flat
+
 #### Scenario: An archived flat still counts towards the limit
 - **WHEN** a user has access to 100 flats, 5 of them archived, and adds another
 - **THEN** it is refused with the reason `property_limit_reached`

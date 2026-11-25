@@ -38,7 +38,9 @@ function rememberFlat(id: string) {
 
 export const Route = createFileRoute('/_authed/transactions/new')({
   validateSearch: z.object({ propertyId: z.string().max(64).optional() }),
-  loader: () => getNewTransactionOptions(),
+  loaderDeps: ({ search }) => ({ propertyId: search.propertyId }),
+  loader: ({ deps }) =>
+    getNewTransactionOptions({ data: { propertyId: deps.propertyId } }),
   head: () => ({ meta: [{ title: m.transactions_new_page_title() }] }),
   component: NewTransactionRoute,
 })
@@ -89,10 +91,10 @@ function Explanation(props: { title: string; text: string; noFlats: boolean }) {
 
 function NewTransactionRoute() {
   const options = Route.useLoaderData()
-  const { propertyId } = Route.useSearch()
   const router = useRouter()
   const owned = sortByStreetAddress(options.owned, getLocale())
-  const fixed = owned.find((flat) => flat.id === propertyId)
+  // Also an archived flat: it is left out of the choice only.
+  const fixed = options.fixed ?? undefined
   // The server can't see this device's storage: hydration uses the server's
   // value, then the page renders again with the remembered flat.
   const remembered = useSyncExternalStore(
@@ -100,7 +102,7 @@ function NewTransactionRoute() {
     lastFlat,
     () => undefined,
   )
-  if (owned.length === 0) {
+  if (owned.length === 0 && !fixed) {
     return options.hasFlats ? (
       <Explanation
         noFlats={false}
@@ -115,7 +117,7 @@ function NewTransactionRoute() {
       />
     )
   }
-  // owned has at least one flat here.
+  // fixed is set or owned has at least one flat here.
   const initial =
     fixed ?? owned.find((flat) => flat.id === remembered) ?? owned[0]
   return (
