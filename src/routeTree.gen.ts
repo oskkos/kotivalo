@@ -18,6 +18,7 @@ import { Route as AuthedWelcomeRouteImport } from './routes/_authed/welcome'
 import { Route as ApiLogRouteImport } from './routes/api/log'
 import { Route as AuthedPropertiesNewRouteImport } from './routes/_authed/properties/new'
 import { Route as AuthedTransactionsNewRouteImport } from './routes/_authed/transactions/new'
+import { Route as ApiDocumentsDocumentIdRouteImport } from './routes/api/documents/$documentId'
 import { Route as ApiReceiptsReceiptIdRouteImport } from './routes/api/receipts/$receiptId'
 import { Route as ApiTestInboxRouteImport } from './routes/api/test/inbox'
 import { Route as AuthedPropertiesPropertyIdIndexRouteImport } from './routes/_authed/properties/$propertyId/index'
@@ -89,6 +90,11 @@ const AuthedTransactionsNewRoute = AuthedTransactionsNewRouteImport.update({
   id: '/transactions/new',
   path: '/transactions/new',
   getParentRoute: () => AuthedRoute,
+} as any)
+const ApiDocumentsDocumentIdRoute = ApiDocumentsDocumentIdRouteImport.update({
+  id: '/api/documents/$documentId',
+  path: '/api/documents/$documentId',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiReceiptsReceiptIdRoute = ApiReceiptsReceiptIdRouteImport.update({
   id: '/api/receipts/$receiptId',
@@ -260,6 +266,7 @@ export interface FileRoutesByFullPath {
   '/api/log': typeof ApiLogRoute
   '/properties/new': typeof AuthedPropertiesNewRoute
   '/transactions/new': typeof AuthedTransactionsNewRoute
+  '/api/documents/$documentId': typeof ApiDocumentsDocumentIdRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
   '/properties/$propertyId/charges': typeof AuthedPropertiesPropertyIdChargesRoute
@@ -297,6 +304,7 @@ export interface FileRoutesByTo {
   '/': typeof AuthedIndexRoute
   '/properties/new': typeof AuthedPropertiesNewRoute
   '/transactions/new': typeof AuthedTransactionsNewRoute
+  '/api/documents/$documentId': typeof ApiDocumentsDocumentIdRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
   '/properties/$propertyId/charges': typeof AuthedPropertiesPropertyIdChargesRoute
@@ -336,6 +344,7 @@ export interface FileRoutesById {
   '/_authed/': typeof AuthedIndexRoute
   '/_authed/properties/new': typeof AuthedPropertiesNewRoute
   '/_authed/transactions/new': typeof AuthedTransactionsNewRoute
+  '/api/documents/$documentId': typeof ApiDocumentsDocumentIdRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
   '/_authed/properties/$propertyId/charges': typeof AuthedPropertiesPropertyIdChargesRoute
@@ -375,6 +384,7 @@ export interface FileRouteTypes {
     | '/api/log'
     | '/properties/new'
     | '/transactions/new'
+    | '/api/documents/$documentId'
     | '/api/receipts/$receiptId'
     | '/api/test/inbox'
     | '/properties/$propertyId/charges'
@@ -412,6 +422,7 @@ export interface FileRouteTypes {
     | '/'
     | '/properties/new'
     | '/transactions/new'
+    | '/api/documents/$documentId'
     | '/api/receipts/$receiptId'
     | '/api/test/inbox'
     | '/properties/$propertyId/charges'
@@ -450,6 +461,7 @@ export interface FileRouteTypes {
     | '/_authed/'
     | '/_authed/properties/new'
     | '/_authed/transactions/new'
+    | '/api/documents/$documentId'
     | '/api/receipts/$receiptId'
     | '/api/test/inbox'
     | '/_authed/properties/$propertyId/charges'
@@ -484,6 +496,7 @@ export interface RootRouteChildren {
   OfflineRoute: typeof OfflineRoute
   SignInRoute: typeof SignInRoute
   ApiLogRoute: typeof ApiLogRoute
+  ApiDocumentsDocumentIdRoute: typeof ApiDocumentsDocumentIdRoute
   ApiReceiptsReceiptIdRoute: typeof ApiReceiptsReceiptIdRoute
   ApiTestInboxRoute: typeof ApiTestInboxRoute
 }
@@ -552,6 +565,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/transactions/new'
       preLoaderRoute: typeof AuthedTransactionsNewRouteImport
       parentRoute: typeof AuthedRoute
+    }
+    '/api/documents/$documentId': {
+      id: '/api/documents/$documentId'
+      path: '/api/documents/$documentId'
+      fullPath: '/api/documents/$documentId'
+      preLoaderRoute: typeof ApiDocumentsDocumentIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/receipts/$receiptId': {
       id: '/api/receipts/$receiptId'
@@ -842,6 +862,7 @@ const rootRouteChildren: RootRouteChildren = {
   OfflineRoute: OfflineRoute,
   SignInRoute: SignInRoute,
   ApiLogRoute: ApiLogRoute,
+  ApiDocumentsDocumentIdRoute: ApiDocumentsDocumentIdRoute,
   ApiReceiptsReceiptIdRoute: ApiReceiptsReceiptIdRoute,
   ApiTestInboxRoute: ApiTestInboxRoute,
 }
