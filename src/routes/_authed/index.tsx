@@ -1,4 +1,5 @@
 import { BottomNav } from '#/components/BottomNav'
+import { NavigationNotice } from '#/components/NavigationNotice'
 import { createFileRoute, useRouter } from '@tanstack/react-router'
 import { listProperties } from '#/features/properties/functions'
 import { listCurrentOwners } from '#/features/ownership/functions'
@@ -40,38 +41,42 @@ function HomeRoute() {
   // flat details page.
   const thisMonth = rentThisMonth(rent.flats, rent.today)
   return (
-    <PropertyList
-      properties={lists.properties}
-      owners={owners}
-      statuses={Object.fromEntries(
-        Object.entries(statuses).map(([id, status]) => [
-          id,
-          <FlatStatusChip key={id} status={status} />,
-        ]),
-      )}
-      rentStatuses={Object.fromEntries(
-        Object.entries(thisMonth.rows).map(([id, row]) => [
-          id,
-          row ? <CardRentChip key={id} row={row} /> : null,
-        ]),
-      )}
-      summary={
-        thisMonth.hasRent ? (
-          <RentSummary
-            month={rent.today.slice(0, 7)}
-            received={thisMonth.received}
-            expected={thisMonth.expected}
-            late={thisMonth.late}
+    <>
+      <NavigationNotice />
+      <PropertyList
+        properties={lists.properties}
+        archived={lists.archived}
+        owners={owners}
+        statuses={Object.fromEntries(
+          Object.entries(statuses).map(([id, status]) => [
+            id,
+            <FlatStatusChip key={id} status={status} />,
+          ]),
+        )}
+        rentStatuses={Object.fromEntries(
+          Object.entries(thisMonth.rows).map(([id, row]) => [
+            id,
+            row ? <CardRentChip key={id} row={row} /> : null,
+          ]),
+        )}
+        summary={
+          thisMonth.hasRent ? (
+            <RentSummary
+              month={rent.today.slice(0, 7)}
+              received={thisMonth.received}
+              expected={thisMonth.expected}
+              late={thisMonth.late}
+            />
+          ) : null
+        }
+        bottomNav={<BottomNav current="flats" />}
+        notices={
+          <InvitationCards
+            invitations={invitations}
+            onAnswered={() => router.invalidate()}
           />
-        ) : null
-      }
-      bottomNav={<BottomNav current="flats" />}
-      notices={
-        <InvitationCards
-          invitations={invitations}
-          onAnswered={() => router.invalidate()}
-        />
-      }
-    />
+        }
+      />
+    </>
   )
 }

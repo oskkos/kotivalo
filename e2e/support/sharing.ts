@@ -55,3 +55,18 @@ export async function accepted(page: Page, browser: Browser) {
   await expect(card(jussi, kuusikuja.streetAddress)).toBeVisible()
   return { id, jussi }
 }
+
+/**
+ * Annika and Jussi own the flat with 50 % each from 1 March 2025: Jussi
+ * accepts, and Annika splits the ownership equally.
+ */
+export async function coOwned(page: Page, browser: Browser) {
+  const { id, jussi } = await accepted(page, browser)
+  await openSharing(page, id)
+  await page.getByRole('button', { name: 'Change ownership' }).click()
+  await page.getByRole('button', { name: 'Equal shares' }).click()
+  await page.getByRole('textbox', { name: 'From' }).fill('01/03/2025')
+  await page.getByRole('button', { name: 'Save ownership change' }).click()
+  await expect(page.getByText('You 50% · Jussi 50%').first()).toBeVisible()
+  return { id, jussi }
+}

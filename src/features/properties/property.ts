@@ -1,4 +1,5 @@
 // A flat as the rest of the app sees it (openspec: properties).
+import type { IsoDate } from '#/lib/dates'
 
 /** 1, 2, 3 or 4, where 4 means four rooms or more. */
 export type RoomCount = 1 | 2 | 3 | 4
@@ -16,6 +17,11 @@ export interface PropertyDetails {
 
 export interface Property extends PropertyDetails {
   id: string
+}
+
+/** A flat the user has archived, with the day (in Finland) they did. */
+export interface ArchivedProperty extends Property {
+  archivedOn: IsoDate
 }
 
 /** A flat as one user sees it: when they archived it, if they did. */

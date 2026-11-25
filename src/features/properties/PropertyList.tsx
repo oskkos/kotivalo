@@ -8,12 +8,12 @@ import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { Link } from '@tanstack/react-router'
-import type { ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
 import { Logo, LogoMark } from '#/components/Logo'
-import { formatArea } from '#/lib/format'
+import { formatArea, formatDate } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 import { colors, radii } from '#/theme/tokens'
-import type { Property } from './property'
+import type { ArchivedProperty, Property } from './property'
 import { ownershipLine, type CardOwner } from './ownership-line'
 import { roomCountLabel } from './room-count'
 
@@ -31,6 +31,8 @@ interface Props {
   bottomNav?: ReactNode
   /** Shown above the list or the empty state, e.g. flat invitations. */
   notices?: ReactNode
+  /** The flats the user has archived, in a section after the list. */
+  archived?: readonly ArchivedProperty[]
 }
 
 function PlusIcon() {
@@ -55,8 +57,11 @@ export function PropertyCard({
   owners = [],
   status,
   rentStatus,
+  archivedOn,
 }: {
   property: Property
+  /** For an archived flat's card, in place of the statuses. */
+  archivedOn?: string
   owners?: readonly CardOwner[] | undefined
   /** The tenancy status, e.g. a chip. */
   status?: ReactNode
@@ -116,6 +121,16 @@ export function PropertyCard({
               {ownership}
             </Typography>
           )}
+          {archivedOn === undefined ? null : (
+            <Typography
+              variant="caption"
+              component="span"
+              color="text.secondary"
+              sx={{ fontWeight: 800 }}
+            >
+              {m.property_archived_on({ date: formatDate(archivedOn) })}
+            </Typography>
+          )}
           {status || rentStatus ? (
             <Stack
               direction="row"
@@ -134,6 +149,56 @@ export function PropertyCard({
         </Stack>
       </Box>
     </Link>
+  )
+}
+
+/** The archived flats, closed at first (spec: "Archived flats on the flats list"). */
+function ArchivedSection(props: { flats: readonly ArchivedProperty[] }) {
+  const [open, setOpen] = useState(false)
+  return (
+    <Stack component="section" sx={{ gap: 1.25, mt: 1 }}>
+      <Button
+        variant="text"
+        color="inherit"
+        aria-expanded={open}
+        aria-controls="archived-flats"
+        onClick={() => {
+          setOpen((was) => !was)
+        }}
+        sx={{ alignSelf: 'flex-start', color: 'text.secondary' }}
+        endIcon={
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.4"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+            style={{ transform: open ? 'rotate(180deg)' : undefined }}
+          >
+            <path d="M6 9 L12 15 L18 9" />
+          </svg>
+        }
+      >
+        {m.properties_archived({ count: props.flats.length })}
+      </Button>
+      {open ? (
+        <Stack
+          id="archived-flats"
+          component="ul"
+          sx={{ gap: 1.25, m: 0, p: 0, listStyle: 'none' }}
+        >
+          {props.flats.map((flat) => (
+            <li key={flat.id}>
+              <PropertyCard property={flat} archivedOn={flat.archivedOn} />
+            </li>
+          ))}
+        </Stack>
+      ) : null}
+    </Stack>
   )
 }
 
@@ -211,6 +276,7 @@ export function PropertyList({
   summary,
   bottomNav,
   notices,
+  archived = [],
 }: Props) {
   return (
     <Stack sx={{ minHeight: '100dvh' }}>
@@ -248,6 +314,7 @@ export function PropertyList({
             ))}
           </Stack>
         )}
+        {archived.length === 0 ? null : <ArchivedSection flats={archived} />}
       </Stack>
       {bottomNav}
     </Stack>
