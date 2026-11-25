@@ -59,6 +59,36 @@ describe('The usage charges page', () => {
     ).toBeVisible()
   })
 
+  test("the occupants come from the month's first day", () => {
+    render(
+      <UsageChargesPage
+        view={{
+          role: 'owner',
+          today: '2026-11-24',
+          charges: [water],
+          tenancies: [
+            {
+              validFrom: '2024-01-01',
+              validTo: '2026-11-14',
+              occupants: [{ validFrom: '2024-01-01', validTo: null, value: 3 }],
+            },
+            {
+              validFrom: '2026-11-15',
+              validTo: null,
+              occupants: [{ validFrom: '2026-11-15', validTo: null, value: 1 }],
+            },
+          ],
+        }}
+        address="Kuusikuja 3 B 12"
+        onBack={vi.fn()}
+      />,
+    )
+    expect(screen.getByText('€66.00/month')).toBeVisible()
+    expect(
+      screen.getByText('€22.00/occupant/month · 3 occupants'),
+    ).toBeVisible()
+  })
+
   test('Other shows its description', () => {
     setup([
       {

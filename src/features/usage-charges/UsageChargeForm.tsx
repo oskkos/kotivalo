@@ -45,7 +45,7 @@ import { USAGE_CHARGE_ROWS } from './rows'
 interface Props {
   propertyId: string
   address: string
-  /** Today's occupants, for a per-occupant amount. */
+  /** This month's occupants (on its first day), for a per-occupant amount. */
   persons: number
   /** Changing this charge; adding one when absent. */
   charge?: UsageChargePeriods

@@ -59,7 +59,9 @@ describe('Adding a usage charge', () => {
     addUsageCharge.mockResolvedValue({ ok: true, chargeId: 'c' })
     const { user, onDone } = setup()
     await user.type(box('Amount (€/occupant/month)'), '22')
-    expect(screen.getByText('Today €44.00/month (2 occupants)')).toBeVisible()
+    expect(
+      screen.getByText('This month €44.00/month (2 occupants)'),
+    ).toBeVisible()
     expect(
       screen.getByText(
         /In the year summary: Maintenance charges and water charges/,

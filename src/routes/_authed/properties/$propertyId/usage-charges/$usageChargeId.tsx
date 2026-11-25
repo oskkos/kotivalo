@@ -76,7 +76,7 @@ function UsageChargeRoute() {
       <UsageChargeForm
         propertyId={propertyId}
         address={view.property.streetAddress}
-        persons={occupantsOn(view.tenancies, view.today)}
+        persons={occupantsOn(view.tenancies, `${view.today.slice(0, 7)}-01`)}
         charge={charge}
         onUndo={() => {
           setUndoing(true)
