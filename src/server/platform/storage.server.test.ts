@@ -2,7 +2,7 @@ import { env } from 'cloudflare:workers'
 import { describe, expect, test } from 'vitest'
 import { newFileKey } from '#/server/files/storage'
 import { getRequestContext } from './context.server'
-import { createR2Storage } from './storage.server'
+import { createR2Storage, R2_DELETE_LIMIT } from './storage.server'
 
 const PDF = new TextEncoder().encode('%PDF-1.7\n')
 
@@ -32,6 +32,35 @@ describe('R2 storage', () => {
     await storage.delete(key)
 
     expect(await storage.get(key)).toBeNull()
+  })
+
+  test('deletes many files, and missing ones are fine', async () => {
+    const storage = createR2Storage(env.FILES)
+    const keys = [newFileKey('receipts'), newFileKey('receipts')]
+    await storage.put(keys[0], PDF, 'application/pdf')
+
+    await storage.deleteMany([...keys, 'receipts/missing'])
+    await storage.deleteMany([])
+
+    expect(await storage.get(keys[0])).toBeNull()
+  })
+
+  test('deletes in calls of at most 1,000 keys', async () => {
+    const sizes: number[] = []
+    const bucket = {
+      delete: (keys: string[]) => {
+        sizes.push(keys.length)
+        return Promise.resolve()
+      },
+    } as unknown as R2Bucket
+    const keys = Array.from(
+      { length: 2 * R2_DELETE_LIMIT + 5 },
+      (_, i) => `k${String(i)}`,
+    )
+
+    await createR2Storage(bucket).deleteMany(keys)
+
+    expect(sizes).toEqual([1000, 1000, 5])
   })
 
   test('the request context gives storage on the FILES bucket', async () => {

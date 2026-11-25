@@ -17,6 +17,8 @@ export interface FileStorage {
   get(key: string): Promise<StoredFile | null>
   /** Removes a file. Removing a missing key is not an error. */
   delete(key: string): Promise<void>
+  /** Removes files, any number of them. Missing keys are not an error. */
+  deleteMany(keys: readonly string[]): Promise<void>
 }
 
 export type FileKind = 'receipts' | 'attachments'

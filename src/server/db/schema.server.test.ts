@@ -57,7 +57,13 @@ describe('Properties tables', () => {
       expect.objectContaining({ id: 'p1', floorArea: 485, roomCount: 2 }),
     ])
     expect(await db.select().from(propertyAccess)).toEqual([
-      { propertyId: 'p1', userId: 'u1', role: 'owner', createdAt: now },
+      {
+        propertyId: 'p1',
+        userId: 'u1',
+        role: 'owner',
+        createdAt: now,
+        archivedAt: null,
+      },
     ])
   })
 

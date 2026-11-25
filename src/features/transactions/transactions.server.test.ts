@@ -449,7 +449,7 @@ describe('Editing an entry', () => {
     const id = await created()
     const broken: FileStorage = {
       ...r2,
-      delete: () => Promise.reject(new Error('R2 is down')),
+      deleteMany: () => Promise.reject(new Error('R2 is down')),
     }
     expect(
       await updateTransaction(deps('annika', broken), flat, id, repair, {
