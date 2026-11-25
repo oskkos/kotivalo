@@ -2,6 +2,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import type { Period } from '#/features/recurring-amounts/periods'
+import type { FeeOfTenancy } from './fees'
 import type { Tenancy } from './tenancy.repository.server'
 import { previousTenancy, TenancyForm } from './TenancyForm'
 
@@ -40,6 +41,7 @@ function setup(
   editing?: Tenancy,
   tenancies: Tenancy[] = [],
   tenancyRents: Record<string, Period<number>[]> = {},
+  tenancyFees: Record<string, FeeOfTenancy[]> = {},
 ) {
   const user = userEvent.setup()
   const onSaved = vi.fn(() => Promise.resolve())
@@ -50,6 +52,7 @@ function setup(
       editing={editing}
       tenancies={tenancies}
       tenancyRents={tenancyRents}
+      tenancyFees={tenancyFees}
       today="2026-11-22"
       onSaved={onSaved}
       onClose={vi.fn()}
@@ -152,6 +155,7 @@ describe('tenancy form', () => {
         termEnd: '31/12/2027',
         rent: '910',
         occupants: '2',
+        copyFeeIds: [],
         dueDay: '5',
       },
     })
@@ -326,5 +330,73 @@ describe('an earlier tenancy in the new tenant form', () => {
     expect(
       await screen.findByText(/landlord's notice period ends later/i),
     ).toBeInTheDocument()
+  })
+})
+
+describe('Occupants and fees of a new tenancy', () => {
+  const ending: Tenancy = {
+    ...aino,
+    validTo: '2026-12-31',
+    noticeGivenBy: 'tenant',
+    noticeDate: '2026-11-22',
+  }
+  const fees: Record<string, FeeOfTenancy[]> = {
+    t1: [
+      {
+        id: 'water',
+        kind: 'water',
+        basis: 'per_occupant',
+        description: null,
+        amounts: [{ validFrom: '2025-03-01', validTo: null, value: 2200 }],
+      },
+      {
+        id: 'parking',
+        kind: 'parking',
+        basis: 'fixed',
+        description: null,
+        amounts: [{ validFrom: '2025-03-01', validTo: null, value: 1500 }],
+      },
+    ],
+  }
+
+  test("The previous tenancy's fees are offered unchecked", async () => {
+    const { user } = setup(undefined, [ending], ainoRents, fees)
+    await user.type(box('Starts'), '01/01/2027')
+    const water = screen.getByRole('checkbox', {
+      name: 'Water charge · €22.00/occupant',
+    })
+    const parking = screen.getByRole('checkbox', {
+      name: 'Parking space · €15.00',
+    })
+    expect(water).not.toBeChecked()
+    expect(parking).not.toBeChecked()
+  })
+
+  test('A checked fee is copied to the new tenancy', async () => {
+    createTenancy.mockResolvedValue({ ok: true, tenancyId: 't2' })
+    const { user, onSaved } = setup(undefined, [ending], ainoRents, fees)
+    await user.type(box('Name'), 'Mikko Lehtinen')
+    await user.type(box('Starts'), '01/01/2027')
+    await user.clear(box('Monthly rent (€)'))
+    await user.type(box('Monthly rent (€)'), '890')
+    await user.type(box('Due day'), '5')
+    await user.click(
+      screen.getByRole('checkbox', { name: 'Water charge · €22.00/occupant' }),
+    )
+    expect(screen.getByRole('status')).toHaveTextContent('€912.00')
+    await user.click(screen.getByRole('button', { name: 'Save tenant' }))
+    await waitFor(() => {
+      expect(onSaved).toHaveBeenCalled()
+    })
+    expect(createTenancy.mock.calls[0]?.[0].data).toMatchObject({
+      copyFeeIds: ['water'],
+      occupants: '1',
+    })
+  })
+
+  test('No fees are offered for the first tenancy', () => {
+    setup()
+    expect(box('Occupants')).toHaveValue('1')
+    expect(screen.queryByRole('checkbox', { name: /€/ })).toBeNull()
   })
 })

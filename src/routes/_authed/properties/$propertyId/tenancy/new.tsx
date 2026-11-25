@@ -54,6 +54,7 @@ function NewTenancyRoute() {
       address={options.property.streetAddress}
       tenancyRents={options.tenancyRents}
       tenancies={options.tenancies}
+      tenancyFees={options.tenancyFees}
       today={options.today}
       onSaved={async () => {
         await router.invalidate()

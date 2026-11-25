@@ -46,8 +46,8 @@
 ## 8. Occupants and fees of a new tenancy
 
 - [x] 8.1 `tenancies.server.ts`: the new tenant form's data offers the previous tenancy's fees not ended on its last day; adding a tenancy copies the checked fees from its start day in the tenancy's batch
-- [ ] 8.2 `TenancyForm.tsx`: the previous fees as unchecked checkboxes with the note that an unchecked fee is included in the rent, and the month's total; messages fi, sv and en; component tests
-- [ ] 8.3 Workers and Playwright tests named after "Occupants and fees of a new tenancy"
+- [x] 8.2 `TenancyForm.tsx`: the previous fees as unchecked checkboxes with the note that an unchecked fee is included in the rent, and the month's total; messages fi, sv and en; component tests
+- [x] 8.3 Workers and Playwright tests named after "Occupants and fees of a new tenancy"
 
 ## 9. The fees on the rent pages
 

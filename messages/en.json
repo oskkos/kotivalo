@@ -723,6 +723,8 @@
   "tenancy_form_email": "Email",
   "tenancy_form_ended": "Notice has already been given or the tenancy has ended",
   "tenancy_form_ending": "Ending",
+  "tenancy_form_fee_per_occupant": "{amount}/occupant",
+  "tenancy_form_fees_note": "Choose the fees that continue with the new tenant. A fee left unchosen is included in the rent.",
   "tenancy_form_made_hint": "This decides the landlord's notice period: for a contract made before 1 October 2026, 6 months after a year; for a later one, 4 months after two years; otherwise 3 months.",
   "tenancy_form_name": "Name",
   "tenancy_form_new_title": "New tenant",
