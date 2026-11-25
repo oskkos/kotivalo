@@ -131,10 +131,13 @@ export async function archiveProperty(
   deps: PropertyDeps,
   id: string,
 ): Promise<Result<object>> {
-  if (!(await deps.properties.setArchived(deps.userId, id, deps.now()))) {
+  const result = await deps.properties.setArchived(deps.userId, id, deps.now())
+  if (result === 'not_found') {
     return notFound
   }
-  deps.log.info('property.archived', { propertyId: id })
+  if (result === 'changed') {
+    deps.log.info('property.archived', { propertyId: id })
+  }
   return { ok: true }
 }
 
@@ -143,10 +146,13 @@ export async function restoreProperty(
   deps: PropertyDeps,
   id: string,
 ): Promise<Result<object>> {
-  if (!(await deps.properties.setArchived(deps.userId, id, null))) {
+  const result = await deps.properties.setArchived(deps.userId, id, null)
+  if (result === 'not_found') {
     return notFound
   }
-  deps.log.info('property.restored', { propertyId: id })
+  if (result === 'changed') {
+    deps.log.info('property.restored', { propertyId: id })
+  }
   return { ok: true }
 }
 
