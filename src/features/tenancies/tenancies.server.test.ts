@@ -1213,6 +1213,25 @@ describe('Occupants and fees stay inside their tenancy', () => {
     expect(await feesOf(id)).toHaveLength(1)
   })
 
+  test("A fee ended after the last day doesn't block ending", async () => {
+    const id = await addId(aino)
+    await storeFee(
+      id,
+      'parking',
+      'fixed',
+      [1500, '2026-02-01', null],
+      [0, '2027-01-01', null],
+    )
+    expect(await endTenancy(deps(), flat, id, tenantNotice)).toEqual({
+      ok: true,
+    })
+    expect((await view()).tenancies[0]?.validTo).toBe('2026-12-31')
+    expect((await feesOf(id))[0]?.amounts).toEqual([
+      { validFrom: '2026-02-01', validTo: '2026-12-31', value: 1500 },
+      { validFrom: '2027-01-01', validTo: null, value: 0 },
+    ])
+  })
+
   test('Ending before an occupants change is refused', async () => {
     const id = await addId(aino)
     await env.DB.prepare(

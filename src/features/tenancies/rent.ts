@@ -203,6 +203,21 @@ export function periodAfterEnd<T>(
   return lastDay !== null && latest !== undefined && latest.validFrom > lastDay
 }
 
+/**
+ * A fee changes after `lastDay`: a period with an amount above 0 starts
+ * after it. A 0 € period there only records that the fee ends with the
+ * tenancy, so it doesn't count.
+ */
+export function feeChangesAfterEnd(
+  amounts: readonly Period<number>[],
+  lastDay: IsoDate | null,
+): boolean {
+  return (
+    lastDay !== null &&
+    amounts.some((p) => p.validFrom > lastDay && p.value !== 0)
+  )
+}
+
 /** `periodAfterEnd` for the rent. */
 export function rentAfterEnd(
   rents: readonly Period<number>[],
