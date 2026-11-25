@@ -74,6 +74,7 @@ export type AlertReason =
   | 'email_failed'
   | 'property_not_found'
   | 'property_limit_reached'
+  | 'property_delete_other_owners'
   | 'invitation_not_found'
   | 'invitation_limit_reached'
   | 'invitation_daily_limit_reached'
@@ -249,6 +250,10 @@ const texts: Record<Reason, () => ReasonText> = {
   email_failed: () => ({
     title: m.reason_email_failed_title(),
     text: m.reason_email_failed(),
+  }),
+  property_delete_other_owners: () => ({
+    title: m.reason_property_delete_other_owners_title(),
+    text: m.reason_property_delete_other_owners(),
   }),
   property_not_found: () => ({
     title: m.reason_property_not_found_title(),
