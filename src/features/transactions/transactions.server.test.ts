@@ -22,7 +22,6 @@ import {
   getTransaction,
   getEntriesSince,
   getTransactions,
-  receiptFilename,
   updateTransaction,
   type TransactionDeps,
   type Upload,
@@ -264,16 +263,6 @@ describe('Attaching a receipt', () => {
       createTransaction(deps('annika', r2, failing), flat, repair, jpeg()),
     ).rejects.toThrow('D1 is down')
     expect(await fileKeys()).toEqual([])
-  })
-
-  test('the stored file name has no control characters and a fallback', () => {
-    expect(receiptFilename(' kuitti\u0000.jpg ', 'image/jpeg')).toBe(
-      'kuitti.jpg',
-    )
-    expect(receiptFilename('', 'application/pdf')).toBe('receipt.pdf')
-    expect(
-      receiptFilename(`${'a'.repeat(150)}.jpg`, 'image/jpeg'),
-    ).toHaveLength(100)
   })
 })
 

@@ -14,6 +14,7 @@ import type { PropertyRole } from '#/server/db/schema'
 import { deleteStoredFiles } from '#/server/files/delete'
 import { fitsQuota } from '#/server/files/quota'
 import { newFileKey, type FileStorage } from '#/server/files/storage'
+import { uploadFilename, withStoredFile } from '#/server/files/stored'
 import { checkUpload, UploadError } from '#/server/files/upload'
 import type { Logger } from '#/server/log/log'
 import { validateTransactionDate } from './rules'
@@ -66,22 +67,6 @@ const entryNotFound = {
   ok: false,
   reason: 'transaction_not_found',
 } as const satisfies Failure
-
-/** The longest stored file name, in characters. */
-const MAX_FILENAME_LENGTH = 100
-
-/** The browser's file name without control characters, at most 100 long. */
-export function receiptFilename(name: string, contentType: string): string {
-  const cleaned = name
-    .replace(/\p{Cc}/gu, '')
-    .trim()
-    .slice(-MAX_FILENAME_LENGTH)
-  if (cleaned !== '') {
-    return cleaned
-  }
-  const extension = contentType === 'application/pdf' ? 'pdf' : 'jpg'
-  return `receipt.${extension}`
-}
 
 async function roleCheck(
   deps: TransactionDeps,
@@ -160,7 +145,7 @@ async function storeReceipt(
       key,
       contentType: checked.contentType,
       size: checked.size,
-      filename: receiptFilename(upload.filename, checked.contentType),
+      filename: uploadFilename(upload.filename, checked.contentType, 'receipt'),
     },
   }
 }
@@ -184,28 +169,6 @@ function deleteFiles(
     keys,
     'transaction.receipt_delete_failed',
   )
-}
-
-/** Runs a database write after storing a file; removes the file if it fails. */
-async function withStoredFile<T>(
-  deps: TransactionDeps,
-  key: string | undefined,
-  write: () => Promise<T>,
-  applied: (result: T) => boolean,
-): Promise<T> {
-  let result: T
-  try {
-    result = await write()
-  } catch (error) {
-    if (key) {
-      await deleteFiles(deps, [key])
-    }
-    throw error
-  }
-  if (key && !applied(result)) {
-    await deleteFiles(deps, [key])
-  }
-  return result
 }
 
 export interface TransactionsView {
@@ -411,6 +374,7 @@ export async function createTransaction(
   }
   const id = await withStoredFile(
     deps,
+    'transaction.receipt_delete_failed',
     receipt?.key,
     () =>
       deps.transactions.create(
@@ -471,6 +435,7 @@ export async function updateTransaction(
   }
   const result = await withStoredFile(
     deps,
+    'transaction.receipt_delete_failed',
     receipt?.key,
     () =>
       deps.transactions.update(
