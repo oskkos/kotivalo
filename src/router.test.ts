@@ -20,6 +20,7 @@ describe('Router', () => {
   test('registers the year summary behind the signed-in layout', () => {
     const { routesById } = getRouter()
     expect(routesById).toHaveProperty('/_authed/year-summary/')
+    expect(routesById).toHaveProperty('/_authed/year-summary/$propertyId')
   })
 
   test('registers the home and sign-in pages', () => {
