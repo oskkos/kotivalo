@@ -67,7 +67,7 @@ Risk accepted: a receipt uploaded between steps 3 and 4 (only the sole owner can
 - `{ ok: true, allowed: false, reason, otherOwners: string[] }` for `property_delete_other_owners` (with the names, past and present) or `sharing_owner_only`, or
 - not found.
 
-`hasData` is true when the flat has a tenancy, a recurring amount, a financing charge, a treatment, a usage charge or a transaction. Ownership periods and access don't count: every flat has them. Counts and names come from one repository method with `count` subqueries. The details page calls it when *Poista asunto* is selected, and the dialog shows a spinner until then. Nothing is loaded for pages that never open the dialog.
+`hasData` is true when the flat has a tenancy, a recurring amount, a financing charge, a treatment, a usage charge or a transaction. Ownership periods and access don't count: every flat has them. Counts and names come from one repository method, `deletionSummary`, which runs a `count` query per table and one query for the members' names. The details page calls it when *Poista asunto* is selected, and the dialog shows a spinner until then. Nothing is loaded for pages that never open the dialog.
 
 ### Server functions and reasons
 
