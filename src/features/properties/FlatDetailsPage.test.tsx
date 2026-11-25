@@ -29,6 +29,8 @@ vi.mock('#/features/rent-payments/functions', () => ({}))
 vi.mock('./functions', () => ({
   restoreProperty: vi.fn(() => Promise.resolve({ ok: true })),
   archiveProperty: vi.fn(() => Promise.resolve({ ok: true })),
+  getPropertyDeletion: vi.fn(() => new Promise(() => undefined)),
+  deleteProperty: vi.fn(),
 }))
 
 const aino: Tenancy = {
@@ -393,5 +395,38 @@ describe('Archiving on the flat details page', () => {
     const dialog = screen.getByRole('dialog', { name: 'Archive the flat?' })
     expect(dialog).toHaveTextContent('Kuusikuja 3 B 12 will be hidden')
     fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }))
+  })
+})
+
+describe('Deleting on the flat details page', () => {
+  test('an owner has Delete flat at the end of the menu, a member not', () => {
+    const { unmount } = renderPage(details())
+    fireEvent.click(screen.getByRole('button', { name: 'More actions' }))
+    const items = within(screen.getByRole('menu')).getAllByRole('menuitem')
+    expect(items.at(-1)).toHaveTextContent('Delete flat')
+    unmount()
+
+    renderPage(details({ role: 'member' }))
+    fireEvent.click(screen.getByRole('button', { name: 'More actions' }))
+    expect(
+      within(screen.getByRole('menu')).queryByRole('menuitem', {
+        name: 'Delete flat',
+      }),
+    ).toBeNull()
+    expect(
+      within(screen.getByRole('menu')).getByRole('menuitem', {
+        name: 'Archive flat',
+      }),
+    ).toBeVisible()
+  })
+
+  test('Delete flat opens the dialog, which loads what is removed', () => {
+    renderPage(details())
+    fireEvent.click(screen.getByRole('button', { name: 'More actions' }))
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Delete flat' }))
+
+    expect(
+      screen.getByRole('progressbar', { name: "Loading the flat's data" }),
+    ).toBeInTheDocument()
   })
 })

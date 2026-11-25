@@ -352,6 +352,72 @@
   "property_card_shared_with_you": "jaettu sinulle",
   "property_city": "Kaupunki",
   "property_close": "Sulje",
+  "property_delete": "Poista asunto",
+  "property_delete_address": "Vahvista kirjoittamalla katuosoite",
+  "property_delete_cancel": "Peru",
+  "property_delete_confirm": "Poista",
+  "property_delete_data_text": "{address} ja kaikki sen tiedot poistetaan pysyvästi. Poistoa ei voi perua. Jos haluat säilyttää tiedot, arkistoi asunto.",
+  "property_delete_empty_text": "{address} poistetaan pysyvästi. Poistoa ei voi perua.",
+  "property_delete_loading": "Haetaan asunnon tietoja",
+  "property_delete_losses": "Poistetaan myös:",
+  "property_delete_members": [
+    {
+      "declarations": [
+        "input count",
+        "input names",
+        "local countPlural = count: plural"
+      ],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Jäsen menettää pääsynsä asuntoon: {names}",
+        "countPlural=other": "Jäsenet menettävät pääsynsä asuntoon: {names}"
+      }
+    }
+  ],
+  "property_delete_other_owners_names": "Muut omistajat: {names}",
+  "property_delete_permanently": "Poista pysyvästi",
+  "property_delete_receipts": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} kuitti",
+        "countPlural=other": "{count} kuittia"
+      }
+    }
+  ],
+  "property_delete_rent_payments": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} vuokranmaksu",
+        "countPlural=other": "{count} vuokranmaksua"
+      }
+    }
+  ],
+  "property_delete_tenancies": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} vuokrasuhde",
+        "countPlural=other": "{count} vuokrasuhdetta"
+      }
+    }
+  ],
+  "property_delete_title": "Poistetaanko asunto?",
+  "property_delete_transactions": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} kirjaus",
+        "countPlural=other": "{count} kirjausta"
+      }
+    }
+  ],
+  "property_deleted_notice": "{address} poistettu",
   "property_edit_page_title": "Muokkaa asuntoa – Kotivalo",
   "property_edit_title": "Muokkaa asuntoa",
   "property_floor_area": "Pinta-ala (m²)",
