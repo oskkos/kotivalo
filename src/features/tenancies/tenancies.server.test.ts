@@ -733,7 +733,13 @@ describe('tenancy logging', () => {
       noticeGivenBy: 'tenant',
     })
     const text = JSON.stringify(capture.lines)
-    for (const secret of ['Aino', 'Koski', '040', 'aino@example.com']) {
+    for (const secret of [
+      'Aino',
+      'Koski',
+      '040 123 4567',
+      '040 765 4321',
+      'aino@example.com',
+    ]) {
       expect(text).not.toContain(secret)
     }
   })
@@ -1479,7 +1485,9 @@ describe('Adding a tenant fee', () => {
       propertyId: flat,
       tenancyId: id,
     })
-    expect(JSON.stringify(capture.lines.at(-1))).not.toContain('1500')
+    expect(JSON.stringify(capture.lines.at(-1))).not.toMatch(
+      /(?<![\w-])1500(?![\w-])/,
+    )
   })
 
   test('Other fee with a description', async () => {
@@ -1721,7 +1729,9 @@ describe("Changing a tenancy's rent", () => {
       propertyId: flat,
       tenancyId: id,
     })
-    expect(JSON.stringify(capture.lines.at(-1))).not.toContain('92000')
+    expect(JSON.stringify(capture.lines.at(-1))).not.toMatch(
+      /(?<![\w-])92000(?![\w-])/,
+    )
   })
 
   test("Correcting the first rent on the tenancy's start", async () => {

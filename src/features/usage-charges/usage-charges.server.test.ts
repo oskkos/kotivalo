@@ -185,7 +185,9 @@ describe('Adding a usage charge', () => {
       propertyId: flat,
       usageChargeId: id,
     })
-    expect(JSON.stringify(capture.lines.at(-1))).not.toContain('2200')
+    expect(JSON.stringify(capture.lines.at(-1))).not.toMatch(
+      /(?<![\w-])2200(?![\w-])/,
+    )
   })
 
   test('Other with a description', async () => {

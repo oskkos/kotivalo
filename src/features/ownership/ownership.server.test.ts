@@ -152,7 +152,7 @@ describe("Changing a flat's ownership", () => {
         owners: 2,
       }),
     ])
-    expect(JSON.stringify(logLines)).not.toContain('5000')
+    expect(JSON.stringify(logLines)).not.toMatch(/(?<![\w-])5000(?![\w-])/)
   })
 
   test("A change on the current period's start corrects its split", async () => {

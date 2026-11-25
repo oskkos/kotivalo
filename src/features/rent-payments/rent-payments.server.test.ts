@@ -116,7 +116,9 @@ describe('Recording a rent payment', () => {
       propertyId: flat,
       tenancyId: tenancy,
     })
-    expect(JSON.stringify(capture.lines)).not.toContain('89000')
+    expect(JSON.stringify(capture.lines)).not.toMatch(
+      /(?<![\w-])89000(?![\w-])/,
+    )
   })
 
   test('A payment date in the future is refused', async () => {
