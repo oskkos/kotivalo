@@ -16,6 +16,7 @@ import { validateEnding } from './notice'
 import { paymentsOutside, validateTenancyDates } from './rules'
 import {
   fillsBeforeFirst,
+  feeChangesAfterEnd,
   firstPeriodMove,
   firstRentMove,
   periodAfterEnd,
@@ -433,7 +434,7 @@ export async function updateTenancy(
   }
   if (
     periodAfterEnd(occupants, validTo) ||
-    fees.some((fee) => periodAfterEnd(fee.amounts, validTo))
+    fees.some((fee) => feeChangesAfterEnd(fee.amounts, validTo))
   ) {
     return fail('tenancy_has_changes_after_end')
   }
@@ -504,7 +505,7 @@ export async function endTenancy(
   if (
     periodAfterEnd(occupantsById[tenancyId] ?? [], ending.lastDay) ||
     (feesById[tenancyId] ?? []).some((fee) =>
-      periodAfterEnd(fee.amounts, ending.lastDay),
+      feeChangesAfterEnd(fee.amounts, ending.lastDay),
     )
   ) {
     return fail('tenancy_has_changes_after_end')

@@ -3,6 +3,7 @@ import {
   fillsBeforeFirst,
   firstPeriodMove,
   firstRentMove,
+  feeChangesAfterEnd,
   periodAfterEnd,
   rentAfterEnd,
   rentInMonth,
@@ -303,6 +304,16 @@ describe('Occupants and fees stay inside their tenancy', () => {
     expect(periodAfterEnd(occupants, '2027-01-31')).toBe(true)
     expect(periodAfterEnd(occupants, '2027-03-31')).toBe(false)
     expect(periodAfterEnd(occupants, null)).toBe(false)
+  })
+
+  test("A fee ended after the last day doesn't block ending", () => {
+    const parking = [
+      period('2026-02-01', '2026-12-31', 1500),
+      period('2027-01-01', null, 0),
+    ]
+    expect(feeChangesAfterEnd(parking, '2026-12-31')).toBe(false)
+    expect(feeChangesAfterEnd(parking, '2026-01-31')).toBe(true)
+    expect(feeChangesAfterEnd(parking, null)).toBe(false)
   })
 
   test('Ending before a fee change is refused', () => {
