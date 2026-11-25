@@ -2,18 +2,7 @@
 // one atomically() batch and carry the owner check in their statements, so a
 // role lost between the read and the write changes nothing. The caller stores
 // and deletes the receipt files; this module returns the keys it removed.
-import {
-  and,
-  count,
-  desc,
-  eq,
-  exists,
-  gte,
-  lte,
-  ne,
-  sql,
-  sum,
-} from 'drizzle-orm'
+import { and, count, desc, eq, exists, gte, lte, sql, sum } from 'drizzle-orm'
 import type { IsoDate } from '#/lib/dates'
 import {
   properties,
@@ -24,7 +13,7 @@ import {
   type TransactionCategory,
   type TransactionType,
 } from '#/server/db/schema'
-import { STORAGE_QUOTA } from '#/server/files/quota'
+import { fitsStorageQuota, storageUsage } from '#/server/db/storage-usage'
 import { atomically, type Db } from '#/server/platform/db.server'
 
 export interface TransactionFields {
@@ -94,29 +83,6 @@ export function transactionRepository(db: Db) {
       isOwner(actorId, propertyId),
     )
 
-  /**
-   * One more file of `size` bytes fits the actor's storage quota, not
-   * counting the receipt of `replacing`. Inside the write, so parallel
-   * uploads can't all pass a check made before them.
-   */
-  const fitsQuota = (actorId: string, size: number, replacing?: string) => {
-    const own = and(
-      eq(receipts.uploadedBy, actorId),
-      replacing === undefined
-        ? undefined
-        : ne(receipts.transactionId, replacing),
-    )
-    const used = db
-      .select({ bytes: sql`coalesce(sum(${receipts.size}), 0)` })
-      .from(receipts)
-      .where(own)
-    const files = db.select({ files: count() }).from(receipts).where(own)
-    return and(
-      sql`(${used}) + ${size} <= ${STORAGE_QUOTA.bytes}`,
-      sql`(${files}) + 1 <= ${STORAGE_QUOTA.files}`,
-    )
-  }
-
   /** Inserts a receipt for an entry that exists in the actor's flat. */
   const insertReceipt = (
     actorId: string,
@@ -141,7 +107,7 @@ export function transactionRepository(db: Db) {
         .where(
           and(
             ownedEntry(actorId, propertyId, transactionId),
-            fitsQuota(actorId, receipt.size, transactionId),
+            fitsStorageQuota(db, actorId, receipt.size, transactionId),
           ),
         ),
     )
@@ -308,7 +274,9 @@ export function transactionRepository(db: Db) {
               and(
                 eq(properties.id, propertyId),
                 isOwner(actorId, propertyId),
-                receipt ? fitsQuota(actorId, receipt.size) : undefined,
+                receipt
+                  ? fitsStorageQuota(db, actorId, receipt.size)
+                  : undefined,
               ),
             ),
         )
@@ -341,7 +309,7 @@ export function transactionRepository(db: Db) {
       // A replacement must fit the quota, or nothing changes.
       const fits =
         change.kind === 'replace'
-          ? fitsQuota(actorId, change.receipt.size, transactionId)
+          ? fitsStorageQuota(db, actorId, change.receipt.size, transactionId)
           : undefined
       const update = db
         .update(transactions)
@@ -449,24 +417,12 @@ export function transactionRepository(db: Db) {
       }
     },
 
-    /** The bytes and number of receipt files the user has uploaded. */
-    /** The user's stored receipts, not counting the receipt of `replacing`. */
-    async storageUsage(
-      userId: string,
-      replacing?: string,
-    ): Promise<{ bytes: number; files: number }> {
-      const [row] = await db
-        .select({ bytes: sum(receipts.size), files: count() })
-        .from(receipts)
-        .where(
-          and(
-            eq(receipts.uploadedBy, userId),
-            replacing === undefined
-              ? undefined
-              : ne(receipts.transactionId, replacing),
-          ),
-        )
-      return { bytes: Number(row.bytes ?? 0), files: row.files }
+    /**
+     * The bytes and number of files the user has uploaded, receipts and
+     * documents, not counting the receipt of `replacing`.
+     */
+    storageUsage(userId: string, replacing?: string) {
+      return storageUsage(db, userId, replacing)
     },
   }
 }

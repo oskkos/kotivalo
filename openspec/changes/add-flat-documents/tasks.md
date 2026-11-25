@@ -1,9 +1,9 @@
 ## 1. One storage quota across receipts and documents
 
-- [ ] 1.1 `property_documents` in `src/server/db/schema.ts` as in design.md ("One table"), with `DOCUMENT_KINDS`; `pnpm db:generate` and the committed migration (adds a table only); `pnpm db:migrate:local`
-- [ ] 1.2 `src/server/db/storage-usage.ts`: `uploadedFiles`, `fitsStorageQuota` and `storageUsage` over receipts and documents; `transaction.repository.server.ts` uses them for the receipt insert and `storageUsage`, and the existing receipt quota tests pass unchanged; `quota.ts` comment updated
-- [ ] 1.3 Workers tests for the builder: "Documents count towards the receipt quota" (`transactions.server.test.ts`), receipts and documents summed per uploader, a replaced receipt left out, another uploader's files not counted
-- [ ] 1.4 The flat deletion cascade test (`CHILD_TABLES`, `fill`) gets `property_documents`
+- [x] 1.1 `property_documents` in `src/server/db/schema.ts` as in design.md ("One table"), with `DOCUMENT_KINDS`; `pnpm db:generate` and the committed migration (adds a table only); `pnpm db:migrate:local`
+- [x] 1.2 `src/server/db/storage-usage.ts`: `uploadedFiles`, `fitsStorageQuota` and `storageUsage` over receipts and documents; `transaction.repository.server.ts` uses them for the receipt insert and `storageUsage`, and the existing receipt quota tests pass unchanged; `quota.ts` comment updated
+- [x] 1.3 Workers tests for the builder: "Documents count towards the receipt quota" (`transactions.server.test.ts`), receipts and documents summed per uploader, a replaced receipt left out, another uploader's files not counted
+- [x] 1.4 The flat deletion cascade test (`CHILD_TABLES`, `fill`) gets `property_documents`
 
 ## 2. The documents repository
 

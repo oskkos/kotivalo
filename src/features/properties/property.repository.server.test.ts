@@ -199,6 +199,7 @@ describe('propertyRepository', () => {
       transactions: 'property_id',
       receipts:
         'transaction_id IN (SELECT id FROM transactions WHERE property_id',
+      property_documents: 'property_id',
     } as const
 
     async function rowsOf(table: keyof typeof CHILD_TABLES, id: string) {
@@ -302,6 +303,15 @@ describe('propertyRepository', () => {
         `rc-${id}`,
         `tx-${id}`,
         key,
+        userId,
+      )
+      await exec(
+        `INSERT INTO property_documents (id, property_id, tenancy_id, kind, name, date, key, content_type, size, filename, uploaded_by, created_at, updated_at)
+         VALUES (?, ?, ?, 'lease', 'Vuokrasopimus', '2025-03-01', ?, 'application/pdf', 9, 'sopimus.pdf', ?, 0, 0)`,
+        `pd-${id}`,
+        id,
+        `t-${id}`,
+        `documents/${key}`,
         userId,
       )
     }
