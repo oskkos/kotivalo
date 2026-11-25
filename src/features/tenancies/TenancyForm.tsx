@@ -21,7 +21,9 @@ import type { Period } from '#/features/recurring-amounts/periods'
 import { typedAmount } from '#/features/recurring-amounts/schemas'
 import { clientLog } from '#/lib/client-log'
 import { parseFiDate, type IsoDate } from '#/lib/dates'
-import { formatAmountInput, formatDate } from '#/lib/format'
+import { chargeName } from '#/lib/charge-labels'
+import { parseDecimal } from '#/lib/decimal'
+import { formatAmountInput, formatDate, formatMoney } from '#/lib/format'
 import { failureReason } from '#/lib/network-error'
 import type { AlertReason, FieldReason } from '#/lib/reasons'
 import { m } from '#/paraglide/messages.js'
@@ -39,6 +41,7 @@ import {
   waysFor,
 } from './ending'
 import { contractShortLabel } from './labels'
+import { offeredFees, type FeeOfTenancy } from './fees'
 import { suggestedRent } from './rent'
 import {
   typedDueDay,
@@ -58,6 +61,8 @@ interface Props {
   tenancyRents?: Partial<Record<string, readonly Period<number>[]>>
   /** Adding: the flat's tenancies, newest first, for the previous one. */
   tenancies?: readonly Tenancy[]
+  /** Adding: each tenancy's tenant fees, for the fees offered. */
+  tenancyFees?: Partial<Record<string, readonly FeeOfTenancy[]>>
   /** Adding: today in Finland. */
   today?: IsoDate
   onSaved: () => Promise<void>
@@ -184,6 +189,8 @@ export function TenancyForm(props: Props) {
   const rentEditedRef = useRef(false)
   // An earlier tenancy's ending (adding only, a start before today).
   const [ended, setEnded] = useState(false)
+  // The previous tenancy's fees to continue (adding only), by id.
+  const [copied, setCopied] = useState<readonly string[]>([])
   const [by, setBy] = useState<NoticeGiver>('tenant')
   const lastDayEditedRef = useRef(false)
 
@@ -225,6 +232,9 @@ export function TenancyForm(props: Props) {
                 ...fields,
                 rent,
                 occupants,
+                copyFeeIds: offered
+                  .map((o) => o.fee.id)
+                  .filter((id) => copied.includes(id)),
                 ...(withEnding
                   ? {
                       ending: {
@@ -258,6 +268,39 @@ export function TenancyForm(props: Props) {
   const contractType = useSelector(form.store, (s) => s.values.contractType)
   const start = useSelector(form.store, (s) => parseFiDate(s.values.validFrom))
   const previous = previousTenancy(props.tenancies ?? [], start, props.today)
+  // The previous tenancy's fees, offered unchecked; before a start is entered,
+  // those of the flat's latest tenancy.
+  const offered = editing
+    ? []
+    : offeredFees(
+        (props.tenancies ?? []).map((t) => ({
+          ...t,
+          fees: props.tenancyFees?.[t.id] ?? [],
+        })),
+        start ?? '9999-12-31',
+      )
+  const rentCents = parseDecimal(
+    useSelector(form.store, (s) => s.values.rent),
+    2,
+  )
+  const persons = Number(useSelector(form.store, (s) => s.values.occupants))
+  const monthTotal =
+    rentCents === undefined
+      ? undefined
+      : rentCents +
+        offered
+          .filter((o) => copied.includes(o.fee.id))
+          .reduce(
+            (sum, o) =>
+              sum +
+              o.amount *
+                (o.fee.basis === 'per_occupant' &&
+                Number.isInteger(persons) &&
+                persons > 0
+                  ? persons
+                  : 1),
+            0,
+          )
   const contractMade = useSelector(form.store, (s) =>
     parseFiDate(s.values.contractMade),
   )
@@ -551,6 +594,53 @@ export function TenancyForm(props: Props) {
             </Typography>
           )}
         </Section>
+        {!editing && offered.length > 0 ? (
+          <Section title={m.tenancy_fees_title()}>
+            <Typography variant="body2" color="text.secondary">
+              {m.tenancy_form_fees_note()}
+            </Typography>
+            {offered.map(({ fee, amount }) => (
+              <FormControlLabel
+                key={fee.id}
+                control={
+                  <Checkbox
+                    checked={copied.includes(fee.id)}
+                    onChange={(e) => {
+                      const { checked } = e.target
+                      setCopied((current) =>
+                        checked
+                          ? [...current, fee.id]
+                          : current.filter((id) => id !== fee.id),
+                      )
+                    }}
+                  />
+                }
+                label={`${chargeName(fee)} · ${
+                  fee.basis === 'per_occupant'
+                    ? m.tenancy_form_fee_per_occupant({
+                        amount: formatMoney(amount),
+                      })
+                    : formatMoney(amount)
+                }`}
+                sx={{ minHeight: 44 }}
+              />
+            ))}
+          </Section>
+        ) : null}
+        {!editing && monthTotal !== undefined ? (
+          <Stack
+            role="status"
+            direction="row"
+            sx={{ justifyContent: 'space-between', gap: 1.5 }}
+          >
+            <Typography variant="body2" sx={{ fontWeight: 800 }}>
+              {m.tenancy_fees_total()}
+            </Typography>
+            <Typography sx={{ fontWeight: 900 }}>
+              {formatMoney(monthTotal)}
+            </Typography>
+          </Stack>
+        ) : null}
         {canEnd && entered ? (
           <Section title={m.tenancy_form_ending()}>
             <FormControlLabel

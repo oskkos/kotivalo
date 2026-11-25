@@ -82,6 +82,40 @@ test.describe('Adding a tenant', () => {
 })
 
 test.describe('The tenancy page', () => {
+  test('A tenancy without fees', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    const fees = page.getByRole('region', { name: 'Fees on top of the rent' })
+    await expect(fees).toContainText('Nothing is paid on top of the rent.')
+    await expect(fees.getByRole('link', { name: 'Add a fee' })).toBeVisible()
+  })
+
+  test("The occupants and the fees with the month's total", async ({
+    page,
+  }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await addFee(page, {
+      kind: 'Water charge',
+      amount: '22',
+      from: '01/03/2025',
+    })
+    await addFee(page, {
+      kind: 'Parking space',
+      amount: '15',
+      from: '01/03/2025',
+    })
+    await setOccupants(page, '2', '01/03/2025')
+    const fees = page.getByRole('region', { name: 'Fees on top of the rent' })
+    await expect(fees).toContainText('€22.00/occupant/month × 2')
+    await expect(fees).toContainText('€44.00/month')
+    await expect(fees).toContainText('€15.00/month')
+    await expect(fees).toContainText('€949.00')
+    await expect(page.getByRole('region', { name: 'Occupants' })).toContainText(
+      '2',
+    )
+  })
+
   test('Opening the tenancy page from the details page', async ({ page }) => {
     const id = await ownerWithFlat(page)
     await addTenant(page, id, aino)
@@ -639,20 +673,11 @@ test.describe('Undoing a tenant fee change', () => {
   })
 })
 
-test.describe('The tenancy page', () => {
-  test('A tenancy without fees', async ({ page }) => {
+test.describe('Occupants and fees of a new tenancy', () => {
+  test('A checked fee is copied to the new tenancy', async ({ page }) => {
     const id = await ownerWithFlat(page)
-    await addTenant(page, id, aino)
-    const fees = page.getByRole('region', { name: 'Fees on top of the rent' })
-    await expect(fees).toContainText('Nothing is paid on top of the rent.')
-    await expect(fees.getByRole('link', { name: 'Add a fee' })).toBeVisible()
-  })
-
-  test("The occupants and the fees with the month's total", async ({
-    page,
-  }) => {
-    const id = await ownerWithFlat(page)
-    await addTenant(page, id, aino)
+    const thisYear = String(new Date().getFullYear())
+    await addTenant(page, id, { ...aino, termEnd: `31/12/${thisYear}` })
     await addFee(page, {
       kind: 'Water charge',
       amount: '22',
@@ -663,14 +688,43 @@ test.describe('The tenancy page', () => {
       amount: '15',
       from: '01/03/2025',
     })
-    await setOccupants(page, '2', '01/03/2025')
-    const fees = page.getByRole('region', { name: 'Fees on top of the rent' })
-    await expect(fees).toContainText('€22.00/occupant/month × 2')
-    await expect(fees).toContainText('€44.00/month')
-    await expect(fees).toContainText('€15.00/month')
-    await expect(fees).toContainText('€949.00')
-    await expect(page.getByRole('region', { name: 'Occupants' })).toContainText(
-      '2',
-    )
+    await page.goto(`/properties/${id}/tenancy/new`)
+    await waitForHydration(page)
+    await page
+      .getByRole('textbox', { name: 'Starts' })
+      .fill(`01/01/${nextYear}`)
+    await expect(
+      page.getByRole('checkbox', { name: 'Water charge · €22.00/occupant' }),
+    ).not.toBeChecked()
+    await expect(
+      page.getByRole('checkbox', { name: 'Parking space · €15.00' }),
+    ).not.toBeChecked()
+    await page.getByRole('textbox', { name: 'Name' }).fill('Mikko Lehtinen')
+    const today = new Date()
+    await page
+      .getByRole('textbox', { name: 'Contract made' })
+      .fill(
+        `${String(today.getDate()).padStart(2, '0')}/${String(today.getMonth() + 1).padStart(2, '0')}/${String(today.getFullYear())}`,
+      )
+    await page.getByRole('textbox', { name: 'Monthly rent (€)' }).fill('890')
+    await page.getByRole('textbox', { name: 'Occupants' }).fill('2')
+    await page.getByRole('textbox', { name: 'Due day' }).fill('5')
+    await page
+      .getByRole('checkbox', { name: 'Water charge · €22.00/occupant' })
+      .check()
+    await expect(page.getByRole('status')).toContainText('€934.00')
+    await page.getByRole('button', { name: 'Save tenant' }).click()
+    await expect(page).toHaveURL(new RegExp(`/properties/${id}/tenancy$`))
+    await expect(page.getByText('Mikko Lehtinen')).toBeVisible()
+  })
+
+  test('The occupants of a new tenancy', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, { ...aino, occupants: '2' })
+    await expect(
+      page
+        .getByRole('region', { name: 'Occupants' })
+        .getByText('2', { exact: true }),
+    ).toBeVisible()
   })
 })

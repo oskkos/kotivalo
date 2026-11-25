@@ -723,6 +723,8 @@
   "tenancy_form_email": "Sähköposti",
   "tenancy_form_ended": "Vuokrasuhde on jo irtisanottu tai päättynyt",
   "tenancy_form_ending": "Päättyminen",
+  "tenancy_form_fee_per_occupant": "{amount}/asukas",
+  "tenancy_form_fees_note": "Valitse maksut, jotka jatkuvat uudella vuokralaisella. Valitsematon maksu sisältyy vuokraan.",
   "tenancy_form_made_hint": "Ratkaisee vuokranantajan irtisanomisajan: ennen 1.10.2026 tehdyssä sopimuksessa 6 kk vuoden jälkeen, myöhemmin tehdyssä 4 kk kahden vuoden jälkeen, muuten 3 kk.",
   "tenancy_form_name": "Nimi",
   "tenancy_form_new_title": "Uusi vuokralainen",

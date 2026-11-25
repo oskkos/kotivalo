@@ -16,6 +16,10 @@ export interface TenantDetails {
   /** As typed; the suggested rent otherwise, or 890 € without one. */
   rent?: string
   dueDay?: string
+  /** As typed; the form's default (1) otherwise. */
+  occupants?: string
+  /** The previous tenancy's fees to continue, by their checkbox's name. */
+  keepFees?: (string | RegExp)[]
   /** An earlier tenancy's ending, recorded in the same form. */
   ending?: {
     /** The way's button, e.g. 'Tenant'; the first way otherwise. */
@@ -64,6 +68,14 @@ export async function addTenant(
   await page
     .getByRole('textbox', { name: 'Due day' })
     .fill(tenant.dueDay ?? '5')
+  if (tenant.occupants !== undefined) {
+    await page
+      .getByRole('textbox', { name: 'Occupants' })
+      .fill(tenant.occupants)
+  }
+  for (const fee of tenant.keepFees ?? []) {
+    await page.getByRole('checkbox', { name: fee }).check()
+  }
   if (tenant.ending) {
     const { by, noticeDate, lastDay } = tenant.ending
     await page

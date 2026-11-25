@@ -723,6 +723,8 @@
   "tenancy_form_email": "E-post",
   "tenancy_form_ended": "Hyresförhållandet har redan sagts upp eller upphört",
   "tenancy_form_ending": "Upphörande",
+  "tenancy_form_fee_per_occupant": "{amount}/boende",
+  "tenancy_form_fees_note": "Välj de avgifter som fortsätter med den nya hyresgästen. En avgift som inte väljs ingår i hyran.",
   "tenancy_form_made_hint": "Avgör hyresvärdens uppsägningstid: i ett avtal som ingåtts före 1.10.2026 är den 6 månader efter ett år, i ett senare avtal 4 månader efter två år, annars 3 månader.",
   "tenancy_form_name": "Namn",
   "tenancy_form_new_title": "Ny hyresgäst",
