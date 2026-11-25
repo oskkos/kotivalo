@@ -1,5 +1,12 @@
 import { expect, test } from '@playwright/test'
-import { addFlat, card, fillInFlat, flatId, kuusikuja } from './support/flats'
+import {
+  addFlat,
+  card,
+  fillInFlat,
+  flatId,
+  housingCompany,
+  kuusikuja,
+} from './support/flats'
 import { signIn, uniqueEmail, waitForHydration } from './support/sign-in'
 
 // The browser's language is English, so the app is in English.
@@ -61,7 +68,7 @@ test.describe('Flat pages', () => {
 test.describe('Editing a flat', () => {
   test.beforeEach(async ({ page }) => {
     await signIn(page, uniqueEmail('muokkaus'))
-    await addFlat(page, kuusikuja)
+    await addFlat(page, { ...kuusikuja, ...housingCompany })
     await card(page, 'Kuusikuja 3 B 12').getByRole('link').click()
     await page.getByRole('link', { name: 'Edit flat' }).click()
     await expect(
@@ -84,6 +91,9 @@ test.describe('Editing a flat', () => {
     await expect(field('City')).toHaveValue('Tampere')
     // English formats the area with a decimal point.
     await expect(field('Floor area (m²)')).toHaveValue('48.5')
+    await expect(field('Housing company name')).toHaveValue('As Oy Kuusikuja 3')
+    await expect(field('Business ID')).toHaveValue('2345678-0')
+    await expect(field('Apartment number')).toHaveValue('B 12')
     await expect(page.getByRole('button', { name: '2 rooms' })).toHaveAttribute(
       'aria-pressed',
       'true',

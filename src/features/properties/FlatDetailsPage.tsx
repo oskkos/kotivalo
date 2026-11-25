@@ -48,6 +48,7 @@ import { ArchiveDialog } from './ArchiveDialog'
 import { DeleteFlatDialog } from './DeleteFlatDialog'
 import type { FlatDetails } from './details.server'
 import { restoreProperty } from './functions'
+import { housingCompanyLine } from './housing-company-line'
 import { ownershipLine } from './ownership-line'
 import { roomCountLabel } from './room-count'
 
@@ -280,6 +281,7 @@ function ArchivedBand(props: {
 
 function Hero(props: { view: FlatDetails }) {
   const { property, owners } = props.view
+  const housingLine = housingCompanyLine(property)
   return (
     <Stack
       component="section"
@@ -308,6 +310,13 @@ function Hero(props: { view: FlatDetails }) {
       >
         {`${property.postcode} ${property.city}`}
       </Typography>
+      {housingLine === '' ? null : (
+        <Typography
+          sx={{ fontSize: 15, fontWeight: 700, color: colors.onPlumMuted }}
+        >
+          {housingLine}
+        </Typography>
+      )}
       {owners.length > 0 ? (
         <TextLink
           to="/properties/$propertyId/sharing"

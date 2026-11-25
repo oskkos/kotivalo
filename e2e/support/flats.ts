@@ -13,6 +13,10 @@ export async function fillInFlat(
     floorArea: string
     /** "Owned since", as typed; the form's default (today) otherwise. */
     ownedSince?: string
+    /** The housing company section, left empty when not given. */
+    housingCompanyName?: string
+    businessId?: string
+    apartmentNumber?: string
   },
 ) {
   // Typing before hydration is lost when React takes over the form.
@@ -26,6 +30,16 @@ export async function fillInFlat(
   await page
     .getByRole('textbox', { name: 'Floor area (m²)' })
     .fill(flat.floorArea)
+  const housing = {
+    'Housing company name': flat.housingCompanyName,
+    'Business ID': flat.businessId,
+    'Apartment number': flat.apartmentNumber,
+  }
+  for (const [name, value] of Object.entries(housing)) {
+    if (value !== undefined) {
+      await page.getByRole('textbox', { name }).fill(value)
+    }
+  }
   if (flat.ownedSince !== undefined) {
     await page
       .getByRole('textbox', { name: 'Owned since' })
@@ -58,6 +72,12 @@ export async function flatId(page: Page, streetAddress: string) {
     throw new Error(`No link on the card of ${streetAddress}`)
   }
   return id
+}
+
+export const housingCompany = {
+  housingCompanyName: 'As Oy Kuusikuja 3',
+  businessId: '2345678-0',
+  apartmentNumber: 'B 12',
 }
 
 export const kuusikuja = {

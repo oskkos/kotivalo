@@ -33,7 +33,13 @@ function EditPropertyRoute() {
   return (
     <PropertyForm
       title={m.property_edit_title()}
-      initial={{ ...details, floorArea: formatTenths(floorArea) }}
+      initial={{
+        ...details,
+        floorArea: formatTenths(floorArea),
+        housingCompanyName: details.housingCompanyName ?? '',
+        businessId: details.businessId ?? '',
+        apartmentNumber: details.apartmentNumber ?? '',
+      }}
       save={(changed) => updateProperty({ data: { id, ...changed } })}
       onSaved={() => {
         void router.invalidate().then(toDetails)
