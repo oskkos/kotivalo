@@ -1104,8 +1104,8 @@
       "declarations": ["input count", "local countPlural = count: plural"],
       "selectors": ["countPlural"],
       "match": {
-        "countPlural=one": "Tom {count} mån.",
-        "countPlural=other": "Tom {count} mån."
+        "countPlural=one": "Ledig {count} mån.",
+        "countPlural=other": "Ledig {count} mån."
       }
     }
   ],

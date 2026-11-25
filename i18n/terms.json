@@ -691,10 +691,14 @@
     },
     "en": {
       "term": "financing charge",
-      "match": ["financing charges?", "capital charges?"],
+      "match": [
+        "financing charges?",
+        "capital charges?",
+        "capital expenditure charges?"
+      ],
       "status": "proposed"
     },
-    "notes": "The Tax Administration's main word is pääomavastike / kapitalvederlag (also the Limited Liability Housing Companies Act's, 3:3), with rahoitusvastike / finansieringsvederlag in brackets. Kotivalo uses rahoitusvastike, the word on housing company invoices, and the patterns accept both. The Tax Administration's English has no settled term (\"capital charges\", \"capital expenditure charges\", \"loan charge\"), so \"financing charge\" stays proposed until a fluent reviewer decides; the 7H instructions' \"capital charges\" is accepted by the pattern and is the main alternative. Once a reviewer decides, keep one English pattern and move the other to avoid."
+    "notes": "The Tax Administration's main word is pääomavastike / kapitalvederlag (also the Limited Liability Housing Companies Act's, 3:3), with rahoitusvastike / finansieringsvederlag in brackets. Kotivalo uses rahoitusvastike, the word on housing company invoices, and the patterns accept both. The Tax Administration's English has no settled term (\"capital charges\", \"capital expenditure charges\", \"loan charge\"), so \"financing charge\" stays proposed until a fluent reviewer decides; the 7H instructions use both: \"capital charges\" in the deductions text and \"capital expenditure charges\" in the label of row 2.3, which the form 7H page quotes; the patterns accept both, and they are the main alternatives. The form 7H page quotes the row 2.3 label as the form has it, so if a reviewer later settles on another English word, keep that pattern and give flat_tax_row_capital_charges an except rather than avoiding the form's wording."
   },
   "fixed_term": {
     "code": "fixedTerm",
@@ -1517,7 +1521,7 @@
     "fi": {
       "term": "vuokra",
       "match": [
-        "vuokr(a|an|aa|at|ia|ien|ista|ille|ana|aan|asta|alle|alla|assa|aksi|alta|ineen|issa|illa|ilta|iin|iksi|ina)"
+        "vuokr(a|an|aa|at|ia|ien|ista|ille|ana|aan|asta|alle|alla|assa|aksi|alta|ineen|issa|illa|ilta|iin|iksi|ina)(?!-)"
       ],
       "status": "verified",
       "sources": [
