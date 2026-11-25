@@ -121,6 +121,8 @@ export const createTenancyInput = tenancyFields.and(
     occupants: typedOccupants,
     /** An earlier tenancy's ending, recorded with it. */
     ending: endingFields.optional(),
+    /** Fees of the previous tenancy to continue, by id. */
+    copyFeeIds: z.array(id).max(20).optional(),
   }),
 )
 

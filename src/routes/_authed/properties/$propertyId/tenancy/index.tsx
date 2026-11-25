@@ -20,6 +20,7 @@ import { CancelEndingDialog } from '#/features/tenancies/CancelEndingDialog'
 import { tenancyStatus } from '#/features/tenancies/status'
 import type { Tenancy } from '#/features/tenancies/tenancy.repository.server'
 import { TenancyPage } from '#/features/tenancies/TenancyPage'
+import { chargeName } from '#/lib/charge-labels'
 import { formatDate, formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 
@@ -121,6 +122,27 @@ function TenancyRoute() {
           </ButtonLink>
         )}
         onUndoRent={setUndoingRent}
+        feeAdd={(tenancy) => (
+          <ButtonLink
+            to="/properties/$propertyId/tenancy/$tenancyId/fees/new"
+            params={{ propertyId, tenancyId: tenancy.id }}
+            variant="outlined"
+            sx={{ minHeight: 44, px: 2, flexShrink: 0 }}
+          >
+            {m.tenancy_fee_add()}
+          </ButtonLink>
+        )}
+        feeChange={(tenancy, fee) => (
+          <ButtonLink
+            to="/properties/$propertyId/tenancy/$tenancyId/fees/$feeId"
+            params={{ propertyId, tenancyId: tenancy.id, feeId: fee.id }}
+            variant="outlined"
+            aria-label={m.tenancy_fee_change_label({ name: chargeName(fee) })}
+            sx={{ minHeight: 44, px: 2, flexShrink: 0 }}
+          >
+            {m.amounts_change()}
+          </ButtonLink>
+        )}
         onChangeOccupants={setChangingOccupants}
         onUndoOccupants={setUndoingOccupants}
         currentActions={(tenancy) => {

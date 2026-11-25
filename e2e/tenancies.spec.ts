@@ -2,7 +2,15 @@ import { expect, test } from '@playwright/test'
 import { addFlat, card } from './support/flats'
 import { accepted, ownerWithFlat } from './support/sharing'
 import { waitForHydration } from './support/sign-in'
-import { addTenant, aino, changeRent, setOccupants } from './support/tenancies'
+import { logEntry } from './support/transactions'
+import {
+  addFee,
+  addTenant,
+  aino,
+  changeRent,
+  openFee,
+  setOccupants,
+} from './support/tenancies'
 
 // The browser's language is English, so the app is in English.
 
@@ -404,7 +412,7 @@ test.describe("Changing a tenancy's rent", () => {
     const id = await ownerWithFlat(page)
     await addTenant(page, id, aino)
     await changeRent(page, '920', `01/03/${nextYear}`)
-    const rent = page.getByRole('region', { name: 'Rent' })
+    const rent = page.getByRole('region', { name: 'Rent', exact: true })
     await expect(rent).toContainText('€890.00 a month')
     await expect(rent).toContainText(`From 01/03/${nextYear}: €920.00/month`)
     await expect(
@@ -418,7 +426,7 @@ test.describe("Undoing a tenancy's rent change", () => {
     const id = await ownerWithFlat(page)
     await addTenant(page, id, aino)
     await changeRent(page, '920', `01/03/${nextYear}`)
-    const rent = page.getByRole('region', { name: 'Rent' })
+    const rent = page.getByRole('region', { name: 'Rent', exact: true })
     await rent.getByRole('button', { name: 'Undo the latest change' }).click()
     const dialog = page.getByRole('dialog')
     await expect(dialog).toContainText('€890.00')
@@ -476,5 +484,193 @@ test.describe('Changing the occupants', () => {
     await expect(
       jussi.getByRole('button', { name: 'Change the occupants' }),
     ).toHaveCount(0)
+  })
+})
+
+test.describe('Adding a tenant fee', () => {
+  test('Adding a parking fee', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await page
+      .getByRole('region', { name: 'Fees on top of the rent' })
+      .getByRole('link', { name: 'Add a fee' })
+      .click()
+    await waitForHydration(page)
+    await page
+      .getByRole('button', { name: 'Parking space', exact: true })
+      .click()
+    await page.getByRole('textbox', { name: /^Amount/ }).fill('15')
+    await page.getByRole('textbox', { name: 'Valid from' }).fill('01/03/2025')
+    await expect(page.getByRole('status')).toContainText('€905.00/month')
+    await page.getByRole('button', { name: 'Add fee' }).click()
+    await expect(page).toHaveURL(/\/tenancy$/)
+    const fees = page.getByRole('region', { name: 'Fees on top of the rent' })
+    await expect(fees).toContainText('Parking space')
+    await expect(fees).toContainText('€15.00/month')
+    await expect(fees).toContainText('From 01/03/2025')
+    await expect(fees).toContainText('€905.00')
+  })
+
+  test('Other fee with a description', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await addFee(page, {
+      kind: 'Other',
+      description: 'Laundry room',
+      basis: 'Fixed',
+      amount: '10',
+      from: '01/03/2025',
+    })
+    const fees = page.getByRole('region', { name: 'Fees on top of the rent' })
+    await expect(fees).toContainText('Laundry room')
+    await expect(fees).toContainText('€10.00/month')
+  })
+
+  test('Tenant water charge entries are warned about', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    for (const date of ['05/04/2025', '05/05/2025', '05/06/2025']) {
+      await logEntry(page, id, {
+        type: 'Income',
+        category: 'Water charges from the tenant',
+        amount: '44',
+        date,
+      })
+    }
+    await page.goto(`/properties/${id}/tenancy`)
+    await waitForHydration(page)
+    await page
+      .getByRole('region', { name: 'Fees on top of the rent' })
+      .getByRole('link', { name: 'Add a fee' })
+      .click()
+    await waitForHydration(page)
+    await page.getByRole('textbox', { name: 'Valid from' }).fill('01/03/2025')
+    await expect(
+      page.getByText(
+        'Tenant water charge entries from 01/03/2025: 3, €132.00 in all.',
+      ),
+    ).toBeVisible()
+    await expect(
+      page.getByRole('link', { name: 'Open the entries' }),
+    ).toHaveAttribute('href', `/properties/${id}/transactions`)
+  })
+})
+
+test.describe('Changing a tenant fee', () => {
+  test('The tenant gives up the parking space', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await addFee(page, {
+      kind: 'Parking space',
+      amount: '15',
+      from: '01/03/2025',
+    })
+    await openFee(page, 'Parking space')
+    await page.getByRole('button', { name: 'Ending' }).click()
+    await page
+      .getByRole('textbox', { name: 'Valid from' })
+      .fill(`01/01/${nextYear}`)
+    await page.getByRole('button', { name: 'Save change' }).click()
+    await expect(page).toHaveURL(/\/tenancy$/)
+    const fees = page.getByRole('region', { name: 'Fees on top of the rent' })
+    await expect(fees).toContainText('€15.00/month')
+    await expect(fees).toContainText(`From 01/01/${nextYear}: €0.00/month`)
+  })
+
+  test('An ended fee is listed apart', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await addFee(page, {
+      kind: 'Parking space',
+      amount: '15',
+      from: '01/03/2025',
+    })
+    await openFee(page, 'Parking space')
+    await page.getByRole('button', { name: 'Ending' }).click()
+    await page.getByRole('textbox', { name: 'Valid from' }).fill('01/04/2025')
+    await page.getByRole('button', { name: 'Save change' }).click()
+    await expect(page).toHaveURL(/\/tenancy$/)
+    const fees = page.getByRole('region', { name: 'Fees on top of the rent' })
+    await expect(fees).toContainText('Ended fees')
+    await expect(fees).toContainText('Ended 31/03/2025')
+    await expect(fees).not.toContainText('€905.00')
+  })
+})
+
+test.describe('Undoing a tenant fee change', () => {
+  test("Undoing a fee's ending", async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await addFee(page, {
+      kind: 'Parking space',
+      amount: '15',
+      from: '01/03/2025',
+    })
+    await openFee(page, 'Parking space')
+    await page.getByRole('button', { name: 'Ending' }).click()
+    await page
+      .getByRole('textbox', { name: 'Valid from' })
+      .fill(`01/01/${nextYear}`)
+    await page.getByRole('button', { name: 'Save change' }).click()
+    await expect(page).toHaveURL(/\/tenancy$/)
+    await openFee(page, 'Parking space')
+    await page.getByRole('button', { name: 'Undo the latest change' }).click()
+    const dialog = page.getByRole('dialog')
+    await expect(dialog).toContainText('€15.00')
+    await dialog.getByRole('button', { name: 'Undo change' }).click()
+    await expect(page).toHaveURL(/\/tenancy$/)
+    await expect(
+      page.getByRole('region', { name: 'Fees on top of the rent' }),
+    ).not.toContainText('€0.00/month')
+  })
+
+  test("Undoing a fee's only amount removes it", async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await addFee(page, { kind: 'Sauna', amount: '10', from: '01/03/2025' })
+    await openFee(page, 'Sauna')
+    await page.getByRole('button', { name: 'Undo the latest change' }).click()
+    const dialog = page.getByRole('dialog')
+    await dialog.getByRole('button', { name: 'Undo change' }).click()
+    await expect(page).toHaveURL(/\/tenancy$/)
+    await expect(
+      page.getByRole('region', { name: 'Fees on top of the rent' }),
+    ).toContainText('Nothing is paid on top of the rent.')
+  })
+})
+
+test.describe('The tenancy page', () => {
+  test('A tenancy without fees', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    const fees = page.getByRole('region', { name: 'Fees on top of the rent' })
+    await expect(fees).toContainText('Nothing is paid on top of the rent.')
+    await expect(fees.getByRole('link', { name: 'Add a fee' })).toBeVisible()
+  })
+
+  test("The occupants and the fees with the month's total", async ({
+    page,
+  }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await addFee(page, {
+      kind: 'Water charge',
+      amount: '22',
+      from: '01/03/2025',
+    })
+    await addFee(page, {
+      kind: 'Parking space',
+      amount: '15',
+      from: '01/03/2025',
+    })
+    await setOccupants(page, '2', '01/03/2025')
+    const fees = page.getByRole('region', { name: 'Fees on top of the rent' })
+    await expect(fees).toContainText('€22.00/occupant/month × 2')
+    await expect(fees).toContainText('€44.00/month')
+    await expect(fees).toContainText('€15.00/month')
+    await expect(fees).toContainText('€949.00')
+    await expect(page.getByRole('region', { name: 'Occupants' })).toContainText(
+      '2',
+    )
   })
 })

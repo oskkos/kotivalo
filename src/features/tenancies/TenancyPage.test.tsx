@@ -52,6 +52,7 @@ function setup(view: Partial<TenancyPageView>) {
         occupants: {
           [aino.id]: [{ validFrom: '2025-03-01', validTo: null, value: 1 }],
         },
+        fees: {},
         ...view,
       }}
       address="Kuusikuja 3 B 12"
@@ -258,5 +259,91 @@ describe('the occupants on the tenancy page', () => {
     expect(
       screen.queryByRole('button', { name: 'Change the occupants' }),
     ).toBeNull()
+  })
+})
+
+describe('the fees on the tenancy page', () => {
+  const occupants = [
+    { validFrom: '2025-03-01', validTo: '2026-08-31', value: 1 },
+    { validFrom: '2026-09-01', validTo: null, value: 2 },
+  ]
+  const water = {
+    id: 'f1',
+    kind: 'water' as const,
+    basis: 'per_occupant' as const,
+    description: null,
+    amounts: [{ validFrom: '2025-03-01', validTo: null, value: 2200 }],
+  }
+  const parking = {
+    id: 'f2',
+    kind: 'parking' as const,
+    basis: 'fixed' as const,
+    description: null,
+    amounts: [{ validFrom: '2026-02-01', validTo: null, value: 1500 }],
+  }
+
+  test("The occupants and the fees with the month's total", () => {
+    setup({
+      today: '2026-11-24',
+      occupants: { [aino.id]: occupants },
+      fees: { [aino.id]: [water, parking] },
+    })
+    const fees = screen.getByRole('region', { name: 'Fees on top of the rent' })
+    expect(within(fees).getByText('Water charge')).toBeVisible()
+    expect(within(fees).getByText('€22.00/occupant/month × 2')).toBeVisible()
+    expect(within(fees).getByText('€44.00/month')).toBeVisible()
+    expect(within(fees).getByText('Parking space')).toBeVisible()
+    expect(within(fees).getByText('€15.00/month')).toBeVisible()
+    expect(within(fees).getByText('€949.00')).toBeVisible()
+    const card = screen.getByRole('region', { name: 'Occupants' })
+    expect(within(card).getByText('2')).toBeVisible()
+    expect(within(card).getByText('From 01/09/2026')).toBeVisible()
+  })
+
+  test('A tenancy without fees', () => {
+    setup({ fees: {} })
+    expect(
+      screen.getByText('Nothing is paid on top of the rent.'),
+    ).toBeVisible()
+  })
+
+  test('an upcoming change and an ended fee', () => {
+    const ending = {
+      ...parking,
+      amounts: [
+        { validFrom: '2026-02-01', validTo: '2026-12-31', value: 1500 },
+        { validFrom: '2027-01-01', validTo: null, value: 0 },
+      ],
+    }
+    setup({ today: '2026-11-24', fees: { [aino.id]: [ending] } })
+    expect(screen.getByText('From 01/01/2027: €0.00/month')).toBeVisible()
+    setup({ today: '2027-02-10', fees: { [aino.id]: [ending] } })
+    expect(screen.getByText('Ended fees')).toBeVisible()
+    expect(screen.getByText(/Ended 31\/12\/2026/)).toBeVisible()
+  })
+
+  test('owners get the add and change links, members none', () => {
+    render(
+      <TenancyPage
+        view={{
+          role: 'owner',
+          today: '2026-11-24',
+          tenancies: [aino],
+          rents: {
+            [aino.id]: [
+              { validFrom: '2025-03-01', validTo: null, value: 89000 },
+            ],
+          },
+          occupants: { [aino.id]: occupants },
+          fees: { [aino.id]: [parking] },
+        }}
+        address="Kuusikuja 3 B 12"
+        onBack={vi.fn()}
+        feeAdd={() => <a href="/add">Add a fee</a>}
+        feeChange={(_, fee) => <a href={`/fee/${fee.id}`}>Change fee</a>}
+      />,
+    )
+    expect(screen.getByRole('link', { name: 'Add a fee' })).toBeVisible()
+    expect(screen.getByRole('link', { name: 'Change fee' })).toBeVisible()
   })
 })

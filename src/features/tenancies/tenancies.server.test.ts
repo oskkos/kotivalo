@@ -1092,6 +1092,106 @@ describe('Occupants and fees of a new tenancy', () => {
   })
 })
 
+describe('copying the previous fees', () => {
+  describe('Occupants and fees of a new tenancy', () => {
+    async function ainoEnding() {
+      const id = await addId(aino)
+      const water = await storeFee(id, 'water', 'per_occupant', [
+        2200,
+        '2025-03-01',
+        null,
+      ])
+      const parking = await storeFee(id, 'parking', 'fixed', [
+        1500,
+        '2025-03-01',
+        null,
+      ])
+      await endTenancy(deps(), flat, id, {
+        noticeGivenBy: 'tenant',
+        noticeDate: '2026-11-22',
+        lastDay: '2026-12-31',
+      })
+      return { id, water, parking }
+    }
+
+    const mikko = fixedTerm('2027-01-01', '2027-12-31')
+
+    test("The previous tenancy's fees are offered unchecked", async () => {
+      const { water, parking } = await ainoEnding()
+      const options = await getNewTenancyOptions(deps(), flat)
+      expect(
+        options.ok &&
+          Object.values(options.tenancyFees)
+            .flat()
+            .map((f) => f?.id)
+            .sort(),
+      ).toEqual([water, parking].sort())
+    })
+
+    test('A checked fee is copied to the new tenancy', async () => {
+      const { water } = await ainoEnding()
+      const result = await createTenancy(
+        deps(),
+        flat,
+        mikko,
+        89000,
+        1,
+        undefined,
+        [water],
+      )
+      if (!result.ok) {
+        throw new Error(result.reason)
+      }
+      expect(await feesOf(result.tenancyId)).toEqual([
+        expect.objectContaining({
+          kind: 'water',
+          basis: 'per_occupant',
+          amounts: [{ validFrom: '2027-01-01', validTo: null, value: 2200 }],
+        }),
+      ])
+    })
+
+    test('an unchecked fee is not copied and the previous tenancy keeps its own', async () => {
+      const { id } = await ainoEnding()
+      const result = await createTenancy(deps(), flat, mikko, 89000, 1)
+      if (!result.ok) {
+        throw new Error(result.reason)
+      }
+      expect(await feesOf(result.tenancyId)).toEqual([])
+      expect(await feesOf(id)).toHaveLength(2)
+    })
+
+    test("a fee that isn't offered is refused and nothing is stored", async () => {
+      await ainoEnding()
+      expect(
+        await createTenancy(deps(), flat, mikko, 89000, 1, undefined, ['nope']),
+      ).toEqual({ ok: false, reason: 'tenant_fee_not_found' })
+      expect((await view()).tenancies).toHaveLength(1)
+    })
+
+    test('a fee ended before the last day is not offered', async () => {
+      const id = await addId(aino)
+      const parking = await storeFee(
+        id,
+        'parking',
+        'fixed',
+        [1500, '2025-03-01', null],
+        [0, '2026-06-01', null],
+      )
+      await endTenancy(deps(), flat, id, {
+        noticeGivenBy: 'tenant',
+        noticeDate: '2026-11-22',
+        lastDay: '2026-12-31',
+      })
+      expect(
+        await createTenancy(deps(), flat, mikko, 89000, 1, undefined, [
+          parking,
+        ]),
+      ).toEqual({ ok: false, reason: 'tenant_fee_not_found' })
+    })
+  })
+})
+
 describe('Occupants and fees stay inside their tenancy', () => {
   test('Ending before a fee change is refused', async () => {
     const id = await addId(aino)

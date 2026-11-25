@@ -26,6 +26,7 @@ import {
 import { MAX_AMOUNT } from '#/features/recurring-amounts/schemas'
 import { MAX_CHARGE_DESCRIPTION } from '#/lib/charge-fields'
 import type { ChargeBasis, ChargeKind } from '#/server/db/schema'
+import { offeredFees } from './fees'
 import { MAX_OCCUPANTS } from './schemas'
 import { flatStatus } from './status'
 import type {
@@ -180,6 +181,8 @@ export async function getNewTenancyOptions(
       ok: true
       /** Each tenancy's rent periods, oldest first, for the suggestion. */
       tenancyRents: Partial<Record<string, Period<number>[]>>
+      /** Each tenancy's tenant fees, for the fees offered to the next. */
+      tenancyFees: Partial<Record<string, TenantFee[]>>
       ownershipStart: IsoDate
     } & TenancyView)
   | typeof notFound
@@ -198,6 +201,7 @@ export async function getNewTenancyOptions(
     today: view.today,
     tenancies: view.tenancies,
     tenancyRents: view.rents,
+    tenancyFees: view.fees,
     ownershipStart: start,
   }
 }
@@ -216,6 +220,10 @@ export async function getTenancy(
       tenancy: Tenancy
       /** The tenancy's rent periods, oldest first. */
       rents: Period<number>[]
+      /** The tenancy's occupants periods, oldest first. */
+      occupants: Period<number>[]
+      /** The tenancy's tenant fees. */
+      fees: TenantFee[]
       /** The flat's other tenancies, for the form's checks. */
       others: Tenancy[]
       ownershipStart: IsoDate
@@ -236,7 +244,11 @@ export async function getTenancy(
   if (!tenancy) {
     return tenancyNotFound
   }
-  const rents = await deps.tenancies.rentsFor([tenancyId])
+  const [rents, occupants, fees] = await Promise.all([
+    deps.tenancies.rentsFor([tenancyId]),
+    deps.tenancies.occupantsFor([tenancyId]),
+    deps.tenancies.feesFor([tenancyId]),
+  ])
   return {
     ok: true,
     role,
@@ -244,6 +256,8 @@ export async function getTenancy(
     today: today(deps),
     tenancy,
     rents: rents[tenancyId] ?? [],
+    occupants: occupants[tenancyId] ?? [],
+    fees: fees[tenancyId] ?? [],
     others: tenancies.filter((t) => t.id !== tenancyId),
     ownershipStart: start,
   }
@@ -259,6 +273,8 @@ export async function createTenancy(
   occupants: number,
   /** An earlier tenancy's ending, recorded with it. */
   ending?: Ending,
+  /** Fees of the previous tenancy to continue, by id. */
+  copyFeeIds: readonly string[] = [],
 ): Promise<
   { ok: true; tenancyId: string } | Failure<FieldReason | AlertReason>
 > {
@@ -285,6 +301,31 @@ export async function createTenancy(
   if (problem) {
     return fail(problem)
   }
+  // Only fees the form offered: the previous tenancy's, not ended.
+  let copied: Parameters<TenancyRepository['createWithRent']>[7] = []
+  if (copyFeeIds.length > 0) {
+    const feesById = await deps.tenancies.feesFor(others.map((t) => t.id))
+    const offered = offeredFees(
+      others.map((t) => ({ ...t, fees: feesById[t.id] ?? [] })),
+      fields.validFrom,
+    )
+    const wanted = copyFeeIds.map((id) => offered.find((o) => o.fee.id === id))
+    if (wanted.some((o) => o === undefined)) {
+      return fail('tenant_fee_not_found')
+    }
+    copied = wanted.flatMap((o) =>
+      o
+        ? [
+            {
+              kind: o.fee.kind,
+              basis: o.fee.basis,
+              description: o.fee.description,
+              amount: o.amount,
+            },
+          ]
+        : [],
+    )
+  }
   const created = await deps.tenancies.createWithRent(
     deps.userId,
     propertyId,
@@ -293,6 +334,7 @@ export async function createTenancy(
     deps.now(),
     ending,
     occupants,
+    copied,
   )
   if (created.outcome === 'overlaps') {
     return refusal(deps, propertyId, fail('tenancy_overlaps'))

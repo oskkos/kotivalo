@@ -169,6 +169,19 @@ describe("a tenancy's fee writes", () => {
     (await repo.feesFor([tenancy]))[tenancy]?.find((f) => f.id === feeId)
       ?.amounts
 
+  test('another tenancy in the database does not multiply the fee', async () => {
+    await env.DB.prepare(
+      "INSERT INTO tenancies (id, property_id, tenant_name, contract_type, contract_made, valid_from, due_day, created_by, created_at, updated_at) VALUES ('t2', ?, 'Mikko', 'open_ended', '2020-01-01', '2020-01-01', 5, 'annika', 0, 0)",
+    )
+      .bind(flatId)
+      .run()
+    await addParking()
+    const row = await env.DB.prepare(
+      'SELECT count(*) AS n FROM tenant_fees',
+    ).first<{ n: number }>()
+    expect(row?.n).toBe(1)
+  })
+
   test('adds the fee with its first period together', async () => {
     const id = await addParking()
     expect(await amountsOf(id)).toEqual([

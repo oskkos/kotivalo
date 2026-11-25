@@ -1159,6 +1159,45 @@
       "status": "proposed"
     }
   },
+  "parking_space": {
+    "definition": "A parking space let to the tenant for a fee, or billed to the owner by the housing company.",
+    "fi": {
+      "term": "autopaikka",
+      "match": ["autopaik\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/mika-on-vuokratuloa/",
+          "quote": "Vuokratuloa ovat vuokran lisäksi muut maksut, joita saat vuokralaiselta – esimerkiksi vesimaksu tai autopaikan vuokra."
+        }
+      ]
+    },
+    "sv": {
+      "term": "bilplats",
+      "match": ["bilplats\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://vero.fi/sv/privatpersoner/egendom/hyresinkomster/vad-ar-hyresinkomst/",
+          "quote": "är utöver hyran också andra avgifter som du får av hyresgästen – till exempel vattenavgift och hyra för bilplats."
+        }
+      ]
+    },
+    "en": {
+      "term": "parking space",
+      "match": ["parking spaces?"],
+      "status": "derived",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/individuals/property/rental_income/what-is-considered-rental-income/",
+          "quote": "money towards a water bill or rent for a parking space"
+        }
+      ]
+    }
+  },
   "principal": {
     "code": "principal",
     "codeNotes": "Part of a loan payment; not deductible",
@@ -1528,6 +1567,48 @@
       ]
     },
     "notes": "The Tax Administration's Swedish detailed guidance also uses \"hyrestagare\"; \"hyresgäst\" is the law's word and the more common one."
+  },
+  "tenant_fee": {
+    "code": "tenantFee",
+    "codeNotes": "Tables `tenant_fees` and `tenant_fee_amounts`: what the tenant pays the landlord on top of the rent (water, parking, sauna, other), as validity periods inside a tenancy. Form 7H row 2.1 (rental income). Not linked to the usage charges.",
+    "definition": "A payment the tenant makes to the landlord on top of the rent, such as for water or a parking space. Rental income, not part of the rent.",
+    "fi": {
+      "term": "maksu vuokran lisäksi",
+      "match": ["maks\\p{L}*\\s+vuokran\\s+lisäksi"],
+      "status": "derived",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://vero.fi/henkiloasiakkaat/omaisuus/vuokratulot/mika-on-vuokratuloa/",
+          "quote": "Vuokratuloa ovat vuokran lisäksi muut maksut, joita saat vuokralaiselta – esimerkiksi vesimaksu tai autopaikan vuokra."
+        }
+      ]
+    },
+    "sv": {
+      "term": "avgift utöver hyran",
+      "match": ["avgift(en|er|erna)?\\s+utöver\\s+hyran"],
+      "status": "derived",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://vero.fi/sv/privatpersoner/egendom/hyresinkomster/vad-ar-hyresinkomst/",
+          "quote": "är utöver hyran också andra avgifter som du får av hyresgästen – till exempel vattenavgift och hyra för bilplats."
+        }
+      ]
+    },
+    "en": {
+      "term": "fee on top of the rent",
+      "match": ["fees?\\s+on\\s+top\\s+of\\s+the\\s+rent"],
+      "status": "derived",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/individuals/property/rental_income/what-is-considered-rental-income/",
+          "quote": "In addition to rent, rental income also covers all other payments you get from your tenant"
+        }
+      ]
+    },
+    "notes": "The Tax Administration describes the concept (\"muut maksut, joita saat vuokralaiselta\") without a fixed term; the words are built from its description. Keep apart from the usage charge (käyttömaksu), which the housing company bills the owner."
   },
   "transaction": {
     "code": "transaction",
