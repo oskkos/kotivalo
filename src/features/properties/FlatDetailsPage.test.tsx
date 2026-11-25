@@ -169,7 +169,9 @@ describe('The flat details page', () => {
     const card = screen.getByRole('region', { name: 'November rent' })
     expect(card).toHaveTextContent('€949.00')
     expect(
-      within(card).queryByRole('list', { name: 'The rent and the fees' }),
+      within(card).queryByRole('list', {
+        name: 'Breakdown of the rent and fees',
+      }),
     ).toBeNull()
     const tenancy = screen.getByRole('link', { name: /Aino Koski/ })
     expect(tenancy).toHaveTextContent('€890.00/month')

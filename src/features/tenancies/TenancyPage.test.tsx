@@ -237,7 +237,7 @@ describe('the occupants on the tenancy page', () => {
     const user = userEvent.setup()
     setup({ occupants: { [aino.id]: two } })
     await user.click(
-      screen.getByRole('button', { name: 'Change the occupants' }),
+      screen.getByRole('button', { name: 'Change the number of occupants' }),
     )
     expect(onChangeOccupants).toHaveBeenCalled()
     await user.click(
@@ -257,7 +257,7 @@ describe('the occupants on the tenancy page', () => {
     setup({ role: 'member', occupants: { [aino.id]: two } })
     expect(screen.getByRole('region', { name: 'Occupants' })).toBeVisible()
     expect(
-      screen.queryByRole('button', { name: 'Change the occupants' }),
+      screen.queryByRole('button', { name: 'Change the number of occupants' }),
     ).toBeNull()
   })
 })

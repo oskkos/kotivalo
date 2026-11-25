@@ -97,7 +97,7 @@ test.describe("The month's rent payments page", () => {
     await expect(summary).toContainText('Rent€949.00')
     await expect(summary).toContainText('Outstanding€449.00')
     const breakdown = summary.getByRole('list', {
-      name: 'The rent and the fees',
+      name: 'Breakdown of the rent and fees',
     })
     await expect(breakdown).toContainText('Rent€890.00')
     await expect(breakdown).toContainText('Water charge · 2 × €22.00€44.00')
