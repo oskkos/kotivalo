@@ -92,11 +92,10 @@
           "jurisdiction": "eu",
         },
       ],
-      // Sends through Resend from a domain verified there (EU region). The
-      // sender domain is temporary until Kotivalo has its own domain.
+      // Sends through Resend from a domain verified there (EU region).
       "vars": {
         "EMAIL_TRANSPORT": "resend",
-        "EMAIL_FROM": "Kotivalo <noreply@k6.fi>",
+        "EMAIL_FROM": "Kotivalo <noreply@kotivalo.app>",
         // Debug lines would use up the free plan's daily log events.
         "LOG_LEVEL": "info",
       },
