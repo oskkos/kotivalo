@@ -141,7 +141,7 @@
     },
     "sv": {
       "term": "lägenhetens nummer",
-      "match": ["lägenhetens nummer", "lägenhetsnummer\\p{L}*"],
+      "match": ["lägenhetens nummer", "lägenhetsnumm?e?r\\p{L}*"],
       "status": "verified",
       "sources": [
         {
@@ -163,7 +163,7 @@
         }
       ]
     },
-    "notes": "The form asks for the apartment's number (huoneiston numero, lägenhetens nummer). Form 7H says apartment here although the UI says flat elsewhere (property): the number belongs to the apartment in the housing company, so the Tax Administration's word is kept."
+    "notes": "The form asks for the apartment's number (huoneiston numero, lägenhetens nummer). Form 7H says apartment here although the UI says flat elsewhere (property): the number belongs to the apartment in the housing company, so the Tax Administration's word is kept. The details page's short line names the flat by its number (huoneisto B 12, lägenhet B 12, flat B 12) and is not this term."
   },
   "basic_improvement": {
     "codeNotes": "Category value `improvement` (expense; its amount fills no form 7H row as such). For a flat in a housing company that the owner pays: a tenth a year in row 2.5 for 10 years from the year paid, or deducted on sale. For a building (form 7K): added to the undepreciated acquisition cost and depreciated at 4 % a year (residential), or deducted on sale.",
