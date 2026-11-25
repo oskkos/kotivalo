@@ -1075,5 +1075,84 @@
   "welcome_page_title": "Tervetuloa – Kotivalo",
   "welcome_question": "Millä nimellä sinut näytetään?",
   "welcome_saving": "Tallennetaan…",
-  "welcome_title": "Tervetuloa!"
+  "welcome_title": "Tervetuloa!",
+  "year_summary_chip_details_missing": "Taloyhtiön tiedot puuttuvat",
+  "year_summary_chip_partly_paid": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} kk vuokra osittain maksettu",
+        "countPlural=other": "{count} kk vuokra osittain maksettu"
+      }
+    }
+  ],
+  "year_summary_chip_share_changed": "Osuus muuttui {date}",
+  "year_summary_chip_treatment_not_set": "Rahoitusvastikkeen käsittely puuttuu",
+  "year_summary_chip_unpaid": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} kk vuokra kirjaamatta",
+        "countPlural=other": "{count} kk vuokra kirjaamatta"
+      }
+    }
+  ],
+  "year_summary_chip_vacant": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Tyhjillään {count} kk",
+        "countPlural=other": "Tyhjillään {count} kk"
+      }
+    }
+  ],
+  "year_summary_company": "{name} · Y-tunnus {businessId}",
+  "year_summary_company_missing": "Taloyhtiö ja Y-tunnus puuttuvat",
+  "year_summary_company_no_business_id": "{name} · Y-tunnus puuttuu",
+  "year_summary_company_no_name": "Taloyhtiön nimi puuttuu · Y-tunnus {businessId}",
+  "year_summary_costs": "Kulut (2.2–2.5)",
+  "year_summary_empty_seen": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Näet {count} asunnon, mutta sinulla ei ollut siinä omistusosuutta vuonna {year}.",
+        "countPlural=other": "Näet {count} asuntoa, mutta sinulla ei ollut niissä omistusosuutta vuonna {year}."
+      }
+    }
+  ],
+  "year_summary_empty_text": "Yhteenveto lasketaan asunnoista, joissa sinulla oli omistusosuus.",
+  "year_summary_empty_title": "Ei omistusosuutta vuonna {year}",
+  "year_summary_income": "Vuokratulot (2.1)",
+  "year_summary_intro": "Lomake 7H täytetään asunnoittain. Avaa asunto ja kopioi luvut OmaVeroon.",
+  "year_summary_intro_title": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Oma osuutesi · {count} asunto",
+        "countPlural=other": "Oma osuutesi · {count} asuntoa"
+      }
+    }
+  ],
+  "year_summary_kicker": "Vuosiyhteenveto · lomake 7H",
+  "year_summary_months_so_far": "{from}–{to}",
+  "year_summary_next_year": "Seuraava vuosi",
+  "year_summary_not_counted": "Luvuissa ei ole lainan korkoja, jotka eivät kuulu lomakkeelle 7H, eikä vielä perusparannuksia.",
+  "year_summary_not_included": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Ei mukana: {flats}, koska sinulla ei ollut siinä omistusosuutta vuonna {year}.",
+        "countPlural=other": "Ei mukana: {flats}, koska sinulla ei ollut niissä omistusosuutta vuonna {year}."
+      }
+    }
+  ],
+  "year_summary_page_title": "Vuosiyhteenveto – Kotivalo",
+  "year_summary_previous_year": "Edellinen vuosi",
+  "year_summary_share": "Osuutesi {share}"
 }

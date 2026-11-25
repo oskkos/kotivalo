@@ -18,6 +18,7 @@ import { Route as AuthedWelcomeRouteImport } from './routes/_authed/welcome'
 import { Route as ApiLogRouteImport } from './routes/api/log'
 import { Route as AuthedPropertiesNewRouteImport } from './routes/_authed/properties/new'
 import { Route as AuthedTransactionsNewRouteImport } from './routes/_authed/transactions/new'
+import { Route as AuthedYearSummaryIndexRouteImport } from './routes/_authed/year-summary/index'
 import { Route as ApiDocumentsDocumentIdRouteImport } from './routes/api/documents/$documentId'
 import { Route as ApiReceiptsReceiptIdRouteImport } from './routes/api/receipts/$receiptId'
 import { Route as ApiTestInboxRouteImport } from './routes/api/test/inbox'
@@ -93,6 +94,11 @@ const AuthedPropertiesNewRoute = AuthedPropertiesNewRouteImport.update({
 const AuthedTransactionsNewRoute = AuthedTransactionsNewRouteImport.update({
   id: '/transactions/new',
   path: '/transactions/new',
+  getParentRoute: () => AuthedRoute,
+} as any)
+const AuthedYearSummaryIndexRoute = AuthedYearSummaryIndexRouteImport.update({
+  id: '/year-summary/',
+  path: '/year-summary/',
   getParentRoute: () => AuthedRoute,
 } as any)
 const ApiDocumentsDocumentIdRoute = ApiDocumentsDocumentIdRouteImport.update({
@@ -297,6 +303,7 @@ export interface FileRoutesByFullPath {
   '/api/documents/$documentId': typeof ApiDocumentsDocumentIdRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
+  '/year-summary/': typeof AuthedYearSummaryIndexRoute
   '/properties/$propertyId/charges': typeof AuthedPropertiesPropertyIdChargesRoute
   '/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
   '/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
@@ -339,6 +346,7 @@ export interface FileRoutesByTo {
   '/api/documents/$documentId': typeof ApiDocumentsDocumentIdRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
+  '/year-summary': typeof AuthedYearSummaryIndexRoute
   '/properties/$propertyId/charges': typeof AuthedPropertiesPropertyIdChargesRoute
   '/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
   '/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
@@ -383,6 +391,7 @@ export interface FileRoutesById {
   '/api/documents/$documentId': typeof ApiDocumentsDocumentIdRoute
   '/api/receipts/$receiptId': typeof ApiReceiptsReceiptIdRoute
   '/api/test/inbox': typeof ApiTestInboxRoute
+  '/_authed/year-summary/': typeof AuthedYearSummaryIndexRoute
   '/_authed/properties/$propertyId/charges': typeof AuthedPropertiesPropertyIdChargesRoute
   '/_authed/properties/$propertyId/edit': typeof AuthedPropertiesPropertyIdEditRoute
   '/_authed/properties/$propertyId/sharing': typeof AuthedPropertiesPropertyIdSharingRoute
@@ -427,6 +436,7 @@ export interface FileRouteTypes {
     | '/api/documents/$documentId'
     | '/api/receipts/$receiptId'
     | '/api/test/inbox'
+    | '/year-summary/'
     | '/properties/$propertyId/charges'
     | '/properties/$propertyId/edit'
     | '/properties/$propertyId/sharing'
@@ -469,6 +479,7 @@ export interface FileRouteTypes {
     | '/api/documents/$documentId'
     | '/api/receipts/$receiptId'
     | '/api/test/inbox'
+    | '/year-summary'
     | '/properties/$propertyId/charges'
     | '/properties/$propertyId/edit'
     | '/properties/$propertyId/sharing'
@@ -512,6 +523,7 @@ export interface FileRouteTypes {
     | '/api/documents/$documentId'
     | '/api/receipts/$receiptId'
     | '/api/test/inbox'
+    | '/_authed/year-summary/'
     | '/_authed/properties/$propertyId/charges'
     | '/_authed/properties/$propertyId/edit'
     | '/_authed/properties/$propertyId/sharing'
@@ -616,6 +628,13 @@ declare module '@tanstack/react-router' {
       path: '/transactions/new'
       fullPath: '/transactions/new'
       preLoaderRoute: typeof AuthedTransactionsNewRouteImport
+      parentRoute: typeof AuthedRoute
+    }
+    '/_authed/year-summary/': {
+      id: '/_authed/year-summary/'
+      path: '/year-summary'
+      fullPath: '/year-summary/'
+      preLoaderRoute: typeof AuthedYearSummaryIndexRouteImport
       parentRoute: typeof AuthedRoute
     }
     '/api/documents/$documentId': {
@@ -851,6 +870,7 @@ interface AuthedRouteChildren {
   AuthedIndexRoute: typeof AuthedIndexRoute
   AuthedPropertiesNewRoute: typeof AuthedPropertiesNewRoute
   AuthedTransactionsNewRoute: typeof AuthedTransactionsNewRoute
+  AuthedYearSummaryIndexRoute: typeof AuthedYearSummaryIndexRoute
   AuthedPropertiesPropertyIdChargesRoute: typeof AuthedPropertiesPropertyIdChargesRoute
   AuthedPropertiesPropertyIdEditRoute: typeof AuthedPropertiesPropertyIdEditRoute
   AuthedPropertiesPropertyIdSharingRoute: typeof AuthedPropertiesPropertyIdSharingRoute
@@ -888,6 +908,7 @@ const AuthedRouteChildren: AuthedRouteChildren = {
   AuthedIndexRoute: AuthedIndexRoute,
   AuthedPropertiesNewRoute: AuthedPropertiesNewRoute,
   AuthedTransactionsNewRoute: AuthedTransactionsNewRoute,
+  AuthedYearSummaryIndexRoute: AuthedYearSummaryIndexRoute,
   AuthedPropertiesPropertyIdChargesRoute:
     AuthedPropertiesPropertyIdChargesRoute,
   AuthedPropertiesPropertyIdEditRoute: AuthedPropertiesPropertyIdEditRoute,

@@ -1075,5 +1075,84 @@
   "welcome_page_title": "Welcome – Kotivalo",
   "welcome_question": "What name should others see?",
   "welcome_saving": "Saving…",
-  "welcome_title": "Welcome!"
+  "welcome_title": "Welcome!",
+  "year_summary_chip_details_missing": "Housing company details missing",
+  "year_summary_chip_partly_paid": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Rent partly paid for {count} month",
+        "countPlural=other": "Rent partly paid for {count} months"
+      }
+    }
+  ],
+  "year_summary_chip_share_changed": "Share changed {date}",
+  "year_summary_chip_treatment_not_set": "Financing charge treatment missing",
+  "year_summary_chip_unpaid": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Rent not recorded for {count} month",
+        "countPlural=other": "Rent not recorded for {count} months"
+      }
+    }
+  ],
+  "year_summary_chip_vacant": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Vacant {count} month",
+        "countPlural=other": "Vacant {count} months"
+      }
+    }
+  ],
+  "year_summary_company": "{name} · Business ID {businessId}",
+  "year_summary_company_missing": "Housing company and Business ID missing",
+  "year_summary_company_no_business_id": "{name} · Business ID missing",
+  "year_summary_company_no_name": "Housing company name missing · Business ID {businessId}",
+  "year_summary_costs": "Costs (2.2–2.5)",
+  "year_summary_empty_seen": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "You can see {count} flat, but you had no ownership share in it in {year}.",
+        "countPlural=other": "You can see {count} flats, but you had no ownership share in them in {year}."
+      }
+    }
+  ],
+  "year_summary_empty_text": "The summary is calculated for flats in which you had an ownership share.",
+  "year_summary_empty_title": "No ownership share in {year}",
+  "year_summary_income": "Rental income (2.1)",
+  "year_summary_intro": "Form 7H is filled in flat by flat. Open a flat and copy the figures into MyTax.",
+  "year_summary_intro_title": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Your own share · {count} flat",
+        "countPlural=other": "Your own share · {count} flats"
+      }
+    }
+  ],
+  "year_summary_kicker": "Year summary · form 7H",
+  "year_summary_months_so_far": "{from}–{to}",
+  "year_summary_next_year": "Next year",
+  "year_summary_not_counted": "The figures leave out loan interest, which is not part of form 7H, and do not yet include improvements.",
+  "year_summary_not_included": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Not included: {flats}, because you had no ownership share in it in {year}.",
+        "countPlural=other": "Not included: {flats}, because you had no ownership share in them in {year}."
+      }
+    }
+  ],
+  "year_summary_page_title": "Year summary – Kotivalo",
+  "year_summary_previous_year": "Previous year",
+  "year_summary_share": "Your share {share}"
 }

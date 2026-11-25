@@ -8,7 +8,7 @@ import { Link } from '@tanstack/react-router'
 import { m } from '#/paraglide/messages.js'
 import { colors } from '#/theme/tokens'
 
-export type NavPage = 'flats' | 'account'
+export type NavPage = 'flats' | 'year-summary' | 'account'
 
 function Icon(props: { children: React.ReactNode; size?: number }) {
   const size = props.size ?? 24
