@@ -103,6 +103,15 @@ function NewTransactionRoute() {
     () => undefined,
   )
   if (owned.length === 0 && !fixed) {
+    if (options.ownsArchived) {
+      return (
+        <Explanation
+          noFlats={false}
+          title={m.transactions_archived_only_title()}
+          text={m.transactions_archived_only_text()}
+        />
+      )
+    }
     return options.hasFlats ? (
       <Explanation
         noFlats={false}

@@ -886,6 +886,8 @@
   "tenant_fee_water_warning": "Hyresgästens vattenavgifter har registrerats från {date}: {count} st, totalt {total}. De finns kvar; kontrollera att samma avgift inte räknas två gånger.",
   "transactions_amount": "Belopp",
   "transactions_amount_placeholder": "0,00",
+  "transactions_archived_only_text": "En registrering kan bara läggas till för en bostad som inte är arkiverad. Återställ en bostad till listan under Arkiverade bostäder i din bostadslista.",
+  "transactions_archived_only_title": "Dina bostäder är arkiverade",
   "transactions_attach": "Ta en bild eller välj en fil",
   "transactions_attach_hint": "Bild eller PDF, högst 10 MB",
   "transactions_back": "Tillbaka till registreringarna",

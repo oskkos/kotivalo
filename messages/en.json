@@ -886,6 +886,8 @@
   "tenant_fee_water_warning": "Tenant water charge entries from {date}: {count}, {total} in all. They stay; check that the same charge is not counted twice.",
   "transactions_amount": "Amount",
   "transactions_amount_placeholder": "0.00",
+  "transactions_archived_only_text": "An entry can only be added to a flat that isn't archived. Restore a flat to your list from Archived flats on your list of flats.",
+  "transactions_archived_only_title": "Your flats are archived",
   "transactions_attach": "Take a photo or choose a file",
   "transactions_attach_hint": "Image or PDF, up to 10 MB",
   "transactions_back": "Back to entries",

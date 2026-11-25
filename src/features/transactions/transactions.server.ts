@@ -343,6 +343,8 @@ export async function getNewTransactionOptions(
   /** The flat of `propertyId`, when the user owns it; else null. */
   fixed: Property | null
   hasFlats: boolean
+  /** Whether the user owns a flat they have archived. */
+  ownsArchived: boolean
   today: IsoDate
 }> {
   const [flats, fixed] = await Promise.all([
@@ -352,13 +354,25 @@ export async function getNewTransactionOptions(
   const roles = await Promise.all(
     flats.map((flat) => deps.sharing.roleOf(deps.userId, flat.id)),
   )
+  const owned = flats.filter((_, i) => roles[i] === 'owner')
   return {
     ok: true,
-    owned: flats.filter((_, i) => roles[i] === 'owner'),
+    owned,
     fixed,
     hasFlats: flats.length > 0,
+    // Asked only when there is nothing to offer: it explains why.
+    ownsArchived:
+      owned.length === 0 && fixed === null && (await ownsArchivedFlat(deps)),
     today: isoDateInFinland(deps.now()),
   }
+}
+
+async function ownsArchivedFlat(deps: TransactionDeps): Promise<boolean> {
+  const archived = await deps.properties.listArchivedForUser(deps.userId)
+  const roles = await Promise.all(
+    archived.map((flat) => deps.sharing.roleOf(deps.userId, flat.id)),
+  )
+  return roles.includes('owner')
 }
 
 /** The flat, archived or not, if the user owns it; else null. */
