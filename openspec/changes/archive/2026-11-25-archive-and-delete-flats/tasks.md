@@ -45,5 +45,5 @@
 ## 7. Review and archive
 
 - [x] 7.1 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
-- [ ] 7.2 The `pr-review` skill on the PR
-- [ ] 7.3 `openspec archive archive-and-delete-flats` as the last commit
+- [x] 7.2 The `pr-review` skill on the PR
+- [x] 7.3 `openspec archive archive-and-delete-flats` as the last commit

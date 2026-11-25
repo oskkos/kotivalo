@@ -219,7 +219,7 @@ Recorded payments SHALL stay within the months of their tenancy. Correcting a te
 - **THEN** it is refused with the reason `tenancy_has_payments`, and the tenancy and the payment stay
 
 ### Requirement: The rent summary on the flats list
-The flats list SHALL start with this month's rent summary across all the flats the user has access to, owners and members alike: the month's title, the rent received out of the rent expected, and the number of flats whose card shows the rent as late ("The rent status on a flat's card") when above zero. Each flat SHALL count with its whole rent, whatever the user's share. The expected rent SHALL be the sum of this month's expected rent ("Expected rent of a month") of every tenancy that runs in the month, so a month a tenancy starts or ends in counts by days and both tenancies of a mid-month change count. The received rent SHALL be the sum of the payments recorded for this month's rent of those tenancies, whatever their payment date. A tenancy without a rent in effect this month SHALL be left out of both sums. When no tenancy has a rent in effect this month, the summary SHALL NOT be shown.
+The flats list SHALL start with this month's rent summary across all the flats the user has access to and hasn't archived ("Archiving a flat"), owners and members alike: the month's title, the rent received out of the rent expected, and the number of flats whose card shows the rent as late ("The rent status on a flat's card") when above zero. Each flat SHALL count with its whole rent, whatever the user's share. The expected rent SHALL be the sum of this month's expected rent ("Expected rent of a month") of every tenancy that runs in the month, so a month a tenancy starts or ends in counts by days and both tenancies of a mid-month change count. The received rent SHALL be the sum of the payments recorded for this month's rent of those tenancies, whatever their payment date. A tenancy without a rent in effect this month SHALL be left out of both sums. When no tenancy has a rent in effect this month, the summary SHALL NOT be shown.
 
 #### Scenario: The summary adds up this month's rent of every flat
 - **WHEN** today is `2026-11-22`; `Kuusikuja 3 B 12` is let from `2025-03-01` with the rent 89000 cents and the due day 5, and November has no payments; `Koivupolku 7 A 4` is let from `2026-01-01` with the rent 64000 cents, and 64000 cents were paid for November on `2026-11-03`; `Rantatie 15 C 21` is vacant
@@ -244,6 +244,10 @@ The flats list SHALL start with this month's rent summary across all the flats t
 #### Scenario: No summary without rent this month
 - **WHEN** a user's only flat is vacant
 - **THEN** the flats list shows no rent summary
+
+#### Scenario: An archived flat is left out of the summary
+- **WHEN** today is `2026-11-22`; `Kuusikuja 3 B 12` is let with the rent 89000 cents and `Koivupolku 7 A 4` with the rent 64000 cents, neither paid for November, and Annika has archived `Koivupolku 7 A 4`
+- **THEN** Annika's summary shows "0,00 € / 890,00 € saatu"
 
 ### Requirement: The rent status on a flat's card
 Each flat's card on the flats list SHALL show this month's rent status ("The rent status of a month") next to its tenancy status, for the same tenancy and month as the details page's rent card ("The flat details page"): *Maksettu*, *Osittain maksettu*, *Myöhässä N pv*, *Erääntyy D.M.*, *Vuokraa ei asetettu* or *Ei maksettavaa*. A vacant flat, and a flat whose tenancy starts after this month, SHALL show no rent status.
