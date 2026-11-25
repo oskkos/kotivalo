@@ -14,8 +14,8 @@
 
 ## 3. The notice after navigating
 
-- [ ] 3.1 `components/NavigationNotice.tsx`: an MUI `Snackbar` with `role="status"` from the router's history state (`HistoryState` typed with `notice?: string`), cleared with a `replace` once shown
-- [ ] 3.2 Component test: shows the notice from history state, clears it so a second render shows nothing
+- [x] 3.1 `components/NavigationNotice.tsx`: an MUI `Snackbar` with `role="status"` from the router's history state (`HistoryState` typed with `notice?: string`), cleared with a `replace` once shown
+- [x] 3.2 Component test: shows the notice from history state, clears it so a second render shows nothing
 
 ## 4. Server functions
 
