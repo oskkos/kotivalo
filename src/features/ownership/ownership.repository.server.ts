@@ -115,6 +115,40 @@ export function ownershipRepository(db: Db) {
       }
     },
 
+    /**
+     * The ownership periods of the flats by flat id, newest first, with no
+     * access check: the caller passes the ids of flats the user can see. A
+     * flat without periods has no entry.
+     */
+    async rowsFor(
+      propertyIds: string[],
+    ): Promise<Partial<Record<string, Period[]>>> {
+      if (propertyIds.length === 0) {
+        return {}
+      }
+      const rows = await db
+        .select({
+          propertyId: ownershipPeriods.propertyId,
+          userId: ownershipPeriods.userId,
+          share: ownershipPeriods.share,
+          validFrom: ownershipPeriods.validFrom,
+          validTo: ownershipPeriods.validTo,
+          reason: ownershipPeriods.reason,
+        })
+        .from(ownershipPeriods)
+        .where(inArray(ownershipPeriods.propertyId, propertyIds))
+      const byFlat: Partial<Record<string, typeof rows>> = {}
+      for (const row of rows) {
+        ;(byFlat[row.propertyId] ??= []).push(row)
+      }
+      return Object.fromEntries(
+        Object.entries(byFlat).map(([propertyId, flatRows]) => [
+          propertyId,
+          groupPeriods(flatRows ?? []),
+        ]),
+      )
+    },
+
     /** Current shares of every flat the user has access to. */
     currentForUser(userId: string): Promise<CurrentShare[]> {
       return db

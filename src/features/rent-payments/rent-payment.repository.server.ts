@@ -92,6 +92,32 @@ export function rentPaymentRepository(db: Db) {
         )
     },
 
+    /**
+     * The payments of the flats' tenancies, by month, then payment date, as
+     * `forProperty` gives them.
+     */
+    async forProperties(propertyIds: string[]): Promise<FlatRentPayment[]> {
+      if (propertyIds.length === 0) {
+        return []
+      }
+      return db
+        .select({
+          propertyId: tenancies.propertyId,
+          tenancyId: rentPayments.tenancyId,
+          month: rentPayments.month,
+          amount: rentPayments.amount,
+          paidOn: rentPayments.paidOn,
+        })
+        .from(rentPayments)
+        .innerJoin(tenancies, eq(tenancies.id, rentPayments.tenancyId))
+        .where(inArray(tenancies.propertyId, propertyIds))
+        .orderBy(
+          asc(rentPayments.month),
+          asc(rentPayments.paidOn),
+          asc(rentPayments.createdAt),
+        )
+    },
+
     /** The payments of the flats' tenancies for the rent of `month`. */
     async forMonth(
       propertyIds: string[],
