@@ -323,3 +323,14 @@ describe("This month's rent across the user's flats", () => {
     expect(view.flats[0]?.tenancies.map((t) => t.id)).toEqual([ville, tenancy])
   })
 })
+
+describe('The rent summary on the flats list', () => {
+  test('An archived flat is left out of the summary', async () => {
+    await propertyRepository(db).setArchived('annika', flat, now)
+
+    expect((await listRentThisMonth(deps('annika'))).flats).toEqual([])
+    expect(
+      (await listRentThisMonth(deps('jussi'))).flats.map((f) => f.propertyId),
+    ).toEqual([flat])
+  })
+})

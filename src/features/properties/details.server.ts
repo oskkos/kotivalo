@@ -53,6 +53,8 @@ export interface FlatDetailsDeps {
 export interface FlatDetails extends RecurringAmounts {
   role: PropertyRole
   property: Property
+  /** The day in Finland the user archived the flat, or null. */
+  archivedOn: IsoDate | null
   /** The current owners, the user as `isYou`. */
   owners: CardOwner[]
   /** Today in Finland. */
@@ -106,7 +108,17 @@ export async function getFlatDetails(
   return {
     ok: true,
     role,
-    property,
+    property: {
+      id: property.id,
+      streetAddress: property.streetAddress,
+      postcode: property.postcode,
+      city: property.city,
+      roomCount: property.roomCount,
+      floorArea: property.floorArea,
+    },
+    archivedOn: property.archivedAt
+      ? isoDateInFinland(property.archivedAt)
+      : null,
     owners: shares
       .filter((share) => share.propertyId === propertyId)
       .map(({ name, share, userId }) => ({

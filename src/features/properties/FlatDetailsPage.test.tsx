@@ -44,6 +44,7 @@ const aino: Tenancy = {
 
 const details = (over: Partial<FlatDetails> = {}): FlatDetails => ({
   role: 'owner',
+  archivedOn: null,
   property: {
     id: 'flat',
     streetAddress: 'Kuusikuja 3 B 12',

@@ -16,35 +16,32 @@ import { m } from '#/paraglide/messages.js'
 
 export const Route = createFileRoute('/_authed/')({
   loader: async () => {
-    const [properties, invitations, shares, statuses, rent] = await Promise.all(
-      [
-        listProperties(),
-        listMyInvitations(),
-        listCurrentOwners(),
-        listTenancyStatuses(),
-        listRentThisMonth(),
-      ],
-    )
+    const [lists, invitations, shares, statuses, rent] = await Promise.all([
+      listProperties(),
+      listMyInvitations(),
+      listCurrentOwners(),
+      listTenancyStatuses(),
+      listRentThisMonth(),
+    ])
     const owners: Record<string, CardOwner[]> = {}
     for (const { propertyId, ...owner } of shares) {
       ;(owners[propertyId] ??= []).push(owner)
     }
-    return { properties, invitations, owners, statuses, rent }
+    return { lists, invitations, owners, statuses, rent }
   },
   head: () => ({ meta: [{ title: m.properties_page_title() }] }),
   component: HomeRoute,
 })
 
 function HomeRoute() {
-  const { properties, invitations, owners, statuses, rent } =
-    Route.useLoaderData()
+  const { lists, invitations, owners, statuses, rent } = Route.useLoaderData()
   const router = useRouter()
   // Computed in the browser from raw data and the server's today, as on the
   // flat details page.
   const thisMonth = rentThisMonth(rent.flats, rent.today)
   return (
     <PropertyList
-      properties={properties}
+      properties={lists.properties}
       owners={owners}
       statuses={Object.fromEntries(
         Object.entries(statuses).map(([id, status]) => [
