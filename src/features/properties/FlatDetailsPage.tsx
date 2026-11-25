@@ -30,6 +30,7 @@ import { StatusChip } from '#/features/rent-payments/StatusChip'
 import { currentTenancy, flatStatus } from '#/features/tenancies/status'
 import { TenancyCard } from '#/features/tenancies/TenancyCard'
 import type { Tenancy } from '#/features/tenancies/tenancy.repository.server'
+import { DocumentRowItem } from '#/features/documents/DocumentsPage'
 import { EntryRow } from '#/features/transactions/TransactionsPage'
 import { clientLog } from '#/lib/client-log'
 import { lastDayOfMonth, type IsoDate } from '#/lib/dates'
@@ -196,6 +197,9 @@ function Header(props: {
         </MenuLink>
         <MenuLink to="/properties/$propertyId/transactions" params={params}>
           {m.transactions_title()}
+        </MenuLink>
+        <MenuLink to="/properties/$propertyId/documents" params={params}>
+          {m.documents_title()}
         </MenuLink>
         <MenuLink to="/properties/$propertyId/sharing" params={params}>
           {m.ownership_title()}
@@ -913,6 +917,75 @@ function Latest(props: { view: FlatDetails }) {
   )
 }
 
+function Documents(props: { view: FlatDetails }) {
+  const { view } = props
+  const { latest, count } = view.documents
+  return (
+    <Stack
+      component="section"
+      aria-labelledby="documents-title"
+      sx={{ gap: 0.75 }}
+    >
+      <Stack
+        direction="row"
+        sx={{ justifyContent: 'space-between', alignItems: 'center' }}
+      >
+        <Typography
+          id="documents-title"
+          variant="h3"
+          component="h2"
+          sx={{ fontSize: 15 }}
+        >
+          {m.documents_title()}
+        </Typography>
+        <TextLink
+          to="/properties/$propertyId/documents"
+          params={{ propertyId: view.property.id }}
+          sx={{
+            minHeight: 44,
+            display: 'flex',
+            alignItems: 'center',
+            fontWeight: 800,
+          }}
+        >
+          {m.documents_all_count({ count })}
+        </TextLink>
+      </Stack>
+      {latest.length === 0 ? (
+        <Typography
+          sx={{ ...card, px: 2, py: 1.75, fontSize: 14, fontWeight: 800 }}
+        >
+          {m.documents_none()}
+        </Typography>
+      ) : (
+        <Box
+          component="ul"
+          sx={{ ...card, m: 0, p: 0, listStyle: 'none', overflow: 'hidden' }}
+        >
+          {latest.map((document, i) => (
+            <DocumentRowItem
+              key={document.id}
+              document={document}
+              propertyId={view.property.id}
+              first={i === 0}
+            />
+          ))}
+        </Box>
+      )}
+      {view.role === 'owner' ? (
+        <ButtonLink
+          to="/properties/$propertyId/documents/new"
+          params={{ propertyId: view.property.id }}
+          variant="outlined"
+          sx={{ minHeight: 48, borderRadius: 999 }}
+        >
+          {m.documents_new()}
+        </ButtonLink>
+      ) : null}
+    </Stack>
+  )
+}
+
 export function FlatDetailsPage(props: Props) {
   const { view } = props
   const owner = view.role === 'owner'
@@ -1029,6 +1102,7 @@ export function FlatDetailsPage(props: Props) {
         <Amounts view={view} />
         <UsageCharges view={view} />
         <Latest view={view} />
+        <Documents view={view} />
       </Stack>
       {deleting ? (
         <DeleteFlatDialog

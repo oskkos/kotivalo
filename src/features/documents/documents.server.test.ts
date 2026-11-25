@@ -23,6 +23,7 @@ import {
   deleteDocument,
   getDocument,
   getDocuments,
+  getNewDocument,
   updateDocument,
   type DocumentDeps,
 } from './documents.server'
@@ -301,6 +302,24 @@ describe("A lease's tenancy", () => {
     ])
     const member = await getDocument(deps('jussi'), flat, id)
     expect(member.ok && member.tenancies).toEqual([])
+  })
+})
+
+describe('The add form', () => {
+  test('gives an owner the tenancies and today, a member nothing', async () => {
+    expect(await getNewDocument(deps('annika'), flat)).toMatchObject({
+      ok: true,
+      today: '2026-11-25',
+      tenancies: [{ id: 'aino', tenantName: 'Aino Koski' }],
+    })
+    expect(await getNewDocument(deps('jussi'), flat)).toEqual({
+      ok: false,
+      reason: 'sharing_owner_only',
+    })
+    expect(await getNewDocument(deps('outsider'), flat)).toEqual({
+      ok: false,
+      reason: 'property_not_found',
+    })
   })
 })
 
