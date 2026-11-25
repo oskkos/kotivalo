@@ -97,16 +97,20 @@ In practice there is rarely a new tenant ready when notice is given, so "change 
 - The expected rent of a month that a tenancy starts or ends in is the month's rent in proportion to the days the tenancy runs, rounded to the cent (15.–30.11. is 16 of 30 days: 474,67 € of 890 €). It only drives the status; the owner records the amount actually paid. In a tenancy's first month the due date is no earlier than its start.
 - A month's payments are deleted and recorded again, not edited. Only owners record and delete them.
 - The year summary (#34) takes gross rent from the payments received in the year, by payment date. Months without a payment are shown as a warning ("rent for 3 months not marked"), never assumed paid.
-- A deposit is not income, but the part kept for unpaid rent or damage is rental income in the year it is kept ([Tax Administration](https://www.vero.fi/en/individuals/property/rental_income/what-is-considered-rental-income/)); the deposit return (#30) records it.
+- A deposit is not income: it is a debt to the tenant. The part kept for unpaid rent (or used as the last months' rent) is rental income in the year it is kept. The part kept for damage is tax-free compensation, and the repair costs are deductible only where they exceed it and any other compensation (Tax Administration, [Vuokratulojen verotus](https://www.vero.fi/syventavat-vero-ohjeet/ohje-hakusivu/49336/vuokratulojen-verotus8/) §2.1.3, example 1). The deposit return (#93) records which is which.
 - Rent is still not an entry (#32): the expected amount comes from the rent periods, and payments are their own records.
 - No action marks several months as paid at once; a new issue if it is ever needed.
 
 ### 4.3 Financing charge: income-recognised or capitalised
 
-Each flat stores whether the housing company recognises the financing charge (rahoitusvastike) as income or capitalises it. The property manager can tell you.
+Each flat stores whether the housing company recognises the financing charge (rahoitusvastike) as income or capitalises it, as periods (one treatment for all of the flat's financing charges, #90). The property manager (isännöitsijä) can tell you. Checked against the Tax Administration's detailed guidance [Vuokratulojen verotus](https://www.vero.fi/syventavat-vero-ohjeet/ohje-hakusivu/49336/vuokratulojen-verotus8/) (12.1.2026, §3.8) and the [7H instructions](https://www.vero.fi/en/About-us/contact-us/forms/filling-instructions/7h-rental-income-rental-apartments--instructions/) (#17):
 
-- **Income-recognised:** deducted from rental income, like the maintenance charge.
-- **Capitalised:** not deducted; added to the flat's acquisition cost instead. The app tracks the accumulated amount for when the flat is sold.
+- **Income-recognised:** deducted from rental income in row 2.3, in the year paid. Only the company's bookkeeping decides, not what the money is for or whether it is paid monthly or as a lump sum. A charge once deducted can't later be added to the acquisition cost.
+- **Capitalised:** not deducted and not reported on 7H; added to the flat's acquisition cost instead. The app tracks the accumulated amount for when the flat is sold.
+- **Partly both:** a company may recognise part of the charges as income and capitalise the rest (e.g. 60 % / 40 %, the same for every shareholder); only the income-recognised part is deductible. The app supports only all-or-nothing today (open, §6).
+- **A change of treatment:** the guidance says nothing about a change during the year or a capitalisation decision made after the year. The periods cover both: a month's charge follows the treatment in effect on its first day, and a later decision is entered by correcting the treatment period.
+- **Only while rented:** like the other charges, deductible only for the time the flat is let or offered for rent (§4.5).
+- **Case law:** deducting income-recognised capital charges has not always been accepted and has in some cases been treated as tax avoidance (§3.8). The year summary says so next to row 2.3 instead of judging the case.
 
 ### 4.4 Ownership and sharing are per flat
 
@@ -119,9 +123,23 @@ Each flat stores whether the housing company recognises the financing charge (ra
 
 ### 4.5 Year summary and taxes
 
+Checked against the [7H instructions](https://www.vero.fi/en/About-us/contact-us/forms/filling-instructions/7h-rental-income-rental-apartments--instructions/) (updated 4.2.2026) and the detailed guidance [Vuokratulojen verotus](https://www.vero.fi/syventavat-vero-ohjeet/ohje-hakusivu/49336/vuokratulojen-verotus8/) (12.1.2026) (#16):
+
+- **Form 7H, per flat.** Each flat gets its own itemisation (one paper form fits two flats; MyTax asks for the same data per flat). The flat's details: the housing company's name and Business ID, the apartment number, the tenant (name and personal identity code or Business ID; with several tenants the name is "several" and the ID left empty), the tenancy period (the whole year when the flat was let in several periods) and the owner's share (%). Then the rows, each the owner's own share for the year:
+  - **2.1** gross rent, nothing deducted
+  - **2.2** maintenance charges and water charges
+  - **2.3** capital charges the housing company recognised as income (§4.3)
+  - **2.4** annual repairs
+  - **2.5** other costs
+  - No profit or loss: the Tax Administration calculates it.
+- **Cash basis.** Rent is income in the year it is received (Income Tax Act §110; guidance §2.1.2) and costs are deducted in the year paid (§113; guidance §3.1). Gross rent is the sum of the rent payments received, never the rent computed from the periods (#25).
+- **Co-owners split everything by ownership share, not by who paid** (guidance §2.2, §3.1: a 50/50 owner deducts half even if the other owner paid all of it). Each co-owner files their own form. A share that changes during the year is not covered by the instructions; the app applies the share in effect on each payment date (a charge month's first day for charges), which follows from the cash basis, and the form's share field shows the share at the end of the owner's period with a note of the change.
+- **Only while let or offered for rent.** Charges and other costs are deductible for the time the flat earns rental income, including vacancies between tenancies when the flat is offered for rent (rental ads, an agent). A long vacancy may not count (guidance §3.1). The year summary deducts the charges for vacant months too, but lists those months so the owner can check them.
+- **Annual repairs vs. improvements** (guidance §3.7): an annual repair restores the original level and is deducted in full in the year paid (row 2.4). An improvement is added to the acquisition cost, or, on the owner's request, deducted as equal tenths over ten tax years starting from the year paid (row 2.5); what remains on sale or when letting stops is added to the acquisition cost. Costs of renovating a flat bought for letting before the first tenant moves in go to the acquisition cost.
+- **Not on form 7H:** loan interest (deducted separately from all capital income, forms 50B / 5010e; loans come after go-live, #35) and capitalised charges.
+- **Usage charges.** Water is named in row 2.2. Parking, sauna and other usage charges paid to the housing company are not named anywhere; the app puts them in row 2.5 as costs of earning the rent (an inference, not stated by the Tax Administration).
+- **A rental loss** (costs above the rent) is deducted from other capital income, and a deficit credit can reduce the tax on earned income (guidance §3.12). The year summary shows the net result as negative; the Tax Administration does the rest.
 - Figures are calculated per person, using ownership shares and validity periods.
-- The form 7H breakdown is made flat by flat.
-- Loan interest is reported as its own item.
 - **Loans** belong to a flat and have one or more borrowers: an owner's own loan, or a joint loan such as one taken by the co-owners of a 50/50 flat. Each borrower has a debt share (basis points, a validity period), which is not assumed to equal their ownership share.
 - Each year's loan payment records **interest** and **principal** separately. Interest is deductible and goes into the year summary; principal is not deductible and stays out of the form 7H figures (cash flow and statistics only).
 - How a joint loan's interest is split between borrowers for tax is open (see §6).
@@ -219,8 +237,11 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 
 **Tax and legal** (to be checked with an expert / the Finnish Tax Administration)
 
-- [ ] Structure of form 7H and the per-flat breakdown
-- [ ] Treatment of the financing charge (income-recognised / capitalised)
+- [x] ~~Structure of form 7H and the per-flat breakdown~~ See §4.5 (#16).
+- [x] ~~Treatment of the financing charge (income-recognised / capitalised)~~ See §4.3 (#17).
+- [ ] A financing charge partly income-recognised and partly capitalised (a percentage) is allowed but not supported (§4.3).
+- [ ] Form 7H asks for the housing company's name and Business ID and the apartment number, which flats don't store yet.
+- [ ] An ownership share that changes during the year: the 7H instructions have one share field per flat, and the app's rule (the share on each payment date) is an inference.
 - [x] ~~Notice periods. In the sketch: tenant 1 month, landlord 3 months, or 6 months if the tenancy has lasted over a year.~~ Checked against the Act on Residential Leases, which changed on 1.10.2026: see §4.2 (#18). The End tenancy sketch's hint follows the old law and is updated with #30.
 - [ ] Capital income tax rate: 30 % applies only up to 30 000 € of capital income and 34 % above it. The flat 30 % in the year summary and the editable rate in Account understate the tax on larger income; decide whether to model the bracket.
 - [ ] Taxation of an estate of a deceased person
