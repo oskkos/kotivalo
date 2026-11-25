@@ -56,13 +56,18 @@ function Row(props: { label: string; value: string; first?: boolean }) {
     >
       <Typography
         variant="body2"
-        sx={{ fontWeight: 700, color: 'text.secondary' }}
+        sx={{ fontWeight: 700, color: 'text.secondary', flexShrink: 0 }}
       >
         {props.label}
       </Typography>
       <Typography
         variant="body2"
-        sx={{ fontWeight: 800, textAlign: 'right', minWidth: 0 }}
+        sx={{
+          fontWeight: 800,
+          textAlign: 'right',
+          minWidth: 0,
+          overflowWrap: 'anywhere',
+        }}
       >
         {props.value}
       </Typography>

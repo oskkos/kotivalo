@@ -247,6 +247,7 @@ export function DocumentForm(props: Props) {
             <ChoiceField
               field={field}
               label={m.documents_kind()}
+              stacked
               choices={DOCUMENT_KINDS.map((value) => ({
                 value,
                 label: kindLabel[value](),
@@ -260,6 +261,7 @@ export function DocumentForm(props: Props) {
               <ChoiceField
                 field={field}
                 label={m.documents_tenancy()}
+                stacked
                 choices={[
                   ...props.tenancies.map((tenancy) => ({
                     value: tenancy.id,
