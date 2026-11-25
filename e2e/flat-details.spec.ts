@@ -137,6 +137,12 @@ test.describe('The flat details page', () => {
     await expect(
       jussi.getByRole('menuitem', { name: 'Add tenant' }),
     ).toHaveCount(0)
+    await expect(
+      jussi.getByRole('menuitem', { name: 'Delete flat' }),
+    ).toHaveCount(0)
+    await expect(
+      jussi.getByRole('menuitem', { name: 'Archive flat' }),
+    ).toBeVisible()
   })
 
   test('Earlier months not fully paid are warned about', async ({ page }) => {
