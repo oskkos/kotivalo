@@ -92,9 +92,9 @@
 
 ## 8. Taxes in the bottom bar
 
-- [ ] 8.1 `components/BottomNav.tsx`: `NavPage` with `year-summary`, four columns, Flats · New entry · Taxes · Account, and the `nav_taxes` message in fi, sv and en. Update the file's header comment.
-- [ ] 8.2 Playwright test for "The bottom bar opens the year summary". The existing navigation tests keep passing.
-- [ ] 8.3 Docs:
+- [x] 8.1 `components/BottomNav.tsx`: `NavPage` with `year-summary`, four columns, Flats · New entry · Taxes · Account, and the `nav_taxes` message in fi, sv and en. Update the file's header comment.
+- [x] 8.2 Playwright test for "The bottom bar opens the year summary". The existing navigation tests keep passing.
+- [x] 8.3 Docs:
   - CLAUDE.md "Current state": the year summary and the Taxes item
   - CONCEPT.md §6: tick "Form 7H asks for the housing company's name…" (done in #118)
   - README if it lists the pages

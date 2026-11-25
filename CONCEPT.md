@@ -240,7 +240,7 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 - [x] ~~Structure of form 7H and the per-flat breakdown~~ See §4.5 (#16).
 - [x] ~~Treatment of the financing charge (income-recognised / capitalised)~~ See §4.3 (#17).
 - [ ] A financing charge partly income-recognised and partly capitalised (a percentage) is allowed but not supported (§4.3).
-- [ ] Form 7H asks for the housing company's name and Business ID and the apartment number, which flats don't store yet.
+- [x] ~~Form 7H asks for the housing company's name and Business ID and the apartment number, which flats don't store yet.~~ Flats store them (#118), and the form 7H page shows each, or Add when it is missing (#34).
 - [ ] An ownership share that changes during the year: the 7H instructions have one share field per flat, and the app's rule (the share on each payment date) is an inference.
 - [x] ~~Notice periods. In the sketch: tenant 1 month, landlord 3 months, or 6 months if the tenancy has lasted over a year.~~ Checked against the Act on Residential Leases, which changed on 1.10.2026: see §4.2 (#18). The End tenancy sketch's hint follows the old law and is updated with #30.
 - [ ] Capital income tax rate: 30 % applies only up to 30 000 € of capital income and 34 % above it. The flat 30 % in the year summary and the editable rate in Account understate the tax on larger income; decide whether to model the bracket.
