@@ -8,9 +8,9 @@
 
 - [x] 2.1 `FileStorage.deleteMany(keys)` in `src/server/files/storage.ts`; R2 in `platform/storage.server.ts` in chunks of 1,000 keys; the memory storage used in tests
 - [x] 2.2 `deleteStoredFiles(storage, log, keys, event)` in `src/server/files/`, on `deleteMany`, logging a failure at `error` with the count; `transactions.server.ts` uses it in place of its own `deleteFiles`, with its tests still passing
-- [ ] 2.3 `property.repository.server.ts`: `deletionCheck(userId, propertyId)` (role, other owners past and present with names), `deletionSummary(propertyId)` (`hasData`, counts of tenancies, rent payments, transactions and receipts, member names), `receiptKeys(propertyId)`, and `deleteGuarded(userId, propertyId)` (one `DELETE` with the owner and other-owner conditions, returning whether it deleted)
-- [ ] 2.4 Workers tests: the cascade empties every child table (listed explicitly: access, invitations, ownership periods, financing charges, recurring amounts, treatments, usage charges and amounts, tenancies, tenancy rents, occupants, tenant fees and amounts, rent payments, transactions, receipts), another flat untouched, the guard refuses with a former owner's share and for a member, the summary's counts and `hasData` for an empty flat; unit or Workers tests for `deleteMany` chunking and `deleteStoredFiles`
-- [ ] 2.5 CLAUDE.md, "Repositories": a new table referencing `properties` goes into the flat deletion cascade test
+- [x] 2.3 `property.repository.server.ts`: `deletionCheck(userId, propertyId)` (role, other owners past and present with names), `deletionSummary(propertyId)` (`hasData`, counts of tenancies, rent payments, transactions and receipts, member names), `receiptKeys(propertyId)`, and `deleteGuarded(userId, propertyId)` (one `DELETE` with the owner and other-owner conditions, returning whether it deleted)
+- [x] 2.4 Workers tests: the cascade empties every child table (listed explicitly: access, invitations, ownership periods, financing charges, recurring amounts, treatments, usage charges and amounts, tenancies, tenancy rents, occupants, tenant fees and amounts, rent payments, transactions, receipts), another flat untouched, the guard refuses with a former owner's share and for a member, the summary's counts and `hasData` for an empty flat; unit or Workers tests for `deleteMany` chunking and `deleteStoredFiles`
+- [x] 2.5 CLAUDE.md, "Repositories": a new table referencing `properties` goes into the flat deletion cascade test
 
 ## 3. The notice after navigating
 

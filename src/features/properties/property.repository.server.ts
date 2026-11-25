@@ -1,12 +1,35 @@
 // Flats and who can reach them (openspec: properties). Every read and write
 // goes through the user's access row, so a flat without access looks the
 // same as one that doesn't exist.
-import { and, eq, inArray, isNotNull, isNull } from 'drizzle-orm'
+import type { AnySQLiteColumn } from 'drizzle-orm/sqlite-core'
+import {
+  and,
+  asc,
+  count,
+  eq,
+  exists,
+  gt,
+  inArray,
+  isNotNull,
+  isNull,
+  ne,
+  notExists,
+} from 'drizzle-orm'
 import type { IsoDate } from '#/lib/dates'
 import {
+  financingCharges,
+  financingTreatments,
   ownershipPeriods,
   properties,
   propertyAccess,
+  receipts,
+  recurringAmounts,
+  rentPayments,
+  tenancies,
+  transactions,
+  usageCharges,
+  user,
+  type PropertyRole,
 } from '#/server/db/schema'
 import { atomically, type Db } from '#/server/platform/db.server'
 import type {
@@ -31,6 +54,20 @@ const toProperty = (row: Row): Property => ({
   ...row,
   roomCount: row.roomCount as RoomCount,
 })
+
+/** What deleting a flat removes, for the confirmation. */
+export interface DeletionSummary {
+  /** A tenancy, charge, financing charge, treatment, usage charge or entry. */
+  hasData: boolean
+  counts: {
+    tenancies: number
+    rentPayments: number
+    transactions: number
+    receipts: number
+  }
+  /** The members, who lose their access. */
+  members: string[]
+}
 
 export function propertyRepository(db: Db) {
   /** The ids of the flats the user has access to, as a subquery. */
@@ -194,6 +231,143 @@ export function propertyRepository(db: Db) {
           and(own, isNotNull(propertyAccess.archivedAt)),
         )) > 0
       )
+    },
+
+    /**
+     * The user's role in the flat (undefined without access) and the names of
+     * everyone else who has had a share above 0 % in any ownership period.
+     */
+    async deletionCheck(
+      userId: string,
+      propertyId: string,
+    ): Promise<{ role: PropertyRole | undefined; otherOwners: string[] }> {
+      const access = await db
+        .select({ role: propertyAccess.role })
+        .from(propertyAccess)
+        .where(
+          and(
+            eq(propertyAccess.propertyId, propertyId),
+            eq(propertyAccess.userId, userId),
+          ),
+        )
+        .get()
+      const others = await db
+        .selectDistinct({ name: user.name })
+        .from(ownershipPeriods)
+        .innerJoin(user, eq(user.id, ownershipPeriods.userId))
+        .where(
+          and(
+            eq(ownershipPeriods.propertyId, propertyId),
+            ne(ownershipPeriods.userId, userId),
+            gt(ownershipPeriods.share, 0),
+          ),
+        )
+        .orderBy(asc(user.name))
+      return {
+        role: access?.role,
+        otherOwners: others.map((other) => other.name),
+      }
+    },
+
+    async deletionSummary(propertyId: string): Promise<DeletionSummary> {
+      const total = async (query: Promise<{ n: number }[]>): Promise<number> =>
+        (await query)[0]?.n ?? 0
+      const ofFlat = (table: { propertyId: AnySQLiteColumn }) =>
+        eq(table.propertyId, propertyId)
+      const counts = {
+        tenancies: await db.$count(tenancies, ofFlat(tenancies)),
+        rentPayments: await total(
+          db
+            .select({ n: count() })
+            .from(rentPayments)
+            .innerJoin(tenancies, eq(tenancies.id, rentPayments.tenancyId))
+            .where(eq(tenancies.propertyId, propertyId)),
+        ),
+        transactions: await db.$count(transactions, ofFlat(transactions)),
+        receipts: await total(
+          db
+            .select({ n: count() })
+            .from(receipts)
+            .innerJoin(
+              transactions,
+              eq(transactions.id, receipts.transactionId),
+            )
+            .where(eq(transactions.propertyId, propertyId)),
+        ),
+      }
+      const others =
+        (await db.$count(recurringAmounts, ofFlat(recurringAmounts))) +
+        (await db.$count(financingCharges, ofFlat(financingCharges))) +
+        (await db.$count(financingTreatments, ofFlat(financingTreatments))) +
+        (await db.$count(usageCharges, ofFlat(usageCharges)))
+      const members = await db
+        .select({ name: user.name })
+        .from(propertyAccess)
+        .innerJoin(user, eq(user.id, propertyAccess.userId))
+        .where(
+          and(
+            eq(propertyAccess.propertyId, propertyId),
+            eq(propertyAccess.role, 'member'),
+          ),
+        )
+        .orderBy(asc(user.name))
+      return {
+        hasData: counts.tenancies + counts.transactions + others > 0,
+        counts,
+        members: members.map((member) => member.name),
+      }
+    },
+
+    /** The storage keys of every receipt file of the flat. */
+    async receiptKeys(propertyId: string): Promise<string[]> {
+      const rows = await db
+        .select({ key: receipts.key })
+        .from(receipts)
+        .innerJoin(transactions, eq(transactions.id, receipts.transactionId))
+        .where(eq(transactions.propertyId, propertyId))
+      return rows.map((row) => row.key)
+    },
+
+    /**
+     * Deletes the flat and, through ON DELETE CASCADE, everything recorded
+     * for it, in one statement: only when the user is an owner and nobody
+     * else has had a share above 0 % (so the rule holds even if ownership
+     * changed since it was checked). Returns whether the flat was deleted.
+     */
+    async deleteGuarded(userId: string, propertyId: string): Promise<boolean> {
+      const deleted = await db
+        .delete(properties)
+        .where(
+          and(
+            eq(properties.id, propertyId),
+            exists(
+              db
+                .select({ one: propertyAccess.userId })
+                .from(propertyAccess)
+                .where(
+                  and(
+                    eq(propertyAccess.propertyId, propertyId),
+                    eq(propertyAccess.userId, userId),
+                    eq(propertyAccess.role, 'owner'),
+                  ),
+                ),
+            ),
+            notExists(
+              db
+                .select({ one: ownershipPeriods.id })
+                .from(ownershipPeriods)
+                .where(
+                  and(
+                    eq(ownershipPeriods.propertyId, propertyId),
+                    ne(ownershipPeriods.userId, userId),
+                    gt(ownershipPeriods.share, 0),
+                  ),
+                ),
+            ),
+          ),
+        )
+        .returning({ id: properties.id })
+      return deleted.length > 0
     },
 
     countForUser(userId: string): Promise<number> {
