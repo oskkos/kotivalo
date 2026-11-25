@@ -1,0 +1,1 @@
+ALTER TABLE `property_access` ADD `archived_at` integer;
