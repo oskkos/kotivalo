@@ -35,12 +35,12 @@
 
 ## 6. Deleting in the UI
 
-- [ ] 6.1 fi, sv and en messages: *Poista asunto*, the three dialog states, the losses with counts (`plural`), the members who lose access, the address field, *Poista* / *Poista pysyvästi*, the notice "… poistettu" (translate skill, term-critic on the diff)
-- [ ] 6.2 `addressMatches(typed, streetAddress)` (lower case, whitespace collapsed and trimmed) with unit tests
-- [ ] 6.3 `DeleteFlatDialog.tsx` loading `getPropertyDeletion`: plain, with losses and the address, or blocked with the alert and *Arkistoi asunto* (opens the archive dialog); *Poista asunto* in the menu for owners; confirming navigates to `/` with the notice; failures with `failureReason(error)`
-- [ ] 6.4 Component tests for the three states and the disabled button until the address matches
-- [ ] 6.5 Playwright tests in `e2e/delete-flat.spec.ts` for "Deleting a flat" and "Confirming the deletion of a flat" (empty flat, flat with a tenancy, a rent payment and an entry with a receipt, a member losing access, a pending invitation, the co-owned flat blocked, cancelling), and the changed member scenario of "The flat details page" in `e2e/flat-details.spec.ts`
-- [ ] 6.6 CLAUDE.md "Current state": deleting a flat, the guard and the receipt files
+- [x] 6.1 fi, sv and en messages: *Poista asunto*, the three dialog states, the losses with counts (`plural`), the members who lose access, the address field, *Poista* / *Poista pysyvästi*, the notice "… poistettu" (translate skill, term-critic on the diff)
+- [x] 6.2 `addressMatches(typed, streetAddress)` (lower case, whitespace collapsed and trimmed) with unit tests
+- [x] 6.3 `DeleteFlatDialog.tsx` loading `getPropertyDeletion`: plain, with losses and the address, or blocked with the alert and *Arkistoi asunto* (opens the archive dialog); *Poista asunto* in the menu for owners; confirming navigates to `/` with the notice; failures with `failureReason(error)`
+- [x] 6.4 Component tests for the three states and the disabled button until the address matches
+- [x] 6.5 Playwright tests in `e2e/delete-flat.spec.ts` for "Deleting a flat" and "Confirming the deletion of a flat" (empty flat, flat with a tenancy, a rent payment and an entry with a receipt, a member losing access, a pending invitation, the co-owned flat blocked, cancelling), and the changed member scenario of "The flat details page" in `e2e/flat-details.spec.ts`
+- [x] 6.6 CLAUDE.md "Current state": deleting a flat, the guard and the receipt files
 
 ## 7. Review and archive
 
