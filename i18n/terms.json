@@ -1307,7 +1307,7 @@
     "fi": {
       "term": "vuokra",
       "match": [
-        "vuokr(a|an|aa|at|ia|ien|ista|ille|ana|aan|asta|alle|alla|assa|aksi|issa|illa|ilta|iin|iksi|ina)"
+        "vuokr(a|an|aa|at|ia|ien|ista|ille|ana|aan|asta|alle|alla|assa|aksi|alta|ineen|issa|illa|ilta|iin|iksi|ina)"
       ],
       "status": "verified",
       "sources": [
