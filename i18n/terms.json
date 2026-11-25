@@ -731,6 +731,48 @@
     },
     "notes": "The noun määräaika (the term itself, \"määräajan päättymispäivä\") is left out of the Finnish pattern; the Swedish messages name it den bestämda tiden or hyrestiden. The English pattern also matches the noun \"fixed term\", which is harmless because the check runs from the Finnish side."
   },
+  "gross_rental_income": {
+    "code": "grossRent",
+    "definition": "A landlord's rental income before any deductions: the rent and the other payments from the tenant. Form 7H row 2.1 asks for the owner's own share of it.",
+    "showOriginal": true,
+    "fi": {
+      "term": "bruttovuokratulo",
+      "match": ["bruttovuokratulo\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/tietoa-verohallinnosta/yhteystiedot-ja-asiointi/lomakkeet/tayttoohjeet/7h-vuokratulot--osakehuoneistot-t%C3%A4ytt%C3%B6ohje/",
+          "quote": "2.1 Oma osuutesi bruttovuokratuloista / vuosi"
+        }
+      ]
+    },
+    "sv": {
+      "term": "bruttohyresinkomst",
+      "match": ["bruttohyresinkomst\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/skatteforvaltningen/kontakta-oss/blanketter/deklarationsanvisningar/7h-hyresinkomster--aktiel%C3%A4genheter/",
+          "quote": "2.1 Din egen andel av bruttohyresinkomsterna/år"
+        }
+      ]
+    },
+    "en": {
+      "term": "gross rental income",
+      "match": ["gross rental income"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/About-us/contact-us/forms/filling-instructions/7h-rental-income-rental-apartments--instructions/",
+          "quote": "2.1 Your portion of gross rental income per year"
+        }
+      ]
+    },
+    "notes": "The summary's row 2.1. The Swedish form says \"bruttohyresinkomsterna\" (definite plural); the term is the stem, and the pattern accepts every form."
+  },
   "housing_company": {
     "code": "housingCompany",
     "definition": "The limited liability housing company whose shares give the right to occupy a flat.",
@@ -1197,6 +1239,50 @@
     },
     "notes": "The full phrases are toistaiseksi voimassa oleva / gäller tills vidare. The patterns match the legal phrase and the bare short label only, because toistaiseksi and tills vidare also mean \"for now\". Short UI labels use Toistaiseksi / Tills vidare / Open-ended."
   },
+  "other_costs": {
+    "code": "otherCosts",
+    "definition": "Costs of renting out a flat that have no row of their own on form 7H, such as insurance and parking or sauna charges; row 2.5.",
+    "showOriginal": true,
+    "fi": {
+      "term": "muut kulut",
+      "match": [
+        "mu(?:ut|iden|ita|ihin|issa|ista|iksi|uta|uhun|ussa|usta) kul(?:ut|ujen|uja|uihin|uissa|uista|uiksi|ua|uun|ussa|usta)"
+      ],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/tietoa-verohallinnosta/yhteystiedot-ja-asiointi/lomakkeet/tayttoohjeet/7h-vuokratulot--osakehuoneistot-t%C3%A4ytt%C3%B6ohje/",
+          "quote": "2.5 Muut kulut / vuosi (ilmoita vain oma osuutesi)"
+        }
+      ]
+    },
+    "sv": {
+      "term": "övriga kostnader",
+      "match": ["övriga kostnad\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/skatteforvaltningen/kontakta-oss/blanketter/deklarationsanvisningar/7h-hyresinkomster--aktiel%C3%A4genheter/",
+          "quote": "2.5 Övriga kostnader/år (ange endast din egen andel)"
+        }
+      ]
+    },
+    "en": {
+      "term": "other costs",
+      "match": ["other costs?"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/About-us/contact-us/forms/filling-instructions/7h-rental-income-rental-apartments--instructions/",
+          "quote": "2.5 Other costs per year (only your share)"
+        }
+      ]
+    },
+    "notes": "The Tax Administration does not name what belongs here (CONCEPT.md §4.5); Kotivalo puts insurance, other expenses and parking, sauna and other usage charges in it."
+  },
   "owner": {
     "code": "owner",
     "codeNotes": "property_access role; a share above 0 %",
@@ -1294,6 +1380,48 @@
       ]
     },
     "codeNotes": "Kind value `parking` of usage charges and tenant fees (`CHARGE_KINDS`)."
+  },
+  "personal_identity_code": {
+    "code": "personalIdentityCode",
+    "definition": "A person's Finnish identity code. Form 7H asks for the tenant's; Kotivalo does not store it.",
+    "showOriginal": true,
+    "fi": {
+      "term": "henkilötunnus",
+      "match": ["henkilötunnu\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/tietoa-verohallinnosta/yhteystiedot-ja-asiointi/lomakkeet/tayttoohjeet/7h-vuokratulot--osakehuoneistot-t%C3%A4ytt%C3%B6ohje/",
+          "quote": "vuokralaisen henkilötunnus tai Y-tunnus sekä nimi"
+        }
+      ]
+    },
+    "sv": {
+      "term": "personbeteckning",
+      "match": ["personbeteckning\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/skatteforvaltningen/kontakta-oss/blanketter/deklarationsanvisningar/7h-hyresinkomster--aktiel%C3%A4genheter/",
+          "quote": "hyresgästens personbeteckning eller FO-nummer samt namn"
+        }
+      ]
+    },
+    "en": {
+      "term": "personal identity code",
+      "match": ["personal identity codes?"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/About-us/contact-us/forms/filling-instructions/7h-rental-income-rental-apartments--instructions/",
+          "quote": "name and personal identity code/Business ID of the tenant"
+        }
+      ]
+    },
+    "notes": "Not stored in Kotivalo: the form 7H page says to fill it in on MyTax."
   },
   "principal": {
     "code": "principal",
