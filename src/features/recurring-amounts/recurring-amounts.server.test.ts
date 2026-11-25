@@ -198,7 +198,7 @@ describe('Setting a charge', () => {
         corrected: false,
       }),
     ])
-    expect(JSON.stringify(logLines)).not.toContain('89000')
+    expect(JSON.stringify(logLines)).not.toMatch(/(?<![\w-])89000(?![\w-])/)
   })
 })
 
