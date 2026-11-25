@@ -1,4 +1,4 @@
-// How much a user may store (receipts now, attachments later): a limit
+// How much a user may store (receipts and documents together): a limit
 // against misuse that keeps R2 within its free tier, not exact accounting.
 // The usage comes from the sizes recorded in D1, checked before
 // storage.put().

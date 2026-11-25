@@ -295,6 +295,20 @@ describe('Storage quota for receipts', () => {
       .run()
   }
 
+  /** Document rows straight in, for the quota: the files don't exist. */
+  const recordDocuments = async (
+    userId: string,
+    files: number,
+    size: number,
+  ) => {
+    const numbers = `WITH RECURSIVE n(i) AS (SELECT 1 UNION ALL SELECT i + 1 FROM n WHERE i < ${String(files)})`
+    await env.DB.prepare(
+      `${numbers} INSERT INTO property_documents (id, property_id, kind, name, date, key, content_type, size, filename, uploaded_by, created_at, updated_at) SELECT ? || '-d' || i, ?, 'other', 'Dokumentti', '2026-11-21', 'attachments/' || ? || i, 'application/pdf', ?, 'd.pdf', ?, 0, 0 FROM n`,
+    )
+      .bind(userId, flat, userId, size, userId)
+      .run()
+  }
+
   test('A receipt over the file count is refused', async () => {
     await recordUploads('annika', 1000, 1)
     expect(
@@ -302,6 +316,43 @@ describe('Storage quota for receipts', () => {
     ).toEqual({ ok: false, reason: 'storage_quota_full' })
     expect(await fileKeys()).toEqual([])
     expect(events()).toContain('transaction.quota_exceeded')
+  })
+
+  test('Documents count towards the receipt quota', async () => {
+    await recordUploads('annika', 400, 1)
+    await recordDocuments('annika', 600, 1)
+    expect(
+      await createTransaction(deps('annika'), flat, repair, jpeg()),
+    ).toEqual({ ok: false, reason: 'storage_quota_full' })
+    expect(await fileKeys()).toEqual([])
+  })
+
+  test('documents and receipts are summed per uploader', async () => {
+    await recordUploads('annika', 2, 100)
+    await recordDocuments('annika', 3, 10)
+    await recordDocuments('jussi', 5, 1000)
+    const repository = transactionRepository(db)
+    expect(await repository.storageUsage('annika')).toEqual({
+      bytes: 230,
+      files: 5,
+    })
+    expect(await repository.storageUsage('jussi')).toEqual({
+      bytes: 5000,
+      files: 5,
+    })
+  })
+
+  test('a replaced receipt is left out of the usage', async () => {
+    await recordUploads('annika', 2, 100)
+    await recordDocuments('annika', 1, 10)
+    const entry = await created()
+    expect(await transactionRepository(db).storageUsage('annika')).toEqual({
+      bytes: 1210,
+      files: 4,
+    })
+    expect(
+      await transactionRepository(db).storageUsage('annika', entry),
+    ).toEqual({ bytes: 210, files: 3 })
   })
 
   test('A receipt over the size is refused', async () => {
