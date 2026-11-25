@@ -100,6 +100,7 @@ export type AlertReason =
   | 'tenancy_start_after_rent_change'
   | 'occupants_nothing_to_undo'
   | 'tenant_fee_not_found'
+  | 'usage_charge_not_found'
   | 'tenancy_has_changes_after_end'
   | 'tenancy_start_after_change'
   | 'rent_payment_month_outside_tenancy'
@@ -367,6 +368,10 @@ const texts: Record<Reason, () => ReasonText> = {
   }),
   occupants_invalid: () => ({ text: m.reason_occupants_invalid() }),
   description_required: () => ({ text: m.reason_description_required() }),
+  usage_charge_not_found: () => ({
+    title: m.reason_usage_charge_not_found_title(),
+    text: m.reason_usage_charge_not_found(),
+  }),
   tenant_fee_not_found: () => ({
     title: m.reason_tenant_fee_not_found_title(),
     text: m.reason_tenant_fee_not_found(),
