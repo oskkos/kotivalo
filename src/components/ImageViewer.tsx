@@ -1,22 +1,28 @@
-// A receipt image full screen (Design canvas: "Kuitti koko näytöllä"), with
+// An image (a receipt or a document) full screen (Design canvas: "Kuitti koko näytöllä"), with
 // Close and Download. PDFs open in the browser's own viewer instead.
 import Box from '@mui/material/Box'
 import Dialog from '@mui/material/Dialog'
 import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
-import { m } from '#/paraglide/messages.js'
 import { colors } from '#/theme/tokens'
-import { receiptUrl } from './labels'
-import type { Receipt } from './transaction.repository.server'
 
 interface Props {
-  receipt: Receipt
+  /** Where the image is, and where it is downloaded from. */
+  src: string
+  downloadHref: string
+  /** The file's name, shown at the top. */
+  filename: string
+  /** The dialog's name, and the image's description. */
+  title: string
+  alt: string
+  closeLabel: string
+  downloadLabel: string
   open: boolean
   onClose: () => void
 }
 
-export function ReceiptViewer(props: Props) {
+export function ImageViewer(props: Props) {
   return (
     <Dialog
       fullScreen
@@ -24,7 +30,7 @@ export function ReceiptViewer(props: Props) {
       onClose={props.onClose}
       slotProps={{
         paper: {
-          'aria-label': m.transactions_receipt(),
+          'aria-label': props.title,
           sx: { bgcolor: colors.plum, color: colors.cream },
         },
       }}
@@ -40,7 +46,7 @@ export function ReceiptViewer(props: Props) {
         }}
       >
         <IconButton
-          aria-label={m.transactions_close()}
+          aria-label={props.closeLabel}
           onClick={props.onClose}
           sx={{ color: 'inherit' }}
         >
@@ -61,12 +67,12 @@ export function ReceiptViewer(props: Props) {
           noWrap
           sx={{ fontSize: 14, fontWeight: 800, minWidth: 0, px: 1 }}
         >
-          {props.receipt.filename}
+          {props.filename}
         </Typography>
         <IconButton
           component="a"
-          href={receiptUrl(props.receipt.id, true)}
-          aria-label={m.transactions_download()}
+          href={props.downloadHref}
+          aria-label={props.downloadLabel}
           sx={{ color: 'inherit' }}
         >
           <svg
@@ -97,8 +103,8 @@ export function ReceiptViewer(props: Props) {
       >
         <Box
           component="img"
-          src={receiptUrl(props.receipt.id)}
-          alt={m.transactions_receipt_alt({ name: props.receipt.filename })}
+          src={props.src}
+          alt={props.alt}
           sx={{
             maxWidth: '100%',
             maxHeight: '100%',

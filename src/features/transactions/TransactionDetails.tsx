@@ -9,6 +9,7 @@ import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { useState, type ReactNode } from 'react'
+import { ImageViewer } from '#/components/ImageViewer'
 import type { Property } from '#/features/properties/property'
 import { formatDate, formatDay, formatFileSize } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
@@ -16,7 +17,6 @@ import type { PropertyRole } from '#/server/db/schema'
 import { colors, radii } from '#/theme/tokens'
 import { CATEGORIES } from './categories'
 import { categoryLabel, receiptUrl, summaryRowLabel } from './labels'
-import { ReceiptViewer } from './ReceiptViewer'
 import type { TransactionDetails as Entry } from './transaction.repository.server'
 import { signedAmount } from './TransactionsPage'
 
@@ -320,8 +320,14 @@ export function TransactionDetails(props: Props) {
         </Box>
       </Stack>
       {receipt && !isPdf ? (
-        <ReceiptViewer
-          receipt={receipt}
+        <ImageViewer
+          src={receiptUrl(receipt.id)}
+          downloadHref={receiptUrl(receipt.id, true)}
+          filename={receipt.filename}
+          title={m.transactions_receipt()}
+          alt={m.transactions_receipt_alt({ name: receipt.filename })}
+          closeLabel={m.transactions_close()}
+          downloadLabel={m.transactions_download()}
           open={viewing}
           onClose={() => {
             setViewing(false)
