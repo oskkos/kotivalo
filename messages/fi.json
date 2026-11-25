@@ -345,7 +345,7 @@
   "property_archive_title": "Arkistoidaanko asunto?",
   "property_archived_notice": "{address} arkistoitu",
   "property_archived_on": "Arkistoitu {date}",
-  "property_archived_text": "Asunto ei näy asuntolistallasi eikä tämän kuun vuokrissa. Sen tiedot säilyvät.",
+  "property_archived_text": "Asunto ei näy asuntolistallasi, tämän kuun vuokrissa eikä uuden kirjauksen asuntovalinnassa. Sen tiedot säilyvät.",
   "property_back_to_list": "Takaisin asuntoihin",
   "property_card_details": "{city} · {rooms} {area}",
   "property_card_owner": "{name} {share}",
