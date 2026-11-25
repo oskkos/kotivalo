@@ -156,7 +156,7 @@ An owner SHALL be able to delete an entry of the flat from its edit form, after 
 - **THEN** it is refused with the reason `sharing_owner_only`, and nothing changes
 
 ### Requirement: Storage quota for receipts
-Each user SHALL be able to store up to 500 MB and up to 1,000 files of receipts in total, counted from the files they uploaded. The quota SHALL be checked before a file is stored, from the sizes recorded in the database. A receipt that would exceed it SHALL be refused with the reason `storage_quota_full`, nothing SHALL be stored, and the user SHALL be able to save the entry without the receipt.
+Each user SHALL be able to store up to 500 MB and up to 1,000 files of receipts and documents ("Storage quota for documents") together, counted from the files they uploaded. The quota SHALL be checked before a file is stored, from the sizes recorded in the database. A receipt that would exceed it SHALL be refused with the reason `storage_quota_full`, nothing SHALL be stored, and the user SHALL be able to save the entry without the receipt.
 
 **No Playwright test:** reaching the quota needs 500 MB or 1,000 stored files; Workers tests cover the check with recorded sizes, and a component test shows the message.
 
@@ -171,6 +171,10 @@ Each user SHALL be able to store up to 500 MB and up to 1,000 files of receipts 
 #### Scenario: Another owner's files don't count
 - **WHEN** Jussi has uploaded 1,000 receipts for `Kuusikuja 3 B 12` and Annika, who has uploaded none, attaches a receipt to an entry of the same flat
 - **THEN** the receipt is stored
+
+#### Scenario: Documents count towards the receipt quota
+- **WHEN** a user has uploaded 400 receipts and 600 documents, and sends a new entry with a receipt
+- **THEN** it is refused with the reason `storage_quota_full`, and neither the entry nor a file is stored
 
 ### Requirement: New entry from the bottom bar
 The new entry form opened from the bottom bar (`/transactions/new`) SHALL ask for the flat, among the flats the user owns and hasn't archived ("Archiving a flat"). With one such flat it SHALL be chosen already; with several, the flat last used for an entry on this device, or else the first by street address. Flats the user is only a member of SHALL NOT be listed. A user who owns no such flat SHALL see an explanation instead of the form: with no flats at all, an "Add flat" action; with only shared flats, that entries are added by the owners; when every flat they own is archived, that their flats are archived and can be restored to the list from the flats list's archived flats, with a link to the flats list.

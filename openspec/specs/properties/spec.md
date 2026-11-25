@@ -113,10 +113,11 @@ Everyone with access to a flat SHALL be able to open its details page, the flat'
 - below them, *Vastikkeet kuukausittain*, opening the charges page ("The charges page"), with this year's charges so far ("Charges of a month") when above zero
 - below the charges and apart from them, the usage charges under the heading *Käyttömaksut*: each usage charge in effect today with its name and its amount this month ("Usage charges of a month"), for a per-occupant charge with the amount per occupant and the occupants, or that there are none, opening the usage charges page ("The usage charges page"); and below them *Käyttömaksut kuukausittain*, opening the usage charges by month page ("The usage charges by month page"), with this year's usage charges so far when above zero
 - the three latest entries by date ("The entries page"), each opening its details, and a link to the Entries page; or that there are no entries yet
-- in the header, a back link to the flats list, Edit, and a menu with Edit flat, Charges (*Vastikkeet*), Rent payments, Entries and Ownership and sharing for everyone, and for owners End tenancy while the current tenancy runs without a recorded ending and Add tenant; and below them, apart from the others, *Arkistoi asunto* for everyone (*Palauta listalle* when the user has archived the flat, "Archiving a flat") and, for owners, *Poista asunto* ("Deleting a flat")
+- below the entries, the *Dokumentit* section: the three latest documents by date ("The documents page"), each opening its details, with *Kaikki* and their number opening the documents page; or that there are no documents yet; and for owners *Lisää dokumentti* ("Adding a document")
+- in the header, a back link to the flats list, Edit, and a menu with Edit flat, Charges (*Vastikkeet*), Rent payments, Entries, Documents (*Dokumentit*) and Ownership and sharing for everyone, and for owners End tenancy while the current tenancy runs without a recorded ending and Add tenant; and below them, apart from the others, *Arkistoi asunto* for everyone (*Palauta listalle* when the user has archived the flat, "Archiving a flat") and, for owners, *Poista asunto* ("Deleting a flat")
 - when the user has archived the flat, at the top a band *Arkistoitu* with the date and *Palauta listalle* ("Restoring an archived flat")
 
-When the flat has no current tenancy, the rent card SHALL be replaced by a note that the flat is vacant, since when if a tenancy has ended, and Add tenant for owners. When the current tenancy starts after this month, the rent card SHALL show *No rent this month* with the start date. Members SHALL NOT see "Merkitse maksetuksi", End tenancy, Add tenant or *Poista asunto*. An archived flat's page SHALL otherwise work as before. A user without access SHALL see that the flat was not found.
+When the flat has no current tenancy, the rent card SHALL be replaced by a note that the flat is vacant, since when if a tenancy has ended, and Add tenant for owners. When the current tenancy starts after this month, the rent card SHALL show *No rent this month* with the start date. Members SHALL NOT see "Merkitse maksetuksi", End tenancy, Add tenant, *Lisää dokumentti* or *Poista asunto*. An archived flat's page SHALL otherwise work as before. A user without access SHALL see that the flat was not found.
 
 #### Scenario: Selecting a flat opens its details page
 - **WHEN** a user selects the card of `Kuusikuja 3 B 12` on `/`
@@ -182,6 +183,14 @@ When the flat has no current tenancy, the rent card SHALL be replaced by a note 
 - **WHEN** the flat has no usage charges
 - **THEN** the *Käyttömaksut* section says that there are none and opens the usage charges page
 
+#### Scenario: The latest documents
+- **WHEN** the flat has the documents `Yhtiökokous 2026` dated `2026-05-15`, `Tilinpäätös 2025` dated `2026-04-28`, `Vastikkeet 2026` dated `2026-01-02` and `Isännöitsijäntodistus` dated `2025-01-10`
+- **THEN** the *Dokumentit* section lists `Yhtiökokous 2026`, `Tilinpäätös 2025` and `Vastikkeet 2026`, and "Kaikki (4)" opens the documents page
+
+#### Scenario: A flat without documents on the details page
+- **WHEN** the flat has no documents, and Annika, an owner, opens the details page
+- **THEN** the *Dokumentit* section says that there are no documents yet and shows *Lisää dokumentti*
+
 ### Requirement: Archiving a flat
 Everyone with access to a flat, owners and members alike, SHALL be able to archive it for themselves with *Arkistoi asunto* in the details page's menu ("The flat details page"), after a confirmation that names the flat and says that its data is kept, other people's lists don't change, and it can be restored. Archiving SHALL hide the flat only for that user: from their flats list ("Listing flats"), this month's rent summary ("The rent summary on the flats list") and the new entry form's flat choice ("New entry from the bottom bar"). It SHALL NOT change the flat, its data, anyone's access or role, or what other users see. The archived flat SHALL keep working when opened, and SHALL still count towards the user's flats ("Limiting the number of flats"). After archiving, the user SHALL land on `/` with a notice naming the flat.
 
@@ -242,7 +251,7 @@ A user SHALL be able to restore a flat they have archived with *Palauta listalle
 ### Requirement: Deleting a flat
 An owner SHALL be able to delete a flat permanently with *Poista asunto* in the details page's menu, after the confirmation in "Confirming the deletion of a flat", only when they own 100 % of the flat now and nobody else has had a share above 0 % in any ownership period of the flat. Otherwise deleting SHALL be refused with the reason `property_delete_other_owners`, the dialog SHALL say so and name the other owners, past and present, and offer *Arkistoi asunto* instead, because they need the flat's data for their own taxes. A member SHALL NOT be able to delete; the server SHALL refuse it with the reason `sharing_owner_only`.
 
-Deleting SHALL remove the flat and everything recorded for it: everyone's access and the pending invitations, the ownership periods, the charges, the financing charges and the treatment, the usage charges, the tenancies with their rents, occupants and tenant fees, the rent payments, the entries and their receipts, and the receipt files in storage. The flat SHALL then behave for everyone as if it had never existed, and the files SHALL no longer count towards their uploaders' storage quota. After deleting, the owner SHALL land on `/` with a notice naming the flat.
+Deleting SHALL remove the flat and everything recorded for it: everyone's access and the pending invitations, the ownership periods, the charges, the financing charges and the treatment, the usage charges, the tenancies with their rents, occupants and tenant fees, the rent payments, the entries and their receipts, the documents, and the receipt and document files in storage. The flat SHALL then behave for everyone as if it had never existed, and the files SHALL no longer count towards their uploaders' storage quota. After deleting, the owner SHALL land on `/` with a notice naming the flat.
 
 #### Scenario: Deleting removes the flat and its receipt files
 - **WHEN** Annika owns 100 % of `Kuusikuja 3 B 12`, it has a tenancy with a rent payment and an expense with a receipt, and she deletes it and confirms
@@ -276,10 +285,14 @@ Deleting SHALL remove the flat and everything recorded for it: everyone's access
 - **WHEN** Annika owns `Kuusikuja 3 B 12` and `Koivupolku 7 A 4`, both with entries and receipts, and deletes `Kuusikuja 3 B 12`
 - **THEN** `Koivupolku 7 A 4`, its entries and its receipt files are unchanged
 
+#### Scenario: Deleting removes the flat's documents and their files
+- **WHEN** Annika owns 100 % of `Kuusikuja 3 B 12`, it has the document `Tilinpäätös 2025`, and Annika deletes the flat and confirms
+- **THEN** the document's file is no longer in storage, and it no longer counts towards Annika's storage quota
+
 ### Requirement: Confirming the deletion of a flat
 The confirmation for deleting a flat SHALL depend on what the flat has:
-- **A flat without data** (no tenancies, charges, financing charge treatment, usage charges or entries): a dialog that names the flat and says that deleting can't be undone, with *Poista*.
-- **A flat with data:** a dialog that says deleting can't be undone and suggests archiving to keep the data, lists what is removed with the number of tenancies, rent payments, entries and receipts, names the members who lose their access, and asks for the street address. *Poista pysyvästi* SHALL stay disabled until the typed text matches the street address, ignoring letter case and extra spaces.
+- **A flat without data** (no tenancies, charges, financing charge treatment, usage charges, entries or documents): a dialog that names the flat and says that deleting can't be undone, with *Poista*.
+- **A flat with data:** a dialog that says deleting can't be undone and suggests archiving to keep the data, lists what is removed with the number of tenancies, rent payments, entries, receipts and documents, names the members who lose their access, and asks for the street address. *Poista pysyvästi* SHALL stay disabled until the typed text matches the street address, ignoring letter case and extra spaces.
 
 Cancel SHALL close the dialog without changes.
 
@@ -288,8 +301,8 @@ Cancel SHALL close the dialog without changes.
 - **THEN** the dialog names `Mäntytie 9 A 2`, asks for no address, and *Poista* deletes the flat
 
 #### Scenario: The confirmation lists what is removed
-- **WHEN** `Kuusikuja 3 B 12` has 2 tenancies, 26 rent payments, 48 entries and 31 receipts, Jussi is a member, and Annika selects *Poista asunto*
-- **THEN** the dialog lists 2 tenancies, 26 rent payments, 48 entries and 31 receipts, and says that Jussi loses his access
+- **WHEN** `Kuusikuja 3 B 12` has 2 tenancies, 26 rent payments, 48 entries, 31 receipts and 5 documents, Jussi is a member, and Annika selects *Poista asunto*
+- **THEN** the dialog lists 2 tenancies, 26 rent payments, 48 entries, 31 receipts and 5 documents, and says that Jussi loses his access
 
 #### Scenario: Deleting waits for the street address
 - **WHEN** the flat `Kuusikuja 3 B 12` has entries, and Annika types `Kuusikuja 3 B` in the confirmation
@@ -298,4 +311,8 @@ Cancel SHALL close the dialog without changes.
 #### Scenario: Cancelling keeps the flat
 - **WHEN** Annika selects *Poista asunto* and then Cancel
 - **THEN** the details page stays open and the flat is unchanged
+
+#### Scenario: A flat with only documents asks for the address
+- **WHEN** `Mäntytie 9 A 2` has no data but the document `Isännöitsijäntodistus`, and Annika selects *Poista asunto*
+- **THEN** the dialog lists 1 document and asks for the street address
 
