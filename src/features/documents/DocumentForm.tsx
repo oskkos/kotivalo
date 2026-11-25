@@ -214,40 +214,12 @@ export function DocumentForm(props: Props) {
         component="main"
         sx={{ flex: 1, gap: 1.75, px: 2.5, pt: 1, pb: 2.5 }}
       >
-        {editing ? null : (
-          <FileField
-            title={m.documents_file()}
-            file={file}
-            reason={reasons.file}
-            submitting={submitting}
-            onChoose={(chosen) => {
-              setFile(chosen)
-              clearReason('file')
-              const current = form.getFieldValue('name')
-              if (current === '' || current === suggested) {
-                const next = nameOf(chosen)
-                setSuggested(next)
-                form.setFieldValue('name', next)
-              }
-            }}
-            onRemove={() => {
-              setFile(undefined)
-            }}
-            labels={{
-              attach: m.documents_attach(),
-              hint: m.documents_attach_hint(),
-              saving: m.documents_saving(),
-              remove: m.documents_remove_file(),
-              replace: m.documents_attach(),
-            }}
-          />
-        )}
         <form.Field name="kind">
           {(field) => (
             <ChoiceField
               field={field}
               label={m.documents_kind()}
-              stacked
+              wrap
               choices={DOCUMENT_KINDS.map((value) => ({
                 value,
                 label: kindLabel[value](),
@@ -307,6 +279,34 @@ export function DocumentForm(props: Props) {
             />
           )}
         </form.Field>
+        {editing ? null : (
+          <FileField
+            title={m.documents_file()}
+            file={file}
+            reason={reasons.file}
+            submitting={submitting}
+            onChoose={(chosen) => {
+              setFile(chosen)
+              clearReason('file')
+              const current = form.getFieldValue('name')
+              if (current === '' || current === suggested) {
+                const next = nameOf(chosen)
+                setSuggested(next)
+                form.setFieldValue('name', next)
+              }
+            }}
+            onRemove={() => {
+              setFile(undefined)
+            }}
+            labels={{
+              attach: m.documents_attach(),
+              hint: m.documents_attach_hint(),
+              saving: m.documents_saving(),
+              remove: m.documents_remove_file(),
+              replace: m.documents_attach(),
+            }}
+          />
+        )}
         {alert === undefined ? null : <ReasonAlert reason={alert} />}
       </Stack>
       <Stack
