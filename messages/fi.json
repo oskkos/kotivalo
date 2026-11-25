@@ -886,7 +886,7 @@
   "tenant_fee_water_warning": "Vuokralaisen vesimaksuja on kirjattu {date} alkaen {count} kpl, yhteensä {total}. Ne säilyvät; tarkista, ettei sama maksu ole kahdesti.",
   "transactions_amount": "Summa",
   "transactions_amount_placeholder": "0,00",
-  "transactions_archived_only_text": "Kirjauksen voi lisätä vain asunnolle, jota ei ole arkistoitu. Palauta asunto listalle asuntolistan kohdasta Arkistoidut asunnot.",
+  "transactions_archived_only_text": "Kirjauksen voi lisätä vain omistamallesi asunnolle, jota ei ole arkistoitu. Palauta asunto listalle asuntolistan lopusta kohdasta Arkistoidut asunnot.",
   "transactions_archived_only_title": "Asuntosi on arkistoitu",
   "transactions_attach": "Ota kuva tai valitse tiedosto",
   "transactions_attach_hint": "Kuva tai PDF, enintään 10 Mt",
