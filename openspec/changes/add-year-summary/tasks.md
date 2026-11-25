@@ -25,18 +25,18 @@
 
 ## 3. Flat details, checks and the copy format
 
-- [ ] 3.1 `summary.ts`, the flat details:
+- [x] 3.1 `summary.ts`, the flat details:
   - the housing company fields
   - the tenant (one, several, none) and the tenancy period clamped to the year
   - the share at the end of the user's period in the year
-- [ ] 3.2 `summary.ts`, the checks:
+- [x] 3.2 `summary.ts`, the checks:
   - months not fully paid from `rentMonths` (`late`, `partly_paid`) in months the user owned on the first day
   - vacant months with the user's charges above 0
   - missing housing company details
   - financing charge months without a treatment
   - the share change with its date and shares
-- [ ] 3.3 `features/year-summary/copy.ts`: `amountForCopy(cents)` and `shareForCopy(basisPoints)`.
-- [ ] 3.4 Unit tests named after the scenarios of "Flat details for form 7H", "Checks in the year summary" and "Amounts and shares in the copy format".
+- [x] 3.3 `features/year-summary/copy.ts`: `amountForCopy(cents)` and `shareForCopy(basisPoints)`.
+- [x] 3.4 Unit tests named after the scenarios of "Flat details for form 7H", "Checks in the year summary" and "Amounts and shares in the copy format".
 
 ## 4. Form 7H terms
 

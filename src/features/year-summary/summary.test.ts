@@ -9,6 +9,7 @@ import {
   summaryYears,
   type FlatYearInput,
   type SummaryEntry,
+  type SummaryTenancy,
 } from './summary'
 
 const TODAY = '2026-11-25'
@@ -32,6 +33,11 @@ const amount = (
 
 const input = (over: Partial<FlatYearInput> = {}): FlatYearInput => ({
   propertyId: 'flat',
+  housingCompany: {
+    name: 'As Oy Kuusikuja',
+    businessId: '0112038-9',
+    apartmentNumber: 'B 12',
+  },
   ownership: always(10000),
   tenancies: [],
   payments: [],
@@ -39,6 +45,18 @@ const input = (over: Partial<FlatYearInput> = {}): FlatYearInput => ({
   charges: { maintenance: [], financing: [] },
   treatments: [],
   usageCharges: [],
+  ...over,
+})
+
+const tenancy = (over: Partial<SummaryTenancy> = {}): SummaryTenancy => ({
+  id: 't',
+  tenantName: 'Aino Koski',
+  validFrom: '2025-01-01',
+  validTo: null,
+  dueDay: 5,
+  occupants: [],
+  rent: [amount(89000, '2025-01-01')],
+  fees: [],
   ...over,
 })
 
@@ -339,5 +357,183 @@ describe('Flats in the year summary', () => {
   test('A share starting after today is not included', () => {
     const data = input({ ownership: ownership([5000, '2026-12-01', null]) })
     expect(year(data, 2026, '2026-11-25').included).toBe(false)
+  })
+})
+
+describe('Flat details for form 7H', () => {
+  test('Missing housing company details', () => {
+    const data = input({
+      housingCompany: { name: null, businessId: null, apartmentNumber: null },
+    })
+    const result = year(data)
+    expect(result.details).toMatchObject({
+      name: null,
+      businessId: null,
+      apartmentNumber: null,
+    })
+    expect(result.checks).toContainEqual({
+      kind: 'details_missing',
+      missing: ['name', 'business_id', 'apartment_number'],
+    })
+  })
+
+  test('One tenancy for part of the year', () => {
+    const data = input({
+      tenancies: [
+        tenancy({ tenantName: 'Mikko Laine', validTo: '2025-09-30' }),
+      ],
+    })
+    expect(year(data).details).toMatchObject({
+      tenant: { kind: 'one', name: 'Mikko Laine' },
+      period: { from: '2025-01-01', to: '2025-09-30' },
+    })
+  })
+
+  test('Several tenancies in the year', () => {
+    const data = input({
+      tenancies: [
+        tenancy({ id: 'a', validTo: '2025-05-31' }),
+        tenancy({
+          id: 'b',
+          tenantName: 'Mikko Laine',
+          validFrom: '2025-06-15',
+        }),
+      ],
+    })
+    expect(year(data).details).toMatchObject({
+      tenant: { kind: 'several' },
+      period: { from: '2025-01-01', to: '2025-12-31' },
+    })
+  })
+
+  test('No tenancy in the year', () => {
+    const data = input({ tenancies: [tenancy({ validFrom: '2026-02-01' })] })
+    expect(year(data).details).toMatchObject({
+      tenant: { kind: 'none' },
+      period: null,
+    })
+  })
+
+  test('A tenancy starting after today is not counted in the current year', () => {
+    const data = input({ tenancies: [tenancy({ validFrom: '2026-12-01' })] })
+    expect(year(data, 2026, '2026-11-25').details.tenant).toEqual({
+      kind: 'none',
+    })
+  })
+
+  test('The share at the end of the year', () => {
+    const data = input({
+      ownership: ownership(
+        [5000, '2024-01-01', '2025-06-30'],
+        [10000, '2025-07-01', null],
+      ),
+    })
+    expect(year(data).details.share).toBe(10000)
+  })
+
+  test("The share at the end of the user's period", () => {
+    const data = input({
+      ownership: ownership(
+        [5000, '2024-01-01', '2025-06-30'],
+        [0, '2025-07-01', null],
+      ),
+    })
+    expect(year(data).details.share).toBe(5000)
+  })
+})
+
+describe('Checks in the year summary', () => {
+  const paid = rentIn2025()
+  const owned = { tenancies: [tenancy()] }
+
+  test('A month not paid', () => {
+    const result = year(input({ ...owned, payments: paid }))
+    expect(result.checks).toContainEqual({
+      kind: 'unpaid',
+      months: ['2025-12'],
+    })
+  })
+
+  test('A partly paid month', () => {
+    const payments = [
+      ...paid.filter((p) => p.month !== '2025-11'),
+      payment('2025-11', 50000, '2025-11-05'),
+      payment('2025-12', 89000, '2025-12-05'),
+    ]
+    const result = year(input({ ...owned, payments }))
+    expect(result.checks).toContainEqual({
+      kind: 'partly_paid',
+      months: [{ month: '2025-11', missing: 39000 }],
+    })
+    expect(result.checks.map((c) => c.kind)).not.toContain('unpaid')
+  })
+
+  test('Months before the user owned are not checked', () => {
+    const result = year(
+      input({
+        ...owned,
+        ownership: ownership([10000, '2025-12-01', null]),
+        payments: [],
+      }),
+    )
+    expect(result.checks).toContainEqual({
+      kind: 'unpaid',
+      months: ['2025-12'],
+    })
+  })
+
+  test('Vacant months with charges', () => {
+    const data = input({
+      tenancies: [tenancy({ validTo: '2025-09-30' })],
+      payments: paid.slice(0, 9),
+      charges: { maintenance: [amount(24458)], financing: [] },
+    })
+    const result = year(data)
+    expect(result.checks).toContainEqual({
+      kind: 'vacant',
+      months: ['2025-10', '2025-11', '2025-12'],
+    })
+    expect(result.rows['2.2'].cents).toBe(12 * 24458)
+  })
+
+  test('A vacant month without charges is not named', () => {
+    const data = input({ tenancies: [tenancy({ validTo: '2025-09-30' })] })
+    expect(year(data).checks.map((c) => c.kind)).not.toContain('vacant')
+  })
+
+  test('A financing charge without a treatment', () => {
+    const data = input({
+      charges: {
+        maintenance: [],
+        financing: [
+          { id: 'f', name: null, periods: [amount(6050, '2025-01-01')] },
+        ],
+      },
+    })
+    const result = year(data)
+    const check = result.checks.find((c) => c.kind === 'treatment_not_set')
+    expect(check && 'months' in check ? check.months : []).toHaveLength(12)
+    expect(result.rows['2.3'].cents).toBe(0)
+    expect(result.outside.capitalised).toBe(0)
+  })
+
+  test('A share change', () => {
+    const data = input({
+      ownership: ownership(
+        [5000, '2024-01-01', '2025-06-30'],
+        [10000, '2025-07-01', null],
+      ),
+    })
+    expect(year(data).checks).toContainEqual({
+      kind: 'share_changed',
+      on: '2025-07-01',
+      from: 5000,
+      to: 10000,
+    })
+  })
+
+  test('A first share in the year is not a change', () => {
+    const data = input({ ownership: ownership([5000, '2025-10-01', null]) })
+    expect(year(data).checks.map((c) => c.kind)).not.toContain('share_changed')
   })
 })
