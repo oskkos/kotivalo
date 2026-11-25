@@ -13,15 +13,15 @@
 
 ## 2. The rows of a flat's year
 
-- [ ] 2.1 `features/year-summary/summary.ts`:
+- [x] 2.1 `features/year-summary/summary.ts`:
   - the weighted amounts (amount × the user's basis points on its deciding date, `sharesOn`)
   - parts rounded once, half up
   - rows 2.1–2.5 from rent payments by `paid_on`, entries by `CATEGORIES[…].row`, `chargeMonth` per month with the treatment, and `usageChargesOfMonth` per month with `USAGE_CHARGE_ROWS`
   - the months up to the current one in the current year
   - the Not on form 7H amounts (capitalised, improvements)
   - `included` (share above 0 on some day of the year up to today)
-- [ ] 2.2 `summaryYears` and `openingYear` (design.md, decision 4) in the same module.
-- [ ] 2.3 Unit tests named after the scenarios of "Form 7H rows of the own share", "Shares on the cash basis", "The Not on form 7H card", "The year the summary opens on" and "Flats in the year summary", with fixed `today` values.
+- [x] 2.2 `summaryYears` and `openingYear` (design.md, decision 4) in the same module.
+- [x] 2.3 Unit tests named after the scenarios of "Form 7H rows of the own share", "Shares on the cash basis", "The Not on form 7H card", "The year the summary opens on" and "Flats in the year summary", with fixed `today` values.
 
 ## 3. Flat details, checks and the copy format
 
