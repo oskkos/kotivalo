@@ -14,13 +14,14 @@ vi.mock('@tanstack/react-router', () => ({
 }))
 
 describe('bottom navigation', () => {
-  test('marks the current page and links the three items', () => {
+  test('marks the current page and links the four items', () => {
     render(<BottomNav current="account" />)
     const nav = screen.getByRole('navigation', { name: 'Main navigation' })
     const links = within(nav).getAllByRole('link')
     expect(links.map((link) => link.getAttribute('href'))).toEqual([
       '/',
       '/transactions/new',
+      '/year-summary',
       '/account',
     ])
     expect(within(nav).getByRole('link', { name: 'Account' })).toHaveAttribute(
@@ -31,5 +32,13 @@ describe('bottom navigation', () => {
       within(nav).getByRole('link', { name: 'Flats' }),
     ).not.toHaveAttribute('aria-current')
     expect(within(nav).getByRole('link', { name: 'New entry' })).toBeVisible()
+  })
+
+  test('marks Taxes on the year summary', () => {
+    render(<BottomNav current="year-summary" />)
+    expect(screen.getByRole('link', { name: 'Taxes' })).toHaveAttribute(
+      'aria-current',
+      'page',
+    )
   })
 })

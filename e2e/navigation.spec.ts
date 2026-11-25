@@ -54,6 +54,18 @@ test.describe('The bottom navigation bar', () => {
     await expect(page).toHaveURL('/transactions/new')
   })
 
+  test('The bottom bar opens the year summary', async ({ page }) => {
+    await signIn(page, uniqueEmail('nav'), 'Annika')
+    await waitForHydration(page)
+
+    await nav(page).getByRole('link', { name: 'Taxes' }).click()
+
+    await expect(page).toHaveURL(/\/year-summary(\?|$)/)
+    await expect(
+      nav(page).getByRole('link', { name: 'Taxes' }),
+    ).toHaveAttribute('aria-current', 'page')
+  })
+
   test("Forms don't show the bottom bar", async ({ page }) => {
     await signIn(page, uniqueEmail('nav'), 'Annika')
     await page.goto('/properties/new')

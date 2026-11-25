@@ -1,6 +1,7 @@
-// The bottom navigation bar on the main pages (Design canvas: "Alapalkki";
-// openspec: navigation): Flats · New entry · Account. Statistics and Taxes
-// join it when their pages exist. Forms and a flat's subpages don't show it.
+// The bottom navigation bar on the main pages (Design canvas: "Alapalkki",
+// VerotAsunnot; openspec: navigation): Flats · New entry · Taxes · Account.
+// Statistics joins it when its page exists. Forms, a flat's subpages and a
+// flat's form 7H page don't show it.
 import Box from '@mui/material/Box'
 import ButtonBase from '@mui/material/ButtonBase'
 import Typography from '@mui/material/Typography'
@@ -30,7 +31,7 @@ function Icon(props: { children: React.ReactNode; size?: number }) {
 }
 
 function Tab(props: {
-  to: '/' | '/account'
+  to: '/' | '/year-summary' | '/account'
   current: boolean
   label: string
   icon: React.ReactNode
@@ -70,7 +71,7 @@ export function BottomNav({ current }: { current: NavPage }) {
         bottom: 0,
         mt: 'auto',
         display: 'grid',
-        gridTemplateColumns: 'repeat(3, minmax(0, 1fr))',
+        gridTemplateColumns: 'repeat(4, minmax(0, 1fr))',
         alignItems: 'center',
         bgcolor: 'background.paper',
         borderTop: `1px solid ${colors.cardBorder}`,
@@ -109,6 +110,18 @@ export function BottomNav({ current }: { current: NavPage }) {
           <path d="M9.5 8 H14.5 M9.5 12 H14.5 M9.5 16 H12" />
         </Icon>
       </ButtonBase>
+      <Tab
+        to="/year-summary"
+        current={current === 'year-summary'}
+        label={m.nav_taxes()}
+        icon={
+          <Icon>
+            <path d="M7 3 H14 L19 8 V21 H7 Z" />
+            <path d="M14 3 V8 H19" />
+            <path d="M10 13 H16 M10 17 H14" />
+          </Icon>
+        }
+      />
       <Tab
         to="/account"
         current={current === 'account'}
