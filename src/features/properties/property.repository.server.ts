@@ -22,6 +22,7 @@ import {
   ownershipPeriods,
   properties,
   propertyAccess,
+  propertyDocuments,
   receipts,
   recurringAmounts,
   rentPayments,
@@ -64,6 +65,7 @@ export interface DeletionSummary {
     rentPayments: number
     transactions: number
     receipts: number
+    documents: number
   }
   /** The members, who lose their access. */
   members: string[]
@@ -297,6 +299,10 @@ export function propertyRepository(db: Db) {
             )
             .where(eq(transactions.propertyId, propertyId)),
         ),
+        documents: await db.$count(
+          propertyDocuments,
+          ofFlat(propertyDocuments),
+        ),
       }
       const others =
         (await db.$count(recurringAmounts, ofFlat(recurringAmounts))) +
@@ -315,20 +321,26 @@ export function propertyRepository(db: Db) {
         )
         .orderBy(asc(user.name))
       return {
-        hasData: counts.tenancies + counts.transactions + others > 0,
+        hasData:
+          counts.tenancies + counts.transactions + counts.documents + others >
+          0,
         counts,
         members: members.map((member) => member.name),
       }
     },
 
-    /** The storage keys of every receipt file of the flat. */
-    async receiptKeys(propertyId: string): Promise<string[]> {
-      const rows = await db
+    /** The storage keys of every receipt and document file of the flat. */
+    async fileKeys(propertyId: string): Promise<string[]> {
+      const receiptRows = await db
         .select({ key: receipts.key })
         .from(receipts)
         .innerJoin(transactions, eq(transactions.id, receipts.transactionId))
         .where(eq(transactions.propertyId, propertyId))
-      return rows.map((row) => row.key)
+      const documentRows = await db
+        .select({ key: propertyDocuments.key })
+        .from(propertyDocuments)
+        .where(eq(propertyDocuments.propertyId, propertyId))
+      return [...receiptRows, ...documentRows].map((row) => row.key)
     },
 
     /**

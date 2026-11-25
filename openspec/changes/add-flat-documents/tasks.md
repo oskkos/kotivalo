@@ -24,9 +24,9 @@
 
 ## 5. Flat deletion and the details page on the server
 
-- [ ] 5.1 `property.repository.server.ts`: `deletionSummary` counts documents and `hasData` includes them; `receiptKeys` becomes `fileKeys` with the document keys; `properties.server.ts` uses it
-- [ ] 5.2 `getFlatDetails` returns `documents: { latest, count }`
-- [ ] 5.3 Workers tests: "Deleting removes the flat's documents and their files", a flat with only documents has data, the details' latest three documents by date and the count
+- [x] 5.1 `property.repository.server.ts`: `deletionSummary` counts documents and `hasData` includes them; `receiptKeys` becomes `fileKeys` with the document keys; `properties.server.ts` uses it
+- [x] 5.2 `getFlatDetails` returns `documents: { latest, count }`
+- [x] 5.3 Workers tests: "Deleting removes the flat's documents and their files", a flat with only documents has data, the details' latest three documents by date and the count
 
 ## 6. Shared file pieces in the browser
 

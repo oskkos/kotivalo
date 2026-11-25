@@ -76,6 +76,7 @@ const details = (over: Partial<FlatDetails> = {}): FlatDetails => ({
   financingCharges: [],
   treatments: [],
   capitalised: 0,
+  documents: { latest: [], count: 0 },
   // Every month to September paid; October and November not.
   payments: Array.from({ length: 19 }, (_, i) => {
     const month = new Date(Date.UTC(2025, 2 + i, 1)).toISOString().slice(0, 7)
