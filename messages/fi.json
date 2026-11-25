@@ -423,6 +423,8 @@
   "reason_ownership_share_invalid": "Kirjoita osuus prosentteina, esimerkiksi 50 tai 33,33.",
   "reason_ownership_shares_total": "Osuuksien summan pitää olla 100 %.",
   "reason_postcode_invalid": "Postinumerossa on 5 numeroa.",
+  "reason_property_delete_other_owners": "Asuntoa ei voi poistaa, koska sillä on tai on ollut muita omistajia. He tarvitsevat sen tietoja omaan verotukseensa. Voit arkistoida asunnon.",
+  "reason_property_delete_other_owners_title": "Asuntoa ei voi poistaa",
   "reason_property_limit_reached": "Kotivaloon voi lisätä enintään 100 asuntoa.",
   "reason_property_limit_reached_title": "Asuntoja on jo 100",
   "reason_property_not_found": "Asunto on voitu poistaa, tai sinulla ei ole siihen pääsyä.",

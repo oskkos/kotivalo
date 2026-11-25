@@ -423,6 +423,8 @@
   "reason_ownership_share_invalid": "Skriv andelen i procent, till exempel 50 eller 33,33.",
   "reason_ownership_shares_total": "Andelarna måste sammanlagt vara 100 %.",
   "reason_postcode_invalid": "Postnumret har 5 siffror.",
+  "reason_property_delete_other_owners": "Bostaden kan inte tas bort, eftersom den har eller har haft andra ägare. De behöver bostadens uppgifter för sin egen beskattning. Du kan arkivera bostaden.",
+  "reason_property_delete_other_owners_title": "Bostaden kan inte tas bort",
   "reason_property_limit_reached": "Du kan lägga till högst 100 bostäder i Kotivalo.",
   "reason_property_limit_reached_title": "Du har redan 100 bostäder",
   "reason_property_not_found": "Bostaden kan ha tagits bort, eller så har du inte åtkomst till den.",

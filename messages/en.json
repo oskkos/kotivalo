@@ -423,6 +423,8 @@
   "reason_ownership_share_invalid": "Enter the share as a percentage, for example 50 or 33.33.",
   "reason_ownership_shares_total": "The shares must add up to 100%.",
   "reason_postcode_invalid": "A postcode has 5 digits.",
+  "reason_property_delete_other_owners": "The flat can't be deleted, because it has or has had other owners. They need its data for their own taxes. You can archive the flat instead.",
+  "reason_property_delete_other_owners_title": "The flat can't be deleted",
   "reason_property_limit_reached": "You can add at most 100 flats to Kotivalo.",
   "reason_property_limit_reached_title": "You already have 100 flats",
   "reason_property_not_found": "It may have been removed, or you don't have access to it.",
