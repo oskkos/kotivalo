@@ -43,8 +43,21 @@ export async function getProperty(
   deps: PropertyDeps,
   id: string,
 ): Promise<Result<{ property: Property }>> {
-  const property = await deps.properties.findForUser(deps.userId, id)
-  return property ? { ok: true, property } : notFound
+  const found = await deps.properties.findForUser(deps.userId, id)
+  if (!found) {
+    return notFound
+  }
+  return {
+    ok: true,
+    property: {
+      id: found.id,
+      streetAddress: found.streetAddress,
+      postcode: found.postcode,
+      city: found.city,
+      roomCount: found.roomCount,
+      floorArea: found.floorArea,
+    },
+  }
 }
 
 /**

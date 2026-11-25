@@ -139,6 +139,8 @@ export const propertyAccess = sqliteTable(
       .references(() => user.id, { onDelete: 'cascade' }),
     role: text('role', { enum: PROPERTY_ROLES }).notNull(),
     createdAt: instant('created_at').notNull(),
+    /** When this user archived the flat: hidden from their own views only. */
+    archivedAt: instant('archived_at'),
   },
   (t) => [
     primaryKey({ columns: [t.propertyId, t.userId] }),

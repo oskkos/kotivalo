@@ -279,6 +279,7 @@ export function sharingRepository(db: Db) {
                 userId: sql<string>`${userId}`.as('user_id'),
                 role: sql<PropertyRole>`'member'`.as('role'),
                 createdAt: sql<Date>`${now.getTime()}`.as('created_at'),
+                archivedAt: sql<Date | null>`NULL`.as('archived_at'),
               })
               .from(propertyInvitations)
               .where(acceptable(invitationId, email, now)),

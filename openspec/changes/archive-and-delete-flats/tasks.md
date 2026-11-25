@@ -1,8 +1,8 @@
 ## 1. Archiving in the schema and the repository
 
-- [ ] 1.1 `property_access.archived_at` (`instant()`, nullable) in `src/server/db/schema.ts`; `pnpm db:generate` and the committed migration (adds a column only); `pnpm db:migrate:local`
-- [ ] 1.2 `property.repository.server.ts`: `listForUser` leaves archived rows out, `listArchivedForUser`, `setArchived(userId, propertyId, at | null)` (keeps the first date when already archived), `findForUser` returns the user's `archivedAt`; `countForUser` unchanged
-- [ ] 1.3 Workers tests in `property.repository.server.test.ts`: archiving hides the flat only for that user, a co-owner's list unchanged, restoring, the first date kept, another user's flat not found, an archived flat still counted
+- [x] 1.1 `property_access.archived_at` (`instant()`, nullable) in `src/server/db/schema.ts`; `pnpm db:generate` and the committed migration (adds a column only); `pnpm db:migrate:local`
+- [x] 1.2 `property.repository.server.ts`: `listForUser` leaves archived rows out, `listArchivedForUser`, `setArchived(userId, propertyId, at | null)` (keeps the first date when already archived), `findForUser` returns the user's `archivedAt`; `countForUser` unchanged
+- [x] 1.3 Workers tests in `property.repository.server.test.ts`: archiving hides the flat only for that user, a co-owner's list unchanged, restoring, the first date kept, another user's flat not found, an archived flat still counted
 
 ## 2. Deleting in the repository and storage
 

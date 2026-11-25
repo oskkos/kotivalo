@@ -18,6 +18,11 @@ export interface Property extends PropertyDetails {
   id: string
 }
 
+/** A flat as one user sees it: when they archived it, if they did. */
+export interface UserProperty extends Property {
+  archivedAt: Date | null
+}
+
 /**
  * Sorts by street address in the language's alphabetical order, numbers by
  * value: "Kuusikuja 3" before "Kuusikuja 12", and in Finnish and Swedish
