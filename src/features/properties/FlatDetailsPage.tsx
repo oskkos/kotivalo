@@ -6,6 +6,7 @@ import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Link from '@mui/material/Link'
+import Divider from '@mui/material/Divider'
 import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import Stack from '@mui/material/Stack'
@@ -29,7 +30,8 @@ import { currentTenancy, flatStatus } from '#/features/tenancies/status'
 import { TenancyCard } from '#/features/tenancies/TenancyCard'
 import type { Tenancy } from '#/features/tenancies/tenancy.repository.server'
 import { EntryRow } from '#/features/transactions/TransactionsPage'
-import { lastDayOfMonth } from '#/lib/dates'
+import { clientLog } from '#/lib/client-log'
+import { lastDayOfMonth, type IsoDate } from '#/lib/dates'
 import { formatArea, formatDate, formatMoney } from '#/lib/format'
 import {
   usageChargesOfMonth,
@@ -38,7 +40,9 @@ import {
 import { chargeName } from '#/lib/charge-labels'
 import { m } from '#/paraglide/messages.js'
 import { colors, radii, shadows } from '#/theme/tokens'
+import { ArchiveDialog } from './ArchiveDialog'
 import type { FlatDetails } from './details.server'
+import { restoreProperty } from './functions'
 import { ownershipLine } from './ownership-line'
 import { roomCountLabel } from './room-count'
 
@@ -100,6 +104,9 @@ function Header(props: {
   propertyId: string
   owner: boolean
   canEnd: Tenancy | null
+  archived: boolean
+  onArchive: () => void
+  onRestore: () => void
 }) {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
   const params = { propertyId: props.propertyId }
@@ -188,8 +195,63 @@ function Header(props: {
         <MenuLink to="/properties/$propertyId/sharing" params={params}>
           {m.ownership_title()}
         </MenuLink>
+        <Divider />
+        {props.archived ? (
+          <MenuItem
+            onClick={() => {
+              close()
+              props.onRestore()
+            }}
+          >
+            {m.property_restore()}
+          </MenuItem>
+        ) : (
+          <MenuItem
+            onClick={() => {
+              close()
+              props.onArchive()
+            }}
+          >
+            {m.property_archive()}
+          </MenuItem>
+        )}
       </Menu>
     </Box>
+  )
+}
+
+/** The user has archived the flat: when, and the way back to the list. */
+function ArchivedBand(props: {
+  archivedOn: IsoDate
+  busy: boolean
+  onRestore: () => void
+}) {
+  return (
+    <Stack
+      component="section"
+      aria-labelledby="archived-band-title"
+      sx={{
+        gap: 1,
+        p: 1.75,
+        bgcolor: colors.yellowTint,
+        borderRadius: `${String(radii.card)}px`,
+      }}
+    >
+      <Typography id="archived-band-title" variant="subtitle1" component="h2">
+        {m.property_archived_on({ date: formatDate(props.archivedOn) })}
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        {m.property_archived_text()}
+      </Typography>
+      <Button
+        color="primary"
+        loading={props.busy}
+        onClick={props.onRestore}
+        sx={{ alignSelf: 'flex-start' }}
+      >
+        {m.property_restore()}
+      </Button>
+    </Stack>
   )
 }
 
@@ -861,14 +923,48 @@ export function FlatDetailsPage(props: Props) {
       ? current
       : null
   const [recording, setRecording] = useState(false)
+  const [archiving, setArchiving] = useState(false)
+  const [restoring, setRestoring] = useState(false)
+
+  async function restore() {
+    setRestoring(true)
+    try {
+      await restoreProperty({ data: { id: view.property.id } })
+      await props.onChanged()
+    } catch (error) {
+      clientLog.error('property.restore_failed', {}, error)
+    } finally {
+      setRestoring(false)
+    }
+  }
 
   return (
     <Stack sx={{ minHeight: '100dvh' }}>
-      <Header propertyId={view.property.id} owner={owner} canEnd={canEnd} />
+      <Header
+        propertyId={view.property.id}
+        owner={owner}
+        canEnd={canEnd}
+        archived={view.archivedOn !== null}
+        onArchive={() => {
+          setArchiving(true)
+        }}
+        onRestore={() => {
+          void restore()
+        }}
+      />
       <Stack
         component="main"
         sx={{ flex: 1, gap: 1.75, px: 2.5, pt: 1, pb: 3 }}
       >
+        {view.archivedOn === null ? null : (
+          <ArchivedBand
+            archivedOn={view.archivedOn}
+            busy={restoring}
+            onRestore={() => {
+              void restore()
+            }}
+          />
+        )}
         <Hero view={view} />
         {current ? (
           <RentCard
@@ -903,6 +999,15 @@ export function FlatDetailsPage(props: Props) {
         <UsageCharges view={view} />
         <Latest view={view} />
       </Stack>
+      {archiving ? (
+        <ArchiveDialog
+          property={view.property}
+          open
+          onClose={() => {
+            setArchiving(false)
+          }}
+        />
+      ) : null}
       {recording && current && row ? (
         <RecordPaymentDialog
           propertyId={view.property.id}

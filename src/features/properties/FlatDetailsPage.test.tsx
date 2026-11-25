@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, test, vi } from 'vitest'
 import type { Tenancy } from '#/features/tenancies/tenancy.repository.server'
@@ -8,6 +8,7 @@ import { FlatDetailsPage } from './FlatDetailsPage'
 // jsdom's browser language is English. Links render as plain anchors; the
 // router isn't under test here.
 vi.mock('@tanstack/react-router', () => ({
+  useNavigate: () => vi.fn(),
   createLink:
     () =>
     ({
@@ -25,6 +26,10 @@ vi.mock('@tanstack/react-router', () => ({
     ),
 }))
 vi.mock('#/features/rent-payments/functions', () => ({}))
+vi.mock('./functions', () => ({
+  restoreProperty: vi.fn(() => Promise.resolve({ ok: true })),
+  archiveProperty: vi.fn(() => Promise.resolve({ ok: true })),
+}))
 
 const aino: Tenancy = {
   id: 't1',
@@ -343,5 +348,50 @@ describe('Months not fully paid', () => {
         .getByText('Rent not recorded as fully paid: December 2025')
         .closest('a'),
     ).toHaveAttribute('href', '/properties/$propertyId/rent?year=2025')
+  })
+})
+
+describe('Archiving on the flat details page', () => {
+  const openMenu = () => {
+    fireEvent.click(screen.getByRole('button', { name: 'More actions' }))
+    return screen.getByRole('menu')
+  }
+
+  test('an archived flat shows the band and Restore to list in the menu', () => {
+    renderPage(details({ archivedOn: '2026-11-25' }))
+
+    const band = screen.getByRole('region', { name: 'Archived 25/11/2026' })
+    expect(
+      within(band).getByRole('button', { name: 'Restore to your list' }),
+    ).toBeVisible()
+    const menu = openMenu()
+    expect(
+      within(menu).getByRole('menuitem', { name: 'Restore to your list' }),
+    ).toBeVisible()
+    expect(
+      within(menu).queryByRole('menuitem', { name: 'Archive flat' }),
+    ).toBeNull()
+  })
+
+  test('a flat not archived has no band and Archive flat in the menu', () => {
+    renderPage(details())
+
+    expect(screen.queryByText(/^Archived /)).toBeNull()
+    const menu = openMenu()
+    expect(
+      within(menu).getByRole('menuitem', { name: 'Archive flat' }),
+    ).toBeVisible()
+  })
+
+  test('Archive flat asks for a confirmation naming the flat', () => {
+    renderPage(details())
+
+    fireEvent.click(
+      within(openMenu()).getByRole('menuitem', { name: 'Archive flat' }),
+    )
+
+    const dialog = screen.getByRole('dialog', { name: 'Archive the flat?' })
+    expect(dialog).toHaveTextContent('Kuusikuja 3 B 12 will be hidden')
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }))
   })
 })
