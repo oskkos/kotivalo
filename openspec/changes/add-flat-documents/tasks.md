@@ -30,8 +30,8 @@
 
 ## 6. Shared file pieces in the browser
 
-- [ ] 6.1 `resize-image.ts` to `src/lib/` with a neutral problem; `ReceiptViewer.tsx` to `components/ImageViewer.tsx`; the entry form's file field to `components/form/FileField.tsx`; the entry form and details use them with their component tests and `e2e/transactions.spec.ts` passing
-- [ ] 6.2 Component tests for `FileField` (chosen file's name and size, remove, the reason under it) and `ImageViewer`
+- [x] 6.1 `resize-image.ts` to `src/lib/` with a neutral problem; `ReceiptViewer.tsx` to `components/ImageViewer.tsx`; the entry form's file field to `components/form/FileField.tsx`; the entry form and details use them with their component tests and `e2e/transactions.spec.ts` passing
+- [x] 6.2 Component tests for `FileField` (chosen file's name and size, remove, the reason under it) and `ImageViewer`
 
 ## 7. The documents page and the details page section
 

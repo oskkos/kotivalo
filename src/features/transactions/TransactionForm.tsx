@@ -14,14 +14,16 @@ import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { useForm, useSelector } from '@tanstack/react-form'
-import { useId, useRef, useState } from 'react'
+import { useId, useState } from 'react'
 import { ReasonAlert } from '#/components/ReasonAlert'
 import { TextField } from '#/components/form/TextField'
 import type { Property } from '#/features/properties/property'
+import { FileField } from '#/components/form/FileField'
 import { clientLog } from '#/lib/client-log'
 import { parseFiDate, type IsoDate } from '#/lib/dates'
-import { formatAmountInput, formatDate, formatFileSize } from '#/lib/format'
+import { formatAmountInput, formatDate } from '#/lib/format'
 import { failureReason } from '#/lib/network-error'
+import { ImageProblem, prepareUpload } from '#/lib/resize-image'
 import { reasonText, type AlertReason, type FieldReason } from '#/lib/reasons'
 import { m } from '#/paraglide/messages.js'
 import type { TransactionCategory } from '#/server/db/schema'
@@ -31,7 +33,6 @@ import { DeleteDialog } from './DeleteDialog'
 import { createTransaction, updateTransaction } from './functions'
 import { categoryLabel } from './labels'
 import type { TransactionDetails } from './transaction.repository.server'
-import { prepareReceipt, RECEIPT_ACCEPT, ReceiptProblem } from './resize-image'
 import { typedNote, typedTransactionAmount } from './schemas'
 
 interface Props {
@@ -106,8 +107,6 @@ function Icon(props: { path: string; size?: number; width?: number }) {
 }
 
 const CLOSE = 'M6 6 L18 18 M18 6 L6 18'
-const CAMERA =
-  'M4 8 H7 L9 5 H15 L17 8 H20 V19 H4 Z M15.2 13 a3.2 3.2 0 1 1 -6.4 0 a3.2 3.2 0 1 1 6.4 0'
 const CHECK = 'M5 12 L10 17 L19 7'
 const CLOCK = 'M12 7 V12 L15 14 M21 12 A9 9 0 1 1 3 12 A9 9 0 1 1 21 12'
 const CHEVRON = 'M9 5 L16 12 L9 19'
@@ -257,9 +256,7 @@ export function TransactionForm(props: Props) {
     Partial<Record<FieldName, FieldReason>>
   >({})
   const [alert, setAlert] = useState<AlertReason>()
-  const fileInputRef = useRef<HTMLInputElement>(null)
   const categoryId = useId()
-  const receiptId = useId()
   const flat = props.flats.find((candidate) => candidate.id === flatId)
 
   const clearReason = (name: FieldName) => {
@@ -298,7 +295,7 @@ export function TransactionForm(props: Props) {
       data.set('note', value.note)
       try {
         if (receipt) {
-          data.set('receipt', await prepareReceipt(receipt))
+          data.set('receipt', await prepareUpload(receipt))
         }
         if (editing) {
           data.set('transactionId', editing.id)
@@ -321,8 +318,8 @@ export function TransactionForm(props: Props) {
           setAlert(result.reason as AlertReason)
         }
       } catch (error) {
-        if (error instanceof ReceiptProblem) {
-          setReasons({ receipt: error.reason })
+        if (error instanceof ImageProblem) {
+          setReasons({ receipt: `receipt_${error.problem}` })
           return
         }
         clientLog.error('transaction.save_failed', {}, error)
@@ -596,140 +593,30 @@ export function TransactionForm(props: Props) {
             </form.Field>
           </Stack>
         </Stack>
-        <Stack
-          component="section"
-          aria-labelledby={receiptId}
-          sx={{ gap: 0.75 }}
-        >
-          <Typography
-            id={receiptId}
-            variant="h4"
-            component="h2"
-            sx={{ fontSize: 14, fontWeight: 900 }}
-          >
-            {m.transactions_receipt()}
-          </Typography>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept={RECEIPT_ACCEPT}
-            hidden
-            aria-label={m.transactions_attach()}
-            onChange={(e) => {
-              const chosen = e.target.files?.[0]
-              if (chosen) {
-                setReceipt(chosen)
-                clearReason('receipt')
-              }
-              e.target.value = ''
-            }}
-          />
-          {kept && !receipt ? (
-            <Stack
-              direction="row"
-              sx={{
-                alignItems: 'center',
-                gap: 1.5,
-                bgcolor: 'background.paper',
-                border: `1px solid ${colors.cardBorder}`,
-                borderRadius: `${String(radii.tile)}px`,
-                py: 1.25,
-                pl: 1.75,
-                pr: 1,
-              }}
-            >
-              <Stack sx={{ flex: 1, minWidth: 0 }}>
-                <Typography noWrap sx={{ fontSize: 14, fontWeight: 900 }}>
-                  {kept.filename}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {formatFileSize(kept.size)}
-                </Typography>
-              </Stack>
-              <Button
-                variant="text"
-                color="inherit"
-                disabled={submitting}
-                onClick={() => fileInputRef.current?.click()}
-                sx={{ textDecoration: 'underline' }}
-              >
-                {m.transactions_replace_receipt()}
-              </Button>
-              <IconButton
-                aria-label={m.transactions_remove_receipt()}
-                disabled={submitting}
-                onClick={() => {
-                  setKept(null)
-                }}
-              >
-                <Icon path={CLOSE} size={20} />
-              </IconButton>
-            </Stack>
-          ) : receipt ? (
-            <Stack
-              direction="row"
-              sx={{
-                alignItems: 'center',
-                gap: 1.5,
-                bgcolor: 'background.paper',
-                border: `1px solid ${colors.cardBorder}`,
-                borderRadius: `${String(radii.tile)}px`,
-                py: 1.25,
-                pl: 1.75,
-                pr: 1,
-              }}
-            >
-              <Stack sx={{ flex: 1, minWidth: 0 }}>
-                <Typography noWrap sx={{ fontSize: 14, fontWeight: 900 }}>
-                  {receipt.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {submitting
-                    ? m.transactions_saving()
-                    : formatFileSize(receipt.size)}
-                </Typography>
-              </Stack>
-              <IconButton
-                aria-label={m.transactions_remove_receipt()}
-                disabled={submitting}
-                onClick={() => {
-                  setReceipt(undefined)
-                }}
-              >
-                <Icon path={CLOSE} size={20} />
-              </IconButton>
-            </Stack>
-          ) : (
-            <ButtonBase
-              aria-describedby={
-                reasons.receipt ? `${receiptId}-reason` : undefined
-              }
-              onClick={() => fileInputRef.current?.click()}
-              sx={{
-                flexDirection: 'column',
-                gap: 0.25,
-                minHeight: 64,
-                border: `1.5px dashed ${reasons.receipt ? colors.error : colors.dashed}`,
-                borderRadius: `${String(radii.tile)}px`,
-                fontFamily: 'inherit',
-              }}
-            >
-              <Stack direction="row" sx={{ alignItems: 'center', gap: 1 }}>
-                <Icon path={CAMERA} size={20} width={2.2} />
-                <Typography sx={{ fontSize: 15, fontWeight: 800 }}>
-                  {m.transactions_attach()}
-                </Typography>
-              </Stack>
-              <Typography variant="body2" color="text.secondary">
-                {m.transactions_attach_hint()}
-              </Typography>
-            </ButtonBase>
-          )}
-          <FieldReasonText
-            id={`${receiptId}-reason`}
-            reason={reasons.receipt}
-          />
-        </Stack>
+        <FileField
+          title={m.transactions_receipt()}
+          file={receipt}
+          kept={kept}
+          reason={reasons.receipt}
+          submitting={submitting}
+          onChoose={(chosen) => {
+            setReceipt(chosen)
+            clearReason('receipt')
+          }}
+          onRemove={() => {
+            setReceipt(undefined)
+          }}
+          onRemoveKept={() => {
+            setKept(null)
+          }}
+          labels={{
+            attach: m.transactions_attach(),
+            hint: m.transactions_attach_hint(),
+            saving: m.transactions_saving(),
+            remove: m.transactions_remove_receipt(),
+            replace: m.transactions_replace_receipt(),
+          }}
+        />
         {alert === undefined ? null : <ReasonAlert reason={alert} />}
         {editing ? (
           <Button
