@@ -135,6 +135,9 @@ export async function getFlatDetails(
       city: property.city,
       roomCount: property.roomCount,
       floorArea: property.floorArea,
+      housingCompanyName: property.housingCompanyName,
+      businessId: property.businessId,
+      apartmentNumber: property.apartmentNumber,
     },
     archivedOn: property.archivedAt
       ? isoDateInFinland(property.archivedAt)

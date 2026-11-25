@@ -148,6 +148,35 @@ describe('The flat details page', () => {
     expect(result.ok && result.financingCharges).toHaveLength(1)
   })
 
+  test('gives the flat its housing company details', async () => {
+    await propertyRepository(db).update(
+      'annika',
+      flat,
+      {
+        streetAddress: 'Kuusikuja 3 B 12',
+        postcode: '33100',
+        city: 'Tampere',
+        roomCount: 2,
+        floorArea: 485,
+        housingCompanyName: 'As Oy Kuusikuja 3',
+        businessId: '2345678-0',
+        apartmentNumber: 'B 12',
+      },
+      now,
+    )
+
+    const result = await getFlatDetails(deps(), flat)
+
+    expect(result).toMatchObject({
+      ok: true,
+      property: {
+        housingCompanyName: 'As Oy Kuusikuja 3',
+        businessId: '2345678-0',
+        apartmentNumber: 'B 12',
+      },
+    })
+  })
+
   test("gives the flat's usage charges with their periods", async () => {
     await usageChargeRepository(db).add({
       actorId: 'annika',

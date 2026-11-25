@@ -84,3 +84,66 @@ describe('The first ownership period', () => {
     expect(issue('31.2.2026')).toBe('date_invalid')
   })
 })
+
+describe('Housing company details of a flat', () => {
+  test('Spaces around the details are dropped', () => {
+    expect(
+      propertyDetailsInput.parse({
+        ...valid,
+        housingCompanyName: '  As Oy Kuusikuja 3 ',
+        businessId: ' 2345678-0 ',
+        apartmentNumber: '  B 12  ',
+      }),
+    ).toMatchObject({
+      housingCompanyName: 'As Oy Kuusikuja 3',
+      businessId: '2345678-0',
+      apartmentNumber: 'B 12',
+    })
+  })
+
+  test('A flat without housing company details', () => {
+    const missing = propertyDetailsInput.parse(valid)
+    expect(missing.housingCompanyName).toBeUndefined()
+    expect(missing.businessId).toBeUndefined()
+    expect(missing.apartmentNumber).toBeUndefined()
+
+    const empty = propertyDetailsInput.parse({
+      ...valid,
+      housingCompanyName: '',
+      businessId: '  ',
+      apartmentNumber: '',
+    })
+    expect(empty.housingCompanyName).toBeUndefined()
+    expect(empty.businessId).toBeUndefined()
+    expect(empty.apartmentNumber).toBeUndefined()
+  })
+
+  test('A Business ID with a wrong check digit is not saved', () => {
+    expect(reasons({ businessId: '2345678-9' })).toEqual({
+      businessId: 'business_id_invalid',
+    })
+  })
+
+  test('A Business ID in the wrong form is not saved', () => {
+    for (const businessId of ['2345678', '23456780', '3141592-0']) {
+      expect(reasons({ businessId })).toEqual({
+        businessId: 'business_id_invalid',
+      })
+    }
+  })
+
+  test('limits the length of the name and the apartment number', () => {
+    expect(reasons({ housingCompanyName: 'x'.repeat(101) })).toEqual({
+      housingCompanyName: 'text_too_long',
+    })
+    expect(reasons({ apartmentNumber: 'x'.repeat(21) })).toEqual({
+      apartmentNumber: 'text_too_long',
+    })
+    expect(
+      reasons({
+        housingCompanyName: 'x'.repeat(100),
+        apartmentNumber: 'x'.repeat(20),
+      }),
+    ).toEqual({})
+  })
+})

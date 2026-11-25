@@ -124,6 +124,47 @@
     },
     "codeNotes": "Category value `annual_repair` (expense, row 2.4)."
   },
+  "apartment_number": {
+    "code": "apartmentNumber",
+    "definition": "The number of a flat within its housing company, e.g. B 12; form 7H asks for it.",
+    "fi": {
+      "term": "huoneiston numero",
+      "match": ["huoneiston numero\\p{L}*", "huoneistonumero\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/tietoa-verohallinnosta/yhteystiedot-ja-asiointi/lomakkeet/tayttoohjeet/7h-vuokratulot--osakehuoneistot-t%C3%A4ytt%C3%B6ohje/",
+          "quote": "asunto- tai kiinteistöosakeyhtiön nimi ja Y-tunnus sekä huoneiston numero"
+        }
+      ]
+    },
+    "sv": {
+      "term": "lägenhetens nummer",
+      "match": ["lägenhetens nummer", "lägenhetsnummer\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/skatteforvaltningen/kontakta-oss/blanketter/deklarationsanvisningar/7h-hyresinkomster--aktiel%C3%A4genheter/",
+          "quote": "bostads- eller fastighetsaktiebolagets namn och FO-nummer samt lägenhetens nummer"
+        }
+      ]
+    },
+    "en": {
+      "term": "apartment number",
+      "match": ["apartment numbers?"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/About-us/contact-us/forms/filling-instructions/7h-rental-income-rental-apartments--instructions/",
+          "quote": "the name and Business ID of the housing company or real estate holding company, and the apartment number"
+        }
+      ]
+    },
+    "notes": "The form asks for the apartment's number (huoneiston numero, lägenhetens nummer). Form 7H says apartment here although the UI says flat elsewhere (property): the number belongs to the apartment in the housing company, so the Tax Administration's word is kept."
+  },
   "basic_improvement": {
     "codeNotes": "Category value `improvement` (expense; its amount fills no form 7H row as such). For a flat in a housing company that the owner pays: a tenth a year in row 2.5 for 10 years from the year paid, or deducted on sale. For a building (form 7K): added to the undepreciated acquisition cost and depreciated at 4 % a year (residential), or deducted on sale.",
     "definition": "An extension, alteration or modernisation of a flat; not deducted at once, but depreciated or deducted on sale.",
@@ -185,6 +226,47 @@
       "term": "borrower",
       "match": ["borrowers?"],
       "status": "proposed"
+    }
+  },
+  "business_id": {
+    "code": "businessId",
+    "definition": "The Finnish identifier of a company, such as a housing company: seven digits, a hyphen and a check digit.",
+    "fi": {
+      "term": "Y-tunnus",
+      "match": ["y-tunnu\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_fi",
+          "url": "https://www.vero.fi/tietoa-verohallinnosta/yhteystiedot-ja-asiointi/lomakkeet/tayttoohjeet/7h-vuokratulot--osakehuoneistot-t%C3%A4ytt%C3%B6ohje/",
+          "quote": "asunto- tai kiinteistöosakeyhtiön nimi ja Y-tunnus sekä huoneiston numero"
+        }
+      ]
+    },
+    "sv": {
+      "term": "FO-nummer",
+      "avoid": ["organisationsnummer\\p{L}*"],
+      "match": ["fo-numm?er\\p{L}*", "fo-numr\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_sv",
+          "url": "https://www.vero.fi/sv/skatteforvaltningen/kontakta-oss/blanketter/deklarationsanvisningar/7h-hyresinkomster--aktiel%C3%A4genheter/",
+          "quote": "bostads- eller fastighetsaktiebolagets namn och FO-nummer samt lägenhetens nummer"
+        }
+      ]
+    },
+    "en": {
+      "term": "Business ID",
+      "match": ["business ids?"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "vero_en",
+          "url": "https://www.vero.fi/en/About-us/contact-us/forms/filling-instructions/7h-rental-income-rental-apartments--instructions/",
+          "quote": "the name and Business ID of the housing company or real estate holding company, and the apartment number"
+        }
+      ]
     }
   },
   "capital_gain": {
@@ -1251,7 +1333,7 @@
     "en": {
       "term": "flat",
       "match": ["flats?"],
-      "avoid": ["apartments?"],
+      "avoid": ["apartments?(?! numbers?)"],
       "status": "proposed",
       "except": {
         "reason_property_not_found": "The alert's title says \"Flat not found\"; the body refers to it as \"it\".",

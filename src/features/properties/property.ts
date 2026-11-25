@@ -13,6 +13,12 @@ export interface PropertyDetails {
   roomCount: RoomCount
   /** In tenths of m²: 485 = 48,5 m². */
   floorArea: number
+  /** Housing company details for form 7H; all optional (openspec: properties). */
+  housingCompanyName?: string
+  /** Business ID (Y-tunnus), "2345678-0". */
+  businessId?: string
+  /** E.g. "B 12". */
+  apartmentNumber?: string
 }
 
 export interface Property extends PropertyDetails {

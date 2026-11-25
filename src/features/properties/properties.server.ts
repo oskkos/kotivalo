@@ -83,6 +83,9 @@ export async function getProperty(
       city: found.city,
       roomCount: found.roomCount,
       floorArea: found.floorArea,
+      housingCompanyName: found.housingCompanyName,
+      businessId: found.businessId,
+      apartmentNumber: found.apartmentNumber,
     },
   }
 }

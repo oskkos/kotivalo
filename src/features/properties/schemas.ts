@@ -2,6 +2,7 @@
 // reason codes (src/lib/reasons.ts), never text.
 import { z } from 'zod'
 import { isoDateInFinland, parseFiDate } from '#/lib/dates'
+import { isValidBusinessId } from '#/lib/business-id'
 import { parseDecimal } from '#/lib/decimal'
 import type { FieldReason } from '#/lib/reasons'
 import type { RoomCount } from './property'
@@ -19,6 +20,36 @@ const requiredText = (code: FieldReason) =>
     .trim()
     .min(1, reason(code))
     .max(MAX_TEXT, reason('text_too_long'))
+
+const MAX_APARTMENT_NUMBER = 20
+
+/**
+ * An optional text: spaces around it are dropped and an empty one is
+ * missing (undefined).
+ */
+const optionalText = (
+  max: number,
+  check?: (text: string) => FieldReason | undefined,
+) =>
+  z
+    .string(reason('text_too_long'))
+    .optional()
+    .transform((text, context) => {
+      const trimmed = text?.trim()
+      if (trimmed === undefined || trimmed === '') {
+        return undefined
+      }
+      if (trimmed.length > max) {
+        context.addIssue({ code: 'custom', message: 'text_too_long' })
+        return z.NEVER
+      }
+      const failure = check?.(trimmed)
+      if (failure) {
+        context.addIssue({ code: 'custom', message: failure })
+        return z.NEVER
+      }
+      return trimmed
+    })
 
 /**
  * The details as the form holds them: the floor area as typed ("48,5"), the
@@ -47,6 +78,11 @@ export const propertyDetailsInput = z.object({
       }
       return tenths
     }),
+  housingCompanyName: optionalText(MAX_TEXT),
+  businessId: optionalText(MAX_TEXT, (text) =>
+    isValidBusinessId(text) ? undefined : 'business_id_invalid',
+  ),
+  apartmentNumber: optionalText(MAX_APARTMENT_NUMBER),
 })
 
 export type PropertyDetailsInput = z.input<typeof propertyDetailsInput>

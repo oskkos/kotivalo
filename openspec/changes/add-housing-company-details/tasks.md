@@ -5,11 +5,11 @@
 
 ## 2. Business ID check, schemas and repository
 
-- [ ] 2.1 Add `isValidBusinessId()` to `src/lib/business-id.ts` with unit tests named after the scenarios "A Business ID with a wrong check digit is not saved" and "A Business ID in the wrong form is not saved" (`2345678-0` valid, `2345678-9`, `2345678`, `23456780`, `3141592-0` invalid, a remainder-0 ID)
-- [ ] 2.2 Add the field reason `business_id_invalid` to `src/lib/reasons.ts` and its Finnish, Swedish and English messages; add the term *Y-tunnus* / *FO-nummer* / *Business ID* (`businessId`) with the `translate` skill, reviewed by the `term-critic` agent
-- [ ] 2.3 Extend `propertyDetailsInput` in `features/properties/schemas.ts` with the three optional fields (trimmed, empty becomes missing, name up to 100 and apartment number up to 20 characters, the Business ID through `isValidBusinessId`), with schema tests for "Spaces around the details are dropped"
-- [ ] 2.4 Add the optional fields to `PropertyDetails` in `property.ts`, and read and write them in `property.repository.server.ts` (null when missing), with Workers tests for "A flat without housing company details" and "Clearing the housing company details"
-- [ ] 2.5 Pass them through the create and update server functions and `getFlatDetails`, with Workers tests for saving them, for "A member can set the housing company details", and that `property.updated` logs the id and no values
+- [x] 2.1 Add `isValidBusinessId()` to `src/lib/business-id.ts` with unit tests named after the scenarios "A Business ID with a wrong check digit is not saved" and "A Business ID in the wrong form is not saved" (`2345678-0` valid, `2345678-9`, `2345678`, `23456780`, `3141592-0` invalid, a remainder-0 ID)
+- [x] 2.2 Add the field reason `business_id_invalid` to `src/lib/reasons.ts` and its Finnish, Swedish and English messages; add the term *Y-tunnus* / *FO-nummer* / *Business ID* (`businessId`) with the `translate` skill, reviewed by the `term-critic` agent
+- [x] 2.3 Extend `propertyDetailsInput` in `features/properties/schemas.ts` with the three optional fields (trimmed, empty becomes missing, name up to 100 and apartment number up to 20 characters, the Business ID through `isValidBusinessId`), with schema tests for "Spaces around the details are dropped"
+- [x] 2.4 Add the optional fields to `PropertyDetails` in `property.ts`, and read and write them in `property.repository.server.ts` (null when missing), with Workers tests for "A flat without housing company details" and "Clearing the housing company details"
+- [x] 2.5 Pass them through the create and update server functions and `getFlatDetails`, with Workers tests for saving them, for "A member can set the housing company details", and that `property.updated` logs the id and no values
 
 ## 3. Form, details page and browser tests
 

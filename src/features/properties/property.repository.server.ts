@@ -47,13 +47,29 @@ const columns = {
   city: properties.city,
   roomCount: properties.roomCount,
   floorArea: properties.floorArea,
+  housingCompanyName: properties.housingCompanyName,
+  businessId: properties.businessId,
+  apartmentNumber: properties.apartmentNumber,
 }
 
 type Row = Pick<typeof properties.$inferSelect, keyof typeof columns>
 
-const toProperty = (row: Row): Property => ({
-  ...row,
-  roomCount: row.roomCount as RoomCount,
+const toProperty = (row: Row): Property => {
+  const { housingCompanyName, businessId, apartmentNumber, ...rest } = row
+  return {
+    ...rest,
+    roomCount: row.roomCount as RoomCount,
+    ...(housingCompanyName !== null && { housingCompanyName }),
+    ...(businessId !== null && { businessId }),
+    ...(apartmentNumber !== null && { apartmentNumber }),
+  }
+}
+
+/** The housing company details as columns: missing is null. */
+const housingCompanyValues = (details: PropertyDetails) => ({
+  housingCompanyName: details.housingCompanyName ?? null,
+  businessId: details.businessId ?? null,
+  apartmentNumber: details.apartmentNumber ?? null,
 })
 
 /** What deleting a flat removes, for the confirmation. */
@@ -113,6 +129,7 @@ export function propertyRepository(db: Db) {
         db.insert(properties).values({
           id,
           ...details,
+          ...housingCompanyValues(details),
           createdAt: now,
           updatedAt: now,
         }),
@@ -144,7 +161,7 @@ export function propertyRepository(db: Db) {
     ): Promise<boolean> {
       const changed = await db
         .update(properties)
-        .set({ ...details, updatedAt: now })
+        .set({ ...details, ...housingCompanyValues(details), updatedAt: now })
         .where(
           and(
             eq(properties.id, id),
