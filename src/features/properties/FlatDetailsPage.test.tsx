@@ -393,7 +393,7 @@ describe('Archiving on the flat details page', () => {
     )
 
     const dialog = screen.getByRole('dialog', { name: 'Archive the flat?' })
-    expect(dialog).toHaveTextContent('Kuusikuja 3 B 12 will be hidden')
+    expect(dialog).toHaveTextContent('Kuusikuja 3 B 12 will only be hidden')
     fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }))
   })
 })
