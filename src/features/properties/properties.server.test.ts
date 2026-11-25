@@ -147,6 +147,58 @@ describe('Editing a flat', () => {
   })
 })
 
+describe('Housing company details of a flat', () => {
+  const housing = {
+    housingCompanyName: 'As Oy Kuusikuja 3',
+    businessId: '2345678-0',
+    apartmentNumber: 'B 12',
+  }
+
+  test('saves the details when adding, and returns them', async () => {
+    const id = await add('anna', { ...kuusikuja, ...housing })
+
+    expect(await getProperty(depsFor('anna').deps, id)).toEqual({
+      ok: true,
+      property: { id, ...kuusikuja, ...housing },
+    })
+  })
+
+  test('A member can set the housing company details', async () => {
+    const id = await add('anna')
+    await addMember(id, 'bertta')
+
+    expect(
+      await updateProperty(depsFor('bertta').deps, id, {
+        ...kuusikuja,
+        housingCompanyName: 'As Oy Kuusikuja 3',
+      }),
+    ).toEqual({ ok: true, id })
+
+    expect(await getProperty(depsFor('anna').deps, id)).toMatchObject({
+      ok: true,
+      property: { housingCompanyName: 'As Oy Kuusikuja 3' },
+    })
+  })
+
+  test('logs the flat by its id and none of the details', async () => {
+    const { deps, lines } = depsFor('anna')
+    const created = await createProperty(deps, { ...kuusikuja, ...housing })
+    if (!created.ok) {
+      throw new Error(created.reason)
+    }
+    await updateProperty(deps, created.id, { ...kuusikuja, ...housing })
+
+    expect(lines.map((line) => line.event)).toEqual([
+      'property.created',
+      'property.updated',
+    ])
+    const logged = JSON.stringify(lines)
+    for (const value of Object.values(housing)) {
+      expect(logged).not.toContain(value)
+    }
+  })
+})
+
 describe('Listing flats', () => {
   test('sorts the flats by street address', async () => {
     await add('anna', { ...kuusikuja, streetAddress: 'Rantatie 15 C 21' })

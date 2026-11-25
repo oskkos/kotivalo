@@ -12,6 +12,7 @@ export type FieldReason =
   | 'text_too_long'
   | 'street_address_required'
   | 'postcode_invalid'
+  | 'business_id_invalid'
   | 'city_required'
   | 'room_count_required'
   | 'name_required'
@@ -136,6 +137,7 @@ const texts: Record<Reason, () => ReasonText> = {
   text_too_long: () => ({ text: m.reason_text_too_long() }),
   street_address_required: () => ({ text: m.reason_street_address_required() }),
   postcode_invalid: () => ({ text: m.reason_postcode_invalid() }),
+  business_id_invalid: () => ({ text: m.reason_business_id_invalid() }),
   city_required: () => ({ text: m.reason_city_required() }),
   room_count_required: () => ({ text: m.reason_room_count_required() }),
   name_required: () => ({ text: m.reason_name_required() }),

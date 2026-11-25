@@ -500,4 +500,51 @@ describe('propertyRepository', () => {
       expect((await repository.deletionSummary(flat.id)).hasData).toBe(true)
     })
   })
+
+  test('A flat without housing company details', async () => {
+    const flat = await repository.create('anna', kuusikuja, now, '2022-06-12')
+
+    const { results } = await env.DB.prepare(
+      'SELECT housing_company_name, business_id, apartment_number FROM properties WHERE id = ?',
+    )
+      .bind(flat.id)
+      .all()
+    expect(results).toEqual([
+      { housing_company_name: null, business_id: null, apartment_number: null },
+    ])
+    const found = await repository.findForUser('anna', flat.id)
+    expect(found?.housingCompanyName).toBeUndefined()
+    expect(found?.businessId).toBeUndefined()
+    expect(found?.apartmentNumber).toBeUndefined()
+  })
+
+  test('saves, reads and Clearing the housing company details', async () => {
+    const housing = {
+      housingCompanyName: 'As Oy Kuusikuja 3',
+      businessId: '2345678-0',
+      apartmentNumber: 'B 12',
+    }
+    const flat = await repository.create(
+      'anna',
+      { ...kuusikuja, ...housing },
+      now,
+      '2022-06-12',
+    )
+    expect(await repository.findForUser('anna', flat.id)).toMatchObject(housing)
+
+    expect(await repository.update('anna', flat.id, kuusikuja, now)).toBe(true)
+
+    const cleared = await repository.findForUser('anna', flat.id)
+    expect(cleared?.housingCompanyName).toBeUndefined()
+    expect(cleared?.businessId).toBeUndefined()
+    expect(cleared?.apartmentNumber).toBeUndefined()
+    const { results } = await env.DB.prepare(
+      'SELECT housing_company_name, business_id, apartment_number FROM properties WHERE id = ?',
+    )
+      .bind(flat.id)
+      .all()
+    expect(results).toEqual([
+      { housing_company_name: null, business_id: null, apartment_number: null },
+    ])
+  })
 })
