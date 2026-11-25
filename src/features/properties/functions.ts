@@ -10,6 +10,7 @@ import { tenancyRepository } from '#/features/tenancies/tenancy.repository.serve
 import { transactionRepository } from '#/features/transactions/transaction.repository.server'
 import { INTL_LOCALES } from '#/lib/format'
 import { getLocale } from '#/paraglide/runtime.js'
+import { usageChargeRepository } from '#/features/usage-charges/usage-charge.repository.server'
 import { getRequestContext } from '#/server/platform/context.server'
 import { getFlatDetails as details } from './details.server'
 import { propertyRepository } from './property.repository.server'
@@ -85,6 +86,7 @@ export const getFlatDetails = createServerFn({ method: 'GET' })
         amounts: recurringAmountRepository(db),
         payments: rentPaymentRepository(db),
         transactions: transactionRepository(db),
+        usageCharges: usageChargeRepository(db),
         now: () => new Date(),
       },
       data.id,

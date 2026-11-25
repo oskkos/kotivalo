@@ -12,12 +12,26 @@ vi.mock('#/features/recurring-amounts/functions', () => ({}))
 vi.mock('#/features/transactions/functions', () => ({}))
 vi.mock('#/features/tenancies/functions', () => ({}))
 vi.mock('#/features/rent-payments/functions', () => ({}))
+vi.mock('#/features/usage-charges/functions', () => ({}))
 
 describe('Router', () => {
   test('registers the home and sign-in pages', () => {
     const { routesByPath } = getRouter()
     expect(routesByPath).toHaveProperty('/')
     expect(routesByPath).toHaveProperty('/sign-in')
+  })
+
+  test('registers the usage charge pages behind the signed-in layout', () => {
+    const { routesById } = getRouter()
+    expect(routesById).toHaveProperty(
+      '/_authed/properties/$propertyId/usage-charges/',
+    )
+    expect(routesById).toHaveProperty(
+      '/_authed/properties/$propertyId/usage-charges/months',
+    )
+    expect(routesById).toHaveProperty(
+      '/_authed/properties/$propertyId/tenancy/$tenancyId/fees/new',
+    )
   })
 
   test('puts the home page behind the signed-in layout', () => {

@@ -6,6 +6,7 @@ import { rentPaymentRepository } from '#/features/rent-payments/rent-payment.rep
 import { sharingRepository } from '#/features/sharing/sharing.repository.server'
 import { tenancyRepository } from '#/features/tenancies/tenancy.repository.server'
 import { transactionRepository } from '#/features/transactions/transaction.repository.server'
+import { usageChargeRepository } from '#/features/usage-charges/usage-charge.repository.server'
 import { createDb } from '#/server/platform/db.server'
 import { addTestUser, emptyTables } from '#/test/users.server'
 import { getFlatDetails, type FlatDetailsDeps } from './details.server'
@@ -25,6 +26,7 @@ function deps(userId = 'annika'): FlatDetailsDeps {
     amounts: recurringAmountRepository(db),
     payments: rentPaymentRepository(db),
     transactions: transactionRepository(db),
+    usageCharges: usageChargeRepository(db),
     now: () => now,
   }
 }
@@ -138,6 +140,25 @@ describe('The flat details page', () => {
     ])
     expect(result.ok && result.payments.map((p) => p.amount)).toEqual([89000])
     expect(result.ok && result.financingCharges).toHaveLength(1)
+  })
+
+  test("gives the flat's usage charges with their periods", async () => {
+    await usageChargeRepository(db).add({
+      actorId: 'annika',
+      propertyId: flat,
+      kind: 'water',
+      basis: 'per_occupant',
+      description: null,
+      amount: 2200,
+      from: '2026-01-01',
+    })
+    const result = await getFlatDetails(deps('annika'), flat)
+    expect(result.ok && result.usageCharges).toEqual([
+      expect.objectContaining({
+        kind: 'water',
+        periods: [{ validFrom: '2026-01-01', validTo: null, value: 2200 }],
+      }),
+    ])
   })
 
   test('lists the three latest entries', async () => {

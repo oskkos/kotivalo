@@ -1630,6 +1630,41 @@
       "status": "proposed"
     }
   },
+  "usage_charge": {
+    "code": "usageCharge",
+    "codeNotes": "Tables `usage_charges` and `usage_charge_amounts`: monthly charges the housing company bills the owner besides the maintenance and financing charges (water, parking, sauna, other), as validity periods from the first of a month. Not linked to the tenant fees. Water: form 7H row 2.2; the others row 2.5 (to verify, #16).",
+    "definition": "A monthly charge the housing company bills the owner for using something, such as water per person, a parking space or a sauna slot, apart from the maintenance and financing charges.",
+    "fi": {
+      "term": "käyttömaksu",
+      "match": ["käyttömaks\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "finlex",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/2009/1599",
+          "quote": "kun osakkeenomistajan maksuvelvollisuus perustuu sopimukseen, joka koskee tiettyä kiinteistön tai rakennuksen käyttöön liittyvää käyttömaksua"
+        }
+      ]
+    },
+    "sv": {
+      "term": "bruksavgift",
+      "match": ["bruksavgift\\p{L}*"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "finlex",
+          "url": "https://www.finlex.fi/sv/lagstiftning/2009/1599",
+          "quote": "en aktieägares betalningsskyldighet grundar sig på ett avtal som gäller en viss bruksavgift för användningen av fastigheten eller byggnaden"
+        }
+      ]
+    },
+    "en": {
+      "term": "usage charge",
+      "match": ["usage charges?"],
+      "status": "proposed"
+    },
+    "notes": "The Limited Liability Housing Companies Act (1599/2009, ch. 3 s. 1) uses käyttömaksu / bruksavgift for a charge for using the property agreed by contract, apart from the company charge (vastike / bolagsvederlag); housing company price lists also say käyttökorvaus. A water charge billed monthly by the housing company is recorded as a usage charge of the kind water; one-off water bills stay entries (water_charge). In English, \"usage charges\" sit next to \"charges\" (vastikkeet) but are not a kind of them. The English word is a proposal."
+  },
   "validity_period": {
     "codeNotes": "validFrom / validTo, columns valid_from / valid_to",
     "definition": "The dates from which, and until which, a time-bound fact holds: rent, charges, shares, tenancies.",
@@ -1699,7 +1734,7 @@
       ]
     },
     "codeNotes": "Category values `water_charge` (expense, paid to the housing company, row 2.2) and `tenant_water_charge` (income, paid by the tenant, row 2.1).",
-    "notes": "One word, two senses: the labels tell them apart (to the housing company / from the tenant). The Tax Administration's English pages also say \"money towards a water bill\" for the tenant's payment; the 7H form's \"water charges\" is used for both."
+    "notes": "One word, two senses: the labels tell them apart (to the housing company / from the tenant). The Tax Administration's English pages also say \"money towards a water bill\" for the tenant's payment; the 7H form's \"water charges\" is used for both. A water charge billed monthly by the housing company is a usage charge of the kind water (usage_charge); one-off water bills are entries."
   },
   "year_summary": {
     "code": "yearSummary",
