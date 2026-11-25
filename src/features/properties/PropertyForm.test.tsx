@@ -57,6 +57,9 @@ describe('PropertyForm', () => {
       city: 'Tampere',
       roomCount: 2,
       floorArea: '48,5',
+      housingCompanyName: '',
+      businessId: '',
+      apartmentNumber: '',
     })
     expect(onSaved).toHaveBeenCalledOnce()
   })
@@ -180,5 +183,62 @@ describe('The Ownership section', () => {
     expect(
       screen.queryByRole('textbox', { name: 'Owned since' }),
     ).not.toBeInTheDocument()
+  })
+})
+
+describe('Housing company details of a flat', () => {
+  test('the housing company section asks for the three details and sends them', async () => {
+    const { user, save } = setup()
+    await fillIn(user)
+    expect(
+      screen.getByRole('heading', { name: 'Housing company' }),
+    ).toBeInTheDocument()
+    await user.type(field('Housing company name'), 'As Oy Kuusikuja 3')
+    await user.type(field('Business ID'), '2345678-0')
+    await user.type(field('Apartment number'), 'B 12')
+    await user.click(saveButton())
+
+    expect(save).toHaveBeenCalledWith(
+      expect.objectContaining({
+        housingCompanyName: 'As Oy Kuusikuja 3',
+        businessId: '2345678-0',
+        apartmentNumber: 'B 12',
+      }),
+    )
+  })
+
+  test('the details may be left empty', async () => {
+    const { user, save } = setup()
+    await fillIn(user)
+    await user.click(saveButton())
+
+    expect(save).toHaveBeenCalledOnce()
+  })
+
+  test('A Business ID with a wrong check digit is not saved', async () => {
+    const { user, save } = setup()
+    await fillIn(user)
+    await user.type(field('Business ID'), '2345678-9')
+    await user.click(saveButton())
+
+    expect(field('Business ID')).toHaveAccessibleDescription(
+      'A Business ID looks like 1234567-8 (seven digits, a hyphen and a check digit).',
+    )
+    expect(save).not.toHaveBeenCalled()
+  })
+
+  test('opens with the current housing company details', () => {
+    setup({
+      initial: {
+        ...EMPTY_PROPERTY,
+        housingCompanyName: 'As Oy Kuusikuja 3',
+        businessId: '2345678-0',
+        apartmentNumber: 'B 12',
+      },
+    })
+
+    expect(field('Housing company name')).toHaveValue('As Oy Kuusikuja 3')
+    expect(field('Business ID')).toHaveValue('2345678-0')
+    expect(field('Apartment number')).toHaveValue('B 12')
   })
 })

@@ -26,6 +26,9 @@ export const EMPTY_PROPERTY: NewPropertyInput = {
   city: '',
   roomCount: 0,
   floorArea: '',
+  housingCompanyName: '',
+  businessId: '',
+  apartmentNumber: '',
 }
 
 export type SaveResult = { ok: true } | { ok: false; reason: AlertReason }
@@ -211,6 +214,47 @@ export function PropertyForm({
               />
             )}
           </form.Field>
+        </Section>
+        <Section title={m.property_section_housing_company()}>
+          <Typography variant="body2" color="text.secondary">
+            {m.property_housing_company_hint()}
+          </Typography>
+          <form.Field name="housingCompanyName">
+            {(field) => (
+              <TextField
+                field={field}
+                label={m.property_housing_company_name()}
+                placeholder={m.property_housing_company_name_placeholder()}
+                fullWidth
+              />
+            )}
+          </form.Field>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'minmax(0, 1fr) minmax(0, 1fr)',
+              gap: 1.25,
+            }}
+          >
+            <form.Field name="businessId">
+              {(field) => (
+                <TextField
+                  field={field}
+                  label={m.property_business_id()}
+                  placeholder={m.property_business_id_placeholder()}
+                />
+              )}
+            </form.Field>
+            <form.Field name="apartmentNumber">
+              {(field) => (
+                <TextField
+                  field={field}
+                  label={m.property_apartment_number()}
+                  placeholder={m.property_apartment_number_placeholder()}
+                />
+              )}
+            </form.Field>
+          </Box>
         </Section>
         {initial.ownedSince === undefined ? null : (
           <Section title={m.property_section_ownership()}>

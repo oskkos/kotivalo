@@ -13,11 +13,11 @@
 
 ## 3. Form, details page and browser tests
 
-- [ ] 3.1 Add the section *Taloyhtiö* to `PropertyForm.tsx` (name, Business ID and apartment number, the hint) and the empty values to `EMPTY_PROPERTY` and the edit form's initial values, with component tests
-- [ ] 3.2 Add `housingCompanyLine()` to the feature (the filled parts joined with ` · `), with unit tests for "Only the filled-in details are shown", and show it in the details page's header card
-- [ ] 3.3 Add the Finnish, Swedish and English messages for the section, labels, placeholders, hint and the line's parts, adding the apartment number term with the `translate` skill, reviewed by the `term-critic` agent
-- [ ] 3.4 Playwright tests in `e2e/` under "Housing company details of a flat" for "Adding a flat with its housing company details", "A flat without housing company details", "A Business ID with a wrong check digit is not saved", "Clearing the housing company details" and "A member can set the housing company details", and update "The edit form shows the current details" under "Editing a flat"
-- [ ] 3.5 Add a "Taloyhtiö" section to the "Uusi asunto" view on the Design canvas, and describe the housing company details in CLAUDE.md's "Current state"
+- [x] 3.1 Add the section *Taloyhtiö* to `PropertyForm.tsx` (name, Business ID and apartment number, the hint) and the empty values to `EMPTY_PROPERTY` and the edit form's initial values, with component tests
+- [x] 3.2 Add `housingCompanyLine()` to the feature (the filled parts joined with ` · `), with unit tests for "Only the filled-in details are shown", and show it in the details page's header card
+- [x] 3.3 Add the Finnish, Swedish and English messages for the section, labels, placeholders, hint and the line's parts, adding the apartment number term with the `translate` skill, reviewed by the `term-critic` agent
+- [x] 3.4 Playwright tests in `e2e/` under "Housing company details of a flat" for "Adding a flat with its housing company details", "A flat without housing company details", "A Business ID with a wrong check digit is not saved", "Clearing the housing company details" and "A member can set the housing company details", and update "The edit form shows the current details" under "Editing a flat"
+- [x] 3.5 Add a "Taloyhtiö" section to the "Uusi asunto" view on the Design canvas, and describe the housing company details in CLAUDE.md's "Current state"
 
 ## 4. Verification
 
