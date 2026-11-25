@@ -178,10 +178,63 @@ export interface TenancyChoice {
   validTo: IsoDate | null
 }
 
+/** The flat's tenancies a lease can name: the current one first. */
+async function tenancyChoices(
+  deps: DocumentDeps,
+  propertyId: string,
+  today: IsoDate,
+): Promise<TenancyChoice[]> {
+  const all = await deps.tenancies.forProperty(propertyId)
+  const current = currentTenancy(all, today)
+  const ordered = current
+    ? [current, ...all.filter((tenancy) => tenancy.id !== current.id)]
+    : all
+  return ordered.map((tenancy) => ({
+    id: tenancy.id,
+    tenantName: tenancy.tenantName,
+    validFrom: tenancy.validFrom,
+    validTo: tenancy.validTo,
+  }))
+}
+
+export interface NewDocumentView {
+  property: Property
+  tenancies: TenancyChoice[]
+  today: IsoDate
+}
+
+/** What the add form needs. Owners only. */
+export async function getNewDocument(
+  deps: DocumentDeps,
+  propertyId: string,
+): Promise<
+  ({ ok: true } & NewDocumentView) | typeof notFound | typeof ownerOnly
+> {
+  const [refused, property] = await Promise.all([
+    roleCheck(deps, propertyId),
+    deps.properties.findForUser(deps.userId, propertyId),
+  ])
+  if (refused) {
+    return refused
+  }
+  if (!property) {
+    return notFound
+  }
+  const today = isoDateInFinland(deps.now())
+  return {
+    ok: true,
+    property,
+    tenancies: await tenancyChoices(deps, propertyId, today),
+    today,
+  }
+}
+
 export interface DocumentView {
   role: PropertyRole
   property: Property
   document: DocumentDetails
+  /** Whether the signed-in user added it. */
+  addedByYou: boolean
   /** Owners only: the current tenancy first, then the others newest first. */
   tenancies: TenancyChoice[]
   today: IsoDate
@@ -206,21 +259,17 @@ export async function getDocument(
     return documentNotFound
   }
   const today = isoDateInFinland(deps.now())
-  let tenancies: TenancyChoice[] = []
-  if (role === 'owner') {
-    const all = await deps.tenancies.forProperty(propertyId)
-    const current = currentTenancy(all, today)
-    const ordered = current
-      ? [current, ...all.filter((tenancy) => tenancy.id !== current.id)]
-      : all
-    tenancies = ordered.map((tenancy) => ({
-      id: tenancy.id,
-      tenantName: tenancy.tenantName,
-      validFrom: tenancy.validFrom,
-      validTo: tenancy.validTo,
-    }))
+  const tenancies =
+    role === 'owner' ? await tenancyChoices(deps, propertyId, today) : []
+  return {
+    ok: true,
+    role,
+    property,
+    document,
+    addedByYou: document.uploadedBy.id === deps.userId,
+    tenancies,
+    today,
   }
-  return { ok: true, role, property, document, tenancies, today }
 }
 
 export async function addDocument(

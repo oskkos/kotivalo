@@ -155,6 +155,9 @@ export function DeleteFlatDialog(props: {
                     m.property_delete_receipts({
                       count: allowed.counts.receipts,
                     }),
+                    m.property_delete_documents({
+                      count: allowed.counts.documents,
+                    }),
                   ].map((line) => (
                     <Typography key={line} component="li" variant="body2">
                       {line}

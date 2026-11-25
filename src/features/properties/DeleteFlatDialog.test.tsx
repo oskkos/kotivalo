@@ -29,7 +29,13 @@ const noData = {
   ok: true,
   allowed: true,
   hasData: false,
-  counts: { tenancies: 0, rentPayments: 0, transactions: 0, receipts: 0 },
+  counts: {
+    tenancies: 0,
+    rentPayments: 0,
+    transactions: 0,
+    receipts: 0,
+    documents: 0,
+  },
   members: [],
 }
 
@@ -93,6 +99,7 @@ describe('Confirming the deletion of a flat', () => {
         rentPayments: 26,
         transactions: 48,
         receipts: 31,
+        documents: 5,
       },
       members: ['Jussi'],
     })
@@ -103,6 +110,7 @@ describe('Confirming the deletion of a flat', () => {
     expect(dialog).toHaveTextContent('26 rent payments')
     expect(dialog).toHaveTextContent('48 entries')
     expect(dialog).toHaveTextContent('31 receipts')
+    expect(dialog).toHaveTextContent('5 documents')
     expect(dialog).toHaveTextContent(
       'This member loses access to the flat: Jussi',
     )
@@ -113,7 +121,13 @@ describe('Confirming the deletion of a flat', () => {
     functions.getPropertyDeletion.mockResolvedValue({
       ...noData,
       hasData: true,
-      counts: { tenancies: 0, rentPayments: 0, transactions: 3, receipts: 0 },
+      counts: {
+        tenancies: 0,
+        rentPayments: 0,
+        transactions: 3,
+        receipts: 0,
+        documents: 0,
+      },
     })
     renderDialog()
 

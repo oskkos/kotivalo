@@ -15,6 +15,7 @@ import {
   addDocument as add,
   deleteDocument as remove,
   getDocument as getOne,
+  getNewDocument as getNew,
   getDocuments as getList,
   updateDocument as update,
   type DocumentDeps,
@@ -94,6 +95,10 @@ export const getDocument = createServerFn({ method: 'GET' })
   .handler(async ({ data }) =>
     getOne(await documentDeps(), data.propertyId, data.documentId),
   )
+
+export const getNewDocument = createServerFn({ method: 'GET' })
+  .validator(propertyRefInput)
+  .handler(async ({ data }) => getNew(await documentDeps(), data.propertyId))
 
 export const addDocument = createServerFn({ method: 'POST' })
   .validator(readForm)

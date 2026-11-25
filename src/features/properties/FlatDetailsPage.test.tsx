@@ -303,6 +303,54 @@ describe('The flat details page', () => {
   })
 })
 
+describe('The documents section', () => {
+  const doc = (id: string, name: string) => ({
+    id,
+    kind: 'financial_statement' as const,
+    name,
+    date: '2026-04-28',
+    contentType: 'application/pdf',
+    size: 1000,
+  })
+
+  test('The latest documents', () => {
+    renderPage(
+      details({
+        documents: {
+          latest: [doc('a', 'Yhtiökokous 2026'), doc('b', 'Tilinpäätös 2025')],
+          count: 4,
+        },
+      }),
+    )
+    const section = screen.getByRole('region', { name: 'Documents' })
+    expect(within(section).getByText('Yhtiökokous 2026')).toBeInTheDocument()
+    expect(within(section).getByText('Tilinpäätös 2025')).toBeInTheDocument()
+    expect(
+      within(section).getByRole('link', { name: 'All (4)' }),
+    ).toHaveAttribute('href', '/properties/$propertyId/documents')
+    expect(
+      within(section).getByRole('link', { name: 'Add document' }),
+    ).toBeInTheDocument()
+  })
+
+  test('A flat without documents on the details page', () => {
+    renderPage(details())
+    const section = screen.getByRole('region', { name: 'Documents' })
+    expect(within(section).getByText('No documents yet.')).toBeInTheDocument()
+    expect(
+      within(section).getByRole('link', { name: 'Add document' }),
+    ).toBeInTheDocument()
+  })
+
+  test('a member gets no Add document', () => {
+    renderPage(details({ role: 'member' }))
+    const section = screen.getByRole('region', { name: 'Documents' })
+    expect(
+      within(section).queryByRole('link', { name: 'Add document' }),
+    ).toBeNull()
+  })
+})
+
 describe('Months not fully paid', () => {
   test("An earlier tenancy's month is warned about on the details page", () => {
     const pekka: Tenancy = {

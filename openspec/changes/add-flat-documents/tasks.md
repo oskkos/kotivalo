@@ -36,15 +36,15 @@
 ## 7. The documents page and the details page section
 
 - [x] 7.1 fi, sv and en messages for the section, the page, the headings and kinds, the empty state, the member note and the storage use (translate skill, term-critic on the diff)
-- [ ] 7.2 Route `documents/index.tsx` and `DocumentsPage.tsx` (groups, filter buttons, empty state, owners' add and usage line, members' note); the *Dokumentit* section on `FlatDetailsPage.tsx` and *Dokumentit* in the menu
-- [ ] 7.3 Component tests: grouping and order, filtering, empty, member, the details page section with and without documents
+- [x] 7.2 Route `documents/index.tsx` and `DocumentsPage.tsx` (groups, filter buttons, empty state, owners' add and usage line, members' note); the *Dokumentit* section on `FlatDetailsPage.tsx` and *Dokumentit* in the menu
+- [x] 7.3 Component tests: grouping and order, filtering, empty, member, the details page section with and without documents
 - [ ] 7.4 Playwright tests in `e2e/documents.spec.ts` for "The documents page" and the new scenarios of "The flat details page" (`e2e/flat-details.spec.ts`), with a support helper `addDocument` in `e2e/support/documents.ts`
 
 ## 8. Adding, details, editing and deleting in the UI
 
 - [x] 8.1 fi, sv and en messages for the form, the details page, the delete dialog and the not-found page (translate skill, term-critic on the diff)
-- [ ] 8.2 `DocumentForm.tsx` (file with `FileField`, kind with `ChoiceField`, name prefilled from the file, date, tenancy for a lease), routes `documents/new.tsx` and `$documentId/edit.tsx`; `DocumentDetails.tsx` with the preview, `ImageViewer`, Download, Edit and the delete dialog, route `$documentId/index.tsx`; invalidate the router before navigating
-- [ ] 8.3 Component tests: the name suggested from the file, a name needed, the tenancy field only for a lease, the quota alert, owner and member details, the delete dialog
+- [x] 8.2 `DocumentForm.tsx` (file with `FileField`, kind with `ChoiceField`, name prefilled from the file, date, tenancy for a lease), routes `documents/new.tsx` and `$documentId/edit.tsx`; `DocumentDetails.tsx` with the preview, `ImageViewer`, Download, Edit and the delete dialog, route `$documentId/index.tsx`; invalidate the router before navigating
+- [x] 8.3 Component tests: the name suggested from the file, a name needed, the tenancy field only for a lease, the quota alert, owner and member details, the delete dialog
 - [ ] 8.4 Playwright tests in `e2e/documents.spec.ts` for "Adding a document", "Document files", "A lease's tenancy", "Document details", "Viewing and downloading a document", "Editing a document" and "Deleting a document"; the flat deletion dialog's document count in `e2e/delete-flat.spec.ts`
 - [ ] 8.5 `e2e/support/` helpers and CLAUDE.md: "Current state" (documents), the e2e helper list, `storage-usage.ts` next to `periods.ts`
 
