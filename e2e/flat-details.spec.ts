@@ -8,6 +8,7 @@ import {
 import { accepted, ownerWithFlat } from './support/sharing'
 import { signIn, uniqueEmail, waitForHydration } from './support/sign-in'
 import { addFee, addTenant, aino, setOccupants } from './support/tenancies'
+import { addDocument, pdfFile } from './support/documents'
 import { logEntry } from './support/transactions'
 import { addUsageCharge } from './support/usage-charges'
 
@@ -320,6 +321,40 @@ test.describe('The flat details page', () => {
     await other.goto(`/properties/${id}`)
     await expect(
       other.getByRole('heading', { name: 'Flat not found' }),
+    ).toBeVisible()
+  })
+
+  test('The latest documents', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    const names = [
+      ['Isännöitsijäntodistus', '10/01/2025'],
+      ['Yhtiökokous 2026', '15/05/2026'],
+      ['Vastikkeet 2026', '02/01/2026'],
+      ['Tilinpäätös 2025', '28/04/2026'],
+    ] as const
+    for (const [name, date] of names) {
+      await addDocument(page, id, { file: pdfFile('a.pdf'), name, date })
+    }
+    await openDetails(page, id)
+
+    const section = page.getByRole('region', { name: 'Documents' })
+    await expect(section.getByRole('listitem')).toHaveText([
+      /Yhtiökokous 2026/,
+      /Tilinpäätös 2025/,
+      /Vastikkeet 2026/,
+    ])
+    await section.getByRole('link', { name: 'All (4)' }).click()
+    await expect(page).toHaveURL(new RegExp(`/properties/${id}/documents$`))
+  })
+
+  test('A flat without documents on the details page', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await openDetails(page, id)
+
+    const section = page.getByRole('region', { name: 'Documents' })
+    await expect(section.getByText('No documents yet.')).toBeVisible()
+    await expect(
+      section.getByRole('link', { name: 'Add document' }),
     ).toBeVisible()
   })
 })
