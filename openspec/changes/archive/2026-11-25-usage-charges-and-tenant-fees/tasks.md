@@ -78,5 +78,5 @@
 ## 13. Archive
 
 - [x] 13.1 `pnpm check:traceability`, `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm test:e2e` pass
-- [ ] 13.2 The Purpose lines of the `tenancies` and `rent-payments` specs updated for the occupants and fees, and the new `usage-charges` spec's Purpose written (archive doesn't write them)
-- [ ] 13.3 `openspec archive usage-charges-and-tenant-fees` as the last commit
+- [x] 13.2 The Purpose lines of the `tenancies` and `rent-payments` specs updated for the occupants and fees, and the new `usage-charges` spec's Purpose written (archive doesn't write them)
+- [x] 13.3 `openspec archive usage-charges-and-tenant-fees` as the last commit
