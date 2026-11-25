@@ -14,7 +14,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
-import { useNavigate } from '@tanstack/react-router'
+import { useRouter } from '@tanstack/react-router'
 import { useEffect, useState } from 'react'
 import { noticeState } from '#/components/NavigationNotice'
 import { ReasonAlert } from '#/components/ReasonAlert'
@@ -35,7 +35,7 @@ export function DeleteFlatDialog(props: {
   /** The flat can't be deleted and the user chose to archive it instead. */
   onArchive: () => void
 }) {
-  const navigate = useNavigate()
+  const router = useRouter()
   const { property } = props
   const address = property.streetAddress
   const [deletion, setDeletion] = useState<Deletion>()
@@ -69,10 +69,13 @@ export function DeleteFlatDialog(props: {
     try {
       const result = await deleteProperty({ data: { id: property.id } })
       if (result.ok) {
-        await navigate({
+        await router.navigate({
           to: '/',
           state: noticeState(m.property_deleted_notice({ address })),
         })
+        // The router shows the list it kept from before while it loads the
+        // new one; without this the flat is still on it.
+        await router.invalidate()
         return
       }
       setAlert(result.reason)

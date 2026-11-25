@@ -5,7 +5,10 @@ import type { Property } from './property'
 
 // jsdom's browser language is English.
 const navigate = vi.fn()
-vi.mock('@tanstack/react-router', () => ({ useNavigate: () => navigate }))
+const invalidate = vi.fn()
+vi.mock('@tanstack/react-router', () => ({
+  useRouter: () => ({ navigate, invalidate }),
+}))
 
 const functions = vi.hoisted(() => ({
   getPropertyDeletion: vi.fn(),
@@ -44,6 +47,7 @@ function renderDialog(onClose = vi.fn(), onArchive = vi.fn()) {
 
 beforeEach(() => {
   navigate.mockReset()
+  invalidate.mockReset()
   functions.getPropertyDeletion.mockReset()
   functions.deleteProperty.mockReset()
   functions.deleteProperty.mockResolvedValue({ ok: true })
@@ -70,6 +74,10 @@ describe('Confirming the deletion of a flat', () => {
         to: '/',
         state: { notice: 'Kuusikuja 3 B 12 deleted' },
       })
+    })
+    // The list the router kept is reloaded, or it still shows the flat.
+    await vi.waitFor(() => {
+      expect(invalidate).toHaveBeenCalledOnce()
     })
     expect(functions.deleteProperty).toHaveBeenCalledWith({
       data: { id: 'flat' },

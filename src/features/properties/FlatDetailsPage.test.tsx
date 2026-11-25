@@ -10,6 +10,7 @@ import { restoreProperty } from './functions'
 // router isn't under test here.
 vi.mock('@tanstack/react-router', () => ({
   useNavigate: () => vi.fn(),
+  useRouter: () => ({ navigate: vi.fn(), invalidate: vi.fn() }),
   createLink:
     () =>
     ({

@@ -63,6 +63,33 @@ test.describe('Archiving a flat', () => {
     await expect(flatsList(page)).toContainText('Koivupolku 7 A 4')
   })
 
+  test('The list is up to date when it was already open before archiving', async ({
+    page,
+  }) => {
+    await ownerWithFlat(page)
+    await addFlat(page, koivupolku)
+    // Reached by clicking, so the router keeps the list it showed.
+    await page.goto('/')
+    await waitForHydration(page)
+    await card(page, 'Kuusikuja 3 B 12').getByRole('link').click()
+    await expect(page).toHaveURL(/\/properties\//)
+
+    await (
+      await openMenu(page)
+    )
+      .getByRole('menuitem', { name: 'Archive flat' })
+      .click()
+    await page
+      .getByRole('dialog', { name: 'Archive the flat?' })
+      .getByRole('button', { name: 'Archive' })
+      .click()
+    await expect(page).toHaveURL(/\/$/)
+
+    await expect(page.getByText('1 flat')).toBeVisible()
+    await expect(flatsList(page)).not.toContainText('Kuusikuja 3 B 12')
+    await expect(archivedToggle(page)).toBeVisible()
+  })
+
   test('Cancelling keeps the flat on the list', async ({ page }) => {
     const id = await ownerWithFlat(page)
     await openDetails(page, id)

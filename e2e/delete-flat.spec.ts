@@ -82,6 +82,30 @@ test.describe('Deleting a flat', () => {
     expect((await page.request.get(receipt ?? '')).status()).toBe(404)
   })
 
+  test('The list is up to date when it was already open before deleting', async ({
+    page,
+  }) => {
+    await ownerWithFlat(page)
+    await addFlat(page, { ...kuusikuja, streetAddress: 'Mäntytie 9 A 2' })
+    // Reached by clicking, so the router keeps the list it showed.
+    await page.goto('/')
+    await waitForHydration(page)
+    await card(page, 'Kuusikuja 3 B 12').getByRole('link').click()
+    await expect(page).toHaveURL(/\/properties\//)
+
+    await page.getByRole('button', { name: 'More actions' }).click()
+    await page.getByRole('menuitem', { name: 'Delete flat' }).click()
+    await page
+      .getByRole('dialog', { name: 'Delete the flat?' })
+      .getByRole('button', { name: 'Delete' })
+      .click()
+    await expect(page).toHaveURL(/\/$/)
+
+    await expect(page.getByText('1 flat')).toBeVisible()
+    await expect(card(page, 'Kuusikuja 3 B 12')).toHaveCount(0)
+    await expect(card(page, 'Mäntytie 9 A 2')).toBeVisible()
+  })
+
   test('A member loses access when the flat is deleted', async ({
     page,
     browser,
