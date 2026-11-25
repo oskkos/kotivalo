@@ -51,9 +51,9 @@
 
 ## 9. The fees on the rent pages
 
-- [ ] 9.1 `RentMonthPage.tsx`: the expected rent's breakdown from `parts` with a link to the Tenancy page; `RecordPaymentDialog.tsx`: the hint that the rent and the fees are one payment; messages fi, sv and en; component tests
-- [ ] 9.2 `FlatDetailsPage.tsx`: the tenancy card's occupants and "+ maksut" with the fees' sum this month (the rent card already shows the total); component tests
-- [ ] 9.3 Playwright tests for the new scenarios of "The month's rent payments page" and "The rent card includes the tenant fees"
+- [x] 9.1 `RentMonthPage.tsx`: the expected rent's breakdown from `parts` with a link to the Tenancy page; `RecordPaymentDialog.tsx`: the hint that the rent and the fees are one payment; messages fi, sv and en; component tests
+- [x] 9.2 `FlatDetailsPage.tsx`: the tenancy card's occupants and "+ maksut" with the fees' sum this month (the rent card already shows the total); component tests
+- [x] 9.3 Playwright tests for the new scenarios of "The month's rent payments page" and "The rent card includes the tenant fees"
 
 ## 10. Usage charges on the server
 

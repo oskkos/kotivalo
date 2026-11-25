@@ -52,6 +52,28 @@ const view = (over: Partial<RentMonthView> = {}): RentMonthView => ({
   ...over,
 })
 
+const feesFixture = {
+  t1: [
+    {
+      id: 'water',
+      kind: 'water' as const,
+      basis: 'per_occupant' as const,
+      description: null,
+      amounts: [{ validFrom: '2025-03-01', validTo: null, value: 2200 }],
+    },
+    {
+      id: 'parking',
+      kind: 'parking' as const,
+      basis: 'fixed' as const,
+      description: null,
+      amounts: [{ validFrom: '2025-03-01', validTo: null, value: 1500 }],
+    },
+  ],
+}
+const twoOccupants = {
+  t1: [{ validFrom: '2025-03-01', validTo: null, value: 2 }],
+}
+
 function renderPage(v = view()) {
   const onChanged = vi.fn(() => Promise.resolve())
   render(
@@ -72,6 +94,59 @@ beforeEach(() => {
 })
 
 describe("The month's rent payments page", () => {
+  test('The breakdown of the rent and the fees', () => {
+    renderPage(view({ fees: feesFixture, occupants: twoOccupants }))
+    const summary = screen.getByRole('region', { name: "The month's rent" })
+    expect(summary).toHaveTextContent('Rent€949.00')
+    expect(summary).toHaveTextContent('Paid€500.00')
+    expect(summary).toHaveTextContent('Outstanding€449.00')
+    const breakdown = within(summary).getByRole('list', {
+      name: 'The rent and the fees',
+    })
+    expect(
+      within(breakdown)
+        .getAllByRole('listitem')
+        .map((item) => item.textContent),
+    ).toEqual([
+      'Rent€890.00',
+      'Water charge · 2 × €22.00€44.00',
+      'Parking space€15.00',
+      'The fees on the tenancy page',
+    ])
+    expect(
+      within(breakdown).getByRole('link', {
+        name: 'The fees on the tenancy page',
+      }),
+    ).toHaveAttribute('href', '/properties/flat/tenancy')
+  })
+
+  test('The rent and the fees as one payment', async () => {
+    const { user } = renderPage(
+      view({ fees: feesFixture, occupants: twoOccupants, payments: [] }),
+    )
+    await user.click(
+      screen.getByRole('button', {
+        name: /Record payment|Mark as paid|Add payment/,
+      }),
+    )
+    const dialog = screen.getByRole('dialog')
+    expect(within(dialog).getByRole('textbox', { name: /Amount/ })).toHaveValue(
+      '949.00',
+    )
+    expect(
+      within(dialog).getByText(
+        'The rent and the fees on top of the rent are recorded as one payment.',
+      ),
+    ).toBeVisible()
+  })
+
+  test('a month without fees shows no breakdown', () => {
+    renderPage()
+    expect(
+      screen.queryByRole('list', { name: 'The rent and the fees' }),
+    ).toBeNull()
+  })
+
   test("The month's payments", () => {
     renderPage()
     expect(screen.getByRole('heading', { name: 'November rent' })).toBeVisible()

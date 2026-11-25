@@ -747,6 +747,8 @@ export function FlatDetailsPage(props: Props) {
             propertyId={view.property.id}
             tenancy={current}
             rents={view.tenancyRents[current.id] ?? []}
+            occupants={view.tenancyOccupants[current.id] ?? []}
+            fees={view.tenancyFees[current.id] ?? []}
             today={view.today}
             showDueDay
           />
@@ -760,6 +762,7 @@ export function FlatDetailsPage(props: Props) {
           tenancy={current}
           month={month}
           missing={row.missing}
+          withFees={row.parts.length > 1}
           today={view.today}
           open
           onClose={() => {

@@ -6,7 +6,7 @@ import {
 } from './support/rent-payments'
 import { accepted, ownerWithFlat } from './support/sharing'
 import { waitForHydration } from './support/sign-in'
-import { addTenant, aino } from './support/tenancies'
+import { addFee, addTenant, aino, setOccupants } from './support/tenancies'
 
 // The browser's language is English, so the app is in English. The month
 // used, January 2026, is inside Aino's tenancy and in the past.
@@ -76,6 +76,57 @@ test.describe('Deleting a rent payment', () => {
 })
 
 test.describe("The month's rent payments page", () => {
+  test('The breakdown of the rent and the fees', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await addFee(page, {
+      kind: 'Water charge',
+      amount: '22',
+      from: '01/03/2025',
+    })
+    await addFee(page, {
+      kind: 'Parking space',
+      amount: '15',
+      from: '01/03/2025',
+    })
+    await setOccupants(page, '2', '01/03/2025')
+    const tenancy = await currentTenancyId(page, id)
+    await openRentMonth(page, id, tenancy, '2026-01')
+    await recordPayment(page, { amount: '500' })
+    const summary = page.getByRole('region', { name: "The month's rent" })
+    await expect(summary).toContainText('Rent€949.00')
+    await expect(summary).toContainText('Outstanding€449.00')
+    const breakdown = summary.getByRole('list', {
+      name: 'The rent and the fees',
+    })
+    await expect(breakdown).toContainText('Rent€890.00')
+    await expect(breakdown).toContainText('Water charge · 2 × €22.00€44.00')
+    await expect(breakdown).toContainText('Parking space€15.00')
+  })
+
+  test('The rent and the fees as one payment', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, aino)
+    await addFee(page, {
+      kind: 'Parking space',
+      amount: '15',
+      from: '01/03/2025',
+    })
+    const tenancy = await currentTenancyId(page, id)
+    await openRentMonth(page, id, tenancy, '2026-01')
+    await page.getByRole('button', { name: 'Add payment' }).click()
+    const dialog = page.getByRole('dialog')
+    await expect(
+      dialog.getByRole('textbox', { name: 'Amount (€)' }),
+    ).toHaveValue('905.00')
+    await expect(dialog).toContainText(
+      'The rent and the fees on top of the rent are recorded as one payment.',
+    )
+    await dialog.getByRole('button', { name: 'Save' }).click()
+    await expect(dialog).toBeHidden()
+    await expect(page.getByText('Paid', { exact: true })).toBeVisible()
+  })
+
   test("The month's payments", async ({ page, browser }) => {
     const { id, jussi } = await accepted(page, browser)
     await addTenant(page, id, aino)

@@ -5,10 +5,13 @@
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
+import Link from '@mui/material/Link'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { useState } from 'react'
 import type { Tenancy } from '#/features/tenancies/tenancy.repository.server'
+import { valueInTenancyMonth } from '#/features/tenancies/rent'
+import { chargeName } from '#/lib/charge-labels'
 import { formatDate, formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 import { colors, radii } from '#/theme/tokens'
@@ -114,6 +117,13 @@ export function RentMonthPage(props: Props) {
   })
   const [recording, setRecording] = useState(false)
   const [deleting, setDeleting] = useState<RentPayment>()
+  // A per-occupant fee's amount per occupant in the month.
+  const perOccupant = (feeId: string) => {
+    const fee = view.fees[view.tenancy.id]?.find((f) => f.id === feeId)
+    return fee
+      ? (valueInTenancyMonth(fee.amounts, view.tenancy, view.month) ?? 0)
+      : 0
+  }
 
   const amounts: [string, string][] = [
     [
@@ -217,6 +227,61 @@ export function RentMonthPage(props: Props) {
               </Stack>
             ))}
           </Box>
+          {row.parts.length > 1 ? (
+            <Box
+              component="ul"
+              aria-label={m.rent_month_breakdown()}
+              sx={{
+                listStyle: 'none',
+                m: 0,
+                p: 0,
+                borderTop: `1px solid ${colors.divider}`,
+              }}
+            >
+              {row.parts.map((part) => (
+                <Stack
+                  component="li"
+                  key={part.type === 'rent' ? 'rent' : part.feeId}
+                  direction="row"
+                  sx={{
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    gap: 1,
+                    minHeight: 40,
+                  }}
+                >
+                  <Typography sx={{ fontSize: 14, fontWeight: 800 }}>
+                    {part.type === 'rent'
+                      ? m.rent_month_breakdown_rent()
+                      : chargeName(part)}
+                    {part.type === 'fee' && part.persons !== null ? (
+                      <Typography
+                        component="span"
+                        variant="body2"
+                        color="text.secondary"
+                      >
+                        {` · ${m.rent_month_breakdown_per_occupant({
+                          persons: String(part.persons),
+                          amount: formatMoney(perOccupant(part.feeId)),
+                        })}`}
+                      </Typography>
+                    ) : null}
+                  </Typography>
+                  <Typography sx={{ fontSize: 14, fontWeight: 900 }}>
+                    {formatMoney(part.amount)}
+                  </Typography>
+                </Stack>
+              ))}
+              <Box component="li" sx={{ pt: 0.5 }}>
+                <Link
+                  href={`/properties/${props.propertyId}/tenancy`}
+                  sx={{ fontSize: 14, fontWeight: 800 }}
+                >
+                  {m.rent_month_breakdown_link()}
+                </Link>
+              </Box>
+            </Box>
+          ) : null}
         </Stack>
         <Stack
           component="section"
@@ -338,6 +403,7 @@ export function RentMonthPage(props: Props) {
           tenancy={view.tenancy}
           month={view.month}
           missing={row.missing}
+          withFees={row.parts.length > 1}
           today={view.today}
           open
           onClose={() => {
