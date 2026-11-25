@@ -7,6 +7,7 @@ import {
 import { propertyRepository } from '#/features/properties/property.repository.server'
 import { EmailError, type SendEmail } from '#/server/email/email'
 import { createDb } from '#/server/platform/db.server'
+import { createR2Storage } from '#/server/platform/storage.server'
 import { consumeLimit } from '#/server/platform/limits.server'
 import {
   createCaptureLogger,
@@ -374,6 +375,7 @@ const flatsOf = (userId: string) => propertyRepository(db).listForUser(userId)
 const propertyDeps = (userId: string) => ({
   userId,
   properties: propertyRepository(db),
+  storage: createR2Storage(env.FILES),
   log: createCaptureLogger().log,
   now: () => now,
   collation: 'fi-FI',

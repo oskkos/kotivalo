@@ -2,18 +2,25 @@
 // dependencies passed in so Workers tests can drive it (openspec: properties).
 import { isoDateInFinland, type IsoDate } from '#/lib/dates'
 import type { AlertReason } from '#/lib/reasons'
+import { deleteStoredFiles } from '#/server/files/delete'
+import type { FileStorage } from '#/server/files/storage'
 import type { Logger } from '#/server/log/log'
 import {
   sortByStreetAddress,
   type Property,
   type PropertyDetails,
 } from './property'
-import type { PropertyRepository } from './property.repository.server'
+import type {
+  DeletionSummary,
+  PropertyRepository,
+} from './property.repository.server'
 
 export interface PropertyDeps {
   /** The signed-in user. */
   userId: string
   properties: PropertyRepository
+  /** Where the receipt files are, for deleting a flat. */
+  storage: FileStorage
   log: Logger
   now: () => Date
   /** The Intl locale to sort addresses in. */
@@ -32,11 +39,35 @@ type Result<T> =
 
 const notFound = { ok: false, reason: 'property_not_found' } as const
 
-export async function listProperties(deps: PropertyDeps): Promise<Property[]> {
-  return sortByStreetAddress(
-    await deps.properties.listForUser(deps.userId),
-    deps.collation,
-  )
+/** A flat the user has archived, with the day (in Finland) they did. */
+export interface ArchivedProperty extends Property {
+  archivedOn: IsoDate
+}
+
+export interface PropertyLists {
+  /** The flats the user hasn't archived, by street address. */
+  properties: Property[]
+  /** The flats the user has archived, by street address. */
+  archived: ArchivedProperty[]
+}
+
+export async function listProperties(
+  deps: PropertyDeps,
+): Promise<PropertyLists> {
+  const [active, archived] = await Promise.all([
+    deps.properties.listForUser(deps.userId),
+    deps.properties.listArchivedForUser(deps.userId),
+  ])
+  return {
+    properties: sortByStreetAddress(active, deps.collation),
+    archived: sortByStreetAddress(
+      archived.map(({ archivedAt, ...flat }) => ({
+        ...flat,
+        archivedOn: isoDateInFinland(archivedAt ?? deps.now()),
+      })),
+      deps.collation,
+    ),
+  }
 }
 
 export async function getProperty(
@@ -97,4 +128,132 @@ export async function updateProperty(
   }
   deps.log.info('property.updated', { propertyId: id })
   return { ok: true, id }
+}
+
+/** Archives the flat for the user only (spec: "Archiving a flat"). */
+export async function archiveProperty(
+  deps: PropertyDeps,
+  id: string,
+): Promise<Result<object>> {
+  if (!(await deps.properties.setArchived(deps.userId, id, deps.now()))) {
+    return notFound
+  }
+  deps.log.info('property.archived', { propertyId: id })
+  return { ok: true }
+}
+
+/** Brings an archived flat back to the user's views. */
+export async function restoreProperty(
+  deps: PropertyDeps,
+  id: string,
+): Promise<Result<object>> {
+  if (!(await deps.properties.setArchived(deps.userId, id, null))) {
+    return notFound
+  }
+  deps.log.info('property.restored', { propertyId: id })
+  return { ok: true }
+}
+
+type DeletionRefusal =
+  | { allowed: false; reason: 'sharing_owner_only'; otherOwners: string[] }
+  | {
+      allowed: false
+      reason: 'property_delete_other_owners'
+      otherOwners: string[]
+    }
+
+export type PropertyDeletion =
+  | ({ ok: true; allowed: true } & DeletionSummary)
+  | ({ ok: true } & DeletionRefusal)
+  | typeof notFound
+
+/** Whether the user may delete the flat, as `allowed` with its reason. */
+async function refusalFor(
+  deps: PropertyDeps,
+  id: string,
+): Promise<DeletionRefusal | 'not_found' | undefined> {
+  const { role, otherOwners } = await deps.properties.deletionCheck(
+    deps.userId,
+    id,
+  )
+  if (role === undefined) {
+    return 'not_found'
+  }
+  if (role !== 'owner') {
+    return { allowed: false, reason: 'sharing_owner_only', otherOwners: [] }
+  }
+  if (otherOwners.length > 0) {
+    return {
+      allowed: false,
+      reason: 'property_delete_other_owners',
+      otherOwners,
+    }
+  }
+  return undefined
+}
+
+/** What the deletion confirmation shows (spec: "Confirming the deletion of a flat"). */
+export async function getPropertyDeletion(
+  deps: PropertyDeps,
+  id: string,
+): Promise<PropertyDeletion> {
+  const refusal = await refusalFor(deps, id)
+  if (refusal === 'not_found') {
+    return notFound
+  }
+  if (refusal) {
+    return { ok: true, ...refusal }
+  }
+  return {
+    ok: true,
+    allowed: true,
+    ...(await deps.properties.deletionSummary(id)),
+  }
+}
+
+/**
+ * Deletes the flat with everything recorded for it, then its receipt files
+ * (spec: "Deleting a flat"). The rows go in one guarded statement that
+ * repeats the rule, so a change made after the check can't get through; a
+ * failed file delete is logged and doesn't undo the deletion.
+ */
+export async function deleteProperty(
+  deps: PropertyDeps,
+  id: string,
+): Promise<
+  | { ok: true }
+  | {
+      ok: false
+      reason:
+        | 'property_not_found'
+        | 'property_delete_other_owners'
+        | 'sharing_owner_only'
+    }
+> {
+  const refuse = async () => {
+    const refusal = await refusalFor(deps, id)
+    if (refusal === 'not_found' || refusal === undefined) {
+      return notFound
+    }
+    deps.log.warn('property.delete_refused', {
+      propertyId: id,
+      reason: refusal.reason,
+    })
+    return { ok: false, reason: refusal.reason } as const
+  }
+  if (await refusalFor(deps, id)) {
+    return refuse()
+  }
+  const keys = await deps.properties.receiptKeys(id)
+  if (!(await deps.properties.deleteGuarded(deps.userId, id))) {
+    return refuse()
+  }
+  await deleteStoredFiles(
+    deps.storage,
+    deps.log,
+    keys,
+    'property.receipt_delete_failed',
+  )
+  deps.log.info('property.deleted', { propertyId: id })
+  return { ok: true }
 }

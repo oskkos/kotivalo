@@ -15,8 +15,12 @@ import { getRequestContext } from '#/server/platform/context.server'
 import { getFlatDetails as details } from './details.server'
 import { propertyRepository } from './property.repository.server'
 import {
+  archiveProperty as archive,
   createProperty as create,
+  deleteProperty as remove,
   getProperty as get,
+  getPropertyDeletion as deletion,
+  restoreProperty as restore,
   listProperties as list,
   updateProperty as update,
   type PropertyDeps,
@@ -40,6 +44,7 @@ async function propertyDeps(): Promise<PropertyDeps> {
   return {
     userId: session.user.id,
     properties: propertyRepository(context.db),
+    storage: context.storage,
     log: context.log,
     now: () => new Date(),
     collation: INTL_LOCALES[getLocale()],
@@ -65,6 +70,24 @@ export const updateProperty = createServerFn({ method: 'POST' })
   .handler(async ({ data: { id, ...details } }) =>
     update(await propertyDeps(), id, details),
   )
+
+/** Archives the flat for the signed-in user only. */
+export const archiveProperty = createServerFn({ method: 'POST' })
+  .validator(propertyIdInput)
+  .handler(async ({ data }) => archive(await propertyDeps(), data.id))
+
+export const restoreProperty = createServerFn({ method: 'POST' })
+  .validator(propertyIdInput)
+  .handler(async ({ data }) => restore(await propertyDeps(), data.id))
+
+/** What deleting the flat would remove, or why it can't be deleted. */
+export const getPropertyDeletion = createServerFn({ method: 'GET' })
+  .validator(propertyIdInput)
+  .handler(async ({ data }) => deletion(await propertyDeps(), data.id))
+
+export const deleteProperty = createServerFn({ method: 'POST' })
+  .validator(propertyIdInput)
+  .handler(async ({ data }) => remove(await propertyDeps(), data.id))
 
 /** Everything the flat details page shows, in one read. */
 export const getFlatDetails = createServerFn({ method: 'GET' })

@@ -549,6 +549,14 @@ describe('New entry from the bottom bar', () => {
     const owner = await getNewTransactionOptions(deps('annika'))
     expect(owner.owned.map((flatOption) => flatOption.id)).toEqual([flat])
   })
+
+  test('An archived flat is not offered', async () => {
+    await propertyRepository(db).setArchived('annika', flat, new Date())
+
+    const options = await getNewTransactionOptions(deps('annika'))
+
+    expect(options.owned).toEqual([])
+  })
 })
 
 describe('Water charge entries are warned about', () => {

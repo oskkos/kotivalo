@@ -19,10 +19,10 @@
 
 ## 4. Server functions
 
-- [ ] 4.1 Reason `property_delete_other_owners` (`AlertReason`) in `src/lib/reasons.ts` with `reason_…` and `reason_…_title` messages in fi, sv and en (translate skill, term-critic on the diff)
-- [ ] 4.2 `properties.server.ts` and `functions.ts`: `archiveProperty`, `restoreProperty`, `getPropertyDeletion` and `deleteProperty` as in design.md ("Deleting is one guarded statement, then the files"); `listProperties` returns `archived`; `getFlatDetails` returns `archivedAt`; logs `property.archived`, `property.restored`, `property.deleted`, `property.delete_refused` (`warn`) and `property.receipt_delete_failed` (`error`)
-- [ ] 4.3 Workers tests in `properties.server.test.ts` named after the scenarios: "Another user can't archive a flat", "An archived flat still counts towards the limit", "A member can't delete a flat", "Another user can't delete a flat", "A former owner's share prevents deleting", "Other flats are kept", the receipt files removed from storage, a failed file delete logged and still `ok`, and the log lines
-- [ ] 4.4 Workers tests at the other callers of `listForUser`: "An archived flat is left out of the summary" (`rent-payments.server.test.ts`) and "An archived flat is not offered" (`transactions.server.test.ts`)
+- [x] 4.1 Reason `property_delete_other_owners` (`AlertReason`) in `src/lib/reasons.ts` with `reason_…` and `reason_…_title` messages in fi, sv and en (translate skill, term-critic on the diff)
+- [x] 4.2 `properties.server.ts` and `functions.ts`: `archiveProperty`, `restoreProperty`, `getPropertyDeletion` and `deleteProperty` as in design.md ("Deleting is one guarded statement, then the files"); `listProperties` returns `archived`; `getFlatDetails` returns `archivedAt`; logs `property.archived`, `property.restored`, `property.deleted`, `property.delete_refused` (`warn`) and `property.receipt_delete_failed` (`error`)
+- [x] 4.3 Workers tests in `properties.server.test.ts` named after the scenarios: "Another user can't archive a flat", "An archived flat still counts towards the limit", "A member can't delete a flat", "Another user can't delete a flat", "A former owner's share prevents deleting", "Other flats are kept", the receipt files removed from storage, a failed file delete logged and still `ok`, and the log lines
+- [x] 4.4 Workers tests at the other callers of `listForUser`: "An archived flat is left out of the summary" (`rent-payments.server.test.ts`) and "An archived flat is not offered" (`transactions.server.test.ts`)
 
 ## 5. Archiving in the UI
 
