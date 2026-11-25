@@ -13,7 +13,7 @@ import {
   user,
   type DocumentKind,
 } from '#/server/db/schema'
-import { fitsStorageQuota } from '#/server/db/storage-usage'
+import { fitsStorageQuota, storageUsage } from '#/server/db/storage-usage'
 import { type Db } from '#/server/platform/db.server'
 
 export interface DocumentFields {
@@ -201,6 +201,11 @@ export function documentRepository(db: Db) {
         )
         .returning({ key: propertyDocuments.key })
       return removed.length > 0 ? removed[0].key : null
+    },
+
+    /** The bytes and number of files the user has uploaded, of any kind. */
+    storageUsage(userId: string) {
+      return storageUsage(db, userId)
     },
 
     /** The flat's documents, newest first. */

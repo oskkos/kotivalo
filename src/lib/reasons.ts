@@ -45,6 +45,8 @@ export type FieldReason =
   | 'receipt_unsupported_type'
   | 'receipt_too_large'
   | 'receipt_unreadable'
+  | 'document_name_required'
+  | 'document_name_too_long'
   | 'document_unsupported_type'
   | 'document_too_large'
   | 'document_unreadable'
@@ -201,6 +203,8 @@ const texts: Record<Reason, () => ReasonText> = {
   }),
   receipt_too_large: () => ({ text: m.reason_receipt_too_large() }),
   receipt_unreadable: () => ({ text: m.reason_receipt_unreadable() }),
+  document_name_required: () => ({ text: m.reason_document_name_required() }),
+  document_name_too_long: () => ({ text: m.reason_document_name_too_long() }),
   document_unsupported_type: () => ({
     text: m.reason_document_unsupported_type(),
   }),

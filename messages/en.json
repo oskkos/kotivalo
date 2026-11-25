@@ -453,6 +453,8 @@
   "reason_code_wrong": "That code is wrong. Check it and try again.",
   "reason_date_invalid": "Enter the date as dd/mm/yyyy, for example 12/06/2022.",
   "reason_description_required": "Enter a description of 1 to 60 characters, for example Laundry room.",
+  "reason_document_name_required": "Give the document a name.",
+  "reason_document_name_too_long": "The name is too long. At most 100 characters.",
   "reason_document_not_found": "The document may have been deleted. Go back to the documents and reload the page.",
   "reason_document_not_found_title": "Document not found",
   "reason_document_too_large": "The file is larger than 10 MB. Make the PDF smaller or take a photo of the document.",

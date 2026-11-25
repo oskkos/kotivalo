@@ -453,6 +453,8 @@
   "reason_code_wrong": "Koodi ei ole oikein. Tarkista koodi ja yritä uudelleen.",
   "reason_date_invalid": "Kirjoita päivä muodossa pp.kk.vvvv, esimerkiksi 12.6.2022.",
   "reason_description_required": "Anna selite, 1–60 merkkiä, esimerkiksi Pyykkitupa.",
+  "reason_document_name_required": "Anna dokumentille nimi.",
+  "reason_document_name_too_long": "Nimi on liian pitkä. Enintään 100 merkkiä.",
   "reason_document_not_found": "Dokumentti on ehkä poistettu. Palaa dokumentteihin ja lataa sivu uudelleen.",
   "reason_document_not_found_title": "Dokumenttia ei löydy",
   "reason_document_too_large": "Tiedosto on yli 10 Mt. Pienennä PDF-tiedostoa tai ota dokumentista kuva.",

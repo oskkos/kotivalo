@@ -453,6 +453,8 @@
   "reason_code_wrong": "Koden stämmer inte. Kontrollera koden och försök igen.",
   "reason_date_invalid": "Skriv datumet som dd.mm.åååå, till exempel 12.6.2022.",
   "reason_description_required": "Skriv en beskrivning på 1–60 tecken, till exempel Tvättstuga.",
+  "reason_document_name_required": "Ge dokumentet ett namn.",
+  "reason_document_name_too_long": "Namnet är för långt. Högst 100 tecken.",
   "reason_document_not_found": "Dokumentet kan ha tagits bort. Gå tillbaka till dokumenten och ladda om sidan.",
   "reason_document_not_found_title": "Dokumentet hittades inte",
   "reason_document_too_large": "Filen är större än 10 MB. Gör PDF-filen mindre eller fotografera dokumentet.",
