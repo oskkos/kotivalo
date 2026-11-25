@@ -77,6 +77,8 @@ test.describe('Deleting a flat', () => {
     await expect(card(page, 'Kuusikuja 3 B 12')).toHaveCount(0)
     await openDetails(page, id)
     await expect(notFound(page)).toBeVisible()
+    // The served URL is gone with the receipt's row. Whether the file left
+    // storage too is checked in properties.server.test.ts, which reads R2.
     expect((await page.request.get(receipt ?? '')).status()).toBe(404)
   })
 
