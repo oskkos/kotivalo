@@ -23,6 +23,8 @@ interface Props<T> {
   reason?: Reason | undefined
   /** One choice per row, for long labels or many choices. */
   stacked?: boolean
+  /** Chips that wrap onto more rows, for many short choices. */
+  wrap?: boolean
 }
 
 export function ChoiceField<T extends string | number>({
@@ -31,6 +33,7 @@ export function ChoiceField<T extends string | number>({
   choices,
   reason,
   stacked = false,
+  wrap = false,
 }: Props<T>) {
   const errors = useSelector(field.store, (s): unknown[] => s.meta.errors)
   const submitted = useSelector(
@@ -62,11 +65,15 @@ export function ChoiceField<T extends string | number>({
         {label}
       </Typography>
       <Box
-        sx={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${String(stacked ? 1 : choices.length)}, minmax(0, 1fr))`,
-          gap: 0.75,
-        }}
+        sx={
+          wrap
+            ? { display: 'flex', flexWrap: 'wrap', gap: 0.75 }
+            : {
+                display: 'grid',
+                gridTemplateColumns: `repeat(${String(stacked ? 1 : choices.length)}, minmax(0, 1fr))`,
+                gap: 0.75,
+              }
+        }
       >
         {choices.map((choice) => {
           const pressed = choice.value === value
@@ -84,8 +91,8 @@ export function ChoiceField<T extends string | number>({
               // The theme's outlined button, with the pressed one in plum.
               sx={{
                 minWidth: 0,
-                paddingInline: 1,
-                borderRadius: `${String(radii.input)}px`,
+                paddingInline: wrap ? 2 : 1,
+                borderRadius: wrap ? 999 : `${String(radii.input)}px`,
                 fontSize: 14,
                 fontWeight: 800,
                 ...(shown === undefined ? {} : { borderColor: 'error.main' }),
