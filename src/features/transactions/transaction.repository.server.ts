@@ -2,7 +2,18 @@
 // one atomically() batch and carry the owner check in their statements, so a
 // role lost between the read and the write changes nothing. The caller stores
 // and deletes the receipt files; this module returns the keys it removed.
-import { and, count, desc, eq, exists, gte, lte, sql, sum } from 'drizzle-orm'
+import {
+  and,
+  count,
+  desc,
+  eq,
+  exists,
+  gte,
+  inArray,
+  lte,
+  sql,
+  sum,
+} from 'drizzle-orm'
 import type { IsoDate } from '#/lib/dates'
 import {
   properties,
@@ -35,6 +46,12 @@ export interface ReceiptFields {
 export interface TransactionRow extends TransactionFields {
   id: string
   hasReceipt: boolean
+}
+
+/** An entry of one of several flats, for the year summary. */
+export interface FlatTransaction extends TransactionFields {
+  id: string
+  propertyId: string
 }
 
 export interface Receipt {
@@ -142,6 +159,35 @@ export function transactionRepository(db: Db) {
         ...row,
         hasReceipt: receiptId !== null,
       }))
+    },
+
+    /** The year's entries of the flats, newest first, with no receipts. */
+    async forPropertiesYear(
+      propertyIds: string[],
+      year: number,
+    ): Promise<FlatTransaction[]> {
+      if (propertyIds.length === 0) {
+        return []
+      }
+      return db
+        .select({
+          id: transactions.id,
+          propertyId: transactions.propertyId,
+          type: transactions.type,
+          category: transactions.category,
+          amount: transactions.amount,
+          date: transactions.date,
+          note: transactions.note,
+        })
+        .from(transactions)
+        .where(
+          and(
+            inArray(transactions.propertyId, propertyIds),
+            gte(transactions.date, `${String(year)}-01-01`),
+            lte(transactions.date, `${String(year)}-12-31`),
+          ),
+        )
+        .orderBy(desc(transactions.date), desc(transactions.createdAt))
     },
 
     /** The flat's latest entries by date, newest first. */

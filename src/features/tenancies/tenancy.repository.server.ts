@@ -557,11 +557,19 @@ export function tenancyRepository(db: Db) {
 
   return {
     /** The flat's tenancies, newest first. */
-    async forProperty(propertyId: string): Promise<Tenancy[]> {
+    forProperty(propertyId: string): Promise<Tenancy[]> {
+      return this.forProperties([propertyId])
+    },
+
+    /** The tenancies of the flats, newest first. */
+    async forProperties(propertyIds: string[]): Promise<Tenancy[]> {
+      if (propertyIds.length === 0) {
+        return []
+      }
       return db
         .select(columns)
         .from(tenancies)
-        .where(eq(tenancies.propertyId, propertyId))
+        .where(inArray(tenancies.propertyId, propertyIds))
         .orderBy(desc(tenancies.validFrom))
     },
 

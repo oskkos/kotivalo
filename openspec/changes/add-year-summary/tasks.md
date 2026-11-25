@@ -1,6 +1,6 @@
 ## 1. Reads by a list of flats
 
-- [ ] 1.1 List reads beside the per-flat ones (design.md, decision 2):
+- [x] 1.1 List reads beside the per-flat ones (design.md, decision 2):
   - `ownership.repository.server.ts`: `rowsFor(propertyIds)`
   - `tenancy.repository.server.ts`: `forProperties(propertyIds)`
   - `rent-payment.repository.server.ts`: `forProperties(propertyIds)`
@@ -9,7 +9,7 @@
   - `usage-charge.repository.server.ts`: `forProperties(propertyIds)`
 
   The per-flat reads become wrappers where that removes duplication. An empty id list returns empty without a query.
-- [ ] 1.2 Workers tests for each list read: two flats' rows kept apart, the order as in the per-flat read, and an empty list.
+- [x] 1.2 Workers tests for each list read: two flats' rows kept apart, the order as in the per-flat read, and an empty list.
 
 ## 2. The rows of a flat's year
 

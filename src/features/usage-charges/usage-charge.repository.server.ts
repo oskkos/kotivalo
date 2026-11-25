@@ -3,7 +3,7 @@
 // statements (src/server/db/periods.ts), so a role lost or a period changed
 // between the read and the write applies nothing. The server checks the
 // same rules first to give the reason.
-import { and, asc, eq, exists, ne, notExists, sql } from 'drizzle-orm'
+import { and, asc, eq, exists, inArray, ne, notExists, sql } from 'drizzle-orm'
 import type { BatchItem } from 'drizzle-orm/batch'
 import type { IsoDate } from '#/lib/dates'
 import {
@@ -92,12 +92,26 @@ export function usageChargeRepository(db: Db) {
   return {
     /** The flat's usage charges with their periods, oldest first. */
     async forProperty(propertyId: string): Promise<UsageChargePeriods[]> {
+      const byFlat = await this.forProperties([propertyId])
+      return byFlat[propertyId] ?? []
+    },
+
+    /**
+     * The usage charges of each flat with their periods, by flat id, in the
+     * order `forProperty` gives. Every id has an entry.
+     */
+    async forProperties(
+      propertyIds: string[],
+    ): Promise<Record<string, UsageChargePeriods[]>> {
+      if (propertyIds.length === 0) {
+        return {}
+      }
       const charges = await db
         .select()
         .from(usageCharges)
-        .where(eq(usageCharges.propertyId, propertyId))
+        .where(inArray(usageCharges.propertyId, propertyIds))
       if (charges.length === 0) {
-        return []
+        return Object.fromEntries(propertyIds.map((id) => [id, []]))
       }
       const amounts = await db
         .select({
@@ -111,27 +125,36 @@ export function usageChargeRepository(db: Db) {
           usageCharges,
           eq(usageCharges.id, usageChargeAmounts.usageChargeId),
         )
-        .where(eq(usageCharges.propertyId, propertyId))
+        .where(inArray(usageCharges.propertyId, propertyIds))
         .orderBy(asc(usageChargeAmounts.validFrom))
-      const result = charges.map((charge) => ({
-        id: charge.id,
-        kind: charge.kind,
-        basis: charge.basis,
-        description: charge.description,
-        periods: amounts
-          .filter((a) => a.chargeId === charge.id)
-          .map(({ validFrom, validTo, value }) => ({
-            validFrom,
-            validTo,
-            value,
-          })),
-      }))
-      // In the order they were started, so the pages keep a stable order.
-      return result.sort(
-        (a, b) =>
-          (a.periods[0]?.validFrom ?? '').localeCompare(
-            b.periods[0]?.validFrom ?? '',
-          ) || a.id.localeCompare(b.id),
+      return Object.fromEntries(
+        propertyIds.map((propertyId) => {
+          const result = charges
+            .filter((charge) => charge.propertyId === propertyId)
+            .map((charge) => ({
+              id: charge.id,
+              kind: charge.kind,
+              basis: charge.basis,
+              description: charge.description,
+              periods: amounts
+                .filter((a) => a.chargeId === charge.id)
+                .map(({ validFrom, validTo, value }) => ({
+                  validFrom,
+                  validTo,
+                  value,
+                })),
+            }))
+          // In the order they were started, so the pages keep a stable order.
+          return [
+            propertyId,
+            result.sort(
+              (a, b) =>
+                (a.periods[0]?.validFrom ?? '').localeCompare(
+                  b.periods[0]?.validFrom ?? '',
+                ) || a.id.localeCompare(b.id),
+            ),
+          ]
+        }),
       )
     },
 

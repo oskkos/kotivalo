@@ -9,6 +9,7 @@ import {
   eq,
   exists,
   gte,
+  inArray,
   isNull,
   lt,
   notExists,
@@ -70,6 +71,12 @@ export interface Expected {
   latestStart: IsoDate | null
   from: IsoDate
 }
+
+const emptyAmounts = (): RecurringAmounts => ({
+  amounts: { maintenance_charge: [] },
+  financingCharges: [],
+  treatments: [],
+})
 
 export function recurringAmountRepository(db: Db) {
   /** The actor owns the flat: the check inside each write. */
@@ -229,20 +236,34 @@ export function recurringAmountRepository(db: Db) {
 
   return {
     async forProperty(propertyId: string): Promise<RecurringAmounts> {
+      const byFlat = await this.forProperties([propertyId])
+      return byFlat[propertyId] ?? emptyAmounts()
+    },
+
+    /**
+     * The charges, financing charges and treatments of each flat, by flat
+     * id. Every id has an entry, empty for a flat without any.
+     */
+    async forProperties(
+      propertyIds: string[],
+    ): Promise<Record<string, RecurringAmounts>> {
+      if (propertyIds.length === 0) {
+        return {}
+      }
       const [amountRows, chargeRows, treatmentRows] = await Promise.all([
         db
           .select()
           .from(recurringAmounts)
-          .where(eq(recurringAmounts.propertyId, propertyId))
+          .where(inArray(recurringAmounts.propertyId, propertyIds))
           .orderBy(asc(recurringAmounts.validFrom)),
         db
           .select()
           .from(financingCharges)
-          .where(eq(financingCharges.propertyId, propertyId)),
+          .where(inArray(financingCharges.propertyId, propertyIds)),
         db
           .select()
           .from(financingTreatments)
-          .where(eq(financingTreatments.propertyId, propertyId))
+          .where(inArray(financingTreatments.propertyId, propertyIds))
           .orderBy(asc(financingTreatments.validFrom)),
       ])
       const period = (row: (typeof amountRows)[number]) => ({
@@ -250,34 +271,46 @@ export function recurringAmountRepository(db: Db) {
         validTo: row.validTo,
         value: row.amount,
       })
-      const charges: FinancingCharge[] = chargeRows
-        .map((row) => ({
-          id: row.id,
-          name: row.name,
-          periods: amountRows
-            .filter((amount) => amount.financingChargeId === row.id)
-            .map(period),
-        }))
-        .sort(
-          (a, b) =>
-            (a.periods[0]?.validFrom ?? '').localeCompare(
-              b.periods[0]?.validFrom ?? '',
-            ) || (a.name ?? '').localeCompare(b.name ?? '', 'fi'),
-        )
-      const of = (kind: RecurringAmountKind) =>
-        amountRows.filter((row) => row.kind === kind).map(period)
-      const amounts = {
-        maintenance_charge: of('maintenance_charge'),
-      }
-      return {
-        amounts,
-        financingCharges: charges,
-        treatments: treatmentRows.map((row) => ({
-          validFrom: row.validFrom,
-          validTo: row.validTo,
-          value: row.treatment,
-        })),
-      }
+      return Object.fromEntries(
+        propertyIds.map((propertyId) => {
+          const flatAmounts = amountRows.filter(
+            (row) => row.propertyId === propertyId,
+          )
+          const charges: FinancingCharge[] = chargeRows
+            .filter((row) => row.propertyId === propertyId)
+            .map((row) => ({
+              id: row.id,
+              name: row.name,
+              periods: flatAmounts
+                .filter((amount) => amount.financingChargeId === row.id)
+                .map(period),
+            }))
+            .sort(
+              (a, b) =>
+                (a.periods[0]?.validFrom ?? '').localeCompare(
+                  b.periods[0]?.validFrom ?? '',
+                ) || (a.name ?? '').localeCompare(b.name ?? '', 'fi'),
+            )
+          return [
+            propertyId,
+            {
+              amounts: {
+                maintenance_charge: flatAmounts
+                  .filter((row) => row.kind === 'maintenance_charge')
+                  .map(period),
+              },
+              financingCharges: charges,
+              treatments: treatmentRows
+                .filter((row) => row.propertyId === propertyId)
+                .map((row) => ({
+                  validFrom: row.validFrom,
+                  validTo: row.validTo,
+                  value: row.treatment,
+                })),
+            },
+          ]
+        }),
+      )
     },
 
     amountStatements,
