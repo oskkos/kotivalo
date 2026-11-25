@@ -99,7 +99,7 @@ export const aino: TenantDetails = {
 export async function changeRent(page: Page, amount: string, from: string) {
   await waitForHydration(page)
   await page
-    .getByRole('region', { name: 'Rent' })
+    .getByRole('region', { name: 'Rent', exact: true })
     .getByRole('link', { name: 'Change' })
     .click()
   await waitForHydration(page)
@@ -126,4 +126,47 @@ export async function setOccupants(page: Page, persons: string, from: string) {
   await dialog.getByRole('textbox', { name: 'Valid from' }).fill(from)
   await dialog.getByRole('button', { name: 'Save change' }).click()
   await expect(dialog).toBeHidden()
+}
+
+export interface FeeInput {
+  /** The kind's button, e.g. 'Parking space'. */
+  kind: string
+  /** The description for 'Other'. */
+  description?: string
+  /** The basis's button, e.g. 'Fixed'; the kind's default otherwise. */
+  basis?: string
+  /** As typed. */
+  amount: string
+  /** As typed (dd/mm/yyyy). */
+  from: string
+}
+
+/** Adds a fee through the fees card's form and lands on the Tenancy page. */
+export async function addFee(page: Page, fee: FeeInput) {
+  await waitForHydration(page)
+  await page
+    .getByRole('region', { name: 'Fees on top of the rent' })
+    .getByRole('link', { name: 'Add a fee' })
+    .click()
+  await waitForHydration(page)
+  await page.getByRole('button', { name: fee.kind, exact: true }).click()
+  if (fee.description !== undefined) {
+    await page
+      .getByRole('textbox', { name: 'Description' })
+      .fill(fee.description)
+  }
+  if (fee.basis !== undefined) {
+    await page.getByRole('button', { name: fee.basis, exact: true }).click()
+  }
+  await page.getByRole('textbox', { name: /^Amount/ }).fill(fee.amount)
+  await page.getByRole('textbox', { name: 'Valid from' }).fill(fee.from)
+  await page.getByRole('button', { name: 'Add fee' }).click()
+  await expect(page).toHaveURL(/\/tenancy$/)
+}
+
+/** Opens a fee's change form from the fees card; `name` is its label. */
+export async function openFee(page: Page, name: string) {
+  await waitForHydration(page)
+  await page.getByRole('link', { name: `Change the fee: ${name}` }).click()
+  await waitForHydration(page)
 }

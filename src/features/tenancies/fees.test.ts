@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { feeInMonth, occupantsInMonth } from './fees'
+import { feeInMonth, occupantsInMonth, offeredFees } from './fees'
 
 const period = (validFrom: string, validTo: string | null, value: number) => ({
   validFrom,
@@ -52,5 +52,67 @@ describe('Tenant fees are recorded as periods', () => {
     }
     expect(feeInMonth(water, [], tenancy, '2026-02')).toBe(2200)
     expect(occupantsInMonth([], tenancy, '2026-02')).toBeUndefined()
+  })
+})
+
+describe('Occupants and fees of a new tenancy', () => {
+  const fee = (id: string, ...amounts: [string, string | null, number][]) => ({
+    id,
+    kind: 'parking' as const,
+    basis: 'fixed' as const,
+    description: null,
+    amounts: amounts.map(([validFrom, validTo, value]) => ({
+      validFrom,
+      validTo,
+      value,
+    })),
+  })
+
+  test('the previous tenancy starts last before the new start', () => {
+    const offered = offeredFees(
+      [
+        {
+          id: 'a',
+          validFrom: '2023-01-01',
+          validTo: '2024-12-31',
+          fees: [fee('old', ['2023-01-01', null, 900])],
+        },
+        {
+          id: 'b',
+          validFrom: '2025-01-01',
+          validTo: '2026-12-31',
+          fees: [fee('new', ['2025-01-01', null, 1500])],
+        },
+      ],
+      '2027-01-01',
+    )
+    expect(offered.map((o) => [o.fee.id, o.amount])).toEqual([['new', 1500]])
+  })
+
+  test('No fees are offered for the first tenancy', () => {
+    expect(offeredFees([], '2027-01-01')).toEqual([])
+  })
+
+  test("a fee ended on the tenancy's last day is not offered", () => {
+    const tenancy = {
+      id: 'a',
+      validFrom: '2025-01-01',
+      validTo: '2026-12-31',
+      fees: [
+        fee(
+          'ended',
+          ['2025-01-01', '2026-06-30', 1500],
+          ['2026-07-01', null, 0],
+        ),
+        fee(
+          'later',
+          ['2025-01-01', '2026-06-30', 1500],
+          ['2027-01-01', null, 0],
+        ),
+      ],
+    }
+    expect(offeredFees([tenancy], '2027-01-01').map((o) => o.fee.id)).toEqual([
+      'later',
+    ])
   })
 })

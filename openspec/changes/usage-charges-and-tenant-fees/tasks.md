@@ -38,14 +38,14 @@
 
 ## 7. Tenant fees on the Tenancy page
 
-- [ ] 7.1 Term bank: *maksu vuokran lisäksi* (code `tenantFee`), and the kind words *autopaikka* and *sauna* if the bank needs them, with the translate skill and the term-critic's review
-- [ ] 7.2 `TenancyPage.tsx`: the fees card (*Maksut vuokran lisäksi*: fees in effect with per-occupant detail, ended fees, none, the month's total, *Lisää maksu* and *Muuta* for owners); component tests
-- [ ] 7.3 Routes `/properties/$propertyId/tenancy/$tenancyId/fees/new` and `/fees/$feeId` with `TenantFeeForm.tsx` (kind as `ChoiceField`, *Selite* for *Muu*, basis defaulting by kind, amount, date, the month's total from the date, the water entries warning; the change form with *Uusi summa* / *Päättyy*, history and undo); owners only; component tests
-- [ ] 7.4 fi, sv and en messages with the translate skill; `e2e/support/tenancies.ts`: `addFee`; Playwright tests for "Adding a tenant fee", "Changing a tenant fee", "Undoing a tenant fee change" and the new scenarios of "The tenancy page"
+- [x] 7.1 Term bank: *maksu vuokran lisäksi* (code `tenantFee`), and the kind words *autopaikka* and *sauna* if the bank needs them, with the translate skill and the term-critic's review
+- [x] 7.2 `TenancyPage.tsx`: the fees card (*Maksut vuokran lisäksi*: fees in effect with per-occupant detail, ended fees, none, the month's total, *Lisää maksu* and *Muuta* for owners); component tests
+- [x] 7.3 Routes `/properties/$propertyId/tenancy/$tenancyId/fees/new` and `/fees/$feeId` with `TenantFeeForm.tsx` (kind as `ChoiceField`, *Selite* for *Muu*, basis defaulting by kind, amount, date, the month's total from the date, the water entries warning; the change form with *Uusi summa* / *Päättyy*, history and undo); owners only; component tests
+- [x] 7.4 fi, sv and en messages with the translate skill; `e2e/support/tenancies.ts`: `addFee`; Playwright tests for "Adding a tenant fee", "Changing a tenant fee", "Undoing a tenant fee change" and the new scenarios of "The tenancy page"
 
 ## 8. Occupants and fees of a new tenancy
 
-- [ ] 8.1 `tenancies.server.ts`: the new tenant form's data offers the previous tenancy's fees not ended on its last day; adding a tenancy copies the checked fees from its start day in the tenancy's batch
+- [x] 8.1 `tenancies.server.ts`: the new tenant form's data offers the previous tenancy's fees not ended on its last day; adding a tenancy copies the checked fees from its start day in the tenancy's batch
 - [ ] 8.2 `TenancyForm.tsx`: the previous fees as unchecked checkboxes with the note that an unchecked fee is included in the rent, and the month's total; messages fi, sv and en; component tests
 - [ ] 8.3 Workers and Playwright tests named after "Occupants and fees of a new tenancy"
 

@@ -1,0 +1,76 @@
+import {
+  createFileRoute,
+  notFound,
+  redirect,
+  useRouter,
+} from '@tanstack/react-router'
+import { NotFoundView } from '#/components/NotFoundView'
+import { getTenancy } from '#/features/tenancies/functions'
+import { TenantFeeForm } from '#/features/tenancies/TenantFeeForm'
+import { m } from '#/paraglide/messages.js'
+
+export const Route = createFileRoute(
+  '/_authed/properties/$propertyId/tenancy/$tenancyId/fees/new',
+)({
+  loader: async ({ params }) => {
+    const result = await getTenancy({
+      data: { propertyId: params.propertyId, tenancyId: params.tenancyId },
+    })
+    if (!result.ok) {
+      // eslint-disable-next-line @typescript-eslint/only-throw-error -- TanStack Router's not-found signal
+      throw notFound()
+    }
+    if (result.role !== 'owner') {
+      throw redirect({
+        to: '/properties/$propertyId/tenancy',
+        params: { propertyId: params.propertyId },
+      })
+    }
+    return result
+  },
+  head: () => ({
+    meta: [
+      {
+        title: m.amounts_form_page_title({
+          title: m.tenant_fee_form_title_add(),
+        }),
+      },
+    ],
+  }),
+  component: NewTenantFeeRoute,
+  notFoundComponent: () => (
+    <NotFoundView
+      title={m.reason_tenancy_not_found_title()}
+      text={m.reason_tenancy_not_found()}
+      backLabel={m.property_back_to_list()}
+    />
+  ),
+})
+
+function NewTenantFeeRoute() {
+  const { tenancy, rents, occupants, fees, property } = Route.useLoaderData()
+  const { propertyId } = Route.useParams()
+  const router = useRouter()
+  const toPage = () =>
+    router.navigate({
+      to: '/properties/$propertyId/tenancy',
+      params: { propertyId },
+    })
+  return (
+    <TenantFeeForm
+      propertyId={propertyId}
+      address={property.streetAddress}
+      tenancy={tenancy}
+      rents={rents}
+      occupants={occupants}
+      fees={fees}
+      onDone={async () => {
+        await router.invalidate()
+        await toPage()
+      }}
+      onClose={() => {
+        void toPage()
+      }}
+    />
+  )
+}

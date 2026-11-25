@@ -14,6 +14,8 @@ import { formatDate, formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 import { colors, radii } from '#/theme/tokens'
 import { contractLabel, datesLabel, endingLabel, statusLabel } from './labels'
+import { FeesCard } from './FeesCard'
+import type { FeeOfTenancy } from './fees'
 import { OccupantsCard } from './OccupantsCard'
 import { RentCard } from './RentCard'
 import { currentTenancy, flatStatus, tenancyStatus } from './status'
@@ -28,6 +30,8 @@ export interface TenancyPageView {
   rents: Partial<Record<string, readonly Period<number>[]>>
   /** Each tenancy's occupants periods, oldest first. */
   occupants: Partial<Record<string, readonly Period<number>[]>>
+  /** Each tenancy's tenant fees. */
+  fees: Partial<Record<string, readonly FeeOfTenancy[]>>
 }
 
 interface Props {
@@ -46,6 +50,10 @@ interface Props {
   rentChange?: (tenancy: Tenancy) => ReactNode
   /** Owners only: undoing the current tenancy's latest rent change. */
   onUndoRent?: (tenancy: Tenancy) => void
+  /** Owners only: the link to add a fee to the current tenancy. */
+  feeAdd?: (tenancy: Tenancy) => ReactNode
+  /** Owners only: the link to change a fee of the current tenancy. */
+  feeChange?: (tenancy: Tenancy, fee: FeeOfTenancy) => ReactNode
   /** Owners only: opening the dialog that changes the occupants. */
   onChangeOccupants?: (tenancy: Tenancy) => void
   /** Owners only: undoing the latest occupants change. */
@@ -379,6 +387,21 @@ export function TenancyPage(props: Props) {
             onUndo={
               owner && props.onUndoRent
                 ? () => props.onUndoRent?.(current)
+                : undefined
+            }
+          />
+        ) : null}
+        {current ? (
+          <FeesCard
+            tenancy={current}
+            fees={view.fees[current.id] ?? []}
+            occupants={view.occupants[current.id] ?? []}
+            rents={view.rents[current.id] ?? []}
+            today={view.today}
+            add={owner ? props.feeAdd?.(current) : undefined}
+            change={
+              owner && props.feeChange
+                ? (fee) => props.feeChange?.(current, fee)
                 : undefined
             }
           />

@@ -68,7 +68,9 @@ test.describe('The charge amounts page', () => {
     await expect(
       page.getByRole('button', { name: 'Set: Maintenance charge' }),
     ).toBeVisible()
-    await expect(page.getByRole('region', { name: 'Rent' })).toHaveCount(0)
+    await expect(
+      page.getByRole('region', { name: 'Rent', exact: true }),
+    ).toHaveCount(0)
     const financing = section(page, 'Financing charge')
     await expect(financing.getByText('No financing charges')).toBeVisible()
     await expect(financing.getByText('Not set')).toBeVisible()

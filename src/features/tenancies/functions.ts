@@ -77,7 +77,7 @@ export const getTenancy = createServerFn({ method: 'GET' })
 export const createTenancy = createServerFn({ method: 'POST' })
   .validator(createTenancyInput)
   .handler(async ({ data }) => {
-    const { propertyId, rent, occupants, ending, ...fields } = data
+    const { propertyId, rent, occupants, ending, copyFeeIds, ...fields } = data
     return create(
       await tenancyDeps(),
       propertyId,
@@ -85,6 +85,7 @@ export const createTenancy = createServerFn({ method: 'POST' })
       rent,
       occupants,
       ending,
+      copyFeeIds,
     )
   })
 

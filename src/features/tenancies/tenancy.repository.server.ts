@@ -368,6 +368,49 @@ export function tenancyRepository(db: Db) {
       ),
     )
 
+  /**
+   * The statements that add a tenant fee with its first amount period: the
+   * period goes in only if the fee did, and the fee only if the actor owns
+   * the tenancy's flat. The first returns the fee's id when it applied.
+   */
+  function feeStatements(
+    fee: NewFee,
+    feeId: string,
+  ): [BatchItem<'sqlite'>, ...BatchItem<'sqlite'>[]] {
+    const { actorId, propertyId, tenancyId } = fee
+    return [
+      db
+        .insert(tenantFees)
+        .select(
+          db
+            .select({
+              id: sql<string>`${feeId}`.as('id'),
+              tenancyId: tenancies.id,
+              kind: sql<ChargeKind>`${fee.kind}`.as('kind'),
+              basis: sql<ChargeBasis>`${fee.basis}`.as('basis'),
+              description: sql<string | null>`${fee.description}`.as(
+                'description',
+              ),
+            })
+            .from(tenancies)
+            .where(
+              and(
+                eq(tenancies.id, tenancyId),
+                ownsTenancy(actorId, propertyId, tenancyId),
+              ),
+            ),
+        )
+        .returning({ id: tenantFees.id }),
+      ...periodWriteStatements(db, tenantFeePeriods, {
+        parentId: feeId,
+        value: fee.amount,
+        from: fee.from,
+        latestStart: null,
+        owned: ownsFee(actorId, propertyId, tenancyId, feeId),
+      }),
+    ]
+  }
+
   const rentsOf = (tenancyId: string) => eq(tenancyRents.tenancyId, tenancyId)
 
   /**
@@ -637,35 +680,9 @@ export function tenancyRepository(db: Db) {
      * the actor isn't an owner or the tenancy isn't the flat's.
      */
     async addFee(fee: NewFee): Promise<string | null> {
-      const { actorId, propertyId, tenancyId } = fee
       const feeId = crypto.randomUUID()
-      const [inserted] = await atomically(db, [
-        db
-          .insert(tenantFees)
-          .select(
-            db
-              .select({
-                id: sql<string>`${feeId}`.as('id'),
-                tenancyId: tenancies.id,
-                kind: sql<ChargeKind>`${fee.kind}`.as('kind'),
-                basis: sql<ChargeBasis>`${fee.basis}`.as('basis'),
-                description: sql<string | null>`${fee.description}`.as(
-                  'description',
-                ),
-              })
-              .from(tenancies)
-              .where(ownsTenancy(actorId, propertyId, tenancyId)),
-          )
-          .returning({ id: tenantFees.id }),
-        ...periodWriteStatements(db, tenantFeePeriods, {
-          parentId: feeId,
-          value: fee.amount,
-          from: fee.from,
-          latestStart: null,
-          owned: ownsFee(actorId, propertyId, tenancyId, feeId),
-        }),
-      ])
-      return inserted.length > 0 ? feeId : null
+      const results = await atomically(db, feeStatements(fee, feeId))
+      return (results[0] as unknown[]).length > 0 ? feeId : null
     },
 
     /**
@@ -891,6 +908,8 @@ export function tenancyRepository(db: Db) {
       ending?: Ending,
       /** The persons living in the flat from the start; one by default. */
       occupants = 1,
+      /** Fees added from the start day, e.g. copied from the previous tenancy. */
+      fees: Pick<NewFee, 'kind' | 'basis' | 'description' | 'amount'>[] = [],
     ): Promise<{ outcome: 'created'; id: string } | { outcome: 'overlaps' }> {
       const { id, statement } = createStatement(
         actorId,
@@ -916,6 +935,18 @@ export function tenancyRepository(db: Db) {
           latestStart: null,
           owned: ownsTenancy(actorId, propertyId, id),
         }),
+        ...fees.flatMap((fee) =>
+          feeStatements(
+            {
+              ...fee,
+              actorId,
+              propertyId,
+              tenancyId: id,
+              from: fields.validFrom,
+            },
+            crypto.randomUUID(),
+          ),
+        ),
       ])
       return inserted.length > 0
         ? { outcome: 'created', id }
