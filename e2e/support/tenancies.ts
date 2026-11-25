@@ -129,7 +129,7 @@ export async function setOccupants(page: Page, persons: string, from: string) {
   await waitForHydration(page)
   await page
     .getByRole('region', { name: 'Occupants' })
-    .getByRole('button', { name: 'Change the occupants' })
+    .getByRole('button', { name: 'Change the number of occupants' })
     .click()
   const dialog = page.getByRole('dialog')
   await dialog

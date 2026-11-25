@@ -1052,19 +1052,33 @@
     "fi": {
       "term": "asukasmäärä",
       "match": ["asuk[ak]\\p{L}*"],
-      "status": "proposed"
+      "status": "derived",
+      "sources": [
+        {
+          "source": "finlex",
+          "url": "https://www.finlex.fi/fi/lainsaadanto/1995/481",
+          "quote": "hänen on kirjallisesti ilmoitettava vuokranantajalle asukkaiden lukumäärä"
+        }
+      ]
     },
     "sv": {
       "term": "antal boende",
-      "match": ["(antal(et)? )?boende(t|n)?"],
-      "status": "proposed"
+      "match": ["(antal(et)? )?boende"],
+      "status": "verified",
+      "sources": [
+        {
+          "source": "finlex",
+          "url": "https://www.finlex.fi/sv/lagstiftning/1995/481",
+          "quote": "skriftligen anmäla hyresvärden antalet boende"
+        }
+      ]
     },
     "en": {
-      "term": "occupants",
-      "match": ["occupants?"],
+      "term": "number of occupants",
+      "match": ["(number of )?occupants?"],
       "status": "proposed"
     },
-    "notes": "No authoritative source found for the count as a term; the Tax Administration doesn't use it. \"Asukkaat\" / \"boende\" / \"occupants\" are the plain words for the persons; \"henkilömäärä\" (as in per-person water billing) was not checked against landlord sources; the label for the count is \"asukasmäärä\" / \"antal boende\" / \"occupants\"."
+    "notes": "The Act on Residential Leases (481/1995) says \"asukkaiden lukumäärä\" / \"antalet boende\"; \"asukasmäärä\" is the everyday compound. The Housing Companies Act (1599/2009) says \"henkilömäärä\" / \"antalet personer\" when the number of persons is the basis of a charge; the app uses the tenancy's word. The English label is a proposal."
   },
   "open_ended": {
     "code": "openEnded",
@@ -1196,7 +1210,8 @@
           "quote": "money towards a water bill or rent for a parking space"
         }
       ]
-    }
+    },
+    "codeNotes": "Kind value `parking` of usage charges and tenant fees (`CHARGE_KINDS`)."
   },
   "principal": {
     "code": "principal",
@@ -1574,7 +1589,9 @@
     "definition": "A payment the tenant makes to the landlord on top of the rent, such as for water or a parking space. Rental income, not part of the rent.",
     "fi": {
       "term": "maksu vuokran lisäksi",
-      "match": ["maks\\p{L}*\\s+vuokran\\s+lisäksi"],
+      "match": [
+        "maksu(t|n|a|ja|jen|ihin|issa|ista|ille|illa|ilta|ksi|na|ina)?\\s+vuokran\\s+lisäksi"
+      ],
       "status": "derived",
       "sources": [
         {
@@ -1608,7 +1625,7 @@
         }
       ]
     },
-    "notes": "The Tax Administration describes the concept (\"muut maksut, joita saat vuokralaiselta\") without a fixed term; the words are built from its description. Keep apart from the usage charge (käyttömaksu), which the housing company bills the owner."
+    "notes": "The Tax Administration describes the concept (\"muut maksut, joita saat vuokralaiselta\") without a fixed term; the words are built from its description. Keep apart from the usage charge (käyttömaksu), which the housing company bills the owner. The Act on Residential Leases (481/1995) calls such charges \"käyttökorvaus\" / \"användningsbaserad ersättning\"; the app follows the Tax Administration's \"maksut vuokran lisäksi\" because parking rent is not a usage-based compensation and \"käyttökorvaus\" sits next to the housing company's käyttömaksu. Open question for the owner: bare \"maksu\" in the fee messages can also be read as a rent payment."
   },
   "transaction": {
     "code": "transaction",
@@ -1663,7 +1680,7 @@
       "match": ["usage charges?"],
       "status": "proposed"
     },
-    "notes": "The Limited Liability Housing Companies Act (1599/2009, ch. 3 s. 1) uses käyttömaksu / bruksavgift for a charge for using the property agreed by contract, apart from the company charge (vastike / bolagsvederlag); housing company price lists also say käyttökorvaus. A water charge billed monthly by the housing company is recorded as a usage charge of the kind water; one-off water bills stay entries (water_charge). In English, \"usage charges\" sit next to \"charges\" (vastikkeet) but are not a kind of them. The English word is a proposal."
+    "notes": "The Limited Liability Housing Companies Act (1599/2009, ch. 3 s. 1) uses käyttömaksu / bruksavgift for a charge for using the property agreed by contract, apart from the company charge (vastike / bolagsvederlag); housing company price lists also say käyttökorvaus. A water charge billed monthly by the housing company is recorded as a usage charge of the kind water; one-off water bills stay entries (water_charge). In English, \"usage charges\" sit next to \"charges\" (vastikkeet) but are not a kind of them. The English word is a proposal. In the Act the word covers a charge agreed by contract; a per-person water charge set in the articles of association is a vastike under the same Act, and the Tax Administration groups it with the maintenance charge (7H row 2.2). The app deliberately records the housing company's monthly per-person water charge as a usage charge of the kind water, which keeps row 2.2."
   },
   "validity_period": {
     "codeNotes": "validFrom / validTo, columns valid_from / valid_to",

@@ -101,7 +101,7 @@ describe("The month's rent payments page", () => {
     expect(summary).toHaveTextContent('Paid€500.00')
     expect(summary).toHaveTextContent('Outstanding€449.00')
     const breakdown = within(summary).getByRole('list', {
-      name: 'The rent and the fees',
+      name: 'Breakdown of the rent and fees',
     })
     expect(
       within(breakdown)
@@ -143,7 +143,7 @@ describe("The month's rent payments page", () => {
   test('a month without fees shows no breakdown', () => {
     renderPage()
     expect(
-      screen.queryByRole('list', { name: 'The rent and the fees' }),
+      screen.queryByRole('list', { name: 'Breakdown of the rent and fees' }),
     ).toBeNull()
   })
 

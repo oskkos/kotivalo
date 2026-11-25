@@ -907,7 +907,7 @@
   "usage_charges_add": "Lisää käyttömaksu",
   "usage_charges_ended_title": "Päättyneet käyttömaksut",
   "usage_charges_months_empty_set": "Lisää käyttömaksuja",
-  "usage_charges_months_footnote": "Summat lasketaan käyttömaksuista ja vuokrasuhteiden asukasmääristä, eivät todellisista maksuista.",
+  "usage_charges_months_footnote": "Summat lasketaan käyttömaksuista ja vuokrasuhteiden asukasmääristä eikä toteutuneista maksuista.",
   "usage_charges_months_page_title": "Käyttömaksut kuukausittain – Kotivalo",
   "usage_charges_months_title": "Käyttömaksut kuukausittain",
   "usage_charges_months_year_total": "Käyttömaksut {year}",

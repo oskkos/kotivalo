@@ -516,7 +516,7 @@ test.describe('Changing the occupants', () => {
     await jussi.goto(`/properties/${id}/tenancy`)
     await expect(jussi.getByRole('region', { name: 'Occupants' })).toBeVisible()
     await expect(
-      jussi.getByRole('button', { name: 'Change the occupants' }),
+      jussi.getByRole('button', { name: 'Change the number of occupants' }),
     ).toHaveCount(0)
   })
 })
