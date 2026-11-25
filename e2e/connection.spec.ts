@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test'
-import { signIn, uniqueEmail, useOwnClientIp } from './support/sign-in'
+import {
+  signIn,
+  uniqueEmail,
+  useOwnClientIp,
+  waitForHydration,
+} from './support/sign-in'
 
 // The browser's language is English, so the app is in English.
 test.describe('Telling the user when the connection fails', () => {
@@ -33,6 +38,9 @@ test.describe('Telling the user when the connection fails', () => {
     await expect(
       page.getByRole('heading', { level: 1, name: 'New flat' }),
     ).toBeVisible()
+    // Before hydration, Close is a plain link: the browser would load the
+    // page itself and get the service worker's offline page instead.
+    await waitForHydration(page)
 
     await context.setOffline(true)
     await page.getByRole('button', { name: 'Close' }).click()
