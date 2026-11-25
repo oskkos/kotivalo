@@ -1075,5 +1075,84 @@
   "welcome_page_title": "Välkommen – Kotivalo",
   "welcome_question": "Med vilket namn ska du visas?",
   "welcome_saving": "Sparar…",
-  "welcome_title": "Välkommen!"
+  "welcome_title": "Välkommen!",
+  "year_summary_chip_details_missing": "Husbolagets uppgifter saknas",
+  "year_summary_chip_partly_paid": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Hyran delvis betald för {count} mån.",
+        "countPlural=other": "Hyran delvis betald för {count} mån."
+      }
+    }
+  ],
+  "year_summary_chip_share_changed": "Andelen ändrades {date}",
+  "year_summary_chip_treatment_not_set": "Finansieringsvederlagets behandling saknas",
+  "year_summary_chip_unpaid": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Hyran inte registrerad för {count} mån.",
+        "countPlural=other": "Hyran inte registrerad för {count} mån."
+      }
+    }
+  ],
+  "year_summary_chip_vacant": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Tom {count} mån.",
+        "countPlural=other": "Tom {count} mån."
+      }
+    }
+  ],
+  "year_summary_company": "{name} · FO-nummer {businessId}",
+  "year_summary_company_missing": "Husbolag och FO-nummer saknas",
+  "year_summary_company_no_business_id": "{name} · FO-nummer saknas",
+  "year_summary_company_no_name": "Husbolagets namn saknas · FO-nummer {businessId}",
+  "year_summary_costs": "Kostnader (2.2–2.5)",
+  "year_summary_empty_seen": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Du ser {count} bostad, men du hade ingen ägarandel i den år {year}.",
+        "countPlural=other": "Du ser {count} bostäder, men du hade ingen ägarandel i dem år {year}."
+      }
+    }
+  ],
+  "year_summary_empty_text": "Sammandraget räknas för bostäder där du hade en ägarandel.",
+  "year_summary_empty_title": "Ingen ägarandel år {year}",
+  "year_summary_income": "Hyresinkomster (2.1)",
+  "year_summary_intro": "Blankett 7H fylls i bostad för bostad. Öppna en bostad och kopiera siffrorna till MinSkatt.",
+  "year_summary_intro_title": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Din egen andel · {count} bostad",
+        "countPlural=other": "Din egen andel · {count} bostäder"
+      }
+    }
+  ],
+  "year_summary_kicker": "Årssammandrag · blankett 7H",
+  "year_summary_months_so_far": "{from}–{to}",
+  "year_summary_next_year": "Följande år",
+  "year_summary_not_counted": "Siffrorna omfattar inte räntor på lån, som inte hör till blankett 7H, och ännu inte ombyggnader.",
+  "year_summary_not_included": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Inte med: {flats}, eftersom du inte hade någon ägarandel i den år {year}.",
+        "countPlural=other": "Inte med: {flats}, eftersom du inte hade någon ägarandel i dem år {year}."
+      }
+    }
+  ],
+  "year_summary_page_title": "Årssammandrag – Kotivalo",
+  "year_summary_previous_year": "Föregående år",
+  "year_summary_share": "Din andel {share}"
 }

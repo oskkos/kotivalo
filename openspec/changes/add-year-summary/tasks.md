@@ -60,15 +60,15 @@
 
 ## 6. The year summary page
 
-- [ ] 6.1 Route `src/routes/_authed/year-summary/index.tsx` (`validateSearch` with an optional `year`) and `features/year-summary/YearSummaryPage.tsx`:
+- [x] 6.1 Route `src/routes/_authed/year-summary/index.tsx` (`validateSearch` with an optional `year`) and `features/year-summary/YearSummaryPage.tsx`:
   - the year heading, with the months so far in the current year
   - previous and next year buttons, disabled at the ends
   - the cards: address, housing company line or missing, share, row 2.1, rows 2.2–2.5 summed, check chips
   - the "Not included" note
   - the empty state
   - `BottomNav` with Taxes current (the bar item itself lands in group 8)
-- [ ] 6.2 fi, sv and en messages with the translate skill; component tests.
-- [ ] 6.3 Playwright tests for "The year summary page" (`e2e/support/year-summary.ts`: `openYearSummary(page, year)`).
+- [x] 6.2 fi, sv and en messages with the translate skill; component tests.
+- [x] 6.3 Playwright tests for "The year summary page" (`e2e/support/year-summary.ts`: `openYearSummary(page, year)`).
   - Data is set up in the current and earlier years through the forms, and the year is always given in the URL, because the opening year depends on the date.
   - The member case uses the sharing helpers.
 

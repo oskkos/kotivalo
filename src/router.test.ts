@@ -14,8 +14,14 @@ vi.mock('#/features/documents/functions', () => ({}))
 vi.mock('#/features/tenancies/functions', () => ({}))
 vi.mock('#/features/rent-payments/functions', () => ({}))
 vi.mock('#/features/usage-charges/functions', () => ({}))
+vi.mock('#/features/year-summary/functions', () => ({}))
 
 describe('Router', () => {
+  test('registers the year summary behind the signed-in layout', () => {
+    const { routesById } = getRouter()
+    expect(routesById).toHaveProperty('/_authed/year-summary/')
+  })
+
   test('registers the home and sign-in pages', () => {
     const { routesByPath } = getRouter()
     expect(routesByPath).toHaveProperty('/')

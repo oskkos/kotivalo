@@ -20,10 +20,9 @@ import {
   flatYear,
   openingYear,
   summaryYears,
-  type Check,
-  type FlatYear,
   type FlatYearInput,
 } from './summary'
+import type { FlatCard, FlatYearView, YearSummaryView } from './view'
 
 export interface YearSummaryDeps {
   /** The signed-in user. */
@@ -37,52 +36,6 @@ export interface YearSummaryDeps {
   usageCharges: UsageChargeRepository
   now: () => Date
 }
-
-/** A flat's card on the year summary page. */
-export interface FlatCard {
-  propertyId: string
-  streetAddress: string
-  housingCompanyName: string | null
-  businessId: string | null
-  /** Basis points at the end of the user's period in the year. */
-  share: number
-  /** Row 2.1, cents. */
-  income: number
-  /** Rows 2.2–2.5 summed, cents. */
-  costs: number
-  checks: Check[]
-}
-
-export interface YearSummaryView {
-  /** Today in Finland. */
-  today: IsoDate
-  year: number
-  /** Oldest first; empty without a share in any flat. */
-  years: number[]
-  /** The flats in the summary, unsorted: sort by address for display. */
-  flats: FlatCard[]
-  /** Flats the user can see without a share in the year. */
-  notIncluded: { propertyId: string; streetAddress: string }[]
-}
-
-/** The flat's address as form 7H's page shows it. */
-export interface FlatAddress {
-  id: string
-  streetAddress: string
-  postcode: string
-  city: string
-}
-
-export type FlatYearView =
-  | {
-      ok: true
-      today: IsoDate
-      year: number
-      property: FlatAddress
-      /** Null when the user had no share in the flat in the year. */
-      flat: Omit<FlatYear, 'propertyId' | 'included'> | null
-    }
-  | { ok: false; reason: 'property_not_found' }
 
 const today = (deps: YearSummaryDeps) => isoDateInFinland(deps.now())
 
