@@ -1584,7 +1584,7 @@ describe('Changing a tenant fee', () => {
   })
 
   test("Another tenancy's fee is not found", async () => {
-    const { fee } = await withParking()
+    const { id, fee } = await withParking()
     const other = await addId(fixedTerm('2027-06-01', '2027-12-31'))
     expect(
       await setTenantFee(deps(), flat, other, fee, {
@@ -1592,6 +1592,16 @@ describe('Changing a tenant fee', () => {
         from: '2027-06-01',
       }),
     ).toEqual({ ok: false, reason: 'tenant_fee_not_found' })
+    await flatOwnedSince('2022-06-12')
+    expect(
+      await setTenantFee(deps(), flat, id, fee, {
+        amount: 2000,
+        from: '2026-12-01',
+      }),
+    ).toEqual({ ok: false, reason: 'tenant_fee_not_found' })
+    expect((await feesOf(id))[0]?.amounts).toEqual([
+      { validFrom: '2026-02-01', validTo: null, value: 1500 },
+    ])
   })
 
   test("A member can't change a tenant fee", async () => {
@@ -1660,6 +1670,17 @@ describe('Undoing a tenant fee change', () => {
       ok: false,
       reason: 'tenant_fee_not_found',
     })
+    const fee = await storeFee(id, 'parking', 'fixed', [
+      1500,
+      '2027-06-01',
+      null,
+    ])
+    await flatOwnedSince('2022-06-12')
+    expect(await undoTenantFee(deps(), flat, id, fee)).toEqual({
+      ok: false,
+      reason: 'tenant_fee_not_found',
+    })
+    expect(await feesOf(id)).toHaveLength(1)
   })
 })
 

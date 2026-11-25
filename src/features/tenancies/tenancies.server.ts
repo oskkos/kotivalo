@@ -872,7 +872,10 @@ export async function addTenantFee(
   return { ok: true, feeId }
 }
 
-/** The tenancy's fee, with the tenancy it must belong to, or a reason. */
+/**
+ * The tenancy's fee, with the tenancy it must belong to, or a reason: a
+ * tenancy that isn't the flat's is `tenant_fee_not_found` too.
+ */
 async function loadFee(
   deps: TenancyDeps,
   propertyId: string,
@@ -881,7 +884,7 @@ async function loadFee(
 ) {
   const tenancy = await deps.tenancies.get(tenancyId)
   if (tenancy?.propertyId !== propertyId) {
-    return { ok: false, failure: tenancyNotFound } as const
+    return { ok: false, failure: fail('tenant_fee_not_found') } as const
   }
   const fees = (await deps.tenancies.feesFor([tenancyId]))[tenancyId] ?? []
   const fee = fees.find((f) => f.id === feeId)
