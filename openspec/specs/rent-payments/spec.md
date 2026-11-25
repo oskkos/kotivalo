@@ -1,7 +1,7 @@
 # rent-payments Specification
 
 ## Purpose
-Rent received for a tenancy's months (CONCEPT.md §4.2): recording payments (several per month) and deleting a wrong one (owners only), a month's expected rent (by days in a month a tenancy starts or ends in) and status computed from the rent periods, the due day and the payments, never stored, the months not fully paid of this and last year, the month's payments page and the rent payments page by year with the rent received by payment date. This month's rent across the flats on the flats list: the summary of received and expected rent and a status chip on each card. Payments stay inside their tenancy. The year summary (#34) comes later.
+Rent received for a tenancy's months (CONCEPT.md §4.2): recording payments (several per month) and deleting a wrong one (owners only), a month's expected rent, the tenancy's rent and its tenant fees (each by days in a month a tenancy starts or ends in, with the breakdown on the month's payments page), and its status computed from the rent, fee and occupants periods, the due day and the payments, never stored, the months not fully paid of this and last year, the month's payments page and the rent payments page by year with the rent received by payment date. This month's rent across the flats on the flats list: the summary of received and expected rent and a status chip on each card. Payments stay inside their tenancy. The year summary (#34) comes later.
 ## Requirements
 ### Requirement: Recording a rent payment
 An owner of a flat SHALL be able to record that rent was paid for a month of a tenancy: the amount and the payment date. The form SHALL open from the rent card on the flat details page (this month) and from a month's payments page, and SHALL show the month and the tenant. The amount SHALL default to the month's expected rent still missing ("Expected rent of a month"), or to empty when the rent is not set, and SHALL be more than 0 and at most 100 000 €, with at most two decimals, written with a comma or a point (`rent_payment_amount_invalid`). The payment date SHALL default to today and SHALL NOT be in the future (`rent_payment_date_in_future`); it MAY be before the month, for rent paid in advance. The month SHALL be a month in which the tenancy runs (`rent_payment_month_outside_tenancy`). A month MAY have several payments, and their total MAY exceed the expected rent. The payment SHALL record the user who recorded it. A member SHALL NOT be able to record payments.
@@ -46,9 +46,9 @@ An owner SHALL be able to delete a recorded payment from the month's payments pa
 - **THEN** it is refused with the reason `sharing_owner_only`, and the payment stays
 
 ### Requirement: Expected rent of a month
-A month's expected rent for a tenancy SHALL be the tenancy's own rent in that month ("The rent of a tenancy"), in proportion to the days of the month the tenancy runs: the rent × the tenancy's days in the month ÷ the month's days, rounded to the nearest cent, halves up. For a month the tenancy runs in full it SHALL be the month's rent. When the tenancy has no rent in the month, the expected rent SHALL be unknown, and the month's status SHALL be *Rent not set*. When the tenant changes mid-month, each tenancy's part of the month SHALL use its own rent.
+A month's expected rent for a tenancy SHALL be the tenancy's own rent in that month ("The rent of a tenancy") and each of its tenant fees in that month ("Tenant fees are recorded as periods"), each in proportion to the days of the month the tenancy runs: the amount × the tenancy's days in the month ÷ the month's days, rounded to the nearest cent, halves up, for the rent and for each fee separately, and then added up. For a month the tenancy runs in full it SHALL be the month's rent and fees. The breakdown (the rent and each fee with its amount in the month) SHALL be kept with the expected rent. When the tenancy has no rent in the month, the expected rent SHALL be unknown, whatever its fees, and the month's status SHALL be *Rent not set*. When the tenant changes mid-month, each tenancy's part of the month SHALL use its own rent and fees.
 
-**No Playwright test:** a pure calculation from the tenancy's rent periods and dates; Vitest covers it, and the details page and the month's payments page show it in the browser tests of "The flat details page" and "The month's rent payments page".
+**No Playwright test:** a pure calculation from the tenancy's rent, fee and occupants periods and dates; Vitest covers it, and the details page and the month's payments page show it in the browser tests of "The flat details page" and "The month's rent payments page".
 
 #### Scenario: A full month
 - **WHEN** a tenancy runs from `2025-03-01` without an end, with the rent 89000 cents from `2025-03-01`
@@ -72,6 +72,18 @@ A month's expected rent for a tenancy SHALL be the tenancy's own rent in that mo
 
 #### Scenario: No rent set
 - **WHEN** a tenancy runs in `2026-11` and has no rent in that month
+- **THEN** the expected rent is unknown, and the month's status is *Rent not set*
+
+#### Scenario: The rent with the tenant fees
+- **WHEN** a tenancy runs from `2025-03-01` with the rent 89000 cents, two occupants, a water fee of 2200 cents per occupant and a parking fee of 1500 cents
+- **THEN** the expected rent of `2026-11` is 94900 cents: the rent 89000, water 4400 and parking 1500 cents
+
+#### Scenario: Fees by days in a partial month
+- **WHEN** a tenancy starts on `2026-11-15` with the rent 89000 cents, one occupant and a water fee of 2200 cents per occupant
+- **THEN** the expected rent of `2026-11` is 48640 cents: the rent 47467 and water 1173 cents (16 of 30 days each)
+
+#### Scenario: Fees without a rent
+- **WHEN** a tenancy has a parking fee of 1500 cents in `2026-11` and no rent in that month
 - **THEN** the expected rent is unknown, and the month's status is *Rent not set*
 
 ### Requirement: The rent status of a month
@@ -144,7 +156,7 @@ The months not fully paid of a flat on a given day SHALL be the months of its te
 - **THEN** November is not counted
 
 ### Requirement: The month's rent payments page
-Everyone with access to a flat SHALL be able to open a month's payments page for a tenancy from the rent card on the details page and from the rent payments page. It SHALL show the month, the tenant, the due date, the status, the expected rent, the total paid and the amount missing, and the payments with their amount, payment date and who recorded them. Owners SHALL see "Lisää maksu" and a delete button on each payment; members SHALL NOT.
+Everyone with access to a flat SHALL be able to open a month's payments page for a tenancy from the rent card on the details page and from the rent payments page. It SHALL show the month, the tenant, the due date, the status, the expected rent, the total paid and the amount missing, and the payments with their amount, payment date and who recorded them. When the tenancy has fees in the month, the page SHALL show the expected rent's breakdown: the rent and each fee with its amount, a per-occupant fee with the occupants and the amount per occupant, and a link to the Tenancy page. Owners SHALL see "Lisää maksu" and a delete button on each payment; members SHALL NOT. The payment form SHALL default to the amount missing of the expected rent with the fees, and say that the rent and the fees are recorded as one payment.
 
 #### Scenario: The month's payments
 - **WHEN** November has a payment of 50000 cents on `2026-11-04` recorded by Annika, and Jussi opens the month's payments page
@@ -153,6 +165,14 @@ Everyone with access to a flat SHALL be able to open a month's payments page for
 #### Scenario: A member sees the payments but can't change them
 - **WHEN** Jussi, a member of the flat, opens a month's payments page
 - **THEN** he sees the payments and no button to add or delete them
+
+#### Scenario: The breakdown of the rent and the fees
+- **WHEN** `Aino Koski`'s rent is 89000 cents, she has two occupants, a water fee of 2200 cents per occupant and a parking fee of 1500 cents, November has a payment of 50000 cents, and Annika opens November's payments page
+- **THEN** it shows the expected `949,00 €`, paid `500,00 €`, missing `449,00 €`, and the breakdown: rent `890,00 €`, `Vesimaksu` "2 × 22,00 €" `44,00 €` and `Autopaikka` `15,00 €`
+
+#### Scenario: The rent and the fees as one payment
+- **WHEN** November has no payments, and Annika chooses "Merkitse maksetuksi" for November with the same rent and fees
+- **THEN** the amount shows `949,00`, and saving it makes November "Maksettu"
 
 ### Requirement: The rent payments page
 Everyone with access to a flat SHALL be able to open its rent payments page from the flat details page. It SHALL show one year at a time, the current year first, with a choice of the current year and the earlier years in which a tenancy of the flat ran or rent was paid. For the chosen year it SHALL show the rent received in the year: the total of the payments of the flat's tenancies whose payment date is in that year, whatever month they are for. It SHALL list the months up to the current one in which a tenancy ran, newest first, each with its status and opening its payments page, whose Back returns to the chosen year; a month in which two tenancies ran SHALL be listed once per tenancy with the tenant's name. It SHALL warn about the year's months not fully paid ("Months not fully paid"), and say that the year summary does not assume them paid.
