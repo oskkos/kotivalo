@@ -26,12 +26,12 @@
 
 ## 5. Archiving in the UI
 
-- [ ] 5.1 fi, sv and en messages: *Arkistoi asunto*, *Palauta listalle*, the archive dialog, the band, *Arkistoidut asunnot (n)*, *Arkistoitu D.M.YYYY*, the notice "… arkistoitu" (translate skill, term-critic on the diff)
-- [ ] 5.2 `FlatDetailsPage.tsx`: the divider and *Arkistoi asunto* / *Palauta listalle* in the menu, `ArchivedBand`; `ArchiveDialog.tsx`; confirming navigates to `/` with the notice
-- [ ] 5.3 `PropertyList.tsx`: the archived section after the cards and below the first-run explanation, closed at first; `NavigationNotice` on the flats list
-- [ ] 5.4 Component tests: the band and the menu label for an archived flat, the archived section closed and opened, the first run with only archived flats
-- [ ] 5.5 Playwright tests in `e2e/archive-flat.spec.ts` for "Archiving a flat", "Archived flats on the flats list" and "Restoring an archived flat", and for the new scenarios of "Listing flats" and "First run without flats" (with `signIn`, `addFlat`, and sharing for the co-owner and member cases)
-- [ ] 5.6 CLAUDE.md "Current state": archiving a flat per user, the archived section, restoring; CONCEPT.md data model: `property_access.archived_at`
+- [x] 5.1 fi, sv and en messages: *Arkistoi asunto*, *Palauta listalle*, the archive dialog, the band, *Arkistoidut asunnot (n)*, *Arkistoitu D.M.YYYY*, the notice "… arkistoitu" (translate skill, term-critic on the diff)
+- [x] 5.2 `FlatDetailsPage.tsx`: the divider and *Arkistoi asunto* / *Palauta listalle* in the menu, `ArchivedBand`; `ArchiveDialog.tsx`; confirming navigates to `/` with the notice
+- [x] 5.3 `PropertyList.tsx`: the archived section after the cards and below the first-run explanation, closed at first; `NavigationNotice` on the flats list
+- [x] 5.4 Component tests: the band and the menu label for an archived flat, the archived section closed and opened, the first run with only archived flats
+- [x] 5.5 Playwright tests in `e2e/archive-flat.spec.ts` for "Archiving a flat", "Archived flats on the flats list" and "Restoring an archived flat", and for the new scenarios of "Listing flats" and "First run without flats" (with `signIn`, `addFlat`, and sharing for the co-owner and member cases)
+- [x] 5.6 CLAUDE.md "Current state": archiving a flat per user, the archived section, restoring; CONCEPT.md data model: `property_access.archived_at`
 
 ## 6. Deleting in the UI
 

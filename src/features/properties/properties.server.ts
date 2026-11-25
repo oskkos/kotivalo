@@ -7,6 +7,7 @@ import type { FileStorage } from '#/server/files/storage'
 import type { Logger } from '#/server/log/log'
 import {
   sortByStreetAddress,
+  type ArchivedProperty,
   type Property,
   type PropertyDetails,
 } from './property'
@@ -38,11 +39,6 @@ type Result<T> =
   | { ok: false; reason: Extract<AlertReason, `property_${string}`> }
 
 const notFound = { ok: false, reason: 'property_not_found' } as const
-
-/** A flat the user has archived, with the day (in Finland) they did. */
-export interface ArchivedProperty extends Property {
-  archivedOn: IsoDate
-}
 
 export interface PropertyLists {
   /** The flats the user hasn't archived, by street address. */

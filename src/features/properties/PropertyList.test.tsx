@@ -1,4 +1,4 @@
-import { render, screen, within } from '@testing-library/react'
+import { fireEvent, render, screen, within } from '@testing-library/react'
 import type { ReactNode } from 'react'
 import { describe, expect, test, vi } from 'vitest'
 import type { Property } from './property'
@@ -121,5 +121,59 @@ describe('Listing flats', () => {
     expect(screen.getByRole('listitem')).toHaveTextContent(
       'You 50% · Jussi 50%',
     )
+  })
+})
+
+describe('Archived flats on the flats list', () => {
+  const rantatie = {
+    ...flat('r', 'Rantatie 12 C 30'),
+    archivedOn: '2026-11-25',
+  }
+
+  test('The archived section opens to show the flat', () => {
+    render(
+      <PropertyList
+        properties={[flat('k', 'Kuusikuja 3 B 12')]}
+        archived={[rantatie]}
+      />,
+    )
+
+    const toggle = screen.getByRole('button', { name: 'Archived flats (1)' })
+    expect(toggle).toHaveAttribute('aria-expanded', 'false')
+    expect(screen.queryByText('Rantatie 12 C 30')).toBeNull()
+    expect(screen.getByText('1 flat')).toBeInTheDocument()
+
+    fireEvent.click(toggle)
+
+    expect(toggle).toHaveAttribute('aria-expanded', 'true')
+    const card = screen.getByRole('link', { name: /Rantatie 12 C 30/ })
+    expect(card).toHaveAttribute('href', '/properties/r')
+    expect(card).toHaveTextContent('Archived 25/11/2026')
+  })
+
+  test('No section without archived flats', () => {
+    render(<PropertyList properties={[flat('k', 'Kuusikuja 3 B 12')]} />)
+
+    expect(screen.queryByRole('button', { name: /Archived flats/ })).toBeNull()
+  })
+})
+
+describe('First run without flats', () => {
+  test('A user whose flats are all archived', () => {
+    render(
+      <PropertyList
+        properties={[]}
+        archived={[
+          { ...flat('k', 'Koivupolku 7 A 4'), archivedOn: '2026-11-25' },
+        ]}
+      />,
+    )
+
+    expect(
+      screen.getByRole('heading', { name: 'Add your first flat' }),
+    ).toBeInTheDocument()
+    expect(
+      screen.getByRole('button', { name: 'Archived flats (1)' }),
+    ).toBeInTheDocument()
   })
 })
