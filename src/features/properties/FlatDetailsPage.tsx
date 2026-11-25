@@ -41,6 +41,7 @@ import { chargeName } from '#/lib/charge-labels'
 import { m } from '#/paraglide/messages.js'
 import { colors, radii, shadows } from '#/theme/tokens'
 import { ArchiveDialog } from './ArchiveDialog'
+import { DeleteFlatDialog } from './DeleteFlatDialog'
 import type { FlatDetails } from './details.server'
 import { restoreProperty } from './functions'
 import { ownershipLine } from './ownership-line'
@@ -107,6 +108,7 @@ function Header(props: {
   archived: boolean
   onArchive: () => void
   onRestore: () => void
+  onDelete: () => void
 }) {
   const [anchor, setAnchor] = useState<HTMLElement | null>(null)
   const params = { propertyId: props.propertyId }
@@ -215,6 +217,17 @@ function Header(props: {
             {m.property_archive()}
           </MenuItem>
         )}
+        {props.owner ? (
+          <MenuItem
+            sx={{ color: 'error.main' }}
+            onClick={() => {
+              close()
+              props.onDelete()
+            }}
+          >
+            {m.property_delete()}
+          </MenuItem>
+        ) : null}
       </Menu>
     </Box>
   )
@@ -925,6 +938,7 @@ export function FlatDetailsPage(props: Props) {
   const [recording, setRecording] = useState(false)
   const [archiving, setArchiving] = useState(false)
   const [restoring, setRestoring] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   async function restore() {
     setRestoring(true)
@@ -950,6 +964,9 @@ export function FlatDetailsPage(props: Props) {
         }}
         onRestore={() => {
           void restore()
+        }}
+        onDelete={() => {
+          setDeleting(true)
         }}
       />
       <Stack
@@ -999,6 +1016,19 @@ export function FlatDetailsPage(props: Props) {
         <UsageCharges view={view} />
         <Latest view={view} />
       </Stack>
+      {deleting ? (
+        <DeleteFlatDialog
+          property={view.property}
+          open
+          onClose={() => {
+            setDeleting(false)
+          }}
+          onArchive={() => {
+            setDeleting(false)
+            setArchiving(true)
+          }}
+        />
+      ) : null}
       {archiving ? (
         <ArchiveDialog
           property={view.property}

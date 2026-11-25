@@ -352,6 +352,72 @@
   "property_card_shared_with_you": "delad med dig",
   "property_city": "Ort",
   "property_close": "Stäng",
+  "property_delete": "Ta bort bostaden",
+  "property_delete_address": "Bekräfta genom att skriva gatuadressen",
+  "property_delete_cancel": "Avbryt",
+  "property_delete_confirm": "Ta bort",
+  "property_delete_data_text": "{address} och alla dess uppgifter tas bort permanent. Det går inte att ångra. Om du vill behålla uppgifterna kan du arkivera bostaden.",
+  "property_delete_empty_text": "{address} tas bort permanent. Det går inte att ångra.",
+  "property_delete_loading": "Hämtar bostadens uppgifter",
+  "property_delete_losses": "Följande tas också bort:",
+  "property_delete_members": [
+    {
+      "declarations": [
+        "input count",
+        "input names",
+        "local countPlural = count: plural"
+      ],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Medlemmen förlorar sin åtkomst till bostaden: {names}",
+        "countPlural=other": "Medlemmarna förlorar sin åtkomst till bostaden: {names}"
+      }
+    }
+  ],
+  "property_delete_other_owners_names": "Andra ägare: {names}",
+  "property_delete_permanently": "Ta bort permanent",
+  "property_delete_receipts": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} kvitto",
+        "countPlural=other": "{count} kvitton"
+      }
+    }
+  ],
+  "property_delete_rent_payments": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} hyresbetalning",
+        "countPlural=other": "{count} hyresbetalningar"
+      }
+    }
+  ],
+  "property_delete_tenancies": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} hyresförhållande",
+        "countPlural=other": "{count} hyresförhållanden"
+      }
+    }
+  ],
+  "property_delete_title": "Ta bort bostaden?",
+  "property_delete_transactions": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} registrering",
+        "countPlural=other": "{count} registreringar"
+      }
+    }
+  ],
+  "property_deleted_notice": "{address} borttagen",
   "property_edit_page_title": "Redigera bostad – Kotivalo",
   "property_edit_title": "Redigera bostad",
   "property_floor_area": "Yta (m²)",

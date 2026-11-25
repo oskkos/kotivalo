@@ -352,6 +352,72 @@
   "property_card_shared_with_you": "shared with you",
   "property_city": "City",
   "property_close": "Close",
+  "property_delete": "Delete flat",
+  "property_delete_address": "Type the street address to confirm",
+  "property_delete_cancel": "Cancel",
+  "property_delete_confirm": "Delete",
+  "property_delete_data_text": "{address} and all its data will be deleted permanently. This can't be undone. To keep the data, archive the flat instead.",
+  "property_delete_empty_text": "{address} will be deleted permanently. This can't be undone.",
+  "property_delete_loading": "Loading the flat's data",
+  "property_delete_losses": "This also deletes:",
+  "property_delete_members": [
+    {
+      "declarations": [
+        "input count",
+        "input names",
+        "local countPlural = count: plural"
+      ],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "This member loses access to the flat: {names}",
+        "countPlural=other": "These members lose access to the flat: {names}"
+      }
+    }
+  ],
+  "property_delete_other_owners_names": "Other owners: {names}",
+  "property_delete_permanently": "Delete permanently",
+  "property_delete_receipts": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} receipt",
+        "countPlural=other": "{count} receipts"
+      }
+    }
+  ],
+  "property_delete_rent_payments": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} rent payment",
+        "countPlural=other": "{count} rent payments"
+      }
+    }
+  ],
+  "property_delete_tenancies": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} tenancy",
+        "countPlural=other": "{count} tenancies"
+      }
+    }
+  ],
+  "property_delete_title": "Delete the flat?",
+  "property_delete_transactions": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} entry",
+        "countPlural=other": "{count} entries"
+      }
+    }
+  ],
+  "property_deleted_notice": "{address} deleted",
   "property_edit_page_title": "Edit flat – Kotivalo",
   "property_edit_title": "Edit flat",
   "property_floor_area": "Floor area (m²)",
