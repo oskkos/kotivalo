@@ -61,6 +61,7 @@ const details = (over: Partial<FlatDetails> = {}): FlatDetails => ({
   },
   tenancyOccupants: {},
   tenancyFees: {},
+  usageCharges: [],
   amounts: { maintenance_charge: [] },
   financingCharges: [],
   treatments: [],
@@ -107,6 +108,56 @@ const renderPage = (view: FlatDetails) =>
   render(<FlatDetailsPage view={view} onChanged={() => Promise.resolve()} />)
 
 describe('The flat details page', () => {
+  test('The usage charges apart from the charges', () => {
+    renderPage(
+      details({
+        today: '2026-11-24',
+        tenancyOccupants: twoOccupants,
+        amounts: {
+          maintenance_charge: [
+            { validFrom: '2025-03-01', validTo: null, value: 21400 },
+          ],
+        },
+        usageCharges: [
+          {
+            id: 'water',
+            kind: 'water',
+            basis: 'per_occupant',
+            description: null,
+            periods: [{ validFrom: '2026-01-01', validTo: null, value: 2200 }],
+          },
+          {
+            id: 'parking',
+            kind: 'parking',
+            basis: 'fixed',
+            description: null,
+            periods: [{ validFrom: '2026-02-01', validTo: null, value: 1500 }],
+          },
+        ],
+      }),
+    )
+    const charges = screen.getByRole('region', { name: 'Charges' })
+    expect(charges).not.toHaveTextContent('Water charge')
+    const usage = screen.getByRole('region', { name: 'Usage charges' })
+    expect(usage).toHaveTextContent(
+      'Water charge€22.00/occupant · 2 occupants€44.00/month',
+    )
+    expect(usage).toHaveTextContent('Parking space€15.00/month')
+    expect(
+      within(usage).getByRole('link', { name: /Usage charges by month/ }),
+    ).toHaveAttribute('href', expect.stringContaining('/usage-charges/months'))
+  })
+
+  test('A flat without usage charges on the details page', () => {
+    renderPage(details())
+    const usage = screen.getByRole('region', { name: 'Usage charges' })
+    expect(usage).toHaveTextContent('The flat has no usage charges.')
+    expect(within(usage).getByRole('link', { name: 'Open' })).toHaveAttribute(
+      'href',
+      expect.stringContaining('/usage-charges'),
+    )
+  })
+
   test('The rent card includes the tenant fees', () => {
     renderPage(
       details({

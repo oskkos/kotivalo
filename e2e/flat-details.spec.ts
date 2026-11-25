@@ -9,6 +9,7 @@ import { accepted, ownerWithFlat } from './support/sharing'
 import { signIn, uniqueEmail, waitForHydration } from './support/sign-in'
 import { addFee, addTenant, aino, setOccupants } from './support/tenancies'
 import { logEntry } from './support/transactions'
+import { addUsageCharge } from './support/usage-charges'
 
 // The browser's language is English, so the app is in English. Months and
 // years are relative to today, so the tests don't age.
@@ -46,6 +47,33 @@ async function markPaid(page: Page, amount?: string) {
 }
 
 test.describe('The flat details page', () => {
+  test('The usage charges apart from the charges', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addUsageCharge(page, id, {
+      kind: 'Parking space',
+      amount: '15',
+      from: thisMonthStart,
+    })
+    await openDetails(page, id)
+    const usage = page.getByRole('region', { name: 'Usage charges' })
+    await expect(usage).toContainText('Parking space')
+    await expect(usage).toContainText('€15.00/month')
+    await expect(
+      page.getByRole('region', { name: 'Charges', exact: true }),
+    ).not.toContainText('Parking space')
+    await usage.getByRole('link', { name: /Usage charges by month/ }).click()
+    await expect(page).toHaveURL(/\/usage-charges\/months$/)
+  })
+
+  test('A flat without usage charges on the details page', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await openDetails(page, id)
+    const usage = page.getByRole('region', { name: 'Usage charges' })
+    await expect(usage).toContainText('The flat has no usage charges.')
+    await usage.getByRole('link', { name: 'Open' }).click()
+    await expect(page).toHaveURL(/\/usage-charges$/)
+  })
+
   test('The rent card includes the tenant fees', async ({ page }) => {
     const id = await ownerWithFlat(page)
     await addTenant(page, id, ainoDueFirst)

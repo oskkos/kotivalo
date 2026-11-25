@@ -25,6 +25,8 @@ import type {
   TransactionRepository,
   TransactionRow,
 } from '#/features/transactions/transaction.repository.server'
+import type { UsageChargePeriods } from '#/features/usage-charges/months'
+import type { UsageChargeRepository } from '#/features/usage-charges/usage-charge.repository.server'
 import { isoDateInFinland, type IsoDate } from '#/lib/dates'
 import type { PropertyRole } from '#/server/db/schema'
 import type { CardOwner } from './ownership-line'
@@ -44,6 +46,7 @@ export interface FlatDetailsDeps {
   amounts: RecurringAmountRepository
   payments: RentPaymentRepository
   transactions: TransactionRepository
+  usageCharges: UsageChargeRepository
   now: () => Date
 }
 
@@ -60,6 +63,8 @@ export interface FlatDetails extends RecurringAmounts {
   tenancyRents: RentsByTenancy
   /** Each tenancy's occupants periods, oldest first. */
   tenancyOccupants: OccupantsByTenancy
+  /** The flat's usage charges with their periods. */
+  usageCharges: UsageChargePeriods[]
   /** Each tenancy's tenant fees. */
   tenancyFees: FeesByTenancy
   /** Cents of financing charges added to the acquisition cost so far. */
@@ -82,13 +87,14 @@ export async function getFlatDetails(
   if (!role || !property) {
     return notFound
   }
-  const [shares, tenancies, amounts, payments, latestEntries] =
+  const [shares, tenancies, amounts, payments, latestEntries, usageCharges] =
     await Promise.all([
       deps.ownership.currentForUser(deps.userId),
       deps.tenancies.forProperty(propertyId),
       deps.amounts.forProperty(propertyId),
       deps.payments.forProperty(propertyId),
       deps.transactions.latest(propertyId, LATEST_ENTRIES),
+      deps.usageCharges.forProperty(propertyId),
     ])
   const today = isoDateInFinland(deps.now())
   const tenancyIds = tenancies.map((t) => t.id)
@@ -113,6 +119,7 @@ export async function getFlatDetails(
     tenancyRents,
     tenancyOccupants,
     tenancyFees,
+    usageCharges,
     ...amounts,
     capitalised: accumulatedCapitalised(
       amounts.financingCharges,

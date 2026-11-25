@@ -31,6 +31,11 @@ import type { Tenancy } from '#/features/tenancies/tenancy.repository.server'
 import { EntryRow } from '#/features/transactions/TransactionsPage'
 import { lastDayOfMonth } from '#/lib/dates'
 import { formatArea, formatDate, formatMoney } from '#/lib/format'
+import {
+  usageChargesOfMonth,
+  usageChargesOfYear,
+} from '#/features/usage-charges/months'
+import { chargeName } from '#/lib/charge-labels'
 import { m } from '#/paraglide/messages.js'
 import { colors, radii, shadows } from '#/theme/tokens'
 import type { FlatDetails } from './details.server'
@@ -628,6 +633,147 @@ function Amounts(props: { view: FlatDetails }) {
   )
 }
 
+function UsageCharges(props: { view: FlatDetails }) {
+  const { view } = props
+  const year = Number(view.today.slice(0, 4))
+  const tenancies = view.tenancies.map((t) => ({
+    validFrom: t.validFrom,
+    validTo: t.validTo,
+    occupants: view.tenancyOccupants[t.id] ?? [],
+  }))
+  const month = usageChargesOfMonth(
+    view.usageCharges,
+    tenancies,
+    view.today.slice(0, 7),
+  )
+  const rows = (month?.charges ?? []).filter((charge) => charge.cents > 0)
+  const soFar = usageChargesOfYear(
+    view.usageCharges,
+    tenancies,
+    year,
+    view.today,
+  ).total
+  return (
+    <Stack
+      component="section"
+      aria-labelledby="usage-charges-title"
+      sx={{ gap: 0.75 }}
+    >
+      <Stack
+        direction="row"
+        sx={{ justifyContent: 'space-between', alignItems: 'center' }}
+      >
+        <Typography
+          id="usage-charges-title"
+          variant="h3"
+          component="h2"
+          sx={{ fontSize: 15 }}
+        >
+          {m.usage_charges_title()}
+        </Typography>
+        <TextLink
+          to="/properties/$propertyId/usage-charges"
+          params={{ propertyId: view.property.id }}
+          sx={{
+            minHeight: 44,
+            display: 'flex',
+            alignItems: 'center',
+            fontWeight: 800,
+          }}
+        >
+          {m.flat_details_usage_charges_open()}
+        </TextLink>
+      </Stack>
+      <Box sx={{ ...card, overflow: 'hidden' }}>
+        {rows.length === 0 ? (
+          <Typography sx={{ px: 2, py: 1.5, fontSize: 14, fontWeight: 800 }}>
+            {m.usage_charges_none()}
+          </Typography>
+        ) : (
+          <Box component="dl" sx={{ m: 0, px: 2 }}>
+            {rows.map((row, i) => (
+              <Stack
+                key={row.id}
+                direction="row"
+                sx={{
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  gap: 1.5,
+                  minHeight: 48,
+                  py: 0.5,
+                  borderTop: i === 0 ? 'none' : `1px solid ${colors.divider}`,
+                }}
+              >
+                <Typography
+                  component="dt"
+                  sx={{
+                    fontSize: 14,
+                    fontWeight: 800,
+                    color: 'text.secondary',
+                  }}
+                >
+                  {chargeName(row)}
+                  {row.persons === null ? null : (
+                    <Box
+                      component="span"
+                      sx={{ display: 'block', fontSize: 12, fontWeight: 700 }}
+                    >
+                      {m.usage_charge_per_occupant_short({
+                        amount: formatMoney(row.perUnit),
+                        occupants: m.occupants_count({ persons: row.persons }),
+                      })}
+                    </Box>
+                  )}
+                </Typography>
+                <Typography
+                  component="dd"
+                  sx={{ m: 0, fontSize: 15, fontWeight: 900 }}
+                >
+                  {m.amounts_per_month({ amount: formatMoney(row.cents) })}
+                </Typography>
+              </Stack>
+            ))}
+          </Box>
+        )}
+        <TextLink
+          to="/properties/$propertyId/usage-charges/months"
+          params={{ propertyId: view.property.id }}
+          underline="none"
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 1.5,
+            minHeight: 60,
+            pl: 2,
+            pr: 1.5,
+            py: 1,
+            borderTop: `1px solid ${colors.cardBorder}`,
+            color: 'text.primary',
+          }}
+        >
+          <Stack sx={{ flex: 1, minWidth: 0 }}>
+            <Box component="span" sx={{ fontSize: 15, fontWeight: 900 }}>
+              {m.usage_charges_months_title()}
+            </Box>
+            {soFar > 0 ? (
+              <Box
+                component="span"
+                sx={{ fontSize: 12, fontWeight: 700, color: 'text.secondary' }}
+              >
+                {m.flat_details_charges_so_far({
+                  year: String(year),
+                  amount: formatMoney(soFar),
+                })}
+              </Box>
+            ) : null}
+          </Stack>
+          <Icon path={NEXT} size={18} />
+        </TextLink>
+      </Box>
+    </Stack>
+  )
+}
+
 function Latest(props: { view: FlatDetails }) {
   const { view } = props
   return (
@@ -754,6 +900,7 @@ export function FlatDetailsPage(props: Props) {
           />
         ) : null}
         <Amounts view={view} />
+        <UsageCharges view={view} />
         <Latest view={view} />
       </Stack>
       {recording && current && row ? (

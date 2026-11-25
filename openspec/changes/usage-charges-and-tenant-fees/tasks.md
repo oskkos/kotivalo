@@ -63,17 +63,17 @@
 
 ## 11. The usage charges page and forms
 
-- [ ] 11.1 Term bank: *käyttömaksu* (code `usageCharge`) with the translate skill and the term-critic's review
-- [ ] 11.2 `UsageChargesPage.tsx` and route `/properties/$propertyId/usage-charges`: charges in effect, ended ones, none, the occupants note, buttons for owners; component tests
-- [ ] 11.3 `UsageChargeForm.tsx` and routes `…/usage-charges/new` and `…/usage-charges/$usageChargeId`: kind, *Selite* for *Muu*, basis defaulting by kind, amount with today's occupants, date, the 7H row hint and the water entries warning; the change form with *Uusi summa* / *Päättyy*, history and undo; owners only; component tests
-- [ ] 11.4 fi, sv and en messages with the translate skill; `e2e/support/usage-charges.ts`: `addUsageCharge`; Playwright tests for "The usage charges page", "Adding a usage charge", "Changing a usage charge", "Undoing the latest usage charge change" and "Water charge entries are warned about"
+- [x] 11.1 Term bank: *käyttömaksu* (code `usageCharge`) with the translate skill and the term-critic's review
+- [x] 11.2 `UsageChargesPage.tsx` and route `/properties/$propertyId/usage-charges`: charges in effect, ended ones, none, the occupants note, buttons for owners; component tests
+- [x] 11.3 `UsageChargeForm.tsx` and routes `…/usage-charges/new` and `…/usage-charges/$usageChargeId`: kind, *Selite* for *Muu*, basis defaulting by kind, amount with today's occupants, date, the 7H row hint and the water entries warning; the change form with *Uusi summa* / *Päättyy*, history and undo; owners only; component tests
+- [x] 11.4 fi, sv and en messages with the translate skill; `e2e/support/usage-charges.ts`: `addUsageCharge`; Playwright tests for "The usage charges page", "Adding a usage charge", "Changing a usage charge", "Undoing the latest usage charge change" and "Water charge entries are warned about"
 
 ## 12. Usage charges by month and on the details page
 
-- [ ] 12.1 `UsageChargesByMonthPage.tsx` and route `…/usage-charges/months`: year choice, totals per charge, months with per-occupant detail and change marks, the note and link, none; component tests
-- [ ] 12.2 `details.server.ts` and `FlatDetailsPage.tsx`: the *Käyttömaksut* section below *Vastikkeet*, opening the usage charges page, and *Käyttömaksut kuukausittain* with this year's total; component tests
-- [ ] 12.3 Playwright tests for "The usage charges by month page" and the new scenarios of "The flat details page"
-- [ ] 12.4 CLAUDE.md "Current state" (usage charges, occupants, tenant fees, the expected rent with fees, the new e2e helpers) and `openspec/config.yaml` if it names anything changed
+- [x] 12.1 `UsageChargesByMonthPage.tsx` and route `…/usage-charges/months`: year choice, totals per charge, months with per-occupant detail and change marks, the note and link, none; component tests
+- [x] 12.2 `details.server.ts` and `FlatDetailsPage.tsx`: the *Käyttömaksut* section below *Vastikkeet*, opening the usage charges page, and *Käyttömaksut kuukausittain* with this year's total; component tests
+- [x] 12.3 Playwright tests for "The usage charges by month page" and the new scenarios of "The flat details page"
+- [x] 12.4 CLAUDE.md "Current state" (usage charges, occupants, tenant fees, the expected rent with fees, the new e2e helpers) and `openspec/config.yaml` if it names anything changed
 
 ## 13. Archive
 
