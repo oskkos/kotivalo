@@ -45,6 +45,6 @@ None.
     - The archive and delete dialogs, the band on the details page and the archived section on the list.
   - `components/`: the notice after navigating.
   - The rent summary and the new entry options read through `listForUser`, so they leave archived flats out without changes of their own (covered by tests).
-- **Logs:** `property.archived`, `property.restored`, `property.deleted` (ids only), `property.receipt_file_delete_failed` at `error`.
+- **Logs:** `property.archived`, `property.restored`, `property.deleted` (ids only), `property.receipt_delete_failed` at `error`.
 - **UI:** Design canvas section *Asunnon arkistointi ja poisto (#64)*: `AsuntoPoisto` (menu), `AsuntoPoistoJasen` (member's menu), `ArkistoiVahvista`, `AsunnotArkistoidut`, `AsuntoArkistoitu`, `PoistaTyhja`, `PoistaVahvista` and `PoistaEiVoi`. The blocked dialog on the canvas also shows the other owner's share and period; the spec names only the other owners, which is enough to explain the refusal.
 - **Messages:** menu items, dialogs, band, section and notices in fi, sv and en, and the reason `property_delete_other_owners`. *Arkistoida* is checked against the term bank with the translate skill.
