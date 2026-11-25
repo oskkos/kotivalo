@@ -222,7 +222,7 @@ describe('Housing company details of a flat', () => {
     await user.click(saveButton())
 
     expect(field('Business ID')).toHaveAccessibleDescription(
-      'A Business ID looks like 1234567-8 (seven digits, a hyphen and a check digit).',
+      'A Business ID looks like 1234567-1 (seven digits, a hyphen and a check digit).',
     )
     expect(save).not.toHaveBeenCalled()
   })

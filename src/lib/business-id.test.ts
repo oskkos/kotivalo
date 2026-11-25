@@ -1,4 +1,6 @@
 import { describe, expect, test } from 'vitest'
+import { m } from '#/paraglide/messages.js'
+import { locales } from '#/paraglide/runtime.js'
 import { isValidBusinessId } from './business-id'
 
 describe('Housing company details of a flat', () => {
@@ -24,5 +26,20 @@ describe('Housing company details of a flat', () => {
     expect(isValidBusinessId('abcdefg-0')).toBe(false)
     expect(isValidBusinessId(' 2345678-0')).toBe(false)
     expect(isValidBusinessId('')).toBe(false)
+  })
+})
+
+describe('isValidBusinessId', () => {
+  test('the example in the placeholder and the error is a valid Business ID', () => {
+    for (const locale of locales) {
+      for (const text of [
+        m.property_business_id_placeholder({}, { locale }),
+        m.reason_business_id_invalid({}, { locale }),
+      ]) {
+        const example = /\d{7}-\d/.exec(text)?.[0]
+        expect(example).toBeDefined()
+        expect(isValidBusinessId(example ?? '')).toBe(true)
+      }
+    }
   })
 })
