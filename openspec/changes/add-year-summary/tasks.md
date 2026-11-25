@@ -40,10 +40,11 @@
 
 ## 4. Form 7H terms
 
-- [ ] 4.1 Term bank, with the translate skill: *bruttovuokratulo*, *tuloutettu pääomavastike*, *muut kulut* and *henkilötunnus*.
+- [x] 4.1 Term bank, with the translate skill: *bruttovuokratulo*, *tuloutettu pääomavastike*, *muut kulut* and *henkilötunnus*.
   - The row names come from form 7H in Finnish and Swedish and from the Tax Administration's English instructions, with their sources in `i18n/sources.json`.
   - Check whether *vuosikorjaus*, *hoitovastike* and *vesimaksu* already match the form's wording.
-- [ ] 4.2 The term-critic's review of the term bank diff, and its findings fixed.
+  - Done: *bruttovuokratulo*, *muut kulut* and *henkilötunnus* added. *Tuloutettu pääomavastike* needs no entry of its own: it is `income_recognised` (*tuloutettu*, verified from row 2.3) with `financing_charge`, whose patterns accept *pääomavastike*. *Vuosikorjaus*, *hoitovastike* and *vesimaksu* already match rows 2.2 and 2.4.
+- [x] 4.2 The term-critic's review of the term bank diff, and its findings fixed.
 
 ## 5. The year summary on the server
 
