@@ -68,6 +68,14 @@
       // No per-version preview URLs: they would be public and use the
       // production database, bucket and email.
       "preview_urls": false,
+      // The Worker is served on its own domain only. Wrangler creates the DNS
+      // records and certificates for a custom domain on deploy, so don't add
+      // records for these names by hand.
+      "workers_dev": false,
+      "routes": [
+        { "pattern": "kotivalo.app", "custom_domain": true },
+        { "pattern": "www.kotivalo.app", "custom_domain": true },
+      ],
       "d1_databases": [
         {
           "binding": "DB",
