@@ -116,6 +116,12 @@ export const properties = sqliteTable('properties', {
   roomCount: integer('room_count', { mode: 'number' }).notNull(),
   /** In tenths of m²: 485 = 48,5 m². */
   floorArea: tenths('floor_area').notNull(),
+  /** The housing company's name, e.g. "As Oy Kuusikuja 3". Form 7H asks for it. */
+  housingCompanyName: text('housing_company_name'),
+  /** The housing company's Business ID (Y-tunnus), "2345678-0". */
+  businessId: text('business_id'),
+  /** The apartment number, e.g. "B 12". */
+  apartmentNumber: text('apartment_number'),
   createdAt: instant('created_at').notNull(),
   updatedAt: instant('updated_at').notNull(),
 })

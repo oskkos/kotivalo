@@ -1,7 +1,7 @@
 ## 1. Schema and migration
 
-- [ ] 1.1 Add the nullable `housing_company_name`, `business_id` and `apartment_number` text columns to `properties` in `src/server/db/schema.ts`, with comments
-- [ ] 1.2 Run `pnpm db:generate`, check the SQL only adds the three columns, commit the migration, and apply it with `pnpm db:migrate:local`
+- [x] 1.1 Add the nullable `housing_company_name`, `business_id` and `apartment_number` text columns to `properties` in `src/server/db/schema.ts`, with comments
+- [x] 1.2 Run `pnpm db:generate`, check the SQL only adds the three columns, commit the migration, and apply it with `pnpm db:migrate:local`
 
 ## 2. Business ID check, schemas and repository
 
