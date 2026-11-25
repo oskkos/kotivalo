@@ -84,7 +84,7 @@
   - not found, and no share
 - [x] 7.2 The copy buttons: `navigator.clipboard.writeText` with `amountForCopy` and `shareForCopy`, an `aria-label` naming the value, the notice "Kopioitu: <value>", and on failure a notice plus `clientLog.warn('year_summary.copy_failed')` without the value.
 - [x] 7.3 fi, sv and en messages with the translate skill; component tests, including the copy failure.
-- [ ] 7.4 Playwright tests:
+- [x] 7.4 Playwright tests:
   - "The form 7H page of a flat"
   - "Flat details for form 7H": "Missing housing company details"
   - "Checks in the year summary": "A month not paid", with the rent month left without a payment in the current year

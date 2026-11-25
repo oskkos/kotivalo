@@ -8,6 +8,7 @@ import ButtonBase from '@mui/material/ButtonBase'
 import IconButton from '@mui/material/IconButton'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
+import { createLink } from '@tanstack/react-router'
 import { sortByStreetAddress } from '#/features/properties/property'
 import {
   formatDayMonth,
@@ -25,8 +26,6 @@ import type { FlatCard, YearSummaryView } from './view'
 interface Props {
   view: YearSummaryView
   onYear: (year: number) => void
-  /** The address of a flat's form 7H page for the year. */
-  flatHref: (propertyId: string, year: number) => string
   bottomNav: React.ReactNode
 }
 
@@ -164,12 +163,16 @@ function Figure(props: { label: string; amount: number }) {
   )
 }
 
-function Card(props: { card: FlatCard; href: string }) {
+const CardLink = createLink(ButtonBase)
+
+function Card(props: { card: FlatCard; year: number }) {
   const { card } = props
   const missing = card.housingCompanyName === null && card.businessId === null
   return (
-    <ButtonBase
-      href={props.href}
+    <CardLink
+      to="/year-summary/$propertyId"
+      params={{ propertyId: card.propertyId }}
+      search={{ year: props.year }}
       sx={{
         display: 'flex',
         flexDirection: 'column',
@@ -232,7 +235,7 @@ function Card(props: { card: FlatCard; href: string }) {
           ))}
         </Box>
       ) : null}
-    </ButtonBase>
+    </CardLink>
   )
 }
 
@@ -375,11 +378,7 @@ export function YearSummaryPage(props: Props) {
               sx={{ gap: 1.25 }}
             >
               {flats.map((card) => (
-                <Card
-                  key={card.propertyId}
-                  card={card}
-                  href={props.flatHref(card.propertyId, view.year)}
-                />
+                <Card key={card.propertyId} card={card} year={view.year} />
               ))}
             </Stack>
             <Stack

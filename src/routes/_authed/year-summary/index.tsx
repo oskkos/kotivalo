@@ -23,10 +23,6 @@ function YearSummaryRoute() {
       onYear={(year) => {
         void router.navigate({ to: '/year-summary', search: { year } })
       }}
-      // A plain link until the form 7H page's route lands.
-      flatHref={(propertyId, year) =>
-        `/year-summary/${encodeURIComponent(propertyId)}?year=${String(year)}`
-      }
       bottomNav={<BottomNav current="year-summary" />}
     />
   )
