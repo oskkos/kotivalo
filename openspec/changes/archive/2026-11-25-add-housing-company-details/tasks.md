@@ -25,4 +25,4 @@
 
 ## 5. Archive
 
-- [ ] 5.1 Archive the change with `openspec archive add-housing-company-details` as the PR's last commit
+- [x] 5.1 Archive the change with `openspec archive add-housing-company-details` as the PR's last commit
