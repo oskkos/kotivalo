@@ -14,6 +14,7 @@ import {
 } from './support/sharing'
 import { signIn, uniqueEmail, waitForHydration } from './support/sign-in'
 import { addTenant, aino } from './support/tenancies'
+import { addDocument, pdfFile } from './support/documents'
 import { logEntry, pdfReceipt } from './support/transactions'
 
 // The browser's language is English, so the app is in English.
@@ -202,6 +203,21 @@ test.describe('Confirming the deletion of a flat', () => {
     await expect(dialog).toContainText('1 rent payment')
     await expect(dialog).toContainText('1 entry')
     await expect(dialog).toContainText('1 receipt')
+  })
+
+  test('The confirmation counts documents', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addDocument(page, id, { file: pdfFile('a.pdf') })
+    await addDocument(page, id, { file: pdfFile('b.pdf') })
+
+    const dialog = await openDelete(page, id)
+
+    await expect(dialog).toContainText('2 documents')
+    await expect(
+      dialog.getByRole('textbox', {
+        name: 'Type the street address to confirm',
+      }),
+    ).toBeVisible()
   })
 
   test('Deleting waits for the street address', async ({ page }) => {
