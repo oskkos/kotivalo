@@ -263,6 +263,19 @@
   "not_found_home": "Go to the home page",
   "not_found_text": "There is no page at this address. Check the address or go back to the home page.",
   "not_found_title": "Page not found",
+  "occupants_count": [
+    {
+      "declarations": [
+        "input persons",
+        "local personsPlural = persons: plural"
+      ],
+      "selectors": ["personsPlural"],
+      "match": {
+        "personsPlural=one": "{persons} occupant",
+        "personsPlural=other": "{persons} occupants"
+      }
+    }
+  ],
   "offline_body": "Kotivalo needs a network connection. Check your connection and try again.",
   "offline_retry": "Try again",
   "offline_title": "No connection",
@@ -486,6 +499,10 @@
   "reason_unexpected": "Try again in a moment.",
   "reason_unexpected_title": "Something went wrong",
   "rent_month_back_to_payments": "Back to rent payments",
+  "rent_month_breakdown": "The rent and the fees",
+  "rent_month_breakdown_link": "The fees on the tenancy page",
+  "rent_month_breakdown_per_occupant": "{persons} × {amount}",
+  "rent_month_breakdown_rent": "Rent",
   "rent_month_delete_label": "Delete the payment of {amount}, {date}",
   "rent_month_due": "Due {date}",
   "rent_month_expected": "Rent",
@@ -528,6 +545,7 @@
   "rent_payment_delete_text": "The payment of {amount}, paid {date}, will be deleted. You can record it again with the right details.",
   "rent_payment_delete_title": "Delete the payment?",
   "rent_payment_dialog_title": "{rent} paid",
+  "rent_payment_fees_hint": "The rent and the fees on top of the rent are recorded as one payment.",
   "rent_payment_save": "Save",
   "rent_payments_empty": "Rent payments are recorded once the flat has a tenant.",
   "rent_payments_months": "Months",
@@ -675,6 +693,7 @@
   "tenancy_cancel_title": "Cancel the ending?",
   "tenancy_card_details": "{contract} · from {date}",
   "tenancy_card_details_due": "{contract} · from {date} · due on day {day} of the month",
+  "tenancy_card_fees": "+ fees {amount}",
   "tenancy_card_let": "Let",
   "tenancy_card_starts": "Vacant · new tenant from {date}",
   "tenancy_card_vacant": "Vacant",

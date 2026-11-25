@@ -263,6 +263,19 @@
   "not_found_home": "Till startsidan",
   "not_found_text": "Det finns ingen sida på adressen. Kontrollera adressen eller gå tillbaka till startsidan.",
   "not_found_title": "Sidan hittades inte",
+  "occupants_count": [
+    {
+      "declarations": [
+        "input persons",
+        "local personsPlural = persons: plural"
+      ],
+      "selectors": ["personsPlural"],
+      "match": {
+        "personsPlural=one": "{persons} boende",
+        "personsPlural=other": "{persons} boende"
+      }
+    }
+  ],
   "offline_body": "Kotivalo behöver en nätverksanslutning. Kontrollera anslutningen och försök igen.",
   "offline_retry": "Försök igen",
   "offline_title": "Ingen nätverksanslutning",
@@ -486,6 +499,10 @@
   "reason_unexpected": "Försök igen om en stund.",
   "reason_unexpected_title": "Något gick fel",
   "rent_month_back_to_payments": "Tillbaka till hyresbetalningarna",
+  "rent_month_breakdown": "Specifikation av hyran och avgifterna",
+  "rent_month_breakdown_link": "Avgifterna på sidan för hyresförhållandet",
+  "rent_month_breakdown_per_occupant": "{persons} × {amount}",
+  "rent_month_breakdown_rent": "Hyra",
   "rent_month_delete_label": "Ta bort betalningen på {amount}, {date}",
   "rent_month_due": "Förfallodag {date}",
   "rent_month_expected": "Hyra",
@@ -528,6 +545,7 @@
   "rent_payment_delete_text": "Betalningen på {amount}, betald {date}, tas bort. Du kan registrera den på nytt med rätt uppgifter.",
   "rent_payment_delete_title": "Ta bort betalningen?",
   "rent_payment_dialog_title": "{rent} betald",
+  "rent_payment_fees_hint": "Hyran och avgifterna utöver hyran registreras som en betalning.",
   "rent_payment_save": "Spara",
   "rent_payments_empty": "Hyresbetalningar registreras när bostaden har en hyresgäst.",
   "rent_payments_months": "Månader",
@@ -675,6 +693,7 @@
   "tenancy_cancel_title": "Ångra upphörandet?",
   "tenancy_card_details": "{contract} · från {date}",
   "tenancy_card_details_due": "{contract} · från {date} · förfallodag den {day} i månaden",
+  "tenancy_card_fees": "+ avgifter {amount}",
   "tenancy_card_let": "Uthyrd",
   "tenancy_card_starts": "Ledig · ny hyresgäst från {date}",
   "tenancy_card_vacant": "Ledig",

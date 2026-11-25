@@ -35,6 +35,8 @@ export interface RecordPaymentDialogProps {
   month: string
   /** Cents still missing; undefined when no rent is set. */
   missing: number | undefined
+  /** The month has fees with the rent: they are paid together. */
+  withFees?: boolean
   today: string
   open: boolean
   onClose: () => void
@@ -128,6 +130,11 @@ export function RecordPaymentDialog(props: RecordPaymentDialogProps) {
                     label={m.rent_payment_amount()}
                     slotProps={{ htmlInput: { inputMode: 'decimal' } }}
                   />
+                  {props.withFees ? (
+                    <Typography variant="body2" color="text.secondary">
+                      {m.rent_payment_fees_hint()}
+                    </Typography>
+                  ) : null}
                   {missing !== undefined && missing > 0 ? (
                     <Typography variant="body2" color="text.secondary">
                       {m.rent_payment_amount_hint({

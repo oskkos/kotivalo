@@ -7,7 +7,7 @@ import {
 } from './support/amounts'
 import { accepted, ownerWithFlat } from './support/sharing'
 import { signIn, uniqueEmail, waitForHydration } from './support/sign-in'
-import { addTenant, aino } from './support/tenancies'
+import { addFee, addTenant, aino, setOccupants } from './support/tenancies'
 import { logEntry } from './support/transactions'
 
 // The browser's language is English, so the app is in English. Months and
@@ -46,6 +46,20 @@ async function markPaid(page: Page, amount?: string) {
 }
 
 test.describe('The flat details page', () => {
+  test('The rent card includes the tenant fees', async ({ page }) => {
+    const id = await ownerWithFlat(page)
+    await addTenant(page, id, ainoDueFirst)
+    const start = ainoDueFirst.start
+    await addFee(page, { kind: 'Water charge', amount: '22', from: start })
+    await addFee(page, { kind: 'Parking space', amount: '15', from: start })
+    await setOccupants(page, '2', start)
+    await openDetails(page, id)
+    await expect(rentCard(page)).toContainText('€949.00')
+    const tenancy = page.getByRole('link', { name: /Aino Koski/ })
+    await expect(tenancy).toContainText('€890.00/month')
+    await expect(tenancy).toContainText('+ fees €59.00')
+  })
+
   test("The rent card shows this month's status", async ({ page }) => {
     const id = await ownerWithFlat(page)
     await addTenant(page, id, ainoDueFirst)

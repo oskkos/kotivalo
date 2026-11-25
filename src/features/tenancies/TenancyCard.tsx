@@ -7,10 +7,15 @@ import Link from '@mui/material/Link'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { createLink } from '@tanstack/react-router'
-import { periodOn, type Period } from '#/features/recurring-amounts/periods'
+import {
+  monthOf,
+  periodOn,
+  type Period,
+} from '#/features/recurring-amounts/periods'
 import { formatDate, formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 import { colors, radii } from '#/theme/tokens'
+import { feeInMonth, type FeeOfTenancy } from './fees'
 import { contractShortLabel } from './labels'
 import { initials } from './TenancyPage'
 import type { Tenancy } from './tenancy.repository.server'
@@ -27,6 +32,10 @@ export function TenancyCard(props: {
   rents?: readonly Period<number>[]
   /** Today, for the rent in effect. */
   today?: string
+  /** The tenancy's occupants periods, to show today's occupants. */
+  occupants?: readonly Period<number>[]
+  /** The tenancy's fees, to show their sum this month. */
+  fees?: readonly FeeOfTenancy[]
 }) {
   const { tenancy, rents, today } = props
   // The rent today, or the first rent of a tenancy that starts later.
@@ -41,6 +50,20 @@ export function TenancyCard(props: {
     rents && day !== undefined
       ? rents.find((p) => p.validFrom > day)
       : undefined
+  const persons =
+    props.occupants && day !== undefined
+      ? periodOn(props.occupants, day)?.value
+      : undefined
+  const feesThisMonth =
+    tenancy && props.fees && day !== undefined
+      ? props.fees.reduce(
+          (sum, fee) =>
+            sum +
+            (feeInMonth(fee, props.occupants ?? [], tenancy, monthOf(day)) ??
+              0),
+          0,
+        )
+      : 0
   return (
     <CardLink
       to="/properties/$propertyId/tenancy"
@@ -97,6 +120,9 @@ export function TenancyCard(props: {
                   contract: contractShortLabel[tenancy.contractType](),
                   date: formatDate(tenancy.validFrom),
                 })}
+            {persons === undefined
+              ? ''
+              : ` · ${m.occupants_count({ persons })}`}
           </Typography>
         ) : null}
       </Stack>
@@ -114,6 +140,14 @@ export function TenancyCard(props: {
                 date: formatDate(next.validFrom),
                 amount: formatMoney(next.value),
               })}
+            </Typography>
+          ) : null}
+          {feesThisMonth > 0 ? (
+            <Typography
+              variant="body2"
+              sx={{ fontSize: 12, fontWeight: 800, color: 'text.secondary' }}
+            >
+              {m.tenancy_card_fees({ amount: formatMoney(feesThisMonth) })}
             </Typography>
           ) : null}
         </Stack>

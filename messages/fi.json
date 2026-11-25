@@ -263,6 +263,19 @@
   "not_found_home": "Etusivulle",
   "not_found_text": "Osoitteessa ei ole sivua. Tarkista osoite tai palaa etusivulle.",
   "not_found_title": "Sivua ei löydy",
+  "occupants_count": [
+    {
+      "declarations": [
+        "input persons",
+        "local personsPlural = persons: plural"
+      ],
+      "selectors": ["personsPlural"],
+      "match": {
+        "personsPlural=one": "{persons} asukas",
+        "personsPlural=other": "{persons} asukasta"
+      }
+    }
+  ],
   "offline_body": "Kotivalo tarvitsee verkkoyhteyden. Tarkista yhteys ja yritä uudelleen.",
   "offline_retry": "Yritä uudelleen",
   "offline_title": "Ei verkkoyhteyttä",
@@ -486,6 +499,10 @@
   "reason_unexpected": "Yritä uudelleen hetken kuluttua.",
   "reason_unexpected_title": "Jokin meni pieleen",
   "rent_month_back_to_payments": "Takaisin vuokranmaksuihin",
+  "rent_month_breakdown": "Vuokran ja maksujen erittely",
+  "rent_month_breakdown_link": "Maksut vuokrasuhteen sivulla",
+  "rent_month_breakdown_per_occupant": "{persons} × {amount}",
+  "rent_month_breakdown_rent": "Vuokra",
   "rent_month_delete_label": "Poista maksu {amount}, {date}",
   "rent_month_due": "Eräpäivä {date}",
   "rent_month_expected": "Vuokra",
@@ -528,6 +545,7 @@
   "rent_payment_delete_text": "Maksu {amount}, maksettu {date}, poistetaan. Voit kirjata sen uudelleen oikeilla tiedoilla.",
   "rent_payment_delete_title": "Poistetaanko maksu?",
   "rent_payment_dialog_title": "{rent} maksettu",
+  "rent_payment_fees_hint": "Vuokra ja maksut vuokran lisäksi kirjataan yhtenä maksuna.",
   "rent_payment_save": "Tallenna",
   "rent_payments_empty": "Vuokranmaksut kirjataan, kun asunnolla on vuokralainen.",
   "rent_payments_months": "Kuukaudet",
@@ -675,6 +693,7 @@
   "tenancy_cancel_title": "Perutaanko päättyminen?",
   "tenancy_card_details": "{contract} · {date} alkaen",
   "tenancy_card_details_due": "{contract} · {date} alkaen · eräpäivä kuun {day}.",
+  "tenancy_card_fees": "+ maksut {amount}",
   "tenancy_card_let": "Vuokrattu",
   "tenancy_card_starts": "Vapaa · uusi vuokralainen {date} alkaen",
   "tenancy_card_vacant": "Vapaa",

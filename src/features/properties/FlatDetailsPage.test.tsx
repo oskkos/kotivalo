@@ -81,10 +81,51 @@ const details = (over: Partial<FlatDetails> = {}): FlatDetails => ({
   ...over,
 })
 
+const feesFixture = {
+  t1: [
+    {
+      id: 'water',
+      kind: 'water' as const,
+      basis: 'per_occupant' as const,
+      description: null,
+      amounts: [{ validFrom: '2025-03-01', validTo: null, value: 2200 }],
+    },
+    {
+      id: 'parking',
+      kind: 'parking' as const,
+      basis: 'fixed' as const,
+      description: null,
+      amounts: [{ validFrom: '2025-03-01', validTo: null, value: 1500 }],
+    },
+  ],
+}
+const twoOccupants = {
+  t1: [{ validFrom: '2025-03-01', validTo: null, value: 2 }],
+}
+
 const renderPage = (view: FlatDetails) =>
   render(<FlatDetailsPage view={view} onChanged={() => Promise.resolve()} />)
 
 describe('The flat details page', () => {
+  test('The rent card includes the tenant fees', () => {
+    renderPage(
+      details({
+        today: '2026-11-24',
+        tenancyFees: feesFixture,
+        tenancyOccupants: twoOccupants,
+      }),
+    )
+    const card = screen.getByRole('region', { name: 'November rent' })
+    expect(card).toHaveTextContent('€949.00')
+    expect(
+      within(card).queryByRole('list', { name: 'The rent and the fees' }),
+    ).toBeNull()
+    const tenancy = screen.getByRole('link', { name: /Aino Koski/ })
+    expect(tenancy).toHaveTextContent('€890.00/month')
+    expect(tenancy).toHaveTextContent('+ fees €59.00')
+    expect(tenancy).toHaveTextContent('2 occupants')
+  })
+
   test('shows the flat, the late rent and the one month not fully paid', () => {
     renderPage(details())
     expect(

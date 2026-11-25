@@ -114,106 +114,110 @@ describe('Expected rent of a month', () => {
   })
 })
 
-describe('Expected rent of a month with the tenant fees', () => {
-  const water: FeeOfTenancy = {
-    id: 'water',
-    kind: 'water',
-    basis: 'per_occupant',
-    description: null,
-    amounts: rent(['2025-03-01', null, 2200]),
-  }
-  const parking: FeeOfTenancy = {
-    id: 'parking',
-    kind: 'parking',
-    basis: 'fixed',
-    description: null,
-    amounts: rent(['2025-03-01', null, 1500]),
-  }
-  const amounts = (
-    fees: FeeOfTenancy[],
-    occupants = rent(['2025-03-01', null, 2]),
-    rents = rent(['2025-03-01', null, 89000]),
-  ) => ({ rent: rents, occupants, fees })
-
-  test('The rent with the tenant fees', () => {
-    const expected = expectedRent(amounts([water, parking]), aino, '2026-11')
-    expect(expected?.total).toBe(94900)
-    expect(expected?.parts).toEqual([
-      { type: 'rent', amount: 89000 },
-      {
-        type: 'fee',
-        feeId: 'water',
-        kind: 'water',
-        description: null,
-        persons: 2,
-        amount: 4400,
-      },
-      {
-        type: 'fee',
-        feeId: 'parking',
-        kind: 'parking',
-        description: null,
-        persons: null,
-        amount: 1500,
-      },
-    ])
-  })
-
-  test('Fees by days in a partial month', () => {
-    const started = expectedRent(
-      amounts(
-        [{ ...water, amounts: rent(['2026-11-15', null, 2200]) }],
-        rent(['2026-11-15', null, 1]),
-        rent(['2026-11-15', null, 89000]),
-      ),
-      { ...aino, validFrom: '2026-11-15' },
-      '2026-11',
-    )
-    expect(started?.total).toBe(48640)
-    expect(started?.parts.map((part) => part.amount)).toEqual([47467, 1173])
-  })
-
-  test('Fees without a rent', () => {
-    expect(expectedRent(amounts([parking], [], []), aino, '2026-11')).toBeNull()
-    const [row] = rentMonths({
-      tenancies: [aino],
-      rents: {},
-      fees: { aino: [parking] },
-      payments: [],
-      from: '2026-11',
-      to: '2026-11',
-      today: '2026-11-22',
-    })
-    expect(row.status).toEqual({ kind: 'rent_not_set' })
-  })
-
-  test('an ended fee and a fee not yet started add nothing', () => {
-    const ended = {
-      ...parking,
-      amounts: rent(
-        ['2025-03-01', '2026-10-31', 1500],
-        ['2026-11-01', null, 0],
-      ),
+describe('with the tenant fees', () => {
+  describe('Expected rent of a month', () => {
+    const water: FeeOfTenancy = {
+      id: 'water',
+      kind: 'water',
+      basis: 'per_occupant',
+      description: null,
+      amounts: rent(['2025-03-01', null, 2200]),
     }
-    const later = { ...parking, amounts: rent(['2027-01-01', null, 1500]) }
-    expect(
-      expectedRent(amounts([ended, later]), aino, '2026-11')?.parts,
-    ).toEqual([{ type: 'rent', amount: 89000 }])
-  })
+    const parking: FeeOfTenancy = {
+      id: 'parking',
+      kind: 'parking',
+      basis: 'fixed',
+      description: null,
+      amounts: rent(['2025-03-01', null, 1500]),
+    }
+    const amounts = (
+      fees: FeeOfTenancy[],
+      occupants = rent(['2025-03-01', null, 2]),
+      rents = rent(['2025-03-01', null, 89000]),
+    ) => ({ rent: rents, occupants, fees })
 
-  test('the status reads the total', () => {
-    const [row] = rentMonths({
-      tenancies: [aino],
-      rents: { aino: rent(['2025-03-01', null, 89000]) },
-      occupants: { aino: rent(['2025-03-01', null, 2]) },
-      fees: { aino: [water, parking] },
-      payments: [pay('2026-11', 89000, '2026-11-03')],
-      from: '2026-11',
-      to: '2026-11',
-      today: '2026-11-22',
+    test('The rent with the tenant fees', () => {
+      const expected = expectedRent(amounts([water, parking]), aino, '2026-11')
+      expect(expected?.total).toBe(94900)
+      expect(expected?.parts).toEqual([
+        { type: 'rent', amount: 89000 },
+        {
+          type: 'fee',
+          feeId: 'water',
+          kind: 'water',
+          description: null,
+          persons: 2,
+          amount: 4400,
+        },
+        {
+          type: 'fee',
+          feeId: 'parking',
+          kind: 'parking',
+          description: null,
+          persons: null,
+          amount: 1500,
+        },
+      ])
     })
-    expect(row.expected).toBe(94900)
-    expect(row.status).toEqual({ kind: 'partly_paid', missing: 5900 })
+
+    test('Fees by days in a partial month', () => {
+      const started = expectedRent(
+        amounts(
+          [{ ...water, amounts: rent(['2026-11-15', null, 2200]) }],
+          rent(['2026-11-15', null, 1]),
+          rent(['2026-11-15', null, 89000]),
+        ),
+        { ...aino, validFrom: '2026-11-15' },
+        '2026-11',
+      )
+      expect(started?.total).toBe(48640)
+      expect(started?.parts.map((part) => part.amount)).toEqual([47467, 1173])
+    })
+
+    test('Fees without a rent', () => {
+      expect(
+        expectedRent(amounts([parking], [], []), aino, '2026-11'),
+      ).toBeNull()
+      const [row] = rentMonths({
+        tenancies: [aino],
+        rents: {},
+        fees: { aino: [parking] },
+        payments: [],
+        from: '2026-11',
+        to: '2026-11',
+        today: '2026-11-22',
+      })
+      expect(row.status).toEqual({ kind: 'rent_not_set' })
+    })
+
+    test('an ended fee and a fee not yet started add nothing', () => {
+      const ended = {
+        ...parking,
+        amounts: rent(
+          ['2025-03-01', '2026-10-31', 1500],
+          ['2026-11-01', null, 0],
+        ),
+      }
+      const later = { ...parking, amounts: rent(['2027-01-01', null, 1500]) }
+      expect(
+        expectedRent(amounts([ended, later]), aino, '2026-11')?.parts,
+      ).toEqual([{ type: 'rent', amount: 89000 }])
+    })
+
+    test('the status reads the total', () => {
+      const [row] = rentMonths({
+        tenancies: [aino],
+        rents: { aino: rent(['2025-03-01', null, 89000]) },
+        occupants: { aino: rent(['2025-03-01', null, 2]) },
+        fees: { aino: [water, parking] },
+        payments: [pay('2026-11', 89000, '2026-11-03')],
+        from: '2026-11',
+        to: '2026-11',
+        today: '2026-11-22',
+      })
+      expect(row.expected).toBe(94900)
+      expect(row.status).toEqual({ kind: 'partly_paid', missing: 5900 })
+    })
   })
 })
 
