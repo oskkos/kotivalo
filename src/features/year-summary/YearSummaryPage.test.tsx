@@ -1,10 +1,28 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import type { ReactNode } from 'react'
 import { describe, expect, test, vi } from 'vitest'
 import type { FlatCard, YearSummaryView } from './view'
 import { YearSummaryPage } from './YearSummaryPage'
 
-// jsdom's browser language is English.
+// jsdom's browser language is English. Links render as plain anchors with
+// the address the router would build; the router isn't under test here.
+vi.mock('@tanstack/react-router', () => ({
+  createLink:
+    () =>
+    (props: {
+      children: ReactNode
+      to: string
+      params: { propertyId: string }
+      search: { year: number }
+    }) => (
+      <a
+        href={`${props.to.replace('$propertyId', props.params.propertyId)}?year=${String(props.search.year)}`}
+      >
+        {props.children}
+      </a>
+    ),
+}))
 const card = (over: Partial<FlatCard> = {}): FlatCard => ({
   propertyId: 'kuusikuja',
   streetAddress: 'Kuusikuja 3 B 12',
@@ -27,14 +45,7 @@ const view = (over: Partial<YearSummaryView> = {}): YearSummaryView => ({
 })
 
 function renderPage(v: YearSummaryView, onYear = vi.fn()) {
-  render(
-    <YearSummaryPage
-      view={v}
-      onYear={onYear}
-      flatHref={(id, year) => `/year-summary/${id}?year=${String(year)}`}
-      bottomNav={null}
-    />,
-  )
+  render(<YearSummaryPage view={v} onYear={onYear} bottomNav={null} />)
   return onYear
 }
 

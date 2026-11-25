@@ -15,3 +15,9 @@ export async function openYearSummary(page: Page, year: number) {
 /** A flat's card on the year summary. */
 export const summaryCard = (page: Page, streetAddress: string) =>
   page.getByRole('link').filter({ hasText: streetAddress })
+
+/** Opens a flat's form 7H page for the year. */
+export async function openFlatYear(page: Page, id: string, year: number) {
+  await page.goto(`/year-summary/${id}?year=${String(year)}`)
+  await waitForHydration(page)
+}
