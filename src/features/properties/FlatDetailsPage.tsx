@@ -13,6 +13,7 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { createLink } from '@tanstack/react-router'
 import { useState } from 'react'
+import { ReasonAlert } from '#/components/ReasonAlert'
 import { chargesOfYear } from '#/features/recurring-amounts/charges'
 import { periodOn } from '#/features/recurring-amounts/periods'
 import { kindLabel, treatmentLabel } from '#/features/recurring-amounts/labels'
@@ -33,6 +34,8 @@ import { EntryRow } from '#/features/transactions/TransactionsPage'
 import { clientLog } from '#/lib/client-log'
 import { lastDayOfMonth, type IsoDate } from '#/lib/dates'
 import { formatArea, formatDate, formatMoney } from '#/lib/format'
+import { failureReason } from '#/lib/network-error'
+import type { Reason } from '#/lib/reasons'
 import {
   usageChargesOfMonth,
   usageChargesOfYear,
@@ -237,6 +240,8 @@ function Header(props: {
 function ArchivedBand(props: {
   archivedOn: IsoDate
   busy: boolean
+  /** Why the last restore failed. */
+  alert: Reason | undefined
   onRestore: () => void
 }) {
   return (
@@ -256,6 +261,7 @@ function ArchivedBand(props: {
       <Typography variant="body2" color="text.secondary">
         {m.property_archived_text()}
       </Typography>
+      {props.alert === undefined ? null : <ReasonAlert reason={props.alert} />}
       <Button
         color="primary"
         loading={props.busy}
@@ -938,15 +944,22 @@ export function FlatDetailsPage(props: Props) {
   const [recording, setRecording] = useState(false)
   const [archiving, setArchiving] = useState(false)
   const [restoring, setRestoring] = useState(false)
+  const [restoreAlert, setRestoreAlert] = useState<Reason>()
   const [deleting, setDeleting] = useState(false)
 
   async function restore() {
+    setRestoreAlert(undefined)
     setRestoring(true)
     try {
-      await restoreProperty({ data: { id: view.property.id } })
+      const result = await restoreProperty({ data: { id: view.property.id } })
+      if (!result.ok) {
+        setRestoreAlert(result.reason)
+        return
+      }
       await props.onChanged()
     } catch (error) {
       clientLog.error('property.restore_failed', {}, error)
+      setRestoreAlert(failureReason(error))
     } finally {
       setRestoring(false)
     }
@@ -977,6 +990,7 @@ export function FlatDetailsPage(props: Props) {
           <ArchivedBand
             archivedOn={view.archivedOn}
             busy={restoring}
+            alert={restoreAlert}
             onRestore={() => {
               void restore()
             }}

@@ -4,6 +4,7 @@ import { describe, expect, test, vi } from 'vitest'
 import type { Tenancy } from '#/features/tenancies/tenancy.repository.server'
 import type { FlatDetails } from './details.server'
 import { FlatDetailsPage } from './FlatDetailsPage'
+import { restoreProperty } from './functions'
 
 // jsdom's browser language is English. Links render as plain anchors; the
 // router isn't under test here.
@@ -373,6 +374,20 @@ describe('Archiving on the flat details page', () => {
     expect(
       within(menu).queryByRole('menuitem', { name: 'Archive flat' }),
     ).toBeNull()
+  })
+
+  test('a failed restore is shown in the band', async () => {
+    vi.mocked(restoreProperty).mockRejectedValueOnce(new Error('boom'))
+    renderPage(details({ archivedOn: '2026-11-25' }))
+    const band = screen.getByRole('region', { name: 'Archived 25/11/2026' })
+
+    fireEvent.click(
+      within(band).getByRole('button', { name: 'Restore to your list' }),
+    )
+
+    expect(await within(band).findByRole('alert')).toHaveTextContent(
+      'Something went wrong',
+    )
   })
 
   test('a flat not archived has no band and Archive flat in the menu', () => {
