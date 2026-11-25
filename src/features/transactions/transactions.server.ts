@@ -11,6 +11,7 @@ import type { SharingRepository } from '#/features/sharing/sharing.repository.se
 import { isoDateInFinland, type IsoDate } from '#/lib/dates'
 import type { AlertReason, FieldReason } from '#/lib/reasons'
 import type { PropertyRole } from '#/server/db/schema'
+import { deleteStoredFiles } from '#/server/files/delete'
 import { fitsQuota } from '#/server/files/quota'
 import { newFileKey, type FileStorage } from '#/server/files/storage'
 import { checkUpload, UploadError } from '#/server/files/upload'
@@ -173,17 +174,16 @@ function quotaFull(
 }
 
 /** Deletes stored files; a failure leaves an orphan and is logged. */
-async function deleteFiles(
+function deleteFiles(
   deps: TransactionDeps,
   keys: readonly string[],
 ): Promise<void> {
-  for (const key of keys) {
-    try {
-      await deps.storage.delete(key)
-    } catch (error) {
-      deps.log.error('transaction.receipt_delete_failed', { key }, error)
-    }
-  }
+  return deleteStoredFiles(
+    deps.storage,
+    deps.log,
+    keys,
+    'transaction.receipt_delete_failed',
+  )
 }
 
 /** Runs a database write after storing a file; removes the file if it fails. */
