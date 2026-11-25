@@ -21,7 +21,7 @@
 
 ## 4. Verification
 
-- [ ] 4.1 Run `pnpm lint`, `pnpm typecheck`, the whole `pnpm test`, the whole `pnpm test:e2e` and `pnpm check:traceability`, all passing, then the `pr-review` skill
+- [x] 4.1 Run `pnpm lint`, `pnpm typecheck`, the whole `pnpm test`, the whole `pnpm test:e2e` and `pnpm check:traceability`, all passing, then the `pr-review` skill
 
 ## 5. Archive
 
