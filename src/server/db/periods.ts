@@ -123,7 +123,15 @@ export function periodWriteStatements(
       db
         .update(periods.table)
         .set({ [periods.keys.value]: value })
-        .where(and(scope, eq(periods.validFrom, from), owned, onlyIf))
+        .where(
+          and(
+            scope,
+            eq(periods.validFrom, from),
+            isNull(periods.validTo),
+            owned,
+            onlyIf,
+          ),
+        )
         .returning({ id: periods.parentKey }),
     ]
   }
