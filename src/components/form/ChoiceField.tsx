@@ -21,6 +21,8 @@ interface Props<T> {
   choices: readonly Choice<T>[]
   /** An error from outside the form's validators, e.g. a server's. */
   reason?: Reason | undefined
+  /** One choice per row, for long labels or many choices. */
+  stacked?: boolean
 }
 
 export function ChoiceField<T extends string | number>({
@@ -28,6 +30,7 @@ export function ChoiceField<T extends string | number>({
   label,
   choices,
   reason,
+  stacked = false,
 }: Props<T>) {
   const errors = useSelector(field.store, (s): unknown[] => s.meta.errors)
   const submitted = useSelector(
@@ -61,7 +64,7 @@ export function ChoiceField<T extends string | number>({
       <Box
         sx={{
           display: 'grid',
-          gridTemplateColumns: `repeat(${String(choices.length)}, minmax(0, 1fr))`,
+          gridTemplateColumns: `repeat(${String(stacked ? 1 : choices.length)}, minmax(0, 1fr))`,
           gap: 0.75,
         }}
       >
