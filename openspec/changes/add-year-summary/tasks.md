@@ -48,12 +48,12 @@
 
 ## 5. The year summary on the server
 
-- [ ] 5.1 `features/year-summary/year-summary.server.ts`: `loadYearSummary(deps, year?)` and `loadFlatYear(deps, propertyId, year?)`.
+- [x] 5.1 `features/year-summary/year-summary.server.ts`: `loadYearSummary(deps, year?)` and `loadFlatYear(deps, propertyId, year?)`.
   - The access check is the user's flats, archived included (`listForUser`, `listArchivedForUser`).
   - The list reads of group 1, then `flatYear` per flat and the opening year.
   - Each returns the computed view only (design.md, decision 5): the cards with the "Not included" flats, or the form 7H page with not found and no share.
-- [ ] 5.2 `features/year-summary/functions.ts`: `getYearSummary({ year? })` and `getFlatYear({ propertyId, year? })` with the session check and a Zod `inputValidator` (year 2000–2100, optional).
-- [ ] 5.3 Workers tests:
+- [x] 5.2 `features/year-summary/functions.ts`: `getYearSummary({ year? })` and `getFlatYear({ propertyId, year? })` with the session check and a Zod `inputValidator` (year 2000–2100, optional).
+- [x] 5.3 Workers tests:
   - the server-side scenarios of "The year summary page", "Flats in the year summary" and "The form 7H page of a flat" (archived flat, no share, not found, member)
   - a test that the number of D1 queries for 3 flats equals that for 1 flat
   - a test with 10 flats and two years of data that stays well inside the Free plan's CPU time
