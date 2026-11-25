@@ -62,6 +62,12 @@ test.describe('Deleting a flat', () => {
   test('Deleting removes the flat and its receipt files', async ({ page }) => {
     const id = await ownerWithFlat(page)
     await withData(page, id)
+    await page.getByRole('listitem').getByRole('link').click()
+    const receipt = await page
+      .getByRole('link', { name: 'Open the PDF receipt' })
+      .getAttribute('href')
+    expect(receipt).toMatch(/^\/api\/receipts\//)
+    expect((await page.request.get(receipt ?? '')).status()).toBe(200)
 
     await deletePermanently(page, id)
 
@@ -71,6 +77,7 @@ test.describe('Deleting a flat', () => {
     await expect(card(page, 'Kuusikuja 3 B 12')).toHaveCount(0)
     await openDetails(page, id)
     await expect(notFound(page)).toBeVisible()
+    expect((await page.request.get(receipt ?? '')).status()).toBe(404)
   })
 
   test('A member loses access when the flat is deleted', async ({
