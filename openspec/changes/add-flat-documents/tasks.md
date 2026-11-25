@@ -46,7 +46,7 @@
 - [x] 8.2 `DocumentForm.tsx` (file with `FileField`, kind with `ChoiceField`, name prefilled from the file, date, tenancy for a lease), routes `documents/new.tsx` and `$documentId/edit.tsx`; `DocumentDetails.tsx` with the preview, `ImageViewer`, Download, Edit and the delete dialog, route `$documentId/index.tsx`; invalidate the router before navigating
 - [x] 8.3 Component tests: the name suggested from the file, a name needed, the tenancy field only for a lease, the quota alert, owner and member details, the delete dialog
 - [x] 8.4 Playwright tests in `e2e/documents.spec.ts` for "Adding a document", "Document files", "A lease's tenancy", "Document details", "Viewing and downloading a document", "Editing a document" and "Deleting a document"; the flat deletion dialog's document count in `e2e/delete-flat.spec.ts`
-- [ ] 8.5 `e2e/support/` helpers and CLAUDE.md: "Current state" (documents), the e2e helper list, `storage-usage.ts` next to `periods.ts`
+- [x] 8.5 `e2e/support/` helpers and CLAUDE.md: "Current state" (documents), the e2e helper list, `storage-usage.ts` next to `periods.ts`
 
 ## 9. Review and archive
 
