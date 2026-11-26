@@ -23,17 +23,19 @@
 
 ## 2. Deposit terms
 
-- [ ] 2.1 With the translate skill, check *vakuus* (`deposit`) and *vakuuden palautus* (`deposit_return`), and decide whether these need terms of their own:
+_Outcome:_ Finlex (481/1995 § 8) and the Tax Administration's guidance §2.1.3 could not be read here (Finlex serves no law text without JavaScript, the guidance page was unreachable). The Swedish and English tax pages that could be read only cover keeping the deposit against unpaid rent. So no term was added or changed: *vakuus* / *hyresgaranti* / *deposit* stay verified, `deposit_return` stays `proposed`, and *pidättää*, *lopputarkastus* and *vahingonkorvaus* are not terms (no term bank diff, so no critic review). The Swedish and English words of the new messages are `proposed` and need a fluent speaker.
+
+- [x] 2.1 With the translate skill, check *vakuus* (`deposit`) and *vakuuden palautus* (`deposit_return`), and decide whether these need terms of their own:
   - *pidättää* (keeping part of a deposit)
   - *lopputarkastus* (final inspection)
   - *vahingonkorvaus* (damage compensation)
 
   Take the Swedish words from the Swedish text of 481/1995 § 8 and the Tax Administration's Swedish *Beskattning av hyresinkomster* §2.1.3, the English from its English pages. Record the sources in `i18n/sources.json`.
-- [ ] 2.2 The term-critic's review of the term bank diff, and its findings fixed.
+- [x] 2.2 The term-critic's review of the term bank diff, and its findings fixed.
 
 ## 3. Deposit calculations
 
-- [ ] 3.1 `features/deposits/deposit.ts`, pure:
+- [x] 3.1 `features/deposits/deposit.ts`, pure:
   - `allocateRentKept(months, kept)`: oldest first, up to each month's missing amount, or `deposit_rent_exceeds_unpaid`
   - `missingRent(tenancy, payments, excludeReturnId?)`: every month of the tenancy, from `rent-payments/status.ts`
   - `amountReturned(deposit, return)`
@@ -41,7 +43,7 @@
   - `returnDeadline(lastRentDay)`
   - `depositOverLimit(deposit, rent)`
   - `pendingReturns(tenancies, returns, today)`
-- [ ] 3.2 Unit tests named after the scenarios of "Rent kept from the deposit", the checks of "Recording a deposit return" ("Deductions can't exceed the deposit", "Deductions need an amount", "A return before the last rent day is refused", "A return date in the future is refused"), "A deposit over three months' rent is warned about", and "The deposit return reminder" ("The reminder after the last rent day", "No reminder before the last rent day", "A tenancy without a deposit has no reminder").
+- [x] 3.2 Unit tests named after the scenarios of "Rent kept from the deposit", the checks of "Recording a deposit return" ("Deductions can't exceed the deposit", "Deductions need an amount", "A return before the last rent day is refused", "A return date in the future is refused"), "A deposit over three months' rent is warned about", and "The deposit return reminder" ("The reminder after the last rent day", "No reminder before the last rent day", "A tenancy without a deposit has no reminder").
 
 ## 4. The deposit on the server
 

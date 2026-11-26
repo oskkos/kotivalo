@@ -52,6 +52,18 @@ export function dayBefore(date: IsoDate): IsoDate {
   return new Date(Date.UTC(year, month - 1, day - 1)).toISOString().slice(0, 10)
 }
 
+/** An ISO date `days` later (earlier when negative): `2026-12-31` + 14 → `2027-01-14`. */
+export function addDays(date: IsoDate, days: number): IsoDate {
+  const [year, month, day] = date.split('-').map(Number) as [
+    number,
+    number,
+    number,
+  ]
+  return new Date(Date.UTC(year, month - 1, day + days))
+    .toISOString()
+    .slice(0, 10)
+}
+
 /** The last day of a month given as `YYYY-MM`: `2027-02` → `2027-02-28`. */
 export function lastDayOfMonth(month: string): IsoDate {
   const [year, monthNumber] = month.split('-').map(Number) as [number, number]
