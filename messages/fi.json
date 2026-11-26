@@ -343,7 +343,7 @@
   "flat_tax_part_usage": "{kind} (käyttömaksu)",
   "flat_tax_period": "Vuokra-aika",
   "flat_tax_period_value": "{from}–{to}",
-  "flat_tax_row_capital_charges": "Tuloutetut pääomavastikkeet",
+  "flat_tax_row_capital_charges": "Yhtiön tulouttamat pääomavastikkeet",
   "flat_tax_rows": "Vuokratulot ja kulut",
   "flat_tax_rows_share": "Osuus {share}",
   "flat_tax_share": "Omistusosuus",
