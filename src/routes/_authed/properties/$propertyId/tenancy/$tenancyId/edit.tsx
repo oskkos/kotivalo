@@ -1,4 +1,6 @@
 import Button from '@mui/material/Button'
+import Stack from '@mui/material/Stack'
+import Typography from '@mui/material/Typography'
 import {
   createFileRoute,
   createLink,
@@ -9,8 +11,10 @@ import {
 import { useState } from 'react'
 import { NotFoundView } from '#/components/NotFoundView'
 import { getTenancy } from '#/features/tenancies/functions'
+import { depositStatus } from '#/features/deposits/deposit'
 import { RemoveTenancyDialog } from '#/features/tenancies/RemoveTenancyDialog'
 import { TenancyForm } from '#/features/tenancies/TenancyForm'
+import { formatDate, formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 
 const ButtonLink = createLink(Button)
@@ -46,7 +50,8 @@ export const Route = createFileRoute(
 })
 
 function EditTenancyRoute() {
-  const { tenancy, property, today, rents } = Route.useLoaderData()
+  const { tenancy, property, today, rents, depositReturn } =
+    Route.useLoaderData()
   const { propertyId } = Route.useParams()
   const router = useRouter()
   const toPage = () =>
@@ -55,6 +60,21 @@ function EditTenancyRoute() {
       params: { propertyId },
     })
   const [removing, setRemoving] = useState(false)
+  // An ended tenancy with a deposit: the return's status and its page.
+  const state = depositStatus(tenancy, depositReturn, today)
+  const statusText =
+    state.kind === 'returned'
+      ? state.kept > 0
+        ? m.deposit_status_returned_kept({
+            date: formatDate(state.on),
+            amount: formatMoney(state.returned),
+            kept: formatMoney(state.kept),
+          })
+        : m.deposit_status_returned({
+            date: formatDate(state.on),
+            amount: formatMoney(state.returned),
+          })
+      : m.deposit_status_pending()
   return (
     <>
       <TenancyForm
@@ -77,6 +97,23 @@ function EditTenancyRoute() {
                 setRemoving(true)
               }
             : undefined
+        }
+        depositReturn={
+          state.kind === 'returned' || state.kind === 'pending' ? (
+            <Stack sx={{ gap: 0.75 }}>
+              <Typography variant="body2" sx={{ fontWeight: 800 }}>
+                {statusText}
+              </Typography>
+              <ButtonLink
+                to="/properties/$propertyId/tenancy/$tenancyId/deposit"
+                params={{ propertyId, tenancyId: tenancy.id }}
+                variant="outlined"
+                sx={{ alignSelf: 'flex-start', minHeight: 44, px: 2 }}
+              >
+                {m.deposit_form_return_open()}
+              </ButtonLink>
+            </Stack>
+          ) : undefined
         }
         rentChange={
           // Every tenancy's rent, not only the current one's (openspec:

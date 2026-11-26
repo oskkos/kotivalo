@@ -78,6 +78,8 @@ interface Props {
    * doesn't change (openspec: tenancies, "Correcting a tenancy").
    */
   rentChange?: ReactNode
+  /** Correcting an ended tenancy with a deposit: its return and a link. */
+  depositReturn?: ReactNode
 }
 
 type Field =
@@ -634,6 +636,7 @@ export function TenancyForm(props: Props) {
                   amount: formatMoney(overLimit),
                 })}
           </Typography>
+          {editing ? (props.depositReturn ?? null) : null}
           {editing ? (
             (props.rentChange ?? null)
           ) : (

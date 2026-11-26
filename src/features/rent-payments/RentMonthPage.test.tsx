@@ -202,6 +202,36 @@ describe('Deleting a rent payment', () => {
       data: { propertyId: 'flat', paymentId: 'p1' },
     })
   })
+  test("A payment from the deposit can't be deleted on its own", () => {
+    renderPage(
+      view({
+        payments: [
+          {
+            id: 'p2',
+            tenancyId: 't1',
+            month: '2026-11',
+            amount: 30000,
+            paidOn: '2027-01-15',
+            depositReturnId: 'r1',
+            recordedBy: 'Annika',
+          },
+          {
+            id: 'p1',
+            tenancyId: 't1',
+            month: '2026-11',
+            amount: 50000,
+            paidOn: '2026-11-04',
+            depositReturnId: null,
+            recordedBy: 'Annika',
+          },
+        ],
+      }),
+    )
+    expect(screen.getByText('From the deposit')).toBeVisible()
+    expect(
+      screen.getAllByRole('button', { name: /^Delete the payment/ }),
+    ).toHaveLength(1)
+  })
 })
 
 describe('Recording a rent payment', () => {

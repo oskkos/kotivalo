@@ -425,7 +425,7 @@ describe('Correcting and deleting a deposit return', () => {
   })
 })
 
-describe('A payment from the deposit', () => {
+describe('Deleting a rent payment', () => {
   test("A payment from the deposit can't be deleted on its own", async () => {
     await paidUntilDecember(59000)
     await recordDepositReturn(deps(), flat, tenancy, withDeductions(30000, 0))

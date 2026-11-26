@@ -15,6 +15,8 @@ import { formatDate, formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 import { colors, radii } from '#/theme/tokens'
 import { contractLabel, datesLabel, endingLabel, statusLabel } from './labels'
+import { depositStatus, pendingReturns } from '#/features/deposits/deposit'
+import { PendingReturnCard } from '#/features/deposits/PendingReturnCard'
 import { DepositCard } from './DepositCard'
 import { FeesCard } from './FeesCard'
 import { LeaseCard } from './LeaseCard'
@@ -37,6 +39,10 @@ export interface TenancyPageView {
   fees: Partial<Record<string, readonly FeeOfTenancy[]>>
   /** The leases naming the current tenancy, newest first. */
   leases?: readonly DocumentRow[]
+  /** Each tenancy's deposit return, if recorded. */
+  depositReturns?: Partial<
+    Record<string, { returnedOn: string; rentKept: number; damageKept: number }>
+  >
 }
 
 interface Props {
@@ -61,6 +67,8 @@ interface Props {
   feeChange?: (tenancy: Tenancy, fee: FeeOfTenancy) => ReactNode
   /** Owners only: the link to the correction form that sets the deposit. */
   depositChange?: (tenancy: Tenancy) => ReactNode
+  /** Owners only: the link that opens a tenancy's deposit return. */
+  returnAction?: (tenancy: Tenancy) => ReactNode
   /** Wraps a lease's row in a link to its details page. */
   leaseLink?: (lease: DocumentRow, row: ReactNode) => ReactNode
   /** Owners only: the link that adds a lease to the current tenancy. */
@@ -330,6 +338,34 @@ export function TenancyPage(props: Props) {
   const current = currentTenancy(view.tenancies, view.today)
   const status = flatStatus(view.tenancies, view.today)
   const others = view.tenancies.filter((t) => t !== current)
+  const returns = view.depositReturns ?? {}
+  const pending = pendingReturns(
+    view.tenancies,
+    new Set(Object.keys(returns)),
+    view.today,
+  )
+  const statusLine = (tenancy: Tenancy) => {
+    const state = depositStatus(tenancy, returns[tenancy.id], view.today)
+    switch (state.kind) {
+      case 'none':
+        return m.deposit_status_none()
+      case 'held':
+        return m.deposit_status_held({ amount: formatMoney(state.amount) })
+      case 'pending':
+        return m.deposit_status_pending()
+      case 'returned':
+        return state.kept > 0
+          ? m.deposit_status_returned_kept({
+              date: formatDate(state.on),
+              amount: formatMoney(state.returned),
+              kept: formatMoney(state.kept),
+            })
+          : m.deposit_status_returned({
+              date: formatDate(state.on),
+              amount: formatMoney(state.returned),
+            })
+    }
+  }
   return (
     <Stack sx={{ minHeight: '100dvh' }}>
       <Box
@@ -360,6 +396,15 @@ export function TenancyPage(props: Props) {
         </Stack>
       </Box>
       <Stack component="main" sx={{ gap: 1.75, px: 2.5, pt: 1.25, pb: 3 }}>
+        {pending.map((tenancy) => (
+          <PendingReturnCard
+            key={tenancy.id}
+            tenantName={tenancy.tenantName}
+            deposit={tenancy.deposit ?? 0}
+            lastRentDay={tenancy.validTo ?? view.today}
+            action={owner ? props.returnAction?.(tenancy) : undefined}
+          />
+        ))}
         {current ? (
           <Current
             tenancy={current}
@@ -462,6 +507,9 @@ export function TenancyPage(props: Props) {
                           dates: datesLabel(tenancy.validFrom, tenancy.validTo),
                           contract: contractLabel[tenancy.contractType](),
                         })}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {statusLine(tenancy)}
                       </Typography>
                     </Stack>
                     <Stack sx={{ alignItems: 'flex-end' }}>

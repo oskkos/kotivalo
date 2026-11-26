@@ -45,6 +45,7 @@ import { Route as AuthedPropertiesPropertyIdAmountsFinancingNewRouteImport } fro
 import { Route as AuthedPropertiesPropertyIdDocumentsDocumentIdIndexRouteImport } from './routes/_authed/properties/$propertyId/documents/$documentId/index'
 import { Route as AuthedPropertiesPropertyIdDocumentsDocumentIdEditRouteImport } from './routes/_authed/properties/$propertyId/documents/$documentId/edit'
 import { Route as AuthedPropertiesPropertyIdRentTenancyIdMonthRouteImport } from './routes/_authed/properties/$propertyId/rent/$tenancyId/$month'
+import { Route as AuthedPropertiesPropertyIdTenancyTenancyIdDepositRouteImport } from './routes/_authed/properties/$propertyId/tenancy/$tenancyId/deposit'
 import { Route as AuthedPropertiesPropertyIdTenancyTenancyIdEditRouteImport } from './routes/_authed/properties/$propertyId/tenancy/$tenancyId/edit'
 import { Route as AuthedPropertiesPropertyIdTenancyTenancyIdEndRouteImport } from './routes/_authed/properties/$propertyId/tenancy/$tenancyId/end'
 import { Route as AuthedPropertiesPropertyIdTenancyTenancyIdRentRouteImport } from './routes/_authed/properties/$propertyId/tenancy/$tenancyId/rent'
@@ -255,6 +256,12 @@ const AuthedPropertiesPropertyIdRentTenancyIdMonthRoute =
     path: '/properties/$propertyId/rent/$tenancyId/$month',
     getParentRoute: () => AuthedRoute,
   } as any)
+const AuthedPropertiesPropertyIdTenancyTenancyIdDepositRoute =
+  AuthedPropertiesPropertyIdTenancyTenancyIdDepositRouteImport.update({
+    id: '/properties/$propertyId/tenancy/$tenancyId/deposit',
+    path: '/properties/$propertyId/tenancy/$tenancyId/deposit',
+    getParentRoute: () => AuthedRoute,
+  } as any)
 const AuthedPropertiesPropertyIdTenancyTenancyIdEditRoute =
   AuthedPropertiesPropertyIdTenancyTenancyIdEditRouteImport.update({
     id: '/properties/$propertyId/tenancy/$tenancyId/edit',
@@ -333,6 +340,7 @@ export interface FileRoutesByFullPath {
   '/properties/$propertyId/amounts/financing/new': typeof AuthedPropertiesPropertyIdAmountsFinancingNewRoute
   '/properties/$propertyId/documents/$documentId/edit': typeof AuthedPropertiesPropertyIdDocumentsDocumentIdEditRoute
   '/properties/$propertyId/rent/$tenancyId/$month': typeof AuthedPropertiesPropertyIdRentTenancyIdMonthRoute
+  '/properties/$propertyId/tenancy/$tenancyId/deposit': typeof AuthedPropertiesPropertyIdTenancyTenancyIdDepositRoute
   '/properties/$propertyId/tenancy/$tenancyId/edit': typeof AuthedPropertiesPropertyIdTenancyTenancyIdEditRoute
   '/properties/$propertyId/tenancy/$tenancyId/end': typeof AuthedPropertiesPropertyIdTenancyTenancyIdEndRoute
   '/properties/$propertyId/tenancy/$tenancyId/rent': typeof AuthedPropertiesPropertyIdTenancyTenancyIdRentRoute
@@ -377,6 +385,7 @@ export interface FileRoutesByTo {
   '/properties/$propertyId/amounts/financing/new': typeof AuthedPropertiesPropertyIdAmountsFinancingNewRoute
   '/properties/$propertyId/documents/$documentId/edit': typeof AuthedPropertiesPropertyIdDocumentsDocumentIdEditRoute
   '/properties/$propertyId/rent/$tenancyId/$month': typeof AuthedPropertiesPropertyIdRentTenancyIdMonthRoute
+  '/properties/$propertyId/tenancy/$tenancyId/deposit': typeof AuthedPropertiesPropertyIdTenancyTenancyIdDepositRoute
   '/properties/$propertyId/tenancy/$tenancyId/edit': typeof AuthedPropertiesPropertyIdTenancyTenancyIdEditRoute
   '/properties/$propertyId/tenancy/$tenancyId/end': typeof AuthedPropertiesPropertyIdTenancyTenancyIdEndRoute
   '/properties/$propertyId/tenancy/$tenancyId/rent': typeof AuthedPropertiesPropertyIdTenancyTenancyIdRentRoute
@@ -423,6 +432,7 @@ export interface FileRoutesById {
   '/_authed/properties/$propertyId/amounts/financing/new': typeof AuthedPropertiesPropertyIdAmountsFinancingNewRoute
   '/_authed/properties/$propertyId/documents/$documentId/edit': typeof AuthedPropertiesPropertyIdDocumentsDocumentIdEditRoute
   '/_authed/properties/$propertyId/rent/$tenancyId/$month': typeof AuthedPropertiesPropertyIdRentTenancyIdMonthRoute
+  '/_authed/properties/$propertyId/tenancy/$tenancyId/deposit': typeof AuthedPropertiesPropertyIdTenancyTenancyIdDepositRoute
   '/_authed/properties/$propertyId/tenancy/$tenancyId/edit': typeof AuthedPropertiesPropertyIdTenancyTenancyIdEditRoute
   '/_authed/properties/$propertyId/tenancy/$tenancyId/end': typeof AuthedPropertiesPropertyIdTenancyTenancyIdEndRoute
   '/_authed/properties/$propertyId/tenancy/$tenancyId/rent': typeof AuthedPropertiesPropertyIdTenancyTenancyIdRentRoute
@@ -469,6 +479,7 @@ export interface FileRouteTypes {
     | '/properties/$propertyId/amounts/financing/new'
     | '/properties/$propertyId/documents/$documentId/edit'
     | '/properties/$propertyId/rent/$tenancyId/$month'
+    | '/properties/$propertyId/tenancy/$tenancyId/deposit'
     | '/properties/$propertyId/tenancy/$tenancyId/edit'
     | '/properties/$propertyId/tenancy/$tenancyId/end'
     | '/properties/$propertyId/tenancy/$tenancyId/rent'
@@ -513,6 +524,7 @@ export interface FileRouteTypes {
     | '/properties/$propertyId/amounts/financing/new'
     | '/properties/$propertyId/documents/$documentId/edit'
     | '/properties/$propertyId/rent/$tenancyId/$month'
+    | '/properties/$propertyId/tenancy/$tenancyId/deposit'
     | '/properties/$propertyId/tenancy/$tenancyId/edit'
     | '/properties/$propertyId/tenancy/$tenancyId/end'
     | '/properties/$propertyId/tenancy/$tenancyId/rent'
@@ -558,6 +570,7 @@ export interface FileRouteTypes {
     | '/_authed/properties/$propertyId/amounts/financing/new'
     | '/_authed/properties/$propertyId/documents/$documentId/edit'
     | '/_authed/properties/$propertyId/rent/$tenancyId/$month'
+    | '/_authed/properties/$propertyId/tenancy/$tenancyId/deposit'
     | '/_authed/properties/$propertyId/tenancy/$tenancyId/edit'
     | '/_authed/properties/$propertyId/tenancy/$tenancyId/end'
     | '/_authed/properties/$propertyId/tenancy/$tenancyId/rent'
@@ -832,6 +845,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthedPropertiesPropertyIdRentTenancyIdMonthRouteImport
       parentRoute: typeof AuthedRoute
     }
+    '/_authed/properties/$propertyId/tenancy/$tenancyId/deposit': {
+      id: '/_authed/properties/$propertyId/tenancy/$tenancyId/deposit'
+      path: '/properties/$propertyId/tenancy/$tenancyId/deposit'
+      fullPath: '/properties/$propertyId/tenancy/$tenancyId/deposit'
+      preLoaderRoute: typeof AuthedPropertiesPropertyIdTenancyTenancyIdDepositRouteImport
+      parentRoute: typeof AuthedRoute
+    }
     '/_authed/properties/$propertyId/tenancy/$tenancyId/edit': {
       id: '/_authed/properties/$propertyId/tenancy/$tenancyId/edit'
       path: '/properties/$propertyId/tenancy/$tenancyId/edit'
@@ -913,6 +933,7 @@ interface AuthedRouteChildren {
   AuthedPropertiesPropertyIdAmountsFinancingNewRoute: typeof AuthedPropertiesPropertyIdAmountsFinancingNewRoute
   AuthedPropertiesPropertyIdDocumentsDocumentIdEditRoute: typeof AuthedPropertiesPropertyIdDocumentsDocumentIdEditRoute
   AuthedPropertiesPropertyIdRentTenancyIdMonthRoute: typeof AuthedPropertiesPropertyIdRentTenancyIdMonthRoute
+  AuthedPropertiesPropertyIdTenancyTenancyIdDepositRoute: typeof AuthedPropertiesPropertyIdTenancyTenancyIdDepositRoute
   AuthedPropertiesPropertyIdTenancyTenancyIdEditRoute: typeof AuthedPropertiesPropertyIdTenancyTenancyIdEditRoute
   AuthedPropertiesPropertyIdTenancyTenancyIdEndRoute: typeof AuthedPropertiesPropertyIdTenancyTenancyIdEndRoute
   AuthedPropertiesPropertyIdTenancyTenancyIdRentRoute: typeof AuthedPropertiesPropertyIdTenancyTenancyIdRentRoute
@@ -971,6 +992,8 @@ const AuthedRouteChildren: AuthedRouteChildren = {
     AuthedPropertiesPropertyIdDocumentsDocumentIdEditRoute,
   AuthedPropertiesPropertyIdRentTenancyIdMonthRoute:
     AuthedPropertiesPropertyIdRentTenancyIdMonthRoute,
+  AuthedPropertiesPropertyIdTenancyTenancyIdDepositRoute:
+    AuthedPropertiesPropertyIdTenancyTenancyIdDepositRoute,
   AuthedPropertiesPropertyIdTenancyTenancyIdEditRoute:
     AuthedPropertiesPropertyIdTenancyTenancyIdEditRoute,
   AuthedPropertiesPropertyIdTenancyTenancyIdEndRoute:
