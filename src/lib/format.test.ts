@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import { areaCases, dateCases, moneyCases } from './format.cases'
 import {
+  formatList,
   formatAmountInput,
   formatArea,
   formatDate,
@@ -168,5 +169,20 @@ describe('formatAmountInput', () => {
   test('an amount to edit, without grouping', () => {
     expect(formatAmountInput(123450, 'fi')).toBe('1234,50')
     expect(formatAmountInput(14550, 'en')).toBe('145.50')
+  })
+})
+
+describe('formatList', () => {
+  test('lists items as each language writes a sentence', () => {
+    expect(formatList(['tammikuu', 'helmikuu', 'maaliskuu'], 'fi')).toBe(
+      'tammikuu, helmikuu ja maaliskuu',
+    )
+    expect(formatList(['januari', 'februari'], 'sv')).toBe(
+      'januari och februari',
+    )
+    expect(formatList(['January', 'February'], 'en')).toBe(
+      'January and February',
+    )
+    expect(formatList(['Kuusikuja 3 B 12'], 'fi')).toBe('Kuusikuja 3 B 12')
   })
 })

@@ -112,6 +112,27 @@ describe('The year summary page', () => {
     expect(screen.getByText(/^Share changed 0?1\/0?7$/)).toBeVisible()
   })
 
+  test('shows a chip for each share change', () => {
+    renderPage(
+      view({
+        flats: [
+          card({
+            checks: [
+              { kind: 'share_changed', on: '2025-03-01', from: 0, to: 5000 },
+              {
+                kind: 'share_changed',
+                on: '2025-09-01',
+                from: 5000,
+                to: 10000,
+              },
+            ],
+          }),
+        ],
+      }),
+    )
+    expect(screen.getAllByText(/^Share changed/)).toHaveLength(2)
+  })
+
   test('names the flats not included and what the figures leave out', () => {
     renderPage(
       view({

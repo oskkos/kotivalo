@@ -12,6 +12,7 @@ import { createLink } from '@tanstack/react-router'
 import { sortByStreetAddress } from '#/features/properties/property'
 import {
   formatDayMonth,
+  formatList,
   formatMoney,
   formatMonthName,
   formatShare,
@@ -231,18 +232,16 @@ function Card(props: { card: FlatCard; year: number }) {
           }}
         >
           {card.checks.map((check) => (
-            <CheckChip key={check.kind} check={check} />
+            <CheckChip
+              key={`${check.kind}-${'on' in check ? check.on : ''}`}
+              check={check}
+            />
           ))}
         </Box>
       ) : null}
     </CardLink>
   )
 }
-
-const list = (items: readonly string[]) =>
-  new Intl.ListFormat(INTL_LOCALES[getLocale()], {
-    type: 'conjunction',
-  }).format(items)
 
 export function YearSummaryPage(props: Props) {
   const { view } = props
@@ -420,7 +419,9 @@ export function YearSummaryPage(props: Props) {
                   <Typography component="p" sx={{ font: 'inherit' }}>
                     {m.year_summary_not_included({
                       count: notIncluded.length,
-                      flats: list(notIncluded.map((f) => f.streetAddress)),
+                      flats: formatList(
+                        notIncluded.map((f) => f.streetAddress),
+                      ),
                       year,
                     })}
                   </Typography>
