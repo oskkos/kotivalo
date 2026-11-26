@@ -101,8 +101,8 @@
 
 ## 9. Verification and review
 
-- [ ] 9.1 `pnpm check:traceability`, then the full `pnpm test` and `pnpm test:e2e` once.
-- [ ] 9.2 Ask the user to paste a copied amount (`4895,00`) into MyTax and confirm that it is accepted. If it isn't, change only `amountForCopy` and its tests.
+- [x] 9.1 `pnpm check:traceability`, then the full `pnpm test` and `pnpm test:e2e` once.
+- [x] 9.2 Ask the user to paste a copied amount (`4895,00`) into MyTax and confirm that it is accepted. If it isn't, change only `amountForCopy` and its tests.
 - [ ] 9.3 Run the `pr-review` skill on the PR, and fix its findings as `fix(...)` commits.
 
 ## 10. Archive
