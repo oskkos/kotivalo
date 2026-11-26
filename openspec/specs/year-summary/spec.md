@@ -57,14 +57,14 @@ A year's summary SHALL include each flat the user has access to and in which the
 - **THEN** the 2025 summary includes `Kuusikuja 3 B 12`, and the 2026 summary does not
 
 ### Requirement: Form 7H rows of the own share
-For each flat in the summary and each year, the year summary SHALL compute the rows of form 7H for the user's share, each from its parts. All of them are computed from the stored payments, entries and periods, never stored:
-- **2.1** (*Bruttovuokratulot*): rent payments by payment date in the year, the tenant fees included, whatever month they are for; and income entries (tenant's water charge, other income) dated in the year
+For each flat in the summary and each year, the year summary SHALL compute the rows of form 7H for the user's share, each from its parts. All of them are computed from the stored payments, entries, periods and deposit returns, never stored:
+- **2.1** (*Bruttovuokratulot*): rent payments by payment date in the year, the tenant fees and the rent kept from a deposit ("Rent kept from the deposit") included, whatever month they are for; and income entries (tenant's water charge, other income) dated in the year
 - **2.2** (*Hoitovastikkeet ja vesimaksut*): the maintenance charges of the year's months, the water usage charges, and water charge entries
 - **2.3** (*Tuloutetut pääomavastikkeet*): the financing charges of the months whose treatment on the month's first day is income-recognised
-- **2.4** (*Vuosikorjaukset*): annual repair entries
+- **2.4** (*Vuosikorjaukset*): annual repair entries, less the damage compensation kept from deposits returned in the year (*Vakuudesta korvatut vahingot*), a negative part of at most the annual repairs part, so the row is never below 0
 - **2.5** (*Muut kulut*): insurance and other expense entries, and the parking, sauna and other usage charges
 
-A charge or usage charge month SHALL be counted in the year of the month, for the months up to the current one. Each part SHALL be the sum of its amounts at the user's share, rounded to the cent once, half up ("Shares on the cash basis"). A row is the sum of its parts. Rent computed from the rent periods SHALL NOT be used. Improvement entries and capitalised financing charges SHALL NOT be in any row ("The Not on form 7H card").
+A charge or usage charge month SHALL be counted in the year of the month, for the months up to the current one. Each part SHALL be the sum of its amounts at the user's share, rounded to the cent once, half up ("Shares on the cash basis"); the damage compensation part SHALL be capped after rounding. A row is the sum of its parts. Rent computed from the rent periods SHALL NOT be used. Improvement entries and capitalised financing charges SHALL NOT be in any row ("The Not on form 7H card").
 
 **No Playwright test:** a pure calculation over many periods and dates; the form 7H page's Playwright test shows rows computed by it.
 
@@ -92,12 +92,20 @@ A charge or usage charge month SHALL be counted in the year of the month, for th
 - **WHEN** Annika owns 5000 basis points, and the year has an annual repair of 134200 cents, an insurance of 18600 cents and a parking usage charge of 1200 cents a month all year
 - **THEN** row 2.4 is 67100 cents and row 2.5 is 16500 cents: insurance 9300 and parking 7200
 
+#### Scenario: Damage kept from a deposit lowers row 2.4
+- **WHEN** Annika owns 5000 basis points, an annual repair of 60000 cents is dated `2027-01-20`, and a deposit return on `2027-01-15` keeps 20000 cents for damage
+- **THEN** row 2.4 of 2027 is 20000 cents: annual repairs 30000 and damage compensation −10000
+
+#### Scenario: Damage compensation over the repairs leaves row 2.4 at 0
+- **WHEN** Annika owns 10000 basis points, an annual repair of 15000 cents is dated in 2027, and a return in 2027 keeps 20000 cents for damage
+- **THEN** row 2.4 of 2027 is 0: annual repairs 15000 and damage compensation −15000
+
 #### Scenario: The current year counts the months so far
 - **WHEN** today is `2026-11-25`, and the maintenance charge is 20000 cents a month all of 2026 with Annika's share 10000 basis points
 - **THEN** row 2.2 of 2026 is 220000 cents, for January to November
 
 ### Requirement: Shares on the cash basis
-The year summary SHALL count a rent payment at the user's share on its payment date, an entry at the share on its date, and a charge or usage charge month at the share on the month's first day. On days without a share the amount counts as 0 for the user. A part SHALL be rounded once, from the exact sum of amount × share basis points ÷ 10000 of its amounts, half up.
+The year summary SHALL count a rent payment at the user's share on its payment date, an entry at the share on its date, a deposit return's damage compensation at the share on the return date, and a charge or usage charge month at the share on the month's first day. On days without a share the amount counts as 0 for the user. A part SHALL be rounded once, from the exact sum of amount × share basis points ÷ 10000 of its amounts, half up.
 
 **No Playwright test:** needs ownership changes in the past; the calculation is covered by Vitest.
 
@@ -113,6 +121,10 @@ The year summary SHALL count a rent payment at the user's share on its payment d
 - **WHEN** Annika owns 3333 basis points, and three rent payments of 89000 cents are made in 2025
 - **THEN** the rent payments part is 88991 cents (267000 × 3333 ÷ 10000 = 88991.1), not three times 29664
 
+#### Scenario: A deposit return counts at the share on its date
+- **WHEN** Annika's share changes from 5000 to 10000 basis points on `2027-02-01`, a return on `2027-01-15` keeps 20000 cents for damage, and the year's annual repairs are 80000 cents at 10000 basis points
+- **THEN** the damage compensation part of 2027 is −10000 cents
+
 ### Requirement: The form 7H page of a flat
 Everyone with a share in a flat in the year SHALL be able to open its form 7H page `/year-summary/$propertyId?year=…` from the year summary. The page SHALL show:
 - the flat's address and the year
@@ -121,7 +133,7 @@ Everyone with a share in a flat in the year SHALL be able to open its form 7H pa
 - rows 2.1–2.5 of the user's share ("Form 7H rows of the own share"), each with its number, the row name used on form 7H, its parts and its amount
 - under row 2.3, when it is above 0, a note that deducting income-recognised capital charges has not always been accepted in case law (CONCEPT.md §4.3)
 - the Not on form 7H card ("The Not on form 7H card")
-- a note that the figures are counted by payment date with the share on each date, that they should be checked before filing, and that deposits are not counted yet
+- a note that the figures are counted by payment date with the share on each date, and that they should be checked before filing
 
 Each value SHALL have a copy button ("Copying form 7H values"). Back SHALL return to the year summary of the same year. The page SHALL NOT show the bottom bar. A user without access to the flat SHALL see that the flat was not found. A user with access but no share that year SHALL see that they had no share in the flat that year.
 
@@ -173,10 +185,11 @@ The form 7H page SHALL show the flat details form 7H asks for:
 The form 7H page SHALL show, apart from the rows, a card of amounts not reported on form 7H, each at the user's share for the year:
 - the capitalised financing charges: the financing charges of the months whose treatment is capitalised, added to the acquisition cost
 - the improvement entries dated in the year, with a note that they are not deducted yet (#120)
+- the damage compensation kept from deposits returned in the year that is more than the year's annual repairs ("Form 7H rows of the own share"), with a note that it is tax-free compensation and that repair costs are deductible only where they exceed it
 
-An amount of 0 SHALL be left out, and the card SHALL be left out when both are 0.
+An amount of 0 SHALL be left out, and the card SHALL be left out when all are 0.
 
-**No Playwright test:** a capitalised treatment and improvements in the past need data a browser test would set up through many forms; the amounts are covered by Vitest, and the form 7H page's Playwright test checks that the card is left out without them.
+**No Playwright test:** a capitalised treatment, improvements and returned deposits in the past need data a browser test would set up through many forms; the amounts are covered by Vitest, and the form 7H page's Playwright test checks that the card is left out without them.
 
 #### Scenario: Capitalised financing charges
 - **WHEN** Annika owns 5000 basis points, and the financing charge of 7883 cents a month is capitalised all of 2025
@@ -185,6 +198,10 @@ An amount of 0 SHALL be left out, and the card SHALL be left out when both are 0
 #### Scenario: An improvement is shown, not counted
 - **WHEN** an improvement entry of 120000 cents is dated `2025-04-02`, and Annika owns 5000 basis points
 - **THEN** the card shows improvements 60000 cents, and no row includes it
+
+#### Scenario: Damage compensation over the repairs is shown
+- **WHEN** Annika owns 10000 basis points, the year's annual repairs are 15000 cents, and a return in the year keeps 20000 cents for damage
+- **THEN** the card shows the damage compensation not deducted, 5000 cents, with the note that it is tax-free
 
 ### Requirement: Checks in the year summary
 The year summary SHALL show what needs checking, without changing any figure:
