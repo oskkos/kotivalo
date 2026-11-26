@@ -75,9 +75,9 @@ Each value SHALL have a copy button ("Copying form 7H values"). Back SHALL retur
 ## ADDED Requirements
 
 ### Requirement: Choosing whose figures
-The year summary SHALL have a *Kenen luvut* selector under the year when the year has at least one owner other than the user. Without one, every flat in the summary is the user's alone and the whole flats equal the own share, so the selector SHALL NOT be shown. The selector SHALL open a sheet with:
+The year summary SHALL have a *Kenen luvut* selector under the year when the year has at least one owner other than the user. Without one, every flat in the summary is the user's alone and the whole flats equal the own share, so the selector SHALL NOT be shown, unless another person or the whole flats are chosen: then it SHALL be shown, so the user can return to their own share. The selector SHALL open a sheet with:
 - *Oma osuutesi*, the default, with the number of flats in the own summary
-- every other person who had a share above 0 on at least one day of the year, up to today in the current year, in a flat the user has access to, archived flats included, with the number of such flats. A person whose share ended during the year is listed too.
+- every other person who had a share above 0 on at least one day of the year, up to today in the current year, in a flat the user has access to, archived flats included, with the number of such flats. A person whose share ended during the year is listed too. A chosen person without a share in the year SHALL be listed with 0 flats, so the choice stays marked.
 - *Koko asunnot (100 %)*, with the number of flats in the whole flats ("The whole flats")
 
 Names SHALL be shown in their stored form, never inflected. The choice SHALL be in the URL, `?person=<user id>` or `?person=whole`, and SHALL be kept when moving to another year, to a flat's form 7H page and back. Choosing *Oma osuutesi* SHALL remove `person` from the URL. A person in the URL who has no share that year in the user's flats SHALL show that they had no ownership share in the flats the user sees that year. A `person` that is no owner of any of the user's flats in any year SHALL open the own share.
@@ -96,7 +96,7 @@ Names SHALL be shown in their stored form, never inflected. The choice SHALL be 
 
 #### Scenario: A person without a share that year
 - **WHEN** Annika has chosen Jussi, whose 5000 basis points of `Koivupolku 7 A 4` ended on `2025-06-30`, and moves to 2026
-- **THEN** the page says that Jussi had no ownership share in the flats she sees in 2026, and shows no cards
+- **THEN** the page says that Jussi had no ownership share in the flats she sees in 2026, shows no cards, and offers the selector with Jussi chosen
 
 #### Scenario: An unknown person in the URL
 - **WHEN** Annika opens `/year-summary?year=2025&person=someone-else`, and that id owns none of her flats
