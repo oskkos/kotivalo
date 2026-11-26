@@ -34,4 +34,4 @@
 - [x] 3.1 The full `pnpm test`, `pnpm test:e2e` and `pnpm check:traceability`.
 - [x] 3.2 The `pr-review` skill, and its findings handled.
 - [ ] 3.3 By hand, before the merge (the user): Cloudflare Email Routing for `tuki@kotivalo.app` and `support@kotivalo.app`, and a test message to each that arrives.
-- [ ] 3.4 `openspec archive add-support-address` as the PR's last commit.
+- [x] 3.4 `openspec archive add-support-address` as the PR's last commit.
