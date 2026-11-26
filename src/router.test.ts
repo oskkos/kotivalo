@@ -15,6 +15,7 @@ vi.mock('#/features/tenancies/functions', () => ({}))
 vi.mock('#/features/rent-payments/functions', () => ({}))
 vi.mock('#/features/usage-charges/functions', () => ({}))
 vi.mock('#/features/year-summary/functions', () => ({}))
+vi.mock('#/features/deposits/functions', () => ({}))
 
 describe('Router', () => {
   test('registers the year summary behind the signed-in layout', () => {

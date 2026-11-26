@@ -232,7 +232,7 @@
   "deposit_return_date": "Återbetalningsdag",
   "deposit_return_deductions": "Med avdrag",
   "deposit_return_delete": "Ta bort återbetalningen",
-  "deposit_return_delete_text": "Återbetalningen och de hyresbetalningar den registrerade tas bort. De obetalda månaderna är obetalda igen.",
+  "deposit_return_delete_text": "Återbetalningen och de hyresbetalningar den registrerade tas bort. Hyran för de obetalda månaderna är obetald igen.",
   "deposit_return_delete_title": "Ta bort återbetalningen av hyresgarantin?",
   "deposit_return_deposit": "Hyresgaranti",
   "deposit_return_full": "Helt",
