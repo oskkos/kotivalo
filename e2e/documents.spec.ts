@@ -86,6 +86,23 @@ test.describe('Adding a document', () => {
     await jussi.goto(`/properties/${id}/documents/new`)
     await expect(jussi).toHaveURL(new RegExp(`/properties/${id}/documents$`))
   })
+
+  test("Another flat's tenancy in the address is ignored", async ({ page }) => {
+    const flat = await ownerWithFlat(page)
+    await addTenant(page, flat, aino)
+    await page.goto(
+      `/properties/${flat}/documents/new?kind=lease&tenancyId=00000000-0000-0000-0000-000000000000`,
+    )
+    await waitForHydration(page)
+    await expect(
+      page.getByRole('button', { name: 'Lease', exact: true }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    await expect(
+      page
+        .getByRole('group', { name: 'Tenancy' })
+        .getByRole('button', { name: /Aino Koski/ }),
+    ).toHaveAttribute('aria-pressed', 'true')
+  })
 })
 
 test.describe('Document files', () => {
@@ -488,24 +505,5 @@ test.describe('The lease on the tenancy page', () => {
     await expect(card.getByRole('link', { name: 'Add the lease' })).toHaveCount(
       0,
     )
-  })
-})
-
-test.describe('Adding a document', () => {
-  test("Another flat's tenancy in the address is ignored", async ({ page }) => {
-    const flat = await ownerWithFlat(page)
-    await addTenant(page, flat, aino)
-    await page.goto(
-      `/properties/${flat}/documents/new?kind=lease&tenancyId=00000000-0000-0000-0000-000000000000`,
-    )
-    await waitForHydration(page)
-    await expect(
-      page.getByRole('button', { name: 'Lease', exact: true }),
-    ).toHaveAttribute('aria-pressed', 'true')
-    await expect(
-      page
-        .getByRole('group', { name: 'Tenancy' })
-        .getByRole('button', { name: /Aino Koski/ }),
-    ).toHaveAttribute('aria-pressed', 'true')
   })
 })

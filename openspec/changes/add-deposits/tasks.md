@@ -110,7 +110,7 @@ _Outcome:_ Finlex (481/1995 § 8) and the Tax Administration's guidance §2.1.3 
 
 ## 9. The deposit return page and reminder
 
-- [ ] 9.1 Route `src/routes/_authed/properties/$propertyId/tenancy/$tenancyId/deposit.tsx` and `features/deposits/DepositReturnForm.tsx`:
+- [x] 9.1 Route `src/routes/_authed/properties/$propertyId/tenancy/$tenancyId/deposit.tsx` and `features/deposits/DepositReturnForm.tsx`:
   - the tenancy summary
   - *Kokonaan* or *Vähennyksin*, and the return date
   - the two amounts, with the rent missing by month under the first, and the note
@@ -118,14 +118,14 @@ _Outcome:_ Finlex (481/1995 § 8) and the Tax Administration's guidance §2.1.3 
   - *Tallenna palautus*, and for a recorded return *Poista palautus* with a confirmation
 
   Members are sent back to the Tenancy page.
-- [ ] 9.2 `TenancyPage.tsx`:
+- [x] 9.2 `TenancyPage.tsx`:
   - the *Vakuus palauttamatta* cards at the top (`pendingReturns`), with the deadline and *Kirjaa palautus* for owners
   - each other tenancy's deposit status
-- [ ] 9.3 The correction form of an ended tenancy with a deposit shows the return's status and opens the return page.
-- [ ] 9.4 The month's payments page and the rent payments page label payments from a deposit *Vakuudesta*, with no delete button.
-- [ ] 9.5 fi, sv and en messages, with the translate skill. Component tests for the form's computed amount, the reminder and the labels.
-- [ ] 9.6 Playwright tests for "Recording a deposit return", "Correcting and deleting a deposit return" and "The deposit return reminder". The data is set up with an earlier tenancy ended in the past through the forms. `e2e/support/deposits.ts` has `openDepositReturn` and `recordDepositReturn`.
-- [ ] 9.7 Docs:
+- [x] 9.3 The correction form of an ended tenancy with a deposit shows the return's status and opens the return page.
+- [x] 9.4 The month's payments page and the rent payments page label payments from a deposit *Vakuudesta*, with no delete button.
+- [x] 9.5 fi, sv and en messages, with the translate skill. Component tests for the form's computed amount, the reminder and the labels.
+- [x] 9.6 Playwright tests for "Recording a deposit return", "Correcting and deleting a deposit return" and "The deposit return reminder". The data is set up with an earlier tenancy ended in the past through the forms. `e2e/support/deposits.ts` has `openDepositReturn` and `recordDepositReturn`.
+- [x] 9.7 Docs:
   - CONCEPT.md: §3 (the End tenancy row), §4.2 (the 14-day deadline, rent kept as payments, damage in row 2.4), §5.2 (`tenancies.deposit`, `deposit_returns`, `rent_payments.deposit_return_id`), and §6 (tick "Logging the deposit return later has no screen"; add the open question of repairs paid in another year)
   - CLAUDE.md "Current state": deposits, the return and the lease card; `e2e/support/deposits.ts` among the e2e helpers
 
