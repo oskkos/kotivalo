@@ -376,7 +376,7 @@
   "flat_tax_kicker_whole": "Lomake 7H · {year} · koko asunto (100 %)",
   "flat_tax_missing": "Puuttuu",
   "flat_tax_no_parts": "Ei kirjauksia",
-  "flat_tax_no_share_person_text": "{name} ei omistanut osuutta tässä asunnossa vuonna {year}, joten lomakkeelle 7H ei ole lukuja.",
+  "flat_tax_no_share_person_text": "{name} ei omistanut osuutta tästä asunnosta vuonna {year}, joten lomakkeelle 7H ei ole lukuja.",
   "flat_tax_no_share_text": "Sinulla ei ollut omistusosuutta tässä asunnossa vuonna {year}, joten lomakkeelle 7H ei ole lukuja.",
   "flat_tax_no_share_title": "Ei omistusosuutta vuonna {year}",
   "flat_tax_no_share_whole_text": "Asunnolla ei ollut omistajaa vuonna {year}, joten lomakkeelle 7H ei ole lukuja.",
@@ -1311,16 +1311,16 @@
   "year_summary_owner_share": "{name} {share}",
   "year_summary_page_title": "Vuosiyhteenveto – Kotivalo",
   "year_summary_person_band_text": "Mukana ovat vain asunnot, jotka näet. Hänellä voi olla muitakin vuokra-asuntoja, jotka kuuluvat hänen veroilmoitukseensa.",
-  "year_summary_person_band_title": "Vain yhteiset asunnot",
-  "year_summary_person_empty_text": "{name} ei omistanut osuutta yhdessäkään asunnossa, jonka näet, vuonna {year}.",
+  "year_summary_person_band_title": "Vain jaetut asunnot",
+  "year_summary_person_empty_text": "Vuonna {year} {name} ei omistanut osuutta yhdestäkään asunnosta, jonka näet.",
   "year_summary_person_intro": "Luvut on laskettu hänen osuudellaan samoin kuin omasi. Avaa asunto ja kopioi luvut OmaVeroon.",
   "year_summary_person_not_included": [
     {
       "declarations": ["input count", "local countPlural = count: plural"],
       "selectors": ["countPlural"],
       "match": {
-        "countPlural=one": "Ei mukana: {flats}, koska {name} ei omistanut siinä osuutta vuonna {year}.",
-        "countPlural=other": "Ei mukana: {flats}, koska {name} ei omistanut niissä osuutta vuonna {year}."
+        "countPlural=one": "Ei mukana: {flats}, koska {name} ei omistanut siitä osuutta vuonna {year}.",
+        "countPlural=other": "Ei mukana: {flats}, koska {name} ei omistanut niistä osuutta vuonna {year}."
       }
     }
   ],

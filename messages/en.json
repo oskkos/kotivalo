@@ -1312,7 +1312,7 @@
   "year_summary_page_title": "Year summary – Kotivalo",
   "year_summary_person_band_text": "Only the flats you can see are counted. They may have other rental flats to report.",
   "year_summary_person_band_title": "Shared flats only",
-  "year_summary_person_empty_text": "{name} had no ownership share in any of the flats you see in {year}.",
+  "year_summary_person_empty_text": "In {year}, {name} had no ownership share in any of the flats you see.",
   "year_summary_person_intro": "The figures are calculated on their share, the same way as your own. Open a flat and copy the figures into MyTax.",
   "year_summary_person_not_included": [
     {
