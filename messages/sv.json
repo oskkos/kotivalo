@@ -301,9 +301,9 @@
   "flat_tax_check_partly_paid_month": "{month} ({amount} saknas)",
   "flat_tax_check_partly_paid_text": "De registrerade betalningarna är mindre än hyran. Om resten kom, registrera den.",
   "flat_tax_check_partly_paid_title": "Hyran delvis betald: {months}",
-  "flat_tax_check_share_text": "Blanketten har en andel per bostad. Siffrorna är räknade med andelen varje dag, och som andel anges din andel i slutet av ditt ägande under året.",
+  "flat_tax_check_share_text": "Blanketten har en andel per bostad. Siffrorna har räknats med andelen för varje dag, och som andel anges din andel i slutet av ditt ägande under året.",
   "flat_tax_check_share_title": "Din andel ändrades {date}: {from} → {to}",
-  "flat_tax_check_treatment_text": "Finansieringsvederlagen för dessa månader finns varken på rad 2.3 eller bland de fonderade förrän husbolagets behandling har angetts.",
+  "flat_tax_check_treatment_text": "Tills husbolagets behandling har angetts finns finansieringsvederlagen för dessa månader varken på rad 2.3 eller bland de fonderade.",
   "flat_tax_check_treatment_title": [
     {
       "declarations": ["input count", "local countPlural = count: plural"],

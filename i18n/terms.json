@@ -1245,12 +1245,12 @@
   },
   "other_costs": {
     "code": "otherCosts",
-    "definition": "Costs of renting out a flat that have no row of their own on form 7H, such as insurance and parking or sauna charges; row 2.5.",
+    "definition": "Other costs of the rental income that have no row of their own on form 7H; row 2.5.",
     "showOriginal": true,
     "fi": {
       "term": "muut kulut",
       "match": [
-        "mu(?:ut|iden|ita|ihin|issa|ista|iksi|uta|uhun|ussa|usta) kul(?:ut|ujen|uja|uihin|uissa|uista|uiksi|ua|uun|ussa|usta)"
+        "mu(?:ut|u|un|iden|ita|ihin|issa|ista|ille|illa|ilta|iksi|uta|uhun|ussa|usta|ulle|ulla|ulta) kul(?:ut|u|un|ujen|uja|uihin|uissa|uista|uille|uilla|uilta|uiksi|ua|uun|ussa|usta|ulle|ulla|ulta)"
       ],
       "status": "verified",
       "sources": [
@@ -1263,7 +1263,7 @@
     },
     "sv": {
       "term": "övriga kostnader",
-      "match": ["övriga kostnad\\p{L}*"],
+      "match": ["övriga? kostnad\\p{L}*"],
       "status": "verified",
       "sources": [
         {
@@ -1285,7 +1285,7 @@
         }
       ]
     },
-    "notes": "The Tax Administration does not name what belongs here (CONCEPT.md §4.5); Kotivalo puts insurance, other expenses and parking, sauna and other usage charges in it."
+    "notes": "The Tax Administration does not name what belongs here (CONCEPT.md §4.5); Kotivalo puts insurance, other expenses and parking, sauna and other usage charges in it. Every match is meant as form row 2.5: a message that says muut kulut in a general sense goes in the language's except."
   },
   "owner": {
     "code": "owner",

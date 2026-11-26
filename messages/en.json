@@ -303,7 +303,7 @@
   "flat_tax_check_partly_paid_title": "Rent partly paid: {months}",
   "flat_tax_check_share_text": "The form has one share per flat. The figures use the share on each day, and the share given is yours at the end of your ownership in the year.",
   "flat_tax_check_share_title": "Your share changed on {date}: {from} → {to}",
-  "flat_tax_check_treatment_text": "These months' financing charges are neither in row 2.3 nor among those placed in reserve until the housing company's treatment is set.",
+  "flat_tax_check_treatment_text": "Until the housing company's treatment is set, these months' financing charges are in neither row 2.3 nor the charges placed in reserve.",
   "flat_tax_check_treatment_title": [
     {
       "declarations": ["input count", "local countPlural = count: plural"],
