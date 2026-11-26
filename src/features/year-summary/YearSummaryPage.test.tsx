@@ -43,7 +43,6 @@ const view = (over: Partial<YearSummaryView> = {}): YearSummaryView => ({
   holder: { kind: 'own' },
   people: [],
   counts: { own: 1, whole: 1 },
-  holderHasYears: true,
   flats: [card()],
   notIncluded: [],
   ...over,
