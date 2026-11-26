@@ -108,7 +108,14 @@ describe('The year summary calculation', () => {
   test('stays inside the Free plan CPU time with 10 flats', () => {
     const flats = Array.from({ length: 10 }, (_, i) => flat(i))
     const run = () =>
-      flats.map((input) => flatYear(input, 'annika', 2025, '2026-11-25'))
+      flats.map((input) =>
+        flatYear(
+          input,
+          { kind: 'owner', userId: 'annika' },
+          2025,
+          '2026-11-25',
+        ),
+      )
     run() // warm up
     // The fastest of ten runs: other test files running at the same time
     // slow single runs down, but rarely all of them.

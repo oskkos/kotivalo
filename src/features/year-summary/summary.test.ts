@@ -85,8 +85,10 @@ const rentIn2025 = (paidOnDay = '04') =>
     return payment(month, 89000, `${month}-${paidOnDay}`)
   })
 
+const ANNIKA = { kind: 'owner', userId: 'annika' } as const
+
 const year = (data: FlatYearInput, y = 2025, today = TODAY) =>
-  flatYear(data, 'annika', y, today)
+  flatYear(data, ANNIKA, y, today)
 
 describe('Form 7H rows of the own share', () => {
   test('Rent counts in the year it was paid', () => {
@@ -384,20 +386,20 @@ describe('The year the summary opens on', () => {
   const owned = ownership([10000, '2024-05-01', null])
 
   test('In spring the previous year opens', () => {
-    const years = summaryYears(owned, 'annika', '2026-03-15')
+    const years = summaryYears(owned, ANNIKA, '2026-03-15')
     expect(years).toEqual([2024, 2025, 2026])
     expect(openingYear(years, '2026-03-15')).toBe(2025)
   })
 
   test('From July the current year opens', () => {
-    const years = summaryYears(owned, 'annika', '2026-07-01')
+    const years = summaryYears(owned, ANNIKA, '2026-07-01')
     expect(openingYear(years, '2026-07-01')).toBe(2026)
   })
 
   test('A first share this year', () => {
     const years = summaryYears(
       ownership([10000, '2026-02-01', null]),
-      'annika',
+      ANNIKA,
       '2026-03-15',
     )
     expect(years).toEqual([2026])
@@ -673,5 +675,78 @@ describe('Checks in the year summary', () => {
       // June 1–14 and 15–30 of 89000 a month, by days: 41533 + 47467.
       months: [{ month: '2025-06', missing: 89000 - 40000 }],
     })
+  })
+})
+
+/** Annika and Mikko owning together: `[annika, mikko, from, to]` each. */
+const together = (
+  ...spans: [number, number, string, string | null][]
+): Period[] =>
+  spans.map(([annika, mikko, validFrom, validTo]) => ({
+    validFrom,
+    validTo,
+    reason: null,
+    shares: [
+      { userId: 'annika', share: annika },
+      { userId: 'mikko', share: mikko },
+    ].filter((s) => s.share > 0),
+  }))
+
+const MIKKO = { kind: 'owner', userId: 'mikko' } as const
+const WHOLE = { kind: 'whole' } as const
+
+describe('The whole flats', () => {
+  const split = input({
+    ownership: together([5000, 5000, '2024-01-01', null]),
+    payments: [payment('2025-02', 89000, '2025-02-03')],
+  })
+
+  test("The whole flat counts every owner's share", () => {
+    expect(flatYear(split, WHOLE, 2025, TODAY).rows['2.1'].cents).toBe(89000)
+  })
+
+  test("Another owner's rows at their share", () => {
+    expect(flatYear(split, MIKKO, 2025, TODAY).rows['2.1'].cents).toBe(44500)
+    expect(flatYear(split, ANNIKA, 2025, TODAY).rows['2.1'].cents).toBe(44500)
+  })
+
+  test('An owner change in the middle of the year', () => {
+    const changed = input({
+      ownership: [
+        ...together([5000, 5000, '2024-01-01', '2025-06-30']),
+        ...together([10000, 0, '2025-07-01', null]),
+      ],
+      payments: [
+        payment('2025-02', 89000, '2025-02-03'),
+        payment('2025-08', 89000, '2025-08-03'),
+      ],
+    })
+    const whole = flatYear(changed, WHOLE, 2025, TODAY)
+    expect(whole.rows['2.1'].cents).toBe(178000)
+    expect(whole.details.share).toBe(10000)
+    expect(whole.checks.some((c) => c.kind === 'share_changed')).toBe(false)
+    expect(
+      flatYear(changed, ANNIKA, 2025, TODAY).checks.some(
+        (c) => c.kind === 'share_changed',
+      ),
+    ).toBe(true)
+  })
+
+  test('A flat without an owner in the year is not included', () => {
+    expect(flatYear(split, WHOLE, 2023, TODAY).included).toBe(false)
+  })
+})
+
+describe('The years of another owner', () => {
+  test('The years of another owner', () => {
+    const owned = together(
+      [10000, 0, '2022-06-12', '2025-02-28'],
+      [5000, 5000, '2025-03-01', null],
+    )
+    const today = '2026-03-15'
+    expect(summaryYears(owned, MIKKO, today)).toEqual([2025, 2026])
+    expect(summaryYears(owned, WHOLE, today)).toEqual([
+      2022, 2023, 2024, 2025, 2026,
+    ])
   })
 })

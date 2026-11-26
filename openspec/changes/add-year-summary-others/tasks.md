@@ -1,8 +1,8 @@
 ## 1. A holder in the calculation
 
-- [ ] 1.1 `summary.ts`: `Holder` and `holderShare` (design.md, decision 1). `flatYear`, `ownedInYear`, `shareAtEnd`, `paymentChecks`, `shareChanges` and `summaryYears` take a `Holder`. `whole` sums the period's shares, and `shareChanges` returns nothing for it.
-- [ ] 1.2 Update the callers in `year-summary.server.ts` to `{ kind: 'owner', userId }`, and the arguments in `summary.test.ts` and `summary.cpu.test.ts`. The own share's results don't change.
-- [ ] 1.3 Unit tests in `summary.test.ts`:
+- [x] 1.1 `summary.ts`: `Holder` and `holderShare` (design.md, decision 1). `flatYear`, `ownedInYear`, `shareAtEnd`, `paymentChecks`, `shareChanges` and `summaryYears` take a `Holder`. `whole` sums the period's shares, and `shareChanges` returns nothing for it.
+- [x] 1.2 Update the callers in `year-summary.server.ts` to `{ kind: 'owner', userId }`, and the arguments in `summary.test.ts` and `summary.cpu.test.ts`. The own share's results don't change.
+- [x] 1.3 Unit tests in `summary.test.ts`:
   - "The whole flat counts every owner's share"
   - the whole flat over a mid-year owner change, with no `share_changed` check
   - another owner's rows at their share
