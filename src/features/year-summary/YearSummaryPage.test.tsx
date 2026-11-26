@@ -267,7 +267,7 @@ describe('Choosing whose figures', () => {
     ).toBeVisible()
     expect(
       screen.getByText(
-        'Mikko Virtanen had no ownership share in any of the flats you see in 2025.',
+        'In 2025, Mikko Virtanen had no ownership share in any of the flats you see.',
       ),
     ).toBeVisible()
     await userEvent.click(screen.getByRole('button', { name: /Whose figures/ }))
