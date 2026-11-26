@@ -46,7 +46,7 @@ export const Route = createFileRoute(
 })
 
 function EditTenancyRoute() {
-  const { tenancy, property, today } = Route.useLoaderData()
+  const { tenancy, property, today, rents } = Route.useLoaderData()
   const { propertyId } = Route.useParams()
   const router = useRouter()
   const toPage = () =>
@@ -61,6 +61,7 @@ function EditTenancyRoute() {
         propertyId={propertyId}
         address={property.streetAddress}
         editing={tenancy}
+        startRent={rents.at(0)?.value}
         onSaved={async () => {
           await router.invalidate()
           await toPage()

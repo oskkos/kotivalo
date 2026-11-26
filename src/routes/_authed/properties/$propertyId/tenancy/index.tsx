@@ -143,6 +143,18 @@ function TenancyRoute() {
             {m.amounts_change()}
           </ButtonLink>
         )}
+        depositChange={(tenancy) => (
+          <ButtonLink
+            to="/properties/$propertyId/tenancy/$tenancyId/edit"
+            params={{ propertyId, tenancyId: tenancy.id }}
+            variant="outlined"
+            sx={{ minHeight: 44, px: 2, flexShrink: 0 }}
+          >
+            {tenancy.deposit != null && tenancy.deposit > 0
+              ? m.amounts_change()
+              : m.deposit_card_add()}
+          </ButtonLink>
+        )}
         onChangeOccupants={setChangingOccupants}
         onUndoOccupants={setUndoingOccupants}
         currentActions={(tenancy) => {

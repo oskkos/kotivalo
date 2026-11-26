@@ -15,7 +15,7 @@ import { TextField } from '#/components/form/TextField'
 import { typedDate } from '#/features/ownership/schemas'
 import { clientLog } from '#/lib/client-log'
 import { parseFiDate } from '#/lib/dates'
-import { formatDate } from '#/lib/format'
+import { formatDate, formatMoney } from '#/lib/format'
 import { failureReason } from '#/lib/network-error'
 import type { AlertReason, FieldReason } from '#/lib/reasons'
 import { m } from '#/paraglide/messages.js'
@@ -241,6 +241,11 @@ export function EndTenancyForm(props: Props) {
         <Typography variant="body2" color="text.secondary">
           {m.tenancy_end_info()}
         </Typography>
+        {tenancy.deposit != null && tenancy.deposit > 0 ? (
+          <Typography variant="body2" sx={{ fontWeight: 800 }}>
+            {m.tenancy_end_deposit({ amount: formatMoney(tenancy.deposit) })}
+          </Typography>
+        ) : null}
         {alert === undefined ? null : <ReasonAlert reason={alert} />}
       </Stack>
       <Box

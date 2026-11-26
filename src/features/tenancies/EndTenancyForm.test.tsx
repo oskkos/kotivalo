@@ -218,3 +218,22 @@ describe('cancel ending dialog', () => {
     ).toBeVisible()
   })
 })
+
+describe('The deposit when ending a tenancy', () => {
+  test('The end form shows the deposit', () => {
+    setup({ ...aino, deposit: 178000 })
+    expect(
+      screen.getByText(
+        /The deposit is €1,780.00. It is returned after the final inspection/,
+      ),
+    ).toBeVisible()
+    expect(
+      screen.getByText(/recorded later from the Tenancy page/),
+    ).toBeVisible()
+  })
+
+  test('No deposit, no deposit section', () => {
+    setup(aino)
+    expect(screen.queryByText(/The deposit is/)).toBeNull()
+  })
+})

@@ -347,3 +347,58 @@ describe('the fees on the tenancy page', () => {
     expect(screen.getByRole('link', { name: 'Change fee' })).toBeVisible()
   })
 })
+
+describe('The deposit on the tenancy page', () => {
+  test('The deposit card of the current tenancy', () => {
+    setup({ tenancies: [{ ...aino, deposit: 178000 }] })
+    const card = screen.getByRole('region', { name: 'Deposit' })
+    expect(within(card).getByText('€1,780.00')).toBeVisible()
+  })
+
+  test('a tenancy without a deposit says so', () => {
+    setup({})
+    const card = screen.getByRole('region', { name: 'Deposit' })
+    expect(within(card).getByText('No deposit.')).toBeVisible()
+  })
+
+  test('owners get the action, members do not', () => {
+    render(
+      <TenancyPage
+        view={{
+          role: 'owner',
+          today: '2026-11-22',
+          tenancies: [aino],
+          rents: {},
+          occupants: {},
+          fees: {},
+        }}
+        address="Kuusikuja 3 B 12"
+        onBack={vi.fn()}
+        depositChange={() => <a href="/edit">Add</a>}
+      />,
+    )
+    const card = screen.getByRole('region', { name: 'Deposit' })
+    expect(within(card).getByRole('link', { name: 'Add' })).toBeVisible()
+  })
+
+  test("A member sees the deposit but can't change it", () => {
+    render(
+      <TenancyPage
+        view={{
+          role: 'member',
+          today: '2026-11-22',
+          tenancies: [{ ...aino, deposit: 178000 }],
+          rents: {},
+          occupants: {},
+          fees: {},
+        }}
+        address="Kuusikuja 3 B 12"
+        onBack={vi.fn()}
+        depositChange={() => <a href="/edit">Change</a>}
+      />,
+    )
+    const card = screen.getByRole('region', { name: 'Deposit' })
+    expect(within(card).getByText('€1,780.00')).toBeVisible()
+    expect(within(card).queryByRole('link')).toBeNull()
+  })
+})

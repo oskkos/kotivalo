@@ -43,7 +43,9 @@ import {
 import { contractShortLabel } from './labels'
 import { offeredFees, type FeeOfTenancy } from './fees'
 import { suggestedRent } from './rent'
+import { depositOverLimit } from '#/features/deposits/deposit'
 import {
+  typedDeposit,
   typedDueDay,
   typedOccupants,
   typedTenantEmail,
@@ -63,6 +65,8 @@ interface Props {
   tenancies?: readonly Tenancy[]
   /** Adding: each tenancy's tenant fees, for the fees offered. */
   tenancyFees?: Partial<Record<string, readonly FeeOfTenancy[]>>
+  /** Correcting: the rent in effect on the tenancy's start day, cents. */
+  startRent?: number
   /** Adding: today in Finland. */
   today?: IsoDate
   onSaved: () => Promise<void>
@@ -85,6 +89,7 @@ type Field =
   | 'termEnd'
   | 'rent'
   | 'occupants'
+  | 'deposit'
   | 'dueDay'
   | 'noticeDate'
   | 'lastDay'
@@ -102,6 +107,8 @@ const FIELD_OF_TENANCY: Partial<Record<FieldReason, Field>> = {
   tenancy_due_day_invalid: 'dueDay',
   amount_invalid: 'rent',
   occupants_invalid: 'occupants',
+  deposit_amount_invalid: 'deposit',
+  deposit_below_kept: 'deposit',
 }
 
 /**
@@ -205,6 +212,8 @@ export function TenancyForm(props: Props) {
       termEnd: editing?.termEnd ? formatDate(editing.termEnd) : '',
       rent: editing ? '' : suggestion('9999-12-31'),
       occupants: '1',
+      deposit:
+        editing?.deposit != null ? formatAmountInput(editing.deposit) : '',
       dueDay: editing ? String(editing.dueDay) : '',
       noticeDate: '',
       lastDay: '',
@@ -284,6 +293,19 @@ export function TenancyForm(props: Props) {
     2,
   )
   const persons = Number(useSelector(form.store, (s) => s.values.occupants))
+  // The warning under the deposit: more than three months of the rent.
+  const depositCents = parseDecimal(
+    useSelector(form.store, (s) => s.values.deposit),
+    2,
+  )
+  const limitedRent = editing ? props.startRent : rentCents
+  const overLimit =
+    depositCents === undefined ||
+    depositCents <= 0 ||
+    limitedRent === undefined ||
+    limitedRent <= 0
+      ? null
+      : depositOverLimit(depositCents, limitedRent)
   const monthTotal =
     rentCents === undefined
       ? undefined
@@ -586,6 +608,32 @@ export function TenancyForm(props: Props) {
               )}
             </form.Field>
           </Box>
+          <form.Field
+            name="deposit"
+            validators={{ onChange: typedDeposit }}
+            listeners={{ onChange: clear('deposit') }}
+          >
+            {(field) => (
+              <TextField
+                field={field}
+                reason={reasons.deposit}
+                label={m.tenancy_form_deposit()}
+                slotProps={{ htmlInput: { inputMode: 'decimal' } }}
+              />
+            )}
+          </form.Field>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mt: -0.75 }}
+            role={overLimit === null ? undefined : 'status'}
+          >
+            {overLimit === null
+              ? m.tenancy_form_deposit_hint()
+              : m.tenancy_form_deposit_over_limit({
+                  amount: formatMoney(overLimit),
+                })}
+          </Typography>
           {editing ? (
             (props.rentChange ?? null)
           ) : (

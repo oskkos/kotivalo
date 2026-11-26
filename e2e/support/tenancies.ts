@@ -18,6 +18,8 @@ export interface TenantDetails {
   dueDay?: string
   /** As typed; the form's default (1) otherwise. */
   occupants?: string
+  /** The deposit as typed; none otherwise. */
+  deposit?: string
   /** The previous tenancy's fees to continue, by their checkbox's name. */
   keepFees?: (string | RegExp)[]
   /** An earlier tenancy's ending, recorded in the same form. */
@@ -72,6 +74,9 @@ export async function addTenant(
     await page
       .getByRole('textbox', { name: 'Occupants' })
       .fill(tenant.occupants)
+  }
+  if (tenant.deposit !== undefined) {
+    await page.getByRole('textbox', { name: 'Deposit €' }).fill(tenant.deposit)
   }
   for (const fee of tenant.keepFees ?? []) {
     await page.getByRole('checkbox', { name: fee }).check()

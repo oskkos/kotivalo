@@ -14,6 +14,7 @@ import { formatDate, formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
 import { colors, radii } from '#/theme/tokens'
 import { contractLabel, datesLabel, endingLabel, statusLabel } from './labels'
+import { DepositCard } from './DepositCard'
 import { FeesCard } from './FeesCard'
 import type { FeeOfTenancy } from './fees'
 import { OccupantsCard } from './OccupantsCard'
@@ -54,6 +55,8 @@ interface Props {
   feeAdd?: (tenancy: Tenancy) => ReactNode
   /** Owners only: the link to change a fee of the current tenancy. */
   feeChange?: (tenancy: Tenancy, fee: FeeOfTenancy) => ReactNode
+  /** Owners only: the link to the correction form that sets the deposit. */
+  depositChange?: (tenancy: Tenancy) => ReactNode
   /** Owners only: opening the dialog that changes the occupants. */
   onChangeOccupants?: (tenancy: Tenancy) => void
   /** Owners only: undoing the latest occupants change. */
@@ -404,6 +407,12 @@ export function TenancyPage(props: Props) {
                 ? (fee) => props.feeChange?.(current, fee)
                 : undefined
             }
+          />
+        ) : null}
+        {current ? (
+          <DepositCard
+            deposit={current.deposit}
+            action={owner ? props.depositChange?.(current) : undefined}
           />
         ) : null}
         {others.length > 0 ? (

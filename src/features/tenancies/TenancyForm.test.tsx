@@ -157,6 +157,7 @@ describe('tenancy form', () => {
         occupants: '2',
         copyFeeIds: [],
         dueDay: '5',
+        deposit: '',
       },
     })
   })
@@ -398,5 +399,70 @@ describe('Occupants and fees of a new tenancy', () => {
     setup()
     expect(box('Occupants')).toHaveValue('1')
     expect(screen.queryByRole('checkbox', { name: /€/ })).toBeNull()
+  })
+})
+
+describe("A tenancy's deposit", () => {
+  test("A deposit over three months' rent is warned about", async () => {
+    const { user } = setup(undefined, [], {})
+    await user.type(box('Monthly rent (€)'), '890')
+    await user.type(box('Deposit €'), '3000')
+    expect(
+      screen.getByText(
+        /at most three months' rent, which is €2,670.00. The deposit is still saved/,
+      ),
+    ).toBeVisible()
+  })
+
+  test('a deposit within the limit shows only the hint', async () => {
+    const { user } = setup()
+    await user.type(box('Monthly rent (€)'), '890')
+    await user.type(box('Deposit €'), '1780')
+    expect(screen.queryByText(/at most three months/)).toBeNull()
+    expect(screen.getByText(/A deposit is not rental income/)).toBeVisible()
+  })
+
+  test('the corrected tenancy uses the rent on its start day', () => {
+    const withDeposit: Tenancy = { ...aino, deposit: 300000 }
+    render(
+      <TenancyForm
+        propertyId="flat"
+        address="Kuusikuja 3 B 12"
+        editing={withDeposit}
+        startRent={85000}
+        onSaved={vi.fn(() => Promise.resolve())}
+        onClose={vi.fn()}
+      />,
+    )
+    expect(box('Deposit €')).toHaveValue('3000.00')
+    expect(screen.getByText(/which is €2,550.00/)).toBeVisible()
+  })
+
+  test('An invalid deposit is refused', async () => {
+    const { user } = setup()
+    await user.type(box('Name'), 'Mikko Lehtinen')
+    await user.type(box('Starts'), '01/01/2027')
+    await user.type(box('Monthly rent (€)'), '890')
+    await user.type(box('Due day'), '5')
+    await user.type(box('Deposit €'), '0')
+    await user.click(screen.getByRole('button', { name: 'Save tenant' }))
+    expect(await screen.findByText(/Enter the deposit in euros/)).toBeVisible()
+    expect(createTenancy).not.toHaveBeenCalled()
+  })
+
+  test('the deposit is sent as typed', async () => {
+    createTenancy.mockResolvedValue({ ok: true, tenancyId: 't9' })
+    const { user } = setup()
+    await user.type(box('Name'), 'Mikko Lehtinen')
+    await user.type(box('Starts'), '01/01/2027')
+    await user.type(box('Monthly rent (€)'), '890')
+    await user.type(box('Due day'), '5')
+    await user.type(box('Deposit €'), '1780')
+    await user.click(screen.getByRole('button', { name: 'Save tenant' }))
+    await waitFor(() => {
+      expect(createTenancy).toHaveBeenCalledWith({
+        data: expect.objectContaining({ deposit: '1780' }) as unknown,
+      })
+    })
   })
 })
