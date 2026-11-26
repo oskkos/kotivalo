@@ -52,7 +52,7 @@ const flat = (over: Partial<Flat> = {}): Flat => ({
       { key: 'parking', cents: 7200 },
     ]),
   },
-  outside: { capitalised: 0, improvements: 0 },
+  outside: { capitalised: 0, improvements: 0, depositDamage: 0 },
   details: {
     name: 'As Oy Kuusikuja 3',
     businessId: '0112038-9',
@@ -130,13 +130,51 @@ describe('The form 7H page of a flat', () => {
     render(
       <FlatTaxPage
         view={view(
-          flat({ outside: { capitalised: 47298, improvements: 60000 } }),
+          flat({
+            outside: {
+              capitalised: 47298,
+              improvements: 60000,
+              depositDamage: 0,
+            },
+          }),
         )}
       />,
     )
     const card = screen.getByRole('region', { name: 'Not on form 7H' })
     expect(within(card).getByText('€472.98')).toBeVisible()
     expect(within(card).getByText('€600.00')).toBeVisible()
+  })
+
+  test('shows damage compensation over the repairs as tax-free', () => {
+    render(
+      <FlatTaxPage
+        view={view(
+          flat({
+            outside: { capitalised: 0, improvements: 0, depositDamage: 5000 },
+          }),
+        )}
+      />,
+    )
+    const card = screen.getByRole('region', { name: 'Not on form 7H' })
+    expect(
+      within(card).getByText('Damage compensated from the deposit'),
+    ).toBeVisible()
+    expect(within(card).getByText('€50.00')).toBeVisible()
+    expect(within(card).getByText(/Tax-free compensation/)).toBeVisible()
+  })
+
+  test('names the damage compensation as a negative part of row 2.4', () => {
+    const rows = {
+      ...flat().rows,
+      '2.4': row(20000, [
+        { key: 'annual_repair', cents: 30000 },
+        { key: 'deposit_damage', cents: -10000 },
+      ]),
+    }
+    render(<FlatTaxPage view={view(flat({ rows }))} />)
+    expect(
+      within(rowOf('2.4')).getByText(/Damage compensated from the deposit/),
+    ).toBeVisible()
   })
 
   test('A flat without a share that year', () => {

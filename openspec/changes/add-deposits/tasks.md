@@ -79,16 +79,16 @@ _Outcome:_ Finlex (481/1995 § 8) and the Tax Administration's guidance §2.1.3 
 
 ## 6. Deposits in the year summary
 
-- [ ] 6.1 `year-summary.server.ts` reads `depositReturns.forPropertiesYear` in `loadInputs` (design.md, decision 5). The query count test still holds.
-- [ ] 6.2 `summary.ts` (design.md, decision 4):
+- [x] 6.1 `year-summary.server.ts` reads `depositReturns.forPropertiesYear` in `loadInputs` (design.md, decision 5). The query count test still holds.
+- [x] 6.2 `summary.ts` (design.md, decision 4):
   - the `deposit_damage` part of row 2.4 at the share on the return date, capped after rounding
   - `deposit_damage_surplus` on the Not on form 7H card
-- [ ] 6.3 `FlatTaxPage.tsx`:
+- [x] 6.3 `FlatTaxPage.tsx`:
   - the part's and the surplus's labels, and the surplus note
   - `flat_tax_note` without "Vakuuksia ei vielä lasketa"
 
   The messages in fi, sv and en, with the translate skill.
-- [ ] 6.4 Tests:
+- [x] 6.4 Tests:
   - unit tests for "Damage kept from a deposit lowers row 2.4", "Damage compensation over the repairs leaves row 2.4 at 0", "A deposit return counts at the share on its date", "Damage compensation over the repairs is shown" and "The rent kept counts in the year of the return"
   - the form 7H page's component test for the new labels
   - an update to any test asserting the old note

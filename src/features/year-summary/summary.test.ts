@@ -205,6 +205,54 @@ describe('Form 7H rows of the own share', () => {
     })
   })
 
+  test('Damage kept from a deposit lowers row 2.4', () => {
+    const data = input({
+      ownership: always(5000),
+      entries: [entry('annual_repair', 60000, '2027-01-20')],
+      depositReturns: [{ returnedOn: '2027-01-15', damageKept: 20000 }],
+    })
+    expect(year(data, 2027, '2027-06-01').rows['2.4']).toEqual({
+      cents: 20000,
+      parts: [
+        { key: 'annual_repair', cents: 30000 },
+        { key: 'deposit_damage', cents: -10000 },
+      ],
+    })
+  })
+
+  test('Damage compensation over the repairs leaves row 2.4 at 0', () => {
+    const data = input({
+      entries: [entry('annual_repair', 15000, '2027-03-01')],
+      depositReturns: [{ returnedOn: '2027-01-15', damageKept: 20000 }],
+    })
+    expect(year(data, 2027, '2027-06-01').rows['2.4']).toEqual({
+      cents: 0,
+      parts: [
+        { key: 'annual_repair', cents: 15000 },
+        { key: 'deposit_damage', cents: -15000 },
+      ],
+    })
+  })
+
+  test('a return of another year or without repairs changes no row', () => {
+    const data = input({
+      entries: [entry('annual_repair', 15000, '2027-03-01')],
+      depositReturns: [{ returnedOn: '2026-12-20', damageKept: 20000 }],
+    })
+    const result = year(data, 2027, '2027-06-01')
+    expect(result.rows['2.4'].cents).toBe(15000)
+    expect(result.outside.depositDamage).toBe(0)
+    const none = year(
+      input({
+        depositReturns: [{ returnedOn: '2027-01-15', damageKept: 20000 }],
+      }),
+      2027,
+      '2027-06-01',
+    )
+    expect(none.rows['2.4']).toEqual({ cents: 0, parts: [] })
+    expect(none.outside.depositDamage).toBe(20000)
+  })
+
   test('The current year counts the months so far', () => {
     const data = input({
       charges: { maintenance: [amount(20000, '2026-01-01')], financing: [] },
@@ -251,6 +299,22 @@ describe('Shares on the cash basis', () => {
     expect(year(only('2025-08')).rows['2.2'].cents).toBe(15400)
   })
 
+  test('A deposit return counts at the share on its date', () => {
+    const data = input({
+      ownership: ownership(
+        [5000, '2024-01-01', '2027-01-31'],
+        [10000, '2027-02-01', null],
+      ),
+      entries: [entry('annual_repair', 80000, '2027-03-01')],
+      depositReturns: [{ returnedOn: '2027-01-15', damageKept: 20000 }],
+    })
+    expect(
+      year(data, 2027, '2027-06-01').rows['2.4'].parts.find(
+        (part) => part.key === 'deposit_damage',
+      )?.cents,
+    ).toBe(-10000)
+  })
+
   test('Rounding a part once', () => {
     const data = input({
       ownership: always(3333),
@@ -266,7 +330,27 @@ describe('Shares on the cash basis', () => {
   })
 })
 
+describe('Rent kept from the deposit', () => {
+  test('The rent kept counts in the year of the return', () => {
+    const data = input({
+      payments: [payment('2026-12', 30000, '2027-01-15')],
+    })
+    expect(year(data, 2027, '2027-06-01').rows['2.1'].cents).toBe(30000)
+    expect(year(data, 2026, '2027-06-01').rows['2.1'].cents).toBe(0)
+  })
+})
+
 describe('The Not on form 7H card', () => {
+  test('Damage compensation over the repairs is shown', () => {
+    const data = input({
+      entries: [entry('annual_repair', 15000, '2027-03-01')],
+      depositReturns: [{ returnedOn: '2027-04-01', damageKept: 20000 }],
+    })
+    const result = year(data, 2027, '2027-06-01')
+    expect(result.outside.depositDamage).toBe(5000)
+    expect(result.rows['2.4'].cents).toBe(0)
+  })
+
   test('Capitalised financing charges', () => {
     const data = input({
       ownership: always(5000),

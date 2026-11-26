@@ -1,5 +1,6 @@
 import { env } from 'cloudflare:workers'
 import { beforeEach, describe, expect, test } from 'vitest'
+import { depositReturnRepository } from '#/features/deposits/deposit-return.repository.server'
 import { ownershipRepository } from '#/features/ownership/ownership.repository.server'
 import { propertyRepository } from '#/features/properties/property.repository.server'
 import { recurringAmountRepository } from '#/features/recurring-amounts/recurring-amount.repository.server'
@@ -29,6 +30,7 @@ function deps(userId = 'annika', database = db): YearSummaryDeps {
     ownership: ownershipRepository(database),
     tenancies: tenancyRepository(database),
     payments: rentPaymentRepository(database),
+    depositReturns: depositReturnRepository(database),
     transactions: transactionRepository(database),
     amounts: recurringAmountRepository(database),
     usageCharges: usageChargeRepository(database),
@@ -328,5 +330,24 @@ describe('Loading the year summary', () => {
     expect(view.flats.map((f) => f.propertyId)).toContain(rantatie)
     const flat = await loadFlatYear(deps(), rantatie, 2025)
     expect(flat.ok && flat.flat?.rows['2.1'].cents).toBe(89000)
+  })
+})
+
+describe('Rent kept from the deposit', () => {
+  test('The rent kept counts in the year of the return', async () => {
+    const [tenancy] = await tenancyRepository(db).forProperty(rantatie)
+    const id = await depositReturnRepository(db).record(
+      'annika',
+      rantatie,
+      tenancy.id,
+      { returnedOn: '2025-06-10', rentKept: 30000, damageKept: 0, note: null },
+      [{ month: '2025-05', amount: 30000 }],
+      now,
+    )
+    expect(id).not.toBeNull()
+    const flat = await loadFlatYear(deps(), rantatie, 2025)
+    expect(flat.ok && flat.flat?.rows['2.1'].cents).toBe(119000)
+    const next = await loadFlatYear(deps(), rantatie, 2026)
+    expect(next.ok && next.flat?.rows['2.1'].cents).toBe(0)
   })
 })

@@ -67,6 +67,7 @@ const partLabel: Record<PartKey, () => string> = {
   ...categoryLabel,
   maintenance_charge: kindLabel.maintenance_charge,
   financing_charge: kindLabel.financing_charge,
+  deposit_damage: () => m.flat_tax_part_deposit_damage(),
   water: usagePart('water'),
   parking: usagePart('parking'),
   sauna: usagePart('sauna'),
@@ -705,7 +706,9 @@ export function FlatTaxPage(props: Props) {
                 )
               })}
             </Stack>
-            {flat.outside.capitalised > 0 || flat.outside.improvements > 0 ? (
+            {flat.outside.capitalised > 0 ||
+            flat.outside.improvements > 0 ||
+            flat.outside.depositDamage > 0 ? (
               <Stack
                 component="section"
                 aria-labelledby="flat-tax-outside"
@@ -730,6 +733,13 @@ export function FlatTaxPage(props: Props) {
                     label={m.flat_tax_outside_improvements()}
                     text={m.flat_tax_outside_improvements_text()}
                     amount={flat.outside.improvements}
+                  />
+                ) : null}
+                {flat.outside.depositDamage > 0 ? (
+                  <OutsideRow
+                    label={m.flat_tax_outside_deposit_damage()}
+                    text={m.flat_tax_outside_deposit_damage_text()}
+                    amount={flat.outside.depositDamage}
                   />
                 ) : null}
               </Stack>

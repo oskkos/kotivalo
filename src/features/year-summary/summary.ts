@@ -52,6 +52,8 @@ export type PartKey =
   | TransactionCategory
   | 'maintenance_charge'
   | 'financing_charge'
+  // Damage kept from deposits: a negative part of row 2.4.
+  | 'deposit_damage'
   // A usage charge of the kind, as the housing company charges it.
   | ChargeKind
 
@@ -78,6 +80,7 @@ const PART_ORDER: readonly PartKey[] = [
   'water_charge',
   'financing_charge',
   'annual_repair',
+  'deposit_damage',
   'insurance',
   'other_expense',
   'parking',
@@ -108,6 +111,13 @@ export interface SummaryTenancy {
   fees: readonly FeeOfTenancy[]
 }
 
+/** A deposit return as the summary reads it. */
+export interface SummaryDepositReturn {
+  returnedOn: IsoDate
+  /** Kept for damage, cents. */
+  damageKept: number
+}
+
 /** The housing company details stored on the flat. */
 export interface HousingCompany {
   name: string | null
@@ -129,6 +139,8 @@ export interface FlatYearInput {
   charges: ChargePeriods
   treatments: readonly ValuePeriod<FinancingTreatment>[]
   usageCharges: readonly UsageChargePeriods[]
+  /** The deposit returns of the flat's tenancies; the summary picks the year's. */
+  depositReturns?: readonly SummaryDepositReturn[]
 }
 
 /** The flat details form 7H asks for. */
@@ -157,7 +169,12 @@ export interface FlatYear {
   included: boolean
   rows: Record<RowNumber, Row>
   /** Counted in no row, at the user's share (cents). */
-  outside: { capitalised: number; improvements: number }
+  outside: {
+    capitalised: number
+    improvements: number
+    /** Damage compensation over the year's annual repairs. */
+    depositDamage: number
+  }
   details: FlatDetails
   checks: Check[]
 }
@@ -315,18 +332,23 @@ export function flatYear(
     }
   }
 
+  const rows = Object.fromEntries(
+    ROW_NUMBERS.map((row) => [
+      row,
+      rowOf(byRow.get(row)?.parts([...(rowKeys.get(row) ?? [])]) ?? []),
+    ]),
+  ) as Record<RowNumber, Row>
+  const damage = depositDamage(input, shareAt, inYear, rows['2.4'])
+  rows['2.4'] = damage.row
+
   return {
     propertyId: input.propertyId,
     included: ownedInYear(ownership, userId, year, today),
-    rows: Object.fromEntries(
-      ROW_NUMBERS.map((row) => [
-        row,
-        rowOf(byRow.get(row)?.parts([...(rowKeys.get(row) ?? [])]) ?? []),
-      ]),
-    ) as Record<RowNumber, Row>,
+    rows,
     outside: {
       capitalised: outside.capitalised.cents('financing_charge'),
       improvements: outside.improvements.cents('improvement'),
+      depositDamage: damage.surplus,
     },
     details: flatDetails(input, userId, year, today),
     checks: [
@@ -341,6 +363,43 @@ export function flatYear(
       ...shareChanges(ownership, userId, year, today),
     ],
   }
+}
+
+/**
+ * Damage kept from the deposits returned in the year, at the user's share on
+ * each return date, rounded once: a negative part of row 2.4, at most the
+ * annual repairs part so the row stays at 0 or above. What is over goes
+ * outside form 7H as tax-free compensation.
+ */
+function depositDamage(
+  input: FlatYearInput,
+  shareAt: (date: IsoDate) => number,
+  inYear: (date: IsoDate) => boolean,
+  row: Row,
+): { row: Row; surplus: number } {
+  const kept = new Weighted()
+  for (const depositReturn of input.depositReturns ?? []) {
+    if (inYear(depositReturn.returnedOn)) {
+      kept.add(
+        'deposit_damage',
+        depositReturn.damageKept,
+        shareAt(depositReturn.returnedOn),
+      )
+    }
+  }
+  const compensation = kept.cents('deposit_damage')
+  const repairs =
+    row.parts.find((part) => part.key === 'annual_repair')?.cents ?? 0
+  const applied = Math.min(compensation, repairs)
+  if (applied === 0) {
+    return { row, surplus: compensation }
+  }
+  const parts = [
+    ...row.parts,
+    { key: 'deposit_damage' as const, cents: -applied },
+  ]
+  parts.sort((a, b) => PART_ORDER.indexOf(a.key) - PART_ORDER.indexOf(b.key))
+  return { row: rowOf(parts), surplus: compensation - applied }
 }
 
 /** The last day of the year counted: 31 December, or today in the current year. */
