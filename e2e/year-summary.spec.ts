@@ -145,6 +145,20 @@ test.describe('The form 7H page of a flat', () => {
     await expect(page).toHaveURL('/year-summary?year=2025')
   })
 
+  test('the page does not scroll sideways', async ({ page }) => {
+    // Missing housing company details give a check, with its hidden heading.
+    const id = await ownedIn2025(page, { housing: false })
+    await openFlatYear(page, id, 2025)
+    await expect(
+      page.getByRole('heading', { name: 'Housing company details missing' }),
+    ).toBeVisible()
+    const width = await page.evaluate(() => ({
+      scroll: document.documentElement.scrollWidth,
+      client: document.documentElement.clientWidth,
+    }))
+    expect(width.scroll).toBe(width.client)
+  })
+
   test("A flat the user can't see", async ({ page, browser }) => {
     const id = await ownedIn2025(page)
     const other = await browser.newPage()
