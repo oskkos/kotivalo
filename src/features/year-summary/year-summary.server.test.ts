@@ -502,6 +502,16 @@ describe("Another owner's figures", () => {
       flat: { details: { share: 5000 }, rows: { '2.1': { cents: 44500 } } },
     })
   })
+
+  test("a co-owner of another flat has no share on this flat's page", async () => {
+    // Jussi co-owns Kuusikuja, not Rantatie.
+    const view = await loadFlatYear(deps(), rantatie, 2025, 'jussi')
+    expect(view).toMatchObject({
+      ok: true,
+      holder: { kind: 'person', userId: 'jussi', name: 'Jussi Laine' },
+      flat: null,
+    })
+  })
 })
 
 describe('The whole flats', () => {
