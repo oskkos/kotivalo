@@ -47,14 +47,14 @@ _Outcome:_ Finlex (481/1995 § 8) and the Tax Administration's guidance §2.1.3 
 
 ## 4. The deposit on the server
 
-- [ ] 4.1 `features/tenancies/schemas.ts`: an optional `deposit` through `parseDecimal`, more than 0 and at most 100 000 € (`deposit_amount_invalid`). It goes into `createTenancy` and `updateTenancy`, and `getTenancy` returns it.
-- [ ] 4.2 Guards (design.md, decision 8):
+- [x] 4.1 `features/tenancies/schemas.ts`: an optional `deposit` through `parseDecimal`, more than 0 and at most 100 000 € (`deposit_amount_invalid`). It goes into `createTenancy` and `updateTenancy`, and `getTenancy` returns it.
+- [x] 4.2 Guards (design.md, decision 8):
   - `updateTenancy`: `deposit_below_kept`, and `tenancy_has_deposit_return` when `valid_to` moves after the return date or is cleared
   - `cancelTenancyEnding`: `tenancy_has_deposit_return`
-- [ ] 4.3 The reasons in `src/lib/reasons.ts`, with their fi, sv and en messages, written with the translate skill:
+- [x] 4.3 The reasons in `src/lib/reasons.ts`, with their fi, sv and en messages, written with the translate skill:
   - `deposit_amount_invalid` and `deposit_below_kept` (field)
   - `tenancy_has_deposit_return` (alert)
-- [ ] 4.4 Workers tests:
+- [x] 4.4 Workers tests:
   - "Adding a tenant with a deposit", "A tenancy without a deposit", "An invalid deposit is refused", "Correcting the deposit" and "A member can't set a deposit"
   - "The deposit can't go below the amounts kept"
   - "Cancelling the ending of a returned tenancy is refused" and "Moving a fixed term's end past the return is refused"

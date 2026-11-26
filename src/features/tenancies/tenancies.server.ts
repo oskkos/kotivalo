@@ -3,6 +3,7 @@
 // tenancies). The rules are checked here first for the reason, and each
 // write checks the owner role and the overlap again in its statement. The
 // tenant's details are never logged.
+import type { DepositReturnRepository } from '#/features/deposits/deposit-return.repository.server'
 import type { OwnershipRepository } from '#/features/ownership/ownership.repository.server'
 import type { Property } from '#/features/properties/property'
 import type { PropertyRepository } from '#/features/properties/property.repository.server'
@@ -42,6 +43,7 @@ export interface TenancyDeps {
   /** The signed-in user. */
   userId: string
   tenancies: TenancyRepository
+  depositReturns: DepositReturnRepository
   properties: PropertyRepository
   ownership: OwnershipRepository
   sharing: SharingRepository
@@ -399,6 +401,17 @@ export async function updateTenancy(
   ) {
     return fail('tenancy_correction_conflicts_ending')
   }
+  // A recorded deposit return keeps the deposit and the last rent day.
+  const depositReturn = await deps.depositReturns.forTenancy(tenancyId)
+  if (depositReturn) {
+    const kept = depositReturn.rentKept + depositReturn.damageKept
+    if ((fields.deposit ?? 0) < kept) {
+      return fail('deposit_below_kept')
+    }
+    if (validTo === null || validTo > depositReturn.returnedOn) {
+      return fail('tenancy_has_deposit_return')
+    }
+  }
   const [months, rentsById, occupantsById, feesById] = await Promise.all([
     deps.tenancies.paymentMonths(tenancyId),
     deps.tenancies.rentsFor([tenancyId]),
@@ -601,6 +614,9 @@ export async function cancelTenancyEnding(
   }
   if (lastDay < today(deps)) {
     return fail('tenancy_already_ended')
+  }
+  if (await deps.depositReturns.forTenancy(tenancyId)) {
+    return fail('tenancy_has_deposit_return')
   }
   const restored = { from: existing.validFrom, to: existing.termEnd }
   const later = tenancies.some(

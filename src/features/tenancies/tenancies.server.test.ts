@@ -1,5 +1,6 @@
 import { env } from 'cloudflare:workers'
 import { beforeEach, describe, expect, test } from 'vitest'
+import { depositReturnRepository } from '#/features/deposits/deposit-return.repository.server'
 import { ownershipRepository } from '#/features/ownership/ownership.repository.server'
 import { propertyRepository } from '#/features/properties/property.repository.server'
 import { rentPaymentRepository } from '#/features/rent-payments/rent-payment.repository.server'
@@ -42,6 +43,7 @@ function deps(userId = 'annika'): TenancyDeps {
   return {
     userId,
     tenancies: tenancyRepository(db),
+    depositReturns: depositReturnRepository(db),
     properties: propertyRepository(db),
     ownership: ownershipRepository(db),
     sharing: sharingRepository(db),
