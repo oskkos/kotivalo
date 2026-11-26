@@ -3,11 +3,11 @@ import { z } from 'zod'
 import { NotFoundView } from '#/components/NotFoundView'
 import { FlatTaxPage } from '#/features/year-summary/FlatTaxPage'
 import { getFlatYear } from '#/features/year-summary/functions'
-import { summaryYear } from '#/features/year-summary/schemas'
+import { urlYear } from '#/features/year-summary/schemas'
 import { m } from '#/paraglide/messages.js'
 
 export const Route = createFileRoute('/_authed/year-summary/$propertyId')({
-  validateSearch: z.object({ year: summaryYear.optional() }),
+  validateSearch: z.object({ year: urlYear }),
   loaderDeps: ({ search }) => ({ year: search.year }),
   loader: async ({ params, deps }) => {
     const view = await getFlatYear({

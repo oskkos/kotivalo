@@ -186,3 +186,13 @@ export function formatAmountInput(cents: number, locale: Locale = getLocale()) {
     useGrouping: false,
   }).format(cents / 100)
 }
+
+/** A list as a sentence lists it: "A, B and C" in English, "A, B ja C" in Finnish. */
+export function formatList(
+  items: readonly string[],
+  locale: Locale = getLocale(),
+) {
+  return new Intl.ListFormat(INTL_LOCALES[locale], {
+    type: 'conjunction',
+  }).format(items)
+}

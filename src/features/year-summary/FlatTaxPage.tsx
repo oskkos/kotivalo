@@ -19,6 +19,7 @@ import { clientLog } from '#/lib/client-log'
 import {
   formatDate,
   formatDayMonth,
+  formatList,
   formatMoney,
   formatMonth,
   formatShare,
@@ -80,6 +81,7 @@ const partsText = (parts: readonly Part[]) =>
         amount: formatMoney(part.cents),
       }),
     )
+    // The app's separator for amounts on one line, as on the charges page.
     .join(' · ')
 
 const monthName = (month: string) => {
@@ -147,7 +149,7 @@ function CheckItem(props: { check: Check; view: Ok }) {
       case 'unpaid':
         return {
           title: m.flat_tax_check_unpaid_title({
-            months: check.months.map(monthName).join(', '),
+            months: formatList(check.months.map(monthName)),
           }),
           text: m.flat_tax_check_unpaid_text(),
           link: rentLink,
@@ -155,14 +157,14 @@ function CheckItem(props: { check: Check; view: Ok }) {
       case 'partly_paid':
         return {
           title: m.flat_tax_check_partly_paid_title({
-            months: check.months
-              .map((row) =>
+            months: formatList(
+              check.months.map((row) =>
                 m.flat_tax_check_partly_paid_month({
                   month: monthName(row.month),
                   amount: formatMoney(row.missing),
                 }),
-              )
-              .join(', '),
+              ),
+            ),
           }),
           text: m.flat_tax_check_partly_paid_text(),
           link: rentLink,
@@ -170,7 +172,7 @@ function CheckItem(props: { check: Check; view: Ok }) {
       case 'vacant':
         return {
           title: m.flat_tax_check_vacant_title({
-            months: check.months.map(monthName).join(', '),
+            months: formatList(check.months.map(monthName)),
           }),
           text: m.flat_tax_check_vacant_text(),
         }
