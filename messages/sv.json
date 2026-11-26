@@ -1301,15 +1301,15 @@
   "year_summary_page_title": "Årssammandrag – Kotivalo",
   "year_summary_person_band_text": "Endast bostäder som du ser ingår. Personen kan ha andra hyresbostäder som ska med i deklarationen.",
   "year_summary_person_band_title": "Bara gemensamma bostäder",
-  "year_summary_person_empty_text": "{name} hade ingen ägarandel i någon av de bostäder du ser år {year}.",
+  "year_summary_person_empty_text": "{name} ägde ingen andel i någon av de bostäder du ser år {year}.",
   "year_summary_person_intro": "Siffrorna är räknade på personens andel på samma sätt som dina egna. Öppna en bostad och kopiera siffrorna till MinSkatt.",
   "year_summary_person_not_included": [
     {
       "declarations": ["input count", "local countPlural = count: plural"],
       "selectors": ["countPlural"],
       "match": {
-        "countPlural=one": "Inte med: {flats}, eftersom {name} inte hade någon ägarandel i den år {year}.",
-        "countPlural=other": "Inte med: {flats}, eftersom {name} inte hade någon ägarandel i dem år {year}."
+        "countPlural=one": "Inte med: {flats}, eftersom {name} inte ägde någon andel i den år {year}.",
+        "countPlural=other": "Inte med: {flats}, eftersom {name} inte ägde någon andel i dem år {year}."
       }
     }
   ],
