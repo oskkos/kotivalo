@@ -95,11 +95,11 @@ _Outcome:_ Finlex (481/1995 § 8) and the Tax Administration's guidance §2.1.3 
 
 ## 7. The deposit field and card
 
-- [ ] 7.1 `TenancyForm.tsx` gets *Vakuus €* in the new tenant and correction forms, with the warning from `depositOverLimit` under it (design.md, decision 9).
-- [ ] 7.2 `TenancyPage.tsx` gets the *Vakuus* card below the fees card. For owners, *Muuta* or *Lisää* opens the correction form.
-- [ ] 7.3 The end tenancy form (`EndTenancyForm.tsx` / `ending.tsx`) gets the deposit section when a deposit is set.
-- [ ] 7.4 fi, sv and en messages, with the translate skill. Component tests for the warning, the card and the end form section.
-- [ ] 7.5 Playwright tests for "A tenancy's deposit", "The deposit on the tenancy page" and "The deposit when ending a tenancy". The `addTenant` helper in `e2e/support/tenancies.ts` gets a `deposit` option.
+- [x] 7.1 `TenancyForm.tsx` gets *Vakuus €* in the new tenant and correction forms, with the warning from `depositOverLimit` under it (design.md, decision 9).
+- [x] 7.2 `TenancyPage.tsx` gets the *Vakuus* card below the fees card. For owners, *Muuta* or *Lisää* opens the correction form.
+- [x] 7.3 The end tenancy form (`EndTenancyForm.tsx` / `ending.tsx`) gets the deposit section when a deposit is set.
+- [x] 7.4 fi, sv and en messages, with the translate skill. Component tests for the warning, the card and the end form section.
+- [x] 7.5 Playwright tests for "A tenancy's deposit", "The deposit on the tenancy page" and "The deposit when ending a tenancy". The `addTenant` helper in `e2e/support/tenancies.ts` gets a `deposit` option.
 
 ## 8. The lease on the tenancy page
 
