@@ -5,6 +5,7 @@
 // with the flats (design decision 2). Each function returns the computed
 // view only: other owners' ids, payment rows and tenancies outside the year
 // never reach the browser. It only reads, so it logs nothing.
+import type { DepositReturnRepository } from '#/features/deposits/deposit-return.repository.server'
 import type { OwnershipRepository } from '#/features/ownership/ownership.repository.server'
 import type { Period } from '#/features/ownership/periods'
 import type { Property } from '#/features/properties/property'
@@ -31,6 +32,7 @@ export interface YearSummaryDeps {
   ownership: OwnershipRepository
   tenancies: TenancyRepository
   payments: RentPaymentRepository
+  depositReturns: DepositReturnRepository
   transactions: TransactionRepository
   amounts: RecurringAmountRepository
   usageCharges: UsageChargeRepository
@@ -64,8 +66,9 @@ async function loadInputs(
   ])
   const chosen = year(ownership)
   const tenancyIds = tenancies.map((t) => t.id)
-  const [entries, rents, occupants, fees] = await Promise.all([
+  const [entries, returns, rents, occupants, fees] = await Promise.all([
     deps.transactions.forPropertiesYear(ids, chosen),
+    deps.depositReturns.forPropertiesYear(ids, chosen),
     deps.tenancies.rentsFor(tenancyIds),
     deps.tenancies.occupantsFor(tenancyIds),
     deps.tenancies.feesFor(tenancyIds),
@@ -96,6 +99,7 @@ async function loadInputs(
           })),
         payments: payments.filter((p) => p.propertyId === flat.id),
         entries: entries.filter((e) => e.propertyId === flat.id),
+        depositReturns: returns.filter((r) => r.propertyId === flat.id),
         charges: {
           maintenance: flatAmounts.amounts.maintenance_charge,
           financing: flatAmounts.financingCharges,

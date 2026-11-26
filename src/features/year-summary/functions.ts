@@ -3,6 +3,7 @@
 // session and wire in the request context.
 import { createServerFn } from '@tanstack/react-start'
 import { ownershipRepository } from '#/features/ownership/ownership.repository.server'
+import { depositReturnRepository } from '#/features/deposits/deposit-return.repository.server'
 import { propertyRepository } from '#/features/properties/property.repository.server'
 import { recurringAmountRepository } from '#/features/recurring-amounts/recurring-amount.repository.server'
 import { rentPaymentRepository } from '#/features/rent-payments/rent-payment.repository.server'
@@ -34,6 +35,7 @@ async function yearSummaryDeps(): Promise<YearSummaryDeps> {
     ownership: ownershipRepository(db),
     tenancies: tenancyRepository(db),
     payments: rentPaymentRepository(db),
+    depositReturns: depositReturnRepository(db),
     transactions: transactionRepository(db),
     amounts: recurringAmountRepository(db),
     usageCharges: usageChargeRepository(db),
