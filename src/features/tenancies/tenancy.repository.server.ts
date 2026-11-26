@@ -60,6 +60,8 @@ export interface TenancyFields {
   /** A fixed term's end; null for an open-ended tenancy. */
   termEnd: IsoDate | null
   dueDay: number
+  /** The deposit in cents; null or left out when none is set. */
+  deposit?: number | null
 }
 
 export interface Tenancy extends TenancyFields {
@@ -186,6 +188,7 @@ const columns = {
   dueDay: tenancies.dueDay,
   noticeGivenBy: tenancies.noticeGivenBy,
   noticeDate: tenancies.noticeDate,
+  deposit: tenancies.deposit,
 }
 
 export function tenancyRepository(db: Db) {
@@ -314,6 +317,9 @@ export function tenancyRepository(db: Db) {
             }`.as('notice_given_by'),
             noticeDate: sql<string | null>`${ending?.noticeDate ?? null}`.as(
               'notice_date',
+            ),
+            deposit: sql<number | null>`${fields.deposit ?? null}`.as(
+              'deposit',
             ),
             createdBy: sql<string>`${actorId}`.as('created_by'),
             createdAt: sql<number>`${now.getTime()}`.as('created_at'),

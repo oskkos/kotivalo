@@ -196,6 +196,8 @@ describe('propertyRepository', () => {
         'tenant_fee_id IN (SELECT id FROM tenant_fees WHERE tenancy_id IN (SELECT id FROM tenancies WHERE property_id',
       rent_payments:
         'tenancy_id IN (SELECT id FROM tenancies WHERE property_id',
+      deposit_returns:
+        'tenancy_id IN (SELECT id FROM tenancies WHERE property_id',
       transactions: 'property_id',
       receipts:
         'transaction_id IN (SELECT id FROM transactions WHERE property_id',
@@ -287,6 +289,13 @@ describe('propertyRepository', () => {
         `INSERT INTO rent_payments (id, tenancy_id, month, amount, paid_on, created_by, created_at)
          VALUES (?, ?, '2025-03', 89000, '2025-03-05', ?, 0)`,
         `rp-${id}`,
+        `t-${id}`,
+        userId,
+      )
+      await exec(
+        `INSERT INTO deposit_returns (id, tenancy_id, returned_on, rent_kept, damage_kept, created_by, created_at, updated_at)
+         VALUES (?, ?, '2025-09-10', 0, 0, ?, 0, 0)`,
+        `dr-${id}`,
         `t-${id}`,
         userId,
       )

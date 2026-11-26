@@ -32,6 +32,8 @@ export interface RentPayment {
   /** Cents. */
   amount: number
   paidOn: IsoDate
+  /** Set when the rent was kept from a deposit (openspec: deposits). */
+  depositReturnId: string | null
   /** The display name of the user who recorded it. */
   recordedBy: string
 }
@@ -79,6 +81,7 @@ export function rentPaymentRepository(db: Db) {
           month: rentPayments.month,
           amount: rentPayments.amount,
           paidOn: rentPayments.paidOn,
+          depositReturnId: rentPayments.depositReturnId,
           recordedBy: user.name,
         })
         .from(rentPayments)
@@ -168,6 +171,9 @@ export function rentPaymentRepository(db: Db) {
                 month: sql<string>`${payment.month}`.as('month'),
                 amount: sql<number>`${payment.amount}`.as('amount'),
                 paidOn: sql<string>`${payment.paidOn}`.as('paid_on'),
+                depositReturnId: sql<string | null>`${null}`.as(
+                  'deposit_return_id',
+                ),
                 createdBy: sql<string>`${actorId}`.as('created_by'),
                 createdAt: sql<number>`${now.getTime()}`.as('created_at'),
               })

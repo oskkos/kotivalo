@@ -46,6 +46,7 @@ const view = (over: Partial<RentMonthView> = {}): RentMonthView => ({
       month: '2026-11',
       amount: 50000,
       paidOn: '2026-11-04',
+      depositReturnId: null,
       recordedBy: 'Annika',
     },
   ],
