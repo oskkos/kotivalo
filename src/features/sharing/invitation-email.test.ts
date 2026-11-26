@@ -47,3 +47,12 @@ describe('invitationEmail', () => {
     expect(email.html).toContain(`<html lang="${locale}">`)
   })
 })
+
+describe('The support address in every email', () => {
+  test("The invitation email shows the recipient's support address", () => {
+    const email = invitationEmail({ ...options, locale: 'sv' })
+    expect(
+      email.text.endsWith('Frågor? Skriv till oss: support@kotivalo.app'),
+    ).toBe(true)
+  })
+})

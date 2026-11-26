@@ -1,18 +1,18 @@
 ## 1. The support address and the email footer
 
-- [ ] 1.1 `src/lib/support.ts`: `supportAddress(locale)`, from a `Record<Locale, string>` (design.md, decision 1). Unit test: `fi` gives `tuki@kotivalo.app`, `sv` and `en` give `support@kotivalo.app`.
-- [ ] 1.2 `email_support` in fi, sv and en, with `{address}` exactly once (design.md, decisions 5 and 6). `renderEmail()` adds it as the last line:
+- [x] 1.1 `src/lib/support.ts`: `supportAddress(locale)`, from a `Record<Locale, string>` (design.md, decision 1). Unit test: `fi` gives `tuki@kotivalo.app`, `sv` and `en` give `support@kotivalo.app`.
+- [x] 1.2 `email_support` in fi, sv and en, with `{address}` exactly once (design.md, decisions 5 and 6). `renderEmail()` adds it as the last line:
   - in the HTML: under a divider, in a smaller muted font, with the address as an escaped `mailto:` link
   - in the plain text: as the last paragraph
 
   No `Reply-To`.
-- [ ] 1.3 Tests in `layout.test.ts`:
+- [x] 1.3 Tests in `layout.test.ts`:
   - "The support address in the HTML is a link" (`en`)
   - the footer in the plain text
   - `email_support` holds `{address}` once in each language
 
   In `sign-in.server.test.ts`: "The sign-in code email shows the Finnish support address", including no `Reply-To`. In `invitation-email.test.ts`: "The invitation email shows the recipient's support address" (`sv`). Update any test that compares a whole email body.
-- [ ] 1.4 Playwright (`e2e/support.spec.ts`), under "The support address in every email": request a code in Finnish, and check that the email from the test inbox ends with `tuki@kotivalo.app`.
+- [x] 1.4 Playwright (`e2e/support.spec.ts`), under "The support address in every email": request a code in Finnish, and check that the email from the test inbox ends with `tuki@kotivalo.app`.
 
 ## 2. The support address on the sign-in code step and the account page
 

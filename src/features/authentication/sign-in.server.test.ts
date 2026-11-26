@@ -135,6 +135,19 @@ describe('Sign in with an emailed code', () => {
   })
 })
 
+describe('The support address in every email', () => {
+  test('The sign-in code email shows the Finnish support address', async () => {
+    await requestCode(deps(testBrowser(db)), 'omistaja@example.com')
+
+    const email = capturedEmails.last()
+    expect(
+      email?.text.endsWith('Kysyttävää? Kirjoita meille: tuki@kotivalo.app'),
+    ).toBe(true)
+    expect(email).not.toHaveProperty('replyTo')
+    expect(email?.html).toContain('href="mailto:tuki@kotivalo.app"')
+  })
+})
+
 describe('Rejecting wrong and expired codes', () => {
   test('A wrong code shows an error', async () => {
     const browser = testBrowser(db)

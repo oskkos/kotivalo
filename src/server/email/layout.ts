@@ -4,6 +4,7 @@
 // Paraglide messages, rendered with { locale } for the recipient.
 import { m } from '#/paraglide/messages.js'
 import type { Locale } from '#/paraglide/runtime.js'
+import { supportAddress } from '#/lib/support'
 import { colors, radii } from '#/theme/tokens'
 import type { EmailMessage } from './email'
 
@@ -60,6 +61,8 @@ export function renderEmail(content: EmailContent): EmailMessage {
   }
   const tagline = m.app_tagline({}, { locale })
   const logoUrl = new URL(EMAIL_LOGO.path, content.appUrl).href
+  const address = supportAddress(locale)
+  const supportLine = m.email_support({ address }, { locale })
 
   const text = [
     `Kotivalo – ${tagline}`,
@@ -68,6 +71,7 @@ export function renderEmail(content: EmailContent): EmailMessage {
       typeof block === 'string' ? block : block.code,
     ),
     ...(action ? [`${action.label}: ${action.url}`] : []),
+    supportLine,
   ].join('\n\n')
 
   const paragraph = (value: string) =>
@@ -82,6 +86,13 @@ export function renderEmail(content: EmailContent): EmailMessage {
       `<p style="margin:0 0 16px;font-size:14px;word-break:break-all"><a href="${escapeHtml(action.url)}" style="color:${colors.plum}">${escapeHtml(action.url)}</a></p>`
     : ''
 
+  // The message holds {address} once; the HTML links it.
+  const at = supportLine.indexOf(address)
+  const supportHtml =
+    at === -1
+      ? escapeHtml(supportLine)
+      : `${escapeHtml(supportLine.slice(0, at))}<a href="mailto:${escapeHtml(address)}" style="color:${colors.plum}">${escapeHtml(address)}</a>${escapeHtml(supportLine.slice(at + address.length))}`
+
   const html = `<!doctype html>
 <html lang="${locale}">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(content.subject)}</title></head>
@@ -92,6 +103,7 @@ export function renderEmail(content: EmailContent): EmailMessage {
 <h1 style="margin:0 0 16px;font-size:24px;line-height:1.2">${escapeHtml(content.heading)}</h1>
 ${content.paragraphs.map(block).join('\n')}
 ${button}
+<p style="margin:24px 0 0;padding-top:16px;border-top:1px solid ${colors.inputBorder};font-size:13px;line-height:1.5;color:${colors.plumMuted}">${supportHtml}</p>
 </div>
 </body>
 </html>`

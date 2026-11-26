@@ -1,4 +1,6 @@
 import { describe, expect, test } from 'vitest'
+import { locales } from '#/paraglide/runtime.js'
+import { m } from '#/paraglide/messages.js'
 import { escapeHtml, renderEmail, type EmailContent } from './layout'
 
 const content: EmailContent = {
@@ -81,7 +83,7 @@ describe('renderEmail', () => {
 
   test('renders without a button', () => {
     const { html, text } = renderEmail({ ...content, action: undefined })
-    expect(html).not.toContain('<a ')
+    expect(html).not.toContain('<a href="https')
     expect(text).not.toContain('https://')
   })
 
@@ -133,5 +135,42 @@ describe('renderEmail codes', () => {
     })
     expect(html).toContain('&lt;b&gt;1&lt;/b&gt;')
     expect(html).not.toContain('<b>1</b>')
+  })
+})
+
+describe('The support address in every email', () => {
+  test('The support address in the HTML is a link', () => {
+    const { html } = renderEmail({ ...content, locale: 'en' })
+    expect(html).toContain(
+      '<a href="mailto:support@kotivalo.app" style="color:#',
+    )
+    expect(html).toContain('>support@kotivalo.app</a>')
+    expect(html.indexOf('mailto:')).toBeGreaterThan(html.indexOf('</h1>'))
+  })
+
+  test('escapes the support line like the rest of the content', () => {
+    const { html } = renderEmail(content)
+    expect(html).toContain('Kysyttävää? Kirjoita meille: <a href=')
+  })
+
+  test.each([
+    ['fi', 'Kysyttävää? Kirjoita meille: tuki@kotivalo.app'],
+    ['sv', 'Frågor? Skriv till oss: support@kotivalo.app'],
+    ['en', 'Questions? Write to us: support@kotivalo.app'],
+  ] as const)(
+    'ends the %s plain text with the support line',
+    (locale, line) => {
+      const { text } = renderEmail({ ...content, locale })
+      expect(text.endsWith(`\n\n${line}`)).toBe(true)
+    },
+  )
+
+  test.each(locales)('email_support holds {address} once in %s', (locale) => {
+    const line = m.email_support({ address: '{address}' }, { locale })
+    expect(line.split('{address}')).toHaveLength(2)
+  })
+
+  test('sets no Reply-To', () => {
+    expect(renderEmail(content)).not.toHaveProperty('replyTo')
   })
 })

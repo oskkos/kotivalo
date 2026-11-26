@@ -300,6 +300,7 @@
   "documents_type_pdf": "PDF",
   "documents_usage": "Tallennustilaa käytetty {used} / {limit}",
   "email_action_fallback": "Jos painike ei toimi, kopioi tämä osoite selaimeesi:",
+  "email_support": "Kysyttävää? Kirjoita meille: {address}",
   "error_reference": "Virhetunnus: {reference}",
   "flat_details_all": "Kaikki",
   "flat_details_charges": "Vastikkeet kuukausittain",
