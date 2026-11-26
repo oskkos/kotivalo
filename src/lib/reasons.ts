@@ -68,6 +68,8 @@ export type FieldReason =
   | 'rent_payment_amount_invalid'
   | 'rent_payment_date_in_future'
   | 'occupants_invalid'
+  | 'deposit_amount_invalid'
+  | 'deposit_below_kept'
   | 'description_required'
 
 /** Errors about the whole action, shown as an alert with a title. */
@@ -110,6 +112,7 @@ export type AlertReason =
   | 'tenant_fee_not_found'
   | 'usage_charge_not_found'
   | 'tenancy_has_changes_after_end'
+  | 'tenancy_has_deposit_return'
   | 'tenancy_start_after_change'
   | 'rent_payment_month_outside_tenancy'
   | 'rent_payment_not_found'
@@ -212,6 +215,8 @@ const texts: Record<Reason, () => ReasonText> = {
   }),
   document_too_large: () => ({ text: m.reason_document_too_large() }),
   document_unreadable: () => ({ text: m.reason_document_unreadable() }),
+  deposit_amount_invalid: () => ({ text: m.reason_deposit_amount_invalid() }),
+  deposit_below_kept: () => ({ text: m.reason_deposit_below_kept() }),
   tenant_name_required: () => ({ text: m.reason_tenant_name_required() }),
   tenant_name_too_long: () => ({ text: m.reason_tenant_name_too_long() }),
   tenant_phone_too_long: () => ({ text: m.reason_tenant_phone_too_long() }),
@@ -265,6 +270,10 @@ const texts: Record<Reason, () => ReasonText> = {
   email_failed: () => ({
     title: m.reason_email_failed_title(),
     text: m.reason_email_failed(),
+  }),
+  tenancy_has_deposit_return: () => ({
+    title: m.reason_tenancy_has_deposit_return_title(),
+    text: m.reason_tenancy_has_deposit_return(),
   }),
   property_delete_other_owners: () => ({
     title: m.reason_property_delete_other_owners_title(),

@@ -131,6 +131,7 @@ describe('tenancy details', () => {
       tenantEmail: '',
       termEnd: '',
       dueDay: '5',
+      deposit: '',
     })
     expect(fixed.error?.issues.map((issue) => issue.message)).toEqual([
       'tenancy_end_before_start',

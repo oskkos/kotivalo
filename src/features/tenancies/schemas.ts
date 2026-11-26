@@ -5,6 +5,7 @@ import { z } from 'zod'
 import { typedDate } from '#/features/ownership/schemas'
 import { typedAmount } from '#/features/recurring-amounts/schemas'
 import { chargeFields } from '#/lib/charge-fields'
+import { parseDecimal } from '#/lib/decimal'
 import type { FieldReason } from '#/lib/reasons'
 import { CONTRACT_TYPES, NOTICE_GIVERS } from '#/server/db/schema'
 
@@ -63,6 +64,25 @@ export const typedDueDay = z
     return day
   })
 
+/** The largest deposit, in cents. */
+export const MAX_DEPOSIT = 10_000_000
+
+/** An optional deposit as typed in euros; empty means none. */
+export const typedDeposit = z
+  .string(reason('deposit_amount_invalid'))
+  .trim()
+  .transform((text, context) => {
+    if (text === '') {
+      return null
+    }
+    const cents = parseDecimal(text, 2)
+    if (cents === undefined || cents <= 0 || cents > MAX_DEPOSIT) {
+      context.addIssue({ code: 'custom', message: 'deposit_amount_invalid' })
+      return z.NEVER
+    }
+    return cents
+  })
+
 /** A tenancy's details as typed; the term's end only for a fixed term. */
 export const tenancyFields = z
   .object({
@@ -74,6 +94,7 @@ export const tenancyFields = z
     validFrom: typedDate,
     termEnd: z.string().trim(),
     dueDay: typedDueDay,
+    deposit: typedDeposit.prefault(''),
   })
   .transform((fields, context) => {
     if (fields.contractType === 'open_ended') {
