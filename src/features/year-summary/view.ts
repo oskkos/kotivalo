@@ -38,7 +38,10 @@ export type HolderView =
 export interface YearSummaryView {
   /** Whose figures the cards are. */
   holder: HolderView
-  /** Another owner in the year, for the sheet; sorted by name. */
+  /**
+   * Another owner in the year, for the sheet, and the chosen person with 0
+   * flats when they had no share in it; sorted by name.
+   */
   people: { userId: string; name: string; flats: number }[]
   /** The flats in the own summary and in the whole flats. */
   counts: { own: number; whole: number }

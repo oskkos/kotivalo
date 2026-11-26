@@ -442,6 +442,10 @@ describe('Choosing whose figures', () => {
     expect(view.year).toBe(2026)
     expect(view.flats).toEqual([])
     expect(view.notIncluded.map((f) => f.propertyId)).toContain(koivupolku)
+    // The selector keeps Jussi, with no flats, so the choice stays marked.
+    expect(view.people).toEqual([
+      { userId: 'jussi', name: 'Jussi Laine', flats: 0 },
+    ])
   })
 
   test('An unknown person in the URL', async () => {

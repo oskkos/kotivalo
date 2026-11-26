@@ -271,10 +271,19 @@ export async function loadYearSummary(
   const count = (of: Holder) =>
     loaded.inputs.filter((i) => ownedInYear(i.ownership, of, loaded.year, day))
       .length
+  // A chosen person without a share in the year is listed with 0 flats, so
+  // the selector stays and the choice stays marked.
+  const chosen =
+    holder.kind === 'owner' && holder.userId !== deps.userId
+      ? [holder.userId]
+      : []
   const people = [
-    ...new Set(
-      loaded.inputs.flatMap((i) => ownersInYear(i.ownership, loaded.year, day)),
-    ),
+    ...new Set([
+      ...loaded.inputs.flatMap((i) =>
+        ownersInYear(i.ownership, loaded.year, day),
+      ),
+      ...chosen,
+    ]),
   ]
     .filter((userId) => userId !== deps.userId)
     .map((userId) => ({

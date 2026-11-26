@@ -6,7 +6,7 @@ import {
   openRentMonth,
   recordPayment,
 } from './support/rent-payments'
-import { accepted, coOwned } from './support/sharing'
+import { accepted, coOwned, openSharing } from './support/sharing'
 import { signIn, uniqueEmail } from './support/sign-in'
 import { addTenant } from './support/tenancies'
 import {
@@ -295,6 +295,41 @@ test.describe('Choosing whose figures', () => {
     )
     await page.getByRole('link', { name: 'Back to the year summary' }).click()
     await expect(page).toHaveURL(summaryUrl)
+  })
+
+  test('the selector stays in a year the chosen person had no share', async ({
+    page,
+    browser,
+  }) => {
+    // Jussi's share runs from 1 March 2025 to the end of 2025: Annika owns
+    // the flat alone in 2026.
+    const { id } = await coOwned(page, browser)
+    await openSharing(page, id)
+    await page.getByRole('button', { name: 'Change ownership' }).click()
+    await page.getByRole('textbox', { name: 'Share (%), You' }).fill('100')
+    await page.getByRole('textbox', { name: 'Share (%), Jussi' }).fill('0')
+    await page.getByRole('textbox', { name: 'From' }).fill('01/01/2026')
+    await page.getByRole('button', { name: 'Save ownership change' }).click()
+    await expect(page.getByText('You 100%').first()).toBeVisible()
+
+    await openYearSummary(page, 2025)
+    await chooseHolder(page, /Jussi/)
+    await page.getByRole('button', { name: 'Next year' }).click()
+    await expect(
+      page.getByRole('heading', { name: 'No ownership share in 2026' }),
+    ).toBeVisible()
+    await expect(holderButton(page)).toContainText('Jussi')
+
+    await holderButton(page).click()
+    await expect(
+      page.getByRole('dialog').getByRole('radio', { name: /Jussi/ }),
+    ).toBeChecked()
+    await page
+      .getByRole('dialog')
+      .getByRole('radio', { name: /Your own share/ })
+      .click()
+    await expect(page).toHaveURL('/year-summary?year=2026')
+    await expect(summaryCard(page, kuusikuja.streetAddress)).toBeVisible()
   })
 })
 
