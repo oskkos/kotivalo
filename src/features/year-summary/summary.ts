@@ -461,8 +461,24 @@ function flatDetails(
   }
 }
 
-/** The user's share at the end of their ownership in the year. */
-function shareAtEnd(
+/** Everyone who had a share above 0 on some day of the year up to today. */
+export function ownersInYear(
+  ownership: readonly Period[],
+  year: number,
+  today: IsoDate,
+): string[] {
+  const ids = new Set(
+    ownership.flatMap((period) =>
+      period.shares.filter((s) => s.share > 0).map((s) => s.userId),
+    ),
+  )
+  return [...ids].filter((userId) =>
+    ownedInYear(ownership, { kind: 'owner', userId }, year, today),
+  )
+}
+
+/** The holder's share at the end of their ownership in the year. */
+export function shareAtEnd(
   ownership: readonly Period[],
   holder: Holder,
   year: number,

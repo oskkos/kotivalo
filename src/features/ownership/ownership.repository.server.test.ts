@@ -315,4 +315,24 @@ describe('Ownership repository', () => {
     )
     expect(await repo.currentForUser('liisa')).toEqual([])
   })
+
+  test('namesFor names everyone in the periods, also someone without access', async () => {
+    await halves()
+    await repo.change({
+      propertyId: flat,
+      actorId: 'annika',
+      currentStart: '2025-03-01',
+      from: '2025-09-01',
+      reason: 'sale',
+      split: [{ userId: 'annika', share: 10000 }],
+      removeAccess: ['jussi'],
+    })
+    expect(await roles()).toEqual([{ user_id: 'annika', role: 'owner' }])
+
+    expect(await repo.namesFor([flat])).toEqual({
+      annika: 'Annika',
+      jussi: 'Jussi',
+    })
+    expect(await repo.namesFor([])).toEqual({})
+  })
 })

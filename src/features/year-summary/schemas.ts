@@ -19,9 +19,22 @@ export const urlYear = z
   .optional()
   .catch(undefined)
 
-export const yearSummaryInput = z.object({ year: summaryYear.optional() })
+/** Whose figures: another owner's user id, or `whole` for the whole flats. */
+export const personChoice = z.union([
+  z.literal('whole'),
+  z.string().min(1).max(64),
+])
+
+/** A person as the pages' URL gives it: anything else is left out. */
+export const urlPerson = personChoice.optional().catch(undefined)
+
+export const yearSummaryInput = z.object({
+  year: summaryYear.optional(),
+  person: personChoice.optional(),
+})
 
 export const flatYearInput = z.object({
   propertyId: z.string().min(1).max(64),
   year: summaryYear.optional(),
+  person: personChoice.optional(),
 })

@@ -46,11 +46,16 @@ async function yearSummaryDeps(): Promise<YearSummaryDeps> {
 export const getYearSummary = createServerFn({ method: 'GET' })
   .validator(yearSummaryInput)
   .handler(async ({ data }) =>
-    loadYearSummary(await yearSummaryDeps(), data.year),
+    loadYearSummary(await yearSummaryDeps(), data.year, data.person),
   )
 
 export const getFlatYear = createServerFn({ method: 'GET' })
   .validator(flatYearInput)
   .handler(async ({ data }) =>
-    loadFlatYear(await yearSummaryDeps(), data.propertyId, data.year),
+    loadFlatYear(
+      await yearSummaryDeps(),
+      data.propertyId,
+      data.year,
+      data.person,
+    ),
   )

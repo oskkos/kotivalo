@@ -20,10 +20,21 @@ import {
   clampYear,
   flatYear,
   openingYear,
+  ownedInYear,
+  ownersInYear,
+  shareAtEnd,
   summaryYears,
   type FlatYearInput,
+  type Holder,
 } from './summary'
-import type { FlatCard, FlatYearView, YearSummaryView } from './view'
+import type {
+  CardOwner,
+  FlatCard,
+  FlatOwner,
+  FlatYearView,
+  HolderView,
+  YearSummaryView,
+} from './view'
 
 export interface YearSummaryDeps {
   /** The signed-in user. */
@@ -55,15 +66,21 @@ async function loadInputs(
   deps: YearSummaryDeps,
   flats: readonly Property[],
   year: (ownership: Partial<Record<string, Period[]>>) => number,
-): Promise<{ year: number; inputs: FlatYearInput[] }> {
+): Promise<{
+  year: number
+  inputs: FlatYearInput[]
+  names: Record<string, string>
+}> {
   const ids = flats.map((flat) => flat.id)
-  const [ownership, tenancies, payments, amounts, usage] = await Promise.all([
-    deps.ownership.rowsFor(ids),
-    deps.tenancies.forProperties(ids),
-    deps.payments.forProperties(ids),
-    deps.amounts.forProperties(ids),
-    deps.usageCharges.forProperties(ids),
-  ])
+  const [ownership, names, tenancies, payments, amounts, usage] =
+    await Promise.all([
+      deps.ownership.rowsFor(ids),
+      deps.ownership.namesFor(ids),
+      deps.tenancies.forProperties(ids),
+      deps.payments.forProperties(ids),
+      deps.amounts.forProperties(ids),
+      deps.usageCharges.forProperties(ids),
+    ])
   const chosen = year(ownership)
   const tenancyIds = tenancies.map((t) => t.id)
   const [entries, returns, rents, occupants, fees] = await Promise.all([
@@ -75,6 +92,7 @@ async function loadInputs(
   ])
   return {
     year: chosen,
+    names,
     inputs: flats.map((flat) => {
       const flatAmounts = amounts[flat.id]
       return {
@@ -111,49 +129,125 @@ async function loadInputs(
   }
 }
 
-/** The years of the user's shares across the flats, oldest first. */
-const yearsOf = (
-  ownership: Partial<Record<string, Period[]>>,
-  userId: string,
-  day: IsoDate,
-): number[] =>
-  summaryYears(
-    Object.values(ownership).flat() as Period[],
-    { kind: 'owner', userId },
-    day,
-  )
+/** The periods of every flat in one list. */
+const periodsOf = (ownership: Partial<Record<string, Period[]>>): Period[] =>
+  Object.values(ownership).flat() as Period[]
 
 /**
- * The year summary: a card per flat the user had a share in during the year,
- * archived flats included, and the other flats named. Without `year` it
- * opens on the opening year; a year outside the range opens the nearest.
+ * Whose figures to compute: the own share unless `person` is `whole` or
+ * another user with a share above 0 in these flats in some year. Any other
+ * id gives the own share, so a guessed id shows nothing.
+ */
+function holderOf(
+  deps: YearSummaryDeps,
+  periods: readonly Period[],
+  person: string | undefined,
+): Holder {
+  if (person === 'whole') {
+    return { kind: 'whole' }
+  }
+  const known =
+    person !== undefined &&
+    person !== deps.userId &&
+    periods.some((p) =>
+      p.shares.some((s) => s.userId === person && s.share > 0),
+    )
+  return { kind: 'owner', userId: known ? person : deps.userId }
+}
+
+/**
+ * The years of the holder's shares across the flats, oldest first. An own
+ * share without any (a member with no share) uses the whole flats' years.
+ */
+function yearsOf(
+  periods: readonly Period[],
+  holder: Holder,
+  day: IsoDate,
+): { years: number[]; own: boolean } {
+  const years = summaryYears(periods, holder, day)
+  if (years.length > 0) {
+    return { years, own: true }
+  }
+  return { years: summaryYears(periods, { kind: 'whole' }, day), own: false }
+}
+
+/** The holder as the view names them. */
+function holderView(
+  deps: YearSummaryDeps,
+  holder: Holder,
+  names: Record<string, string>,
+): HolderView {
+  if (holder.kind === 'whole') {
+    return { kind: 'whole' }
+  }
+  return holder.userId === deps.userId
+    ? { kind: 'own' }
+    : {
+        kind: 'person',
+        userId: holder.userId,
+        name: names[holder.userId] ?? '',
+      }
+}
+
+const isYou = (deps: YearSummaryDeps, userId: string) => userId === deps.userId
+
+/** The owners of a flat in the year as a card shows them, you first. */
+function cardOwners(
+  deps: YearSummaryDeps,
+  input: FlatYearInput,
+  names: Record<string, string>,
+  year: number,
+  day: IsoDate,
+): CardOwner[] {
+  return ownersInYear(input.ownership, year, day)
+    .map((userId) => ({
+      userId,
+      name: names[userId] ?? '',
+      share: shareAtEnd(input.ownership, { kind: 'owner', userId }, year, day),
+      isYou: isYou(deps, userId),
+    }))
+    .sort(
+      (a, b) =>
+        Number(b.isYou) - Number(a.isYou) || a.name.localeCompare(b.name),
+    )
+    .map(({ name, share, isYou: you }) => ({ name, share, isYou: you }))
+}
+
+/**
+ * The year summary: a card per flat the holder had a share in during the
+ * year, archived flats included, and the other flats named. The holder is the
+ * user's own share, another owner of the user's flats (`person`: their id)
+ * or the whole flats (`person`: `whole`). Without `year` it opens on the
+ * opening year; a year outside the range opens the nearest.
  */
 export async function loadYearSummary(
   deps: YearSummaryDeps,
   year?: number,
+  person?: string,
 ): Promise<YearSummaryView> {
   const day = today(deps)
   const flats = await userFlats(deps)
   let years: number[] = []
+  let holder = { kind: 'owner', userId: deps.userId } as Holder
+  let holderHasYears = true
   const loaded = await loadInputs(deps, flats, (ownership) => {
-    years = yearsOf(ownership, deps.userId, day)
+    const periods = periodsOf(ownership)
+    holder = holderOf(deps, periods, person)
+    ;({ years, own: holderHasYears } = yearsOf(periods, holder, day))
     return year === undefined ? openingYear(years, day) : clampYear(years, year)
   })
   const cards: FlatCard[] = []
   const notIncluded: YearSummaryView['notIncluded'] = []
   for (const [i, input] of loaded.inputs.entries()) {
     const flat = flats[i]
-    const result = flatYear(
-      input,
-      { kind: 'owner', userId: deps.userId },
-      loaded.year,
-      day,
-    )
+    const result = flatYear(input, holder, loaded.year, day)
     if (!result.included) {
-      notIncluded.push({
-        propertyId: flat.id,
-        streetAddress: flat.streetAddress,
-      })
+      if (holder.kind === 'owner') {
+        notIncluded.push({
+          propertyId: flat.id,
+          streetAddress: flat.streetAddress,
+        })
+      }
       continue
     }
     const { '2.1': income, ...costRows } = result.rows
@@ -166,39 +260,96 @@ export async function loadYearSummary(
       income: income.cents,
       costs: Object.values(costRows).reduce((sum, row) => sum + row.cents, 0),
       checks: result.checks,
+      owners:
+        holder.kind === 'whole'
+          ? cardOwners(deps, input, loaded.names, loaded.year, day)
+          : [],
     })
   }
-  return { today: day, year: loaded.year, years, flats: cards, notIncluded }
+
+  const me = { kind: 'owner', userId: deps.userId } as const
+  const count = (of: Holder) =>
+    loaded.inputs.filter((i) => ownedInYear(i.ownership, of, loaded.year, day))
+      .length
+  const people = [
+    ...new Set(
+      loaded.inputs.flatMap((i) => ownersInYear(i.ownership, loaded.year, day)),
+    ),
+  ]
+    .filter((userId) => userId !== deps.userId)
+    .map((userId) => ({
+      userId,
+      name: loaded.names[userId] ?? '',
+      flats: count({ kind: 'owner', userId }),
+    }))
+    .sort((a, b) => a.name.localeCompare(b.name))
+
+  return {
+    today: day,
+    year: loaded.year,
+    years,
+    holder: holderView(deps, holder, loaded.names),
+    people,
+    counts: { own: count(me), whole: count({ kind: 'whole' }) },
+    holderHasYears,
+    flats: cards,
+    notIncluded,
+  }
 }
 
 /**
  * A flat's form 7H page for the year: not found unless the user can see the
- * flat (archived included), and no figures in a year without their share.
- * Without `year` it opens on the opening year of the flat's years.
+ * flat (archived included), and no figures in a year without the holder's
+ * share. The holder is chosen as in the summary, among the owners of this
+ * flat. Without `year` it opens on the opening year of the holder's years.
  */
 export async function loadFlatYear(
   deps: YearSummaryDeps,
   propertyId: string,
   year?: number,
+  person?: string,
 ): Promise<FlatYearView> {
   const day = today(deps)
   const flat = (await userFlats(deps)).find((f) => f.id === propertyId)
   if (!flat) {
     return { ok: false, reason: 'property_not_found' }
   }
-  const loaded = await loadInputs(
-    deps,
-    [flat],
-    (ownership) =>
-      year ?? openingYear(yearsOf(ownership, deps.userId, day), day),
-  )
+  let holder = { kind: 'owner', userId: deps.userId } as Holder
+  const loaded = await loadInputs(deps, [flat], (ownership) => {
+    const periods = periodsOf(ownership)
+    holder = holderOf(deps, periods, person)
+    return year ?? openingYear(yearsOf(periods, holder, day).years, day)
+  })
   const [input] = loaded.inputs
   const { included, rows, outside, details, checks } = flatYear(
     input,
-    { kind: 'owner', userId: deps.userId },
+    holder,
     loaded.year,
     day,
   )
+  const owners: FlatOwner[] =
+    holder.kind === 'whole' && included
+      ? ownersInYear(input.ownership, loaded.year, day)
+          .map((userId) => {
+            const own = flatYear(
+              input,
+              { kind: 'owner', userId },
+              loaded.year,
+              day,
+            )
+            return {
+              userId,
+              name: loaded.names[userId] ?? '',
+              share: own.details.share,
+              income: own.rows['2.1'].cents,
+              isYou: isYou(deps, userId),
+            }
+          })
+          .sort(
+            (a, b) =>
+              Number(b.isYou) - Number(a.isYou) || a.name.localeCompare(b.name),
+          )
+      : []
   return {
     ok: true,
     today: day,
@@ -209,6 +360,8 @@ export async function loadFlatYear(
       postcode: flat.postcode,
       city: flat.city,
     },
+    holder: holderView(deps, holder, loaded.names),
+    owners,
     flat: included ? { rows, outside, details, checks } : null,
   }
 }
