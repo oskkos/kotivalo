@@ -631,12 +631,17 @@ export function FlatTaxPage(props: Props) {
                 <Typography
                   id="flat-tax-checks"
                   component="h2"
+                  // Visually hidden. In sx a width of 1 is 100 %, which
+                  // made the page scroll sideways: the sizes are in pixels.
                   sx={{
                     position: 'absolute',
-                    width: 1,
-                    height: 1,
+                    width: '1px',
+                    height: '1px',
+                    m: '-1px',
+                    p: 0,
                     overflow: 'hidden',
                     clip: 'rect(0 0 0 0)',
+                    whiteSpace: 'nowrap',
                   }}
                 >
                   {m.flat_tax_checks()}
