@@ -46,6 +46,7 @@ const view: RentPaymentsPageView = {
       month: '2025-10',
       amount: 89000,
       paidOn: '2025-10-03',
+      depositReturnId: null,
       recordedBy: 'Annika',
     },
     {
@@ -54,6 +55,7 @@ const view: RentPaymentsPageView = {
       month: '2025-12',
       amount: 89000,
       paidOn: '2026-01-02',
+      depositReturnId: null,
       recordedBy: 'Annika',
     },
   ],

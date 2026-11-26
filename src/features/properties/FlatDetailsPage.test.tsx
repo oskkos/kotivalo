@@ -86,6 +86,7 @@ const details = (over: Partial<FlatDetails> = {}): FlatDetails => ({
       month,
       amount: 89000,
       paidOn: `${month}-03`,
+      depositReturnId: null,
       recordedBy: 'Annika',
     }
   }),
@@ -368,6 +369,7 @@ describe('Months not fully paid', () => {
       month,
       amount: 89000,
       paidOn: `${month}-03`,
+      depositReturnId: null,
       recordedBy: 'Annika',
     })
     renderPage(

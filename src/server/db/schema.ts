@@ -438,6 +438,8 @@ export const tenancies = sqliteTable(
     noticeGivenBy: text('notice_given_by', { enum: NOTICE_GIVERS }),
     /** The date notice was received, or the ending agreed or permitted. */
     noticeDate: isoDate('notice_date'),
+    /** The deposit in cents (openspec: deposits); null when none is set. */
+    deposit: cents('deposit'),
     createdBy: text('created_by')
       .notNull()
       .references(() => user.id),
@@ -446,6 +448,31 @@ export const tenancies = sqliteTable(
   },
   (t) => [index('tenancies_property_idx').on(t.propertyId, t.validFrom)],
 )
+
+/**
+ * The return of a tenancy's deposit (openspec: deposits), one per tenancy.
+ * The amount returned is computed: the deposit less the two amounts kept.
+ * The rent kept is also recorded as rent payments linked to the return
+ * (`rent_payments.deposit_return_id`).
+ */
+export const depositReturns = sqliteTable('deposit_returns', {
+  id: id(),
+  tenancyId: text('tenancy_id')
+    .notNull()
+    .unique()
+    .references(() => tenancies.id, { onDelete: 'cascade' }),
+  returnedOn: isoDate('returned_on').notNull(),
+  /** Kept for unpaid rent, in cents. */
+  rentKept: cents('rent_kept').notNull(),
+  /** Kept for damage and cleaning, in cents. */
+  damageKept: cents('damage_kept').notNull(),
+  note: text('note'),
+  createdBy: text('created_by')
+    .notNull()
+    .references(() => user.id),
+  createdAt: instant('created_at').notNull(),
+  updatedAt: instant('updated_at').notNull(),
+})
 
 /**
  * A tenancy's rent over time (openspec: tenancies, "The rent of a tenancy").
@@ -635,6 +662,11 @@ export const rentPayments = sqliteTable(
     /** Positive, in cents. */
     amount: cents('amount').notNull(),
     paidOn: isoDate('paid_on').notNull(),
+    /** Set when the rent was kept from the deposit (openspec: deposits). */
+    depositReturnId: text('deposit_return_id').references(
+      () => depositReturns.id,
+      { onDelete: 'cascade' },
+    ),
     createdBy: text('created_by')
       .notNull()
       .references(() => user.id),

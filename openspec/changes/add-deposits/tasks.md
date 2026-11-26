@@ -1,6 +1,6 @@
 ## 1. Tables and the deposit return repository
 
-- [ ] 1.1 `src/server/db/schema.ts`:
+- [x] 1.1 `src/server/db/schema.ts`:
   - `tenancies.deposit` (`cents`, nullable)
   - `deposit_returns`:
     - `id()`, and `tenancy_id`: unique, `ON DELETE CASCADE`
@@ -11,13 +11,13 @@
   - `rent_payments.deposit_return_id`: nullable, references `deposit_returns.id`, `ON DELETE CASCADE`
 
   Then `pnpm db:generate`, and commit the migration (design.md, Migration Plan).
-- [ ] 1.2 `features/deposits/deposit-return.repository.server.ts` (design.md, decisions 3 and 5):
+- [x] 1.2 `features/deposits/deposit-return.repository.server.ts` (design.md, decisions 3 and 5):
   - `forTenancies(tenancyIds)`, using `inChunks`
   - `forPropertiesYear(propertyIds, year)`
   - the statements for recording, correcting and deleting a return with its payments, for `atomically`
 
   The tenancy repository reads and writes `deposit`. The rent payment repository reads `depositReturnId`.
-- [ ] 1.3 Workers tests:
+- [x] 1.3 Workers tests:
   - the repository: a return with its payments written and read, correcting replaces the payments, deleting cascades to them, and a second return for a tenancy fails on the unique index
   - `deposit_returns` in the flat deletion cascade test (`CHILD_TABLES` and `fill` in `property.repository.server.test.ts`), for "Deleting a flat removes its deposit returns"
 
