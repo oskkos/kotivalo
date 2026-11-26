@@ -61,16 +61,16 @@ _Outcome:_ Finlex (481/1995 § 8) and the Tax Administration's guidance §2.1.3 
 
 ## 5. Deposit return server functions
 
-- [ ] 5.1 `features/deposits/functions.ts` with the logic in `deposits.server.ts`:
+- [x] 5.1 `features/deposits/functions.ts` with the logic in `deposits.server.ts`:
   - `getDepositReturn({ propertyId, tenancyId })`: the tenancy, the deposit, the last rent day, the rent missing by month and the recorded return
   - `recordDepositReturn`, `updateDepositReturn` and `deleteDepositReturn`
 
   Each checks the session, owners only and access (`tenancy_not_found`), and writes with `atomically`. They log `deposit.return_recorded`, `deposit.return_updated` and `deposit.return_deleted` with the tenancy and return ids, and refusals at `warn` where the app does so already.
-- [ ] 5.2 `deleteRentPayment` refuses a payment from a return with `rent_payment_from_deposit`. The month's payments and the rent payments views say which payments come from a deposit.
-- [ ] 5.3 The reasons, with their fi, sv and en messages:
+- [x] 5.2 `deleteRentPayment` refuses a payment from a return with `rent_payment_from_deposit`. The month's payments and the rent payments views say which payments come from a deposit.
+- [x] 5.3 The reasons, with their fi, sv and en messages:
   - `deposit_not_set`, `deposit_return_exists` and `rent_payment_from_deposit` (alerts)
   - `deposit_return_before_end`, `deposit_return_date_in_future`, `deposit_kept_exceeds_deposit`, `deposit_rent_exceeds_unpaid`, `deposit_kept_required` and `deposit_note_too_long` (fields)
-- [ ] 5.4 Workers tests:
+- [x] 5.4 Workers tests:
   - the server-side scenarios of "Recording a deposit return"
   - "The rent kept pays the missing month" and "The rent kept covers the oldest months first", end to end
   - "Correcting and deleting a deposit return": "Correcting the amount kept for damage", "Correcting the rent kept replaces its payments", "Deleting a return removes its payments" and "A member can't delete a return"

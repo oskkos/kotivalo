@@ -256,7 +256,12 @@ export async function deleteRentPayment(
   }
   const removed = await deps.payments.remove(deps.userId, propertyId, paymentId)
   if (!removed) {
-    return (await roleCheck(deps, propertyId)) ?? fail('rent_payment_not_found')
+    return (
+      (await roleCheck(deps, propertyId)) ??
+      ((await deps.payments.isFromDeposit(propertyId, paymentId))
+        ? fail('rent_payment_from_deposit')
+        : fail('rent_payment_not_found'))
+    )
   }
   deps.log.info('rent_payment.deleted', { propertyId, paymentId })
   return { ok: true }
