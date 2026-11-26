@@ -309,8 +309,9 @@ export async function loadYearSummary(
 /**
  * A flat's form 7H page for the year: not found unless the user can see the
  * flat (archived included), and no figures in a year without the holder's
- * share. The holder is chosen as in the summary, among the owners of this
- * flat. Without `year` it opens on the opening year of the holder's years.
+ * share. The holder is chosen as in the summary, among the owners of all
+ * the user's flats. Without `year` it opens on the opening year of the
+ * holder's years in this flat.
  */
 export async function loadFlatYear(
   deps: YearSummaryDeps,
@@ -319,14 +320,26 @@ export async function loadFlatYear(
   person?: string,
 ): Promise<FlatYearView> {
   const day = today(deps)
-  const flat = (await userFlats(deps)).find((f) => f.id === propertyId)
+  const flats = await userFlats(deps)
+  const flat = flats.find((f) => f.id === propertyId)
   if (!flat) {
     return { ok: false, reason: 'property_not_found' }
   }
-  let holder = { kind: 'owner', userId: deps.userId } as Holder
+  // Another owner is known from all the user's flats, as in the summary, so
+  // an owner of another flat gets this flat's no-share state with their name.
+  let holder = holderOf(deps, [], person)
+  let names: Record<string, string> = {}
+  if (holder.kind === 'owner' && person !== undefined) {
+    const ids = flats.map((f) => f.id)
+    const [ownership, allNames] = await Promise.all([
+      deps.ownership.rowsFor(ids),
+      deps.ownership.namesFor(ids),
+    ])
+    holder = holderOf(deps, periodsOf(ownership), person)
+    names = allNames
+  }
   const loaded = await loadInputs(deps, [flat], (ownership) => {
     const periods = periodsOf(ownership)
-    holder = holderOf(deps, periods, person)
     return year ?? openingYear(yearsOf(periods, holder, day).years, day)
   })
   const [input] = loaded.inputs
@@ -369,7 +382,7 @@ export async function loadFlatYear(
       postcode: flat.postcode,
       city: flat.city,
     },
-    holder: holderView(deps, holder, loaded.names),
+    holder: holderView(deps, holder, { ...names, ...loaded.names }),
     owners,
     flat: included ? { rows, outside, details, checks } : null,
   }
