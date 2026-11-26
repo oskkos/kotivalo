@@ -95,8 +95,8 @@ Names SHALL be shown in their stored form, never inflected. The choice SHALL be 
 - **THEN** the URLs are `/year-summary?year=2024&person=<Mikko's id>`, `/year-summary/<its id>?year=2024&person=<Mikko's id>` and again the first
 
 #### Scenario: A person without a share that year
-- **WHEN** Annika has chosen Mikko, whose share starts on `2025-03-01`, and moves to 2024
-- **THEN** the page says that Mikko had no ownership share in the flats she sees in 2024, and shows no cards
+- **WHEN** Annika has chosen Jussi, whose 5000 basis points of `Koivupolku 7 A 4` ended on `2025-06-30`, and moves to 2026
+- **THEN** the page says that Jussi had no ownership share in the flats she sees in 2026, and shows no cards
 
 #### Scenario: An unknown person in the URL
 - **WHEN** Annika opens `/year-summary?year=2025&person=someone-else`, and that id owns none of her flats
