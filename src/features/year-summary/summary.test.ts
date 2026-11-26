@@ -550,8 +550,44 @@ describe('Checks in the year summary', () => {
     })
   })
 
-  test('A first share in the year is not a change', () => {
+  test('A share bought during the year', () => {
     const data = input({ ownership: ownership([5000, '2025-10-01', null]) })
+    expect(year(data).checks).toContainEqual({
+      kind: 'share_changed',
+      on: '2025-10-01',
+      from: 0,
+      to: 5000,
+    })
+  })
+
+  test('A share from the start of the year is not a change', () => {
+    const data = input({ ownership: ownership([5000, '2025-01-01', null]) })
     expect(year(data).checks.map((c) => c.kind)).not.toContain('share_changed')
+  })
+
+  test('A month with two tenancies is named once', () => {
+    const data = input({
+      tenancies: [
+        tenancy({ id: 'a', validTo: '2025-06-14' }),
+        tenancy({
+          id: 'b',
+          tenantName: 'Mikko Laine',
+          validFrom: '2025-06-15',
+        }),
+      ],
+      payments: [
+        ...paid.slice(0, 5).map((p) => ({ ...p, tenancyId: 'a' })),
+        { ...payment('2025-06', 20000, '2025-06-05'), tenancyId: 'a' },
+        { ...payment('2025-06', 20000, '2025-06-16'), tenancyId: 'b' },
+        ...paid.slice(6).map((p) => ({ ...p, tenancyId: 'b' })),
+        { ...payment('2025-12', 89000, '2025-12-05'), tenancyId: 'b' },
+      ],
+    })
+    const check = year(data).checks.find((c) => c.kind === 'partly_paid')
+    expect(check).toEqual({
+      kind: 'partly_paid',
+      // June 1–14 and 15–30 of 89000 a month, by days: 41533 + 47467.
+      months: [{ month: '2025-06', missing: 89000 - 40000 }],
+    })
   })
 })
