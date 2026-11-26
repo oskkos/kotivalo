@@ -117,7 +117,11 @@ const yearsOf = (
   userId: string,
   day: IsoDate,
 ): number[] =>
-  summaryYears(Object.values(ownership).flat() as Period[], userId, day)
+  summaryYears(
+    Object.values(ownership).flat() as Period[],
+    { kind: 'owner', userId },
+    day,
+  )
 
 /**
  * The year summary: a card per flat the user had a share in during the year,
@@ -139,7 +143,12 @@ export async function loadYearSummary(
   const notIncluded: YearSummaryView['notIncluded'] = []
   for (const [i, input] of loaded.inputs.entries()) {
     const flat = flats[i]
-    const result = flatYear(input, deps.userId, loaded.year, day)
+    const result = flatYear(
+      input,
+      { kind: 'owner', userId: deps.userId },
+      loaded.year,
+      day,
+    )
     if (!result.included) {
       notIncluded.push({
         propertyId: flat.id,
@@ -186,7 +195,7 @@ export async function loadFlatYear(
   const [input] = loaded.inputs
   const { included, rows, outside, details, checks } = flatYear(
     input,
-    deps.userId,
+    { kind: 'owner', userId: deps.userId },
     loaded.year,
     day,
   )

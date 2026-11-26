@@ -185,12 +185,25 @@ const WHOLE = 10000
 const toCents = (weighted: number): number =>
   Math.floor((2 * weighted + WHOLE) / (2 * WHOLE))
 
+/** Whose figures: one owner's share, or the whole flat at every owner's share. */
+export type Holder = { kind: 'owner'; userId: string } | { kind: 'whole' }
+
+/** The holder's basis points in a period: one owner's, or all owners' summed. */
+export function holderShare(
+  period: { shares: readonly { userId: string; share: number }[] },
+  holder: Holder,
+): number {
+  if (holder.kind === 'whole') {
+    return period.shares.reduce((sum, s) => sum + s.share, 0)
+  }
+  return period.shares.find((s) => s.userId === holder.userId)?.share ?? 0
+}
+
 const shareOn = (
   ownership: readonly Period[],
-  userId: string,
+  holder: Holder,
   date: IsoDate,
-): number =>
-  sharesOn(ownership, date).find((share) => share.userId === userId)?.share ?? 0
+): number => holderShare({ shares: sharesOn(ownership, date) }, holder)
 
 const monthIn = (year: number, index: number): Month =>
   `${String(year)}-${String(index + 1).padStart(2, '0')}`
@@ -206,7 +219,7 @@ export function monthsCounted(year: number, today: IsoDate): Month[] {
 /** Whether the user had a share above 0 on some day of the year up to today. */
 export function ownedInYear(
   ownership: readonly Period[],
-  userId: string,
+  holder: Holder,
   year: number,
   today: IsoDate,
 ): boolean {
@@ -214,7 +227,7 @@ export function ownedInYear(
   const last = `${String(year)}-12-31` < today ? `${String(year)}-12-31` : today
   return ownership.some(
     (period) =>
-      period.shares.some((s) => s.userId === userId && s.share > 0) &&
+      holderShare(period, holder) > 0 &&
       period.validFrom <= last &&
       (period.validTo === null || period.validTo >= first) &&
       first <= last,
@@ -249,12 +262,12 @@ const rowOf = (parts: Part[]): Row => ({
 /** The flat's year for the user, on `today` (in Finland). */
 export function flatYear(
   input: FlatYearInput,
-  userId: string,
+  holder: Holder,
   year: number,
   today: IsoDate,
 ): FlatYear {
   const { ownership } = input
-  const shareAt = (date: IsoDate) => shareOn(ownership, userId, date)
+  const shareAt = (date: IsoDate) => shareOn(ownership, holder, date)
   const inYear = (date: IsoDate) => date.startsWith(`${String(year)}-`)
   const byRow = new Map<RowNumber, Weighted>(
     ROW_NUMBERS.map((row) => [row, new Weighted()]),
@@ -343,16 +356,16 @@ export function flatYear(
 
   return {
     propertyId: input.propertyId,
-    included: ownedInYear(ownership, userId, year, today),
+    included: ownedInYear(ownership, holder, year, today),
     rows,
     outside: {
       capitalised: outside.capitalised.cents('financing_charge'),
       improvements: outside.improvements.cents('improvement'),
       depositDamage: damage.surplus,
     },
-    details: flatDetails(input, userId, year, today),
+    details: flatDetails(input, holder, year, today),
     checks: [
-      ...paymentChecks(input, userId, months, today),
+      ...paymentChecks(input, holder, months, today),
       ...(vacant.length > 0
         ? [{ kind: 'vacant' as const, months: vacant }]
         : []),
@@ -360,7 +373,7 @@ export function flatYear(
       ...(treatmentNotSet.length > 0
         ? [{ kind: 'treatment_not_set' as const, months: treatmentNotSet }]
         : []),
-      ...shareChanges(ownership, userId, year, today),
+      ...shareChanges(ownership, holder, year, today),
     ],
   }
 }
@@ -421,7 +434,7 @@ function tenanciesInYear(
 
 function flatDetails(
   input: FlatYearInput,
-  userId: string,
+  holder: Holder,
   year: number,
   today: IsoDate,
 ): FlatDetails {
@@ -444,14 +457,14 @@ function flatDetails(
       : ran.length > 1
         ? { from: first, to: end }
         : null,
-    share: shareAtEnd(input.ownership, userId, year, today),
+    share: shareAtEnd(input.ownership, holder, year, today),
   }
 }
 
 /** The user's share at the end of their ownership in the year. */
 function shareAtEnd(
   ownership: readonly Period[],
-  userId: string,
+  holder: Holder,
   year: number,
   today: IsoDate,
 ): number {
@@ -460,7 +473,7 @@ function shareAtEnd(
   let share = 0
   let end = ''
   for (const period of ownership) {
-    const own = period.shares.find((s) => s.userId === userId)?.share ?? 0
+    const own = holderShare(period, holder)
     const periodEnd =
       period.validTo !== null && period.validTo < last ? period.validTo : last
     if (
@@ -479,7 +492,7 @@ function shareAtEnd(
 /** Months not fully paid, in months the user had a share on the first day. */
 function paymentChecks(
   input: FlatYearInput,
-  userId: string,
+  holder: Holder,
   months: readonly Month[],
   today: IsoDate,
 ): Check[] {
@@ -500,7 +513,7 @@ function paymentChecks(
     to,
     today,
   })
-    .filter((row) => shareOn(input.ownership, userId, `${row.month}-01`) > 0)
+    .filter((row) => shareOn(input.ownership, holder, `${row.month}-01`) > 0)
     .reverse()
   // Two tenancies in one month give two rows: name the month once, and a
   // partly paid month with what is missing from both.
@@ -542,17 +555,20 @@ function detailsChecks(company: HousingCompany): Check[] {
  */
 function shareChanges(
   ownership: readonly Period[],
-  userId: string,
+  holder: Holder,
   year: number,
   today: IsoDate,
 ): Check[] {
+  // The sum of all owners' shares doesn't change when owners do.
+  if (holder.kind === 'whole') {
+    return []
+  }
   const first = `${String(year)}-01-01`
   const last = lastDayCounted(year, today)
   const sorted = [...ownership].sort((a, b) =>
     a.validFrom.localeCompare(b.validFrom),
   )
-  const own = (period: Period) =>
-    period.shares.find((s) => s.userId === userId)?.share ?? 0
+  const own = (period: Period) => holderShare(period, holder)
   return sorted.flatMap((period, i) => {
     if (period.validFrom <= first || period.validFrom > last) {
       return []
@@ -565,17 +581,15 @@ function shareChanges(
   })
 }
 
-/** The first year of each period's share above 0 up to the current year. */
+/** The years from the holder's first share above 0 up to the current year. */
 export function summaryYears(
   ownership: readonly Period[],
-  userId: string,
+  holder: Holder,
   today: IsoDate,
 ): number[] {
   const starts = ownership
     .filter(
-      (period) =>
-        period.validFrom <= today &&
-        period.shares.some((s) => s.userId === userId && s.share > 0),
+      (period) => period.validFrom <= today && holderShare(period, holder) > 0,
     )
     .map((period) => Number(period.validFrom.slice(0, 4)))
   if (starts.length === 0) {
