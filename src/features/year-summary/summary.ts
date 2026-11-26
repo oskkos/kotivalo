@@ -443,14 +443,23 @@ function paymentChecks(
   })
     .filter((row) => shareOn(input.ownership, userId, `${row.month}-01`) > 0)
     .reverse()
-  const unpaid = rows
-    .filter((row) => row.status.kind === 'late')
-    .map((row) => row.month)
-  const partly = rows.flatMap((row) =>
-    row.status.kind === 'partly_paid'
-      ? [{ month: row.month, missing: row.status.missing }]
-      : [],
-  )
+  // Two tenancies in one month give two rows: name the month once, and a
+  // partly paid month with what is missing from both.
+  const unpaid = [
+    ...new Set(
+      rows.filter((row) => row.status.kind === 'late').map((row) => row.month),
+    ),
+  ]
+  const missing = new Map<Month, number>()
+  for (const row of rows) {
+    if (row.status.kind === 'partly_paid') {
+      missing.set(row.month, (missing.get(row.month) ?? 0) + row.status.missing)
+    }
+  }
+  const partly = [...missing].map(([month, cents]) => ({
+    month,
+    missing: cents,
+  }))
   return [
     ...(unpaid.length > 0 ? [{ kind: 'unpaid' as const, months: unpaid }] : []),
     ...(partly.length > 0
@@ -468,7 +477,10 @@ function detailsChecks(company: HousingCompany): Check[] {
   return missing.length > 0 ? [{ kind: 'details_missing', missing }] : []
 }
 
-/** The days in the year the user's share went from one above 0 to another. */
+/**
+ * The days in the year the user's share changed: bought, sold or split
+ * anew. A share starting during the year changes from 0.
+ */
 function shareChanges(
   ownership: readonly Period[],
   userId: string,
@@ -483,12 +495,12 @@ function shareChanges(
   const own = (period: Period) =>
     period.shares.find((s) => s.userId === userId)?.share ?? 0
   return sorted.flatMap((period, i) => {
-    if (i === 0 || period.validFrom <= first || period.validFrom > last) {
+    if (period.validFrom <= first || period.validFrom > last) {
       return []
     }
-    const from = own(sorted[i - 1])
+    const from = i === 0 ? 0 : own(sorted[i - 1])
     const to = own(period)
-    return from > 0 && from !== to
+    return from !== to
       ? [{ kind: 'share_changed' as const, on: period.validFrom, from, to }]
       : []
   })

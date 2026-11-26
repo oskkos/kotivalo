@@ -189,7 +189,7 @@ The year summary SHALL show what needs checking, without changing any figure:
 - **Vacant months:** whole calendar months of the year up to the current one in which no tenancy ran on any day, while the user had a share and the month had charges or usage charges. It says that their charges are deducted, but only if the flat was offered for rent.
 - **Missing housing company details:** any of the housing company's name, Business ID or apartment number missing.
 - **Treatment not set:** months with a financing charge above 0 but no treatment. Their financing charges are left out of row 2.3 and of the capitalised sum, and the check opens the charge amounts page.
-- **Share changed:** the user's share changed during the year, with the date and the shares before and after.
+- **Share changed:** the user's share changed during the year, with the date and the shares before and after. A share that starts during the year changes from 0 %, and one that ends changes to 0 %.
 
 On the year summary page each check SHALL be a chip on the flat's card; on the form 7H page each SHALL be listed with its explanation.
 
@@ -212,6 +212,10 @@ On the year summary page each check SHALL be a chip on the flat's card; on the f
 #### Scenario: A share change
 - **WHEN** Annika's share changes from 5000 to 10000 basis points on `2025-07-01`
 - **THEN** the check says her share changed on `1.7.2025` from `50 %` to `100 %`
+
+#### Scenario: A share bought during the year
+- **WHEN** Annika's first share of `Rantatie 15 C 21`, 5000 basis points, starts on `2025-10-01`
+- **THEN** the check says her share changed on `1.10.2025` from `0 %` to `50 %`
 
 ### Requirement: Copying form 7H values
 Each value on the form 7H page SHALL have its own copy button, labelled for screen readers with what it copies. It copies the value to the clipboard and shows "Kopioitu: <value>". Amounts SHALL be copied as digits with a decimal comma and two decimals, without spaces, thousand separators or €, in every language (`489500` cents → `4895,00`). The share SHALL be copied as a percentage without the sign, with a decimal comma only when needed (`5000` → `50`, `3333` → `33,33`). Text values are copied as shown. A missing value and the personal identity code row SHALL have no copy button.
