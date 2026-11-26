@@ -298,4 +298,18 @@ describe('Copying form 7H values', () => {
     )
     expect(clientLog.warn).toHaveBeenCalledWith('year_summary.copy_failed')
   })
+
+  test('says copying failed when the clipboard is missing', async () => {
+    // Outside a secure context navigator.clipboard is undefined, so the
+    // write throws before it returns a promise.
+    const writeClipboard = vi.fn((): Promise<void> => {
+      throw new TypeError('navigator.clipboard is undefined')
+    })
+    render(<FlatTaxPage view={view()} writeClipboard={writeClipboard} />)
+    await userEvent.click(screen.getByRole('button', { name: 'Copy row 2.2' }))
+    expect(await screen.findByRole('status')).toHaveTextContent(
+      'Copying failed. Type the figure in by hand.',
+    )
+    expect(clientLog.warn).toHaveBeenCalledWith('year_summary.copy_failed')
+  })
 })

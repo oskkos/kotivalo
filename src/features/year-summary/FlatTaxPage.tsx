@@ -375,7 +375,11 @@ export function FlatTaxPage(props: Props) {
   const flat = view.flat
 
   const copy = (value: string) => {
-    writeClipboard(value).then(
+    // Outside a secure context navigator.clipboard is undefined and the
+    // write throws at once; the promise turns that into the failure too.
+    new Promise<void>((resolve) => {
+      resolve(writeClipboard(value))
+    }).then(
       () => {
         setNotice(m.flat_tax_copied({ value }))
       },
