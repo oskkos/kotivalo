@@ -423,16 +423,25 @@ describe('Choosing whose figures', () => {
   })
 
   test('A person without a share that year', async () => {
-    await coOwn('Koivupolku 7 A 4', 'mikko', '2025-01-01', '2025-07-01')
-    // Mikko's share ended on 2025-06-30: 2026 is the year after it.
-    const view = await loadYearSummary(deps(), 2026, 'mikko')
+    const koivupolku = await coOwn(
+      'Koivupolku 7 A 4',
+      'jussi',
+      '2025-01-01',
+      '2025-07-01',
+    )
+    // Jussi also co-owns Kuusikuja: leave him only Koivupolku, ended 2025-06-30.
+    await env.DB.prepare('DELETE FROM properties WHERE id = ?')
+      .bind(kuusikuja)
+      .run()
+    const view = await loadYearSummary(deps(), 2026, 'jussi')
     expect(view.holder).toEqual({
       kind: 'person',
-      userId: 'mikko',
-      name: 'Mikko Virtanen',
+      userId: 'jussi',
+      name: 'Jussi Laine',
     })
     expect(view.year).toBe(2026)
     expect(view.flats).toEqual([])
+    expect(view.notIncluded.map((f) => f.propertyId)).toContain(koivupolku)
   })
 
   test('An unknown person in the URL', async () => {
