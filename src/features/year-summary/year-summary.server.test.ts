@@ -295,4 +295,38 @@ describe('Loading the year summary', () => {
     expect(one.counter.queries).toBeGreaterThan(5)
     expect(one.counter.queries).toBeLessThanOrEqual(16)
   })
+
+  test('more tenancies and fees than D1 binds in one query still load', async () => {
+    // 110 earlier one-month tenancies of Rantatie, each with a rent, its
+    // occupants and two fees: over D1's 100 bound parameters per query.
+    const statements = Array.from({ length: 110 }, (_, i) => {
+      const id = `old-${String(i)}`
+      const from = `${String(2010 + Math.floor(i / 12))}-${String((i % 12) + 1).padStart(2, '0')}-01`
+      const to = `${from.slice(0, 8)}28`
+      return [
+        env.DB.prepare(
+          "INSERT INTO tenancies (id, property_id, tenant_name, contract_type, contract_made, valid_from, valid_to, due_day, created_by, created_at, updated_at) VALUES (?, ?, 'Aino Koski', 'open_ended', ?, ?, ?, 5, 'annika', ?, ?)",
+        ).bind(id, rantatie, from, from, to, now.getTime(), now.getTime()),
+        env.DB.prepare(
+          'INSERT INTO tenancy_rents (id, tenancy_id, amount, valid_from, valid_to) VALUES (?, ?, 89000, ?, ?)',
+        ).bind(`${id}-rent`, id, from, to),
+        env.DB.prepare(
+          'INSERT INTO tenancy_occupants (id, tenancy_id, persons, valid_from, valid_to) VALUES (?, ?, 1, ?, ?)',
+        ).bind(`${id}-occupants`, id, from, to),
+        ...['water', 'parking'].flatMap((kind) => [
+          env.DB.prepare(
+            "INSERT INTO tenant_fees (id, tenancy_id, kind, basis, description) VALUES (?, ?, ?, 'fixed', NULL)",
+          ).bind(`${id}-${kind}`, id, kind),
+          env.DB.prepare(
+            'INSERT INTO tenant_fee_amounts (id, tenant_fee_id, amount, valid_from, valid_to) VALUES (?, ?, 1500, ?, ?)',
+          ).bind(`${id}-${kind}-amount`, `${id}-${kind}`, from, to),
+        ]),
+      ]
+    })
+    await env.DB.batch(statements.flat())
+    const view = await loadYearSummary(deps(), 2025)
+    expect(view.flats.map((f) => f.propertyId)).toContain(rantatie)
+    const flat = await loadFlatYear(deps(), rantatie, 2025)
+    expect(flat.ok && flat.flat?.rows['2.1'].cents).toBe(89000)
+  })
 })
