@@ -6,6 +6,7 @@ import Typography from '@mui/material/Typography'
 import { useEffect, useState } from 'react'
 import { Logo } from '#/components/Logo'
 import { ReasonAlert } from '#/components/ReasonAlert'
+import { SupportLink } from '#/components/SupportLink'
 import { clientLog } from '#/lib/client-log'
 import { failureReason } from '#/lib/network-error'
 import type { AlertReason, FieldReason } from '#/lib/reasons'
@@ -226,18 +227,22 @@ export function CodeStep(props: Props) {
             {m.sign_in_change_email()}
           </Link>
         </Stack>
-        <Stack
-          direction="row"
-          sx={{
-            mt: 'auto',
-            gap: 1,
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'text.secondary',
-          }}
-        >
-          <MailIcon />
-          <Typography variant="body2">{m.sign_in_spam_hint()}</Typography>
+        <Stack sx={{ mt: 'auto', gap: 0.5, alignItems: 'center' }}>
+          <Stack
+            direction="row"
+            sx={{
+              gap: 1,
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: 'text.secondary',
+            }}
+          >
+            <MailIcon />
+            <Typography variant="body2">{m.sign_in_spam_hint()}</Typography>
+          </Stack>
+          <Typography variant="body2" color="text.secondary">
+            {m.sign_in_support()} <SupportLink />
+          </Typography>
         </Stack>
       </Stack>
     </Stack>
