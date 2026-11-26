@@ -17,9 +17,18 @@ const tenancies = [
     validFrom: '2025-03-01',
     validTo: null,
   },
+  {
+    id: 't0',
+    tenantName: 'Pekka Virtanen',
+    validFrom: '2023-06-01',
+    validTo: '2025-02-28',
+  },
 ]
 
-function setup(editing?: DocumentDetails) {
+function setup(
+  editing?: DocumentDetails,
+  defaults: { defaultKind?: 'lease'; defaultTenancyId?: string } = {},
+) {
   const onSaved = vi.fn(() => Promise.resolve())
   render(
     <DocumentForm
@@ -28,6 +37,7 @@ function setup(editing?: DocumentDetails) {
       tenancies={tenancies}
       today="2026-11-25"
       editing={editing}
+      {...defaults}
       onClose={vi.fn()}
       onSaved={onSaved}
     />,
@@ -189,5 +199,26 @@ describe('Editing a document', () => {
         tenancyId: '',
       },
     })
+  })
+})
+
+describe('A lease opened from the tenancy page', () => {
+  test('Adding the lease from the tenancy page', () => {
+    setup(undefined, { defaultKind: 'lease', defaultTenancyId: 't0' })
+    expect(screen.getByRole('button', { name: 'Lease' })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
+    expect(
+      screen.getByRole('button', { name: /Pekka Virtanen/ }),
+    ).toHaveAttribute('aria-pressed', 'true')
+  })
+
+  test('the current tenancy is preselected without one in the address', () => {
+    setup(undefined, { defaultKind: 'lease' })
+    expect(screen.getByRole('button', { name: /Aino Koski/ })).toHaveAttribute(
+      'aria-pressed',
+      'true',
+    )
   })
 })

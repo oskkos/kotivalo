@@ -431,3 +431,81 @@ test.describe('Deleting a document', () => {
     expect((await page.request.get(`/api/documents/${id}`)).status()).toBe(200)
   })
 })
+
+test.describe('The lease on the tenancy page', () => {
+  test("The current tenancy's lease", async ({ page }) => {
+    const flat = await ownerWithFlat(page)
+    await addTenant(page, flat, aino)
+    await addDocument(page, flat, {
+      file: pdfFile('vuokrasopimus_aino.pdf'),
+      kind: 'Lease',
+      name: 'Vuokrasopimus Aino K.',
+      date: '12/02/2025',
+    })
+    await page.goto(`/properties/${flat}/tenancy`)
+    await waitForHydration(page)
+    const card = page.getByRole('region', { name: 'Lease', exact: true })
+    await expect(card).toContainText('Vuokrasopimus Aino K.')
+    await expect(card).toContainText('12/02/2025 · PDF')
+    await card.getByRole('link', { name: /Vuokrasopimus Aino K\./ }).click()
+    await expect(page).toHaveURL(/\/documents\/[0-9a-f-]{36}$/)
+  })
+
+  test('Adding the lease from the tenancy page', async ({ page }) => {
+    const flat = await ownerWithFlat(page)
+    await addTenant(page, flat, aino)
+    const card = page.getByRole('region', { name: 'Lease', exact: true })
+    await expect(card).toContainText("can be kept with the flat's documents")
+    await card.getByRole('link', { name: 'Add the lease' }).click()
+    await waitForHydration(page)
+    await expect(
+      page.getByRole('button', { name: 'Lease', exact: true }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    await expect(
+      page
+        .getByRole('group', { name: 'Tenancy' })
+        .getByRole('button', { name: /Aino Koski/ }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    await page.getByRole('button', { name: 'Close' }).click()
+    await expect(page).toHaveURL(new RegExp(`/properties/${flat}/tenancy$`))
+  })
+
+  test("A member sees the lease but can't add one", async ({
+    page,
+    browser,
+  }) => {
+    const { id, jussi } = await accepted(page, browser)
+    await addTenant(page, id, aino)
+    await addDocument(page, id, {
+      file: pdfFile('vuokrasopimus_aino.pdf'),
+      kind: 'Lease',
+      name: 'Vuokrasopimus Aino K.',
+    })
+    await jussi.goto(`/properties/${id}/tenancy`)
+    await waitForHydration(jussi)
+    const card = jussi.getByRole('region', { name: 'Lease', exact: true })
+    await expect(card).toContainText('Vuokrasopimus Aino K.')
+    await expect(card.getByRole('link', { name: 'Add the lease' })).toHaveCount(
+      0,
+    )
+  })
+})
+
+test.describe('Adding a document', () => {
+  test("Another flat's tenancy in the address is ignored", async ({ page }) => {
+    const flat = await ownerWithFlat(page)
+    await addTenant(page, flat, aino)
+    await page.goto(
+      `/properties/${flat}/documents/new?kind=lease&tenancyId=00000000-0000-0000-0000-000000000000`,
+    )
+    await waitForHydration(page)
+    await expect(
+      page.getByRole('button', { name: 'Lease', exact: true }),
+    ).toHaveAttribute('aria-pressed', 'true')
+    await expect(
+      page
+        .getByRole('group', { name: 'Tenancy' })
+        .getByRole('button', { name: /Aino Koski/ }),
+    ).toHaveAttribute('aria-pressed', 'true')
+  })
+})

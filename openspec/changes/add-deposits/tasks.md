@@ -103,10 +103,10 @@ _Outcome:_ Finlex (481/1995 § 8) and the Tax Administration's guidance §2.1.3 
 
 ## 8. The lease on the tenancy page
 
-- [ ] 8.1 `/properties/$propertyId/documents/new` gets `validateSearch` with `kind` and `tenancyId`. `DocumentForm.tsx` uses them as defaults when the tenancy is the flat's, and closing returns to the Tenancy page when opened from it (design.md, decision 10).
-- [ ] 8.2 The Tenancy page loader reads the current tenancy's leases. `TenancyPage.tsx` gets the *Vuokrasopimus* card below the *Vakuus* card, with *Lisää vuokrasopimus* for owners.
-- [ ] 8.3 fi, sv and en messages, with the translate skill. Component tests.
-- [ ] 8.4 Playwright tests for "The lease on the tenancy page" and "Adding a document": "Another flat's tenancy in the address is ignored". They use `addDocument` from `e2e/support/documents.ts`.
+- [x] 8.1 `/properties/$propertyId/documents/new` gets `validateSearch` with `kind` and `tenancyId`. `DocumentForm.tsx` uses them as defaults when the tenancy is the flat's, and closing returns to the Tenancy page when opened from it (design.md, decision 10).
+- [x] 8.2 The Tenancy page loader reads the current tenancy's leases. `TenancyPage.tsx` gets the *Vuokrasopimus* card below the *Vakuus* card, with *Lisää vuokrasopimus* for owners.
+- [x] 8.3 fi, sv and en messages, with the translate skill. Component tests.
+- [x] 8.4 Playwright tests for "The lease on the tenancy page" and "Adding a document": "Another flat's tenancy in the address is ignored". They use `addDocument` from `e2e/support/documents.ts`.
 
 ## 9. The deposit return page and reminder
 

@@ -220,6 +220,23 @@ export function documentRepository(db: Db) {
         )
     },
 
+    /** The leases naming the tenancy, newest first. */
+    leasesOfTenancy(tenancyId: string): Promise<DocumentRow[]> {
+      return db
+        .select(rowColumns)
+        .from(propertyDocuments)
+        .where(
+          and(
+            eq(propertyDocuments.tenancyId, tenancyId),
+            eq(propertyDocuments.kind, 'lease'),
+          ),
+        )
+        .orderBy(
+          desc(propertyDocuments.date),
+          desc(propertyDocuments.createdAt),
+        )
+    },
+
     /** The flat's latest documents by date, newest first. */
     latestForProperty(propertyId: string, limit: number) {
       return db

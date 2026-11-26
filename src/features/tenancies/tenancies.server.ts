@@ -4,6 +4,10 @@
 // write checks the owner role and the overlap again in its statement. The
 // tenant's details are never logged.
 import type { DepositReturnRepository } from '#/features/deposits/deposit-return.repository.server'
+import type {
+  DocumentRepository,
+  DocumentRow,
+} from '#/features/documents/document.repository.server'
 import type { OwnershipRepository } from '#/features/ownership/ownership.repository.server'
 import type { Property } from '#/features/properties/property'
 import type { PropertyRepository } from '#/features/properties/property.repository.server'
@@ -30,7 +34,7 @@ import { MAX_CHARGE_DESCRIPTION } from '#/lib/charge-fields'
 import type { ChargeBasis, ChargeKind } from '#/server/db/schema'
 import { offeredFees } from './fees'
 import { MAX_OCCUPANTS } from './schemas'
-import { flatStatus } from './status'
+import { currentTenancy, flatStatus } from './status'
 import type {
   Ending,
   Tenancy,
@@ -44,6 +48,7 @@ export interface TenancyDeps {
   userId: string
   tenancies: TenancyRepository
   depositReturns: DepositReturnRepository
+  documents: DocumentRepository
   properties: PropertyRepository
   ownership: OwnershipRepository
   sharing: SharingRepository
@@ -165,6 +170,8 @@ export async function getTenancies(
       occupants: Partial<Record<string, Period<number>[]>>
       /** Each tenancy's tenant fees. */
       fees: Partial<Record<string, TenantFee[]>>
+      /** The leases naming the current tenancy, newest first. */
+      leases: DocumentRow[]
     } & TenancyView)
   | typeof notFound
 > {
@@ -172,7 +179,9 @@ export async function getTenancies(
   if (!view) {
     return notFound
   }
-  return { ok: true, ...view }
+  const current = currentTenancy(view.tenancies, view.today)
+  const leases = current ? await deps.documents.leasesOfTenancy(current.id) : []
+  return { ok: true, ...view, leases }
 }
 
 /** What the new tenant form needs: the rent periods and the limits. */

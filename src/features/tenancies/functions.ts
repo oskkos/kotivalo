@@ -37,6 +37,7 @@ import {
   updateTenancy as update,
   type TenancyDeps,
 } from './tenancies.server'
+import { documentRepository } from '#/features/documents/document.repository.server'
 import { depositReturnRepository } from '#/features/deposits/deposit-return.repository.server'
 import { tenancyRepository } from './tenancy.repository.server'
 
@@ -54,6 +55,7 @@ async function tenancyDeps(): Promise<TenancyDeps> {
     userId: session.user.id,
     tenancies: tenancyRepository(context.db),
     depositReturns: depositReturnRepository(context.db),
+    documents: documentRepository(context.db),
     properties: propertyRepository(context.db),
     ownership: ownershipRepository(context.db),
     sharing: sharingRepository(context.db),

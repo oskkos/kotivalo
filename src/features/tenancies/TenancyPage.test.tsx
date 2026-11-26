@@ -402,3 +402,71 @@ describe('The deposit on the tenancy page', () => {
     expect(within(card).queryByRole('link')).toBeNull()
   })
 })
+
+describe('The lease on the tenancy page', () => {
+  const lease = {
+    id: 'd1',
+    kind: 'lease' as const,
+    name: 'Vuokrasopimus Aino K.',
+    date: '2025-02-12',
+    contentType: 'application/pdf',
+    size: 9,
+  }
+
+  test("The current tenancy's lease", () => {
+    setup({ leases: [lease] })
+    const card = screen.getByRole('region', { name: 'Lease' })
+    expect(within(card).getByText('Vuokrasopimus Aino K.')).toBeVisible()
+    expect(within(card).getByText('12/02/2025 · PDF')).toBeVisible()
+  })
+
+  test('without a lease the card says it can be kept with the documents', () => {
+    setup({})
+    const card = screen.getByRole('region', { name: 'Lease' })
+    expect(
+      within(card).getByText(/can be kept with the flat's documents/),
+    ).toBeVisible()
+  })
+
+  test('owners get the add action', () => {
+    render(
+      <TenancyPage
+        view={{
+          role: 'owner',
+          today: '2026-11-22',
+          tenancies: [aino],
+          rents: {},
+          occupants: {},
+          fees: {},
+        }}
+        address="Kuusikuja 3 B 12"
+        onBack={vi.fn()}
+        leaseAdd={() => <a href="/new">Add the lease</a>}
+      />,
+    )
+    expect(screen.getByRole('link', { name: 'Add the lease' })).toBeVisible()
+  })
+
+  test("A member sees the lease but can't add one", () => {
+    render(
+      <TenancyPage
+        view={{
+          role: 'member',
+          today: '2026-11-22',
+          tenancies: [aino],
+          rents: {},
+          occupants: {},
+          fees: {},
+          leases: [lease],
+        }}
+        address="Kuusikuja 3 B 12"
+        onBack={vi.fn()}
+        leaseAdd={() => <a href="/new">Add the lease</a>}
+        leaseLink={(l, row) => <a href={`/documents/${l.id}`}>{row}</a>}
+      />,
+    )
+    const card = screen.getByRole('region', { name: 'Lease' })
+    expect(within(card).getByText('Vuokrasopimus Aino K.')).toBeVisible()
+    expect(screen.queryByRole('link', { name: 'Add the lease' })).toBeNull()
+  })
+})

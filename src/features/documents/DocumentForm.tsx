@@ -20,6 +20,7 @@ import { failureReason } from '#/lib/network-error'
 import type { AlertReason, FieldReason } from '#/lib/reasons'
 import { ImageProblem, prepareUpload } from '#/lib/resize-image'
 import { m } from '#/paraglide/messages.js'
+import type { DocumentKind } from '#/server/db/schema'
 import type { DocumentDetails } from './document.repository.server'
 import type { TenancyChoice } from './documents.server'
 import { addDocument, updateDocument } from './functions'
@@ -31,6 +32,10 @@ interface Props {
   streetAddress: string
   tenancies: readonly TenancyChoice[]
   today: IsoDate
+  /** Adding: the kind to start with, e.g. a lease from the Tenancy page. */
+  defaultKind?: DocumentKind
+  /** Adding: the tenancy to start with, one of `tenancies`. */
+  defaultTenancyId?: string
   /** The document being edited; without it the form adds one. */
   editing?: DocumentDetails
   onClose: () => void
@@ -75,7 +80,9 @@ export function DocumentForm(props: Props) {
     setReasons((current) => ({ ...current, [name]: undefined }))
   }
   // The current tenancy is first and preselected for a new lease.
-  const defaultTenancy = props.tenancies[0]?.id ?? NO_TENANCY
+  const currentTenancyId = props.tenancies.at(0)?.id
+  const defaultTenancy =
+    props.defaultTenancyId ?? currentTenancyId ?? NO_TENANCY
 
   const showReason = (reason: FieldReason | AlertReason) => {
     const field = FIELD_OF[reason as FieldReason]
@@ -88,7 +95,7 @@ export function DocumentForm(props: Props) {
 
   const form = useForm({
     defaultValues: {
-      kind: editing?.kind ?? 'other',
+      kind: editing?.kind ?? props.defaultKind ?? 'other',
       name: editing?.name ?? '',
       date: formatDate(editing?.date ?? props.today),
       tenancyId: editing ? (editing.tenancyId ?? NO_TENANCY) : defaultTenancy,
