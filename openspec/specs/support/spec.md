@@ -1,7 +1,7 @@
 # support Specification
 
 ## Purpose
-TBD - created by archiving change add-support-address. Update Purpose after archive.
+The support address by language (#112): `tuki@kotivalo.app` in Finnish, `support@kotivalo.app` in Swedish and English, shown as a `mailto:` link on the sign-in code step, in the *Help and support* card on the account page and in the footer line of every email, in the recipient's language; the sender stays `noreply@` with no `Reply-To`.
 ## Requirements
 ### Requirement: The support address follows the language
 Kotivalo SHALL show one support address per language:
