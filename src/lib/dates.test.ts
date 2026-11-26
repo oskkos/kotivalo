@@ -2,6 +2,7 @@ import { describe, expect, test } from 'vitest'
 import {
   addMonths,
   addYears,
+  addDays,
   dayBefore,
   daysBetween,
   daysInMonth,
@@ -95,5 +96,15 @@ describe('day counts', () => {
     expect(daysBetween('2026-12-31', '2027-01-01')).toBe(1)
     expect(daysBetween('2028-02-28', '2028-03-01')).toBe(2)
     expect(daysBetween('2026-11-22', '2026-11-05')).toBe(-17)
+  })
+})
+
+describe('addDays', () => {
+  test.each([
+    ['2026-12-31', 14, '2027-01-14'],
+    ['2028-02-20', 10, '2028-03-01'],
+    ['2026-03-01', -1, '2026-02-28'],
+  ])('%s plus %i days is %s', (date, days, expected) => {
+    expect(addDays(date, days)).toBe(expected)
   })
 })
