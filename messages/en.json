@@ -372,7 +372,7 @@
   "flat_tax_outside_capitalised": "Financing charges (placed in reserve)",
   "flat_tax_outside_capitalised_text": "Not deducted. Added to the flat's acquisition cost.",
   "flat_tax_outside_deposit_damage": "Damage compensated from the deposit",
-  "flat_tax_outside_deposit_damage_text": "Tax-free compensation that is more than the annual repairs. Repair costs are deductible only to the extent they exceed the compensation kept from the deposit. Check whether the repair was paid in another year.",
+  "flat_tax_outside_deposit_damage_text": "Tax-free compensation, to the extent it is more than the year's annual repairs. Repair costs are deductible only to the extent they exceed the compensation kept from the deposit. Check whether the repair was paid in another year.",
   "flat_tax_outside_improvements": "Improvements",
   "flat_tax_outside_improvements_text": "Not deducted yet: the tenths and the acquisition cost come later.",
   "flat_tax_page_title": "Form 7H – Kotivalo",
