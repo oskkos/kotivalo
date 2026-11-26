@@ -163,6 +163,26 @@ test.describe('The form 7H page of a flat', () => {
     ).toBeVisible()
     await expect(jussi.locator('[data-row]')).toHaveCount(0)
   })
+
+  test("Another owner's form 7H page has the copy buttons", async ({
+    page,
+    browser,
+  }) => {
+    await coOwned(page, browser)
+    await openYearSummary(page, 2025)
+    await chooseHolder(page, /Jussi/)
+    await summaryCard(page, kuusikuja.streetAddress).click()
+
+    await expect(page.getByText('Form 7H · 2025 · Jussi')).toBeVisible()
+    await expect(page.getByText('Share: Jussi')).toBeVisible()
+    await expect(page.locator('[data-row="2.1"]')).toBeVisible()
+    await expect(
+      page.getByRole('button', { name: 'Copy row 2.1' }),
+    ).toBeVisible()
+    await expect(
+      page.getByRole('region', { name: 'Flat details' }),
+    ).toBeVisible()
+  })
 })
 
 test.describe('Flat details for form 7H', () => {
@@ -240,6 +260,28 @@ test.describe('Choosing whose figures', () => {
     await chooseHolder(page, /Your own share/)
     await expect(page).toHaveURL('/year-summary?year=2025')
   })
+
+  test('The choice follows the year and the flat', async ({
+    page,
+    browser,
+  }) => {
+    await coOwned(page, browser)
+    await openYearSummary(page, 2026)
+    await chooseHolder(page, /Jussi/)
+    await page.getByRole('button', { name: 'Previous year' }).click()
+    await expect(page).toHaveURL(/\/year-summary\?year=2025&person=[^&]+$/)
+    await expect(
+      page.getByRole('heading', { level: 1, name: '2025' }),
+    ).toBeVisible()
+    const summaryUrl = page.url()
+
+    await summaryCard(page, kuusikuja.streetAddress).click()
+    await expect(page).toHaveURL(
+      /\/year-summary\/[^?]+\?year=2025&person=[^&]+$/,
+    )
+    await page.getByRole('link', { name: 'Back to the year summary' }).click()
+    await expect(page).toHaveURL(summaryUrl)
+  })
 })
 
 test.describe("Another owner's figures", () => {
@@ -268,5 +310,35 @@ test.describe('The whole flats', () => {
     const card = summaryCard(page, kuusikuja.streetAddress)
     await expect(card).toContainText('Annika 50% · Jussi 50%')
     await expect(card).not.toContainText('Share changed')
+  })
+})
+
+test.describe("The whole flat's page", () => {
+  test("The whole flat's page", async ({ page, browser }) => {
+    await coOwned(page, browser)
+    await openYearSummary(page, 2025)
+    await chooseHolder(page, /Whole flats/)
+    await summaryCard(page, kuusikuja.streetAddress).click()
+
+    await expect(page).toHaveURL(
+      /\/year-summary\/[^?]+\?year=2025&person=whole$/,
+    )
+    await expect(page.getByText('The whole flat, for checking')).toBeVisible()
+    const owners = page.getByRole('region', { name: 'Owners' })
+    await expect(owners.getByRole('link')).toHaveCount(2)
+    await expect(owners).toContainText('Annika')
+    await expect(owners).toContainText('Jussi')
+    await expect(page.locator('[data-row="2.1"]')).toBeVisible()
+    await expect(page.getByRole('button', { name: /^Copy/ })).toHaveCount(0)
+    await expect(
+      page.getByRole('region', { name: 'Flat details' }),
+    ).toHaveCount(0)
+
+    await owners.getByRole('link', { name: /Jussi/ }).click()
+    await expect(page).toHaveURL(/\?year=2025&person=(?!whole)[^&]+$/)
+    await expect(page.getByText('Form 7H · 2025 · Jussi')).toBeVisible()
+
+    await page.getByRole('link', { name: 'Back to the year summary' }).click()
+    await expect(holderButton(page)).toContainText('Jussi')
   })
 })

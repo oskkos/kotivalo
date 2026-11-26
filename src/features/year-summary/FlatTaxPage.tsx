@@ -5,6 +5,7 @@
 // copies it in the format MyTax takes (copy.ts).
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import ButtonBase from '@mui/material/ButtonBase'
 import IconButton from '@mui/material/IconButton'
 import Link from '@mui/material/Link'
 import Snackbar from '@mui/material/Snackbar'
@@ -28,6 +29,7 @@ import { m } from '#/paraglide/messages.js'
 import type { ChargeKind } from '#/server/db/schema'
 import { colors, radii } from '#/theme/tokens'
 import { amountForCopy, shareForCopy } from './copy'
+import { personParam } from './holder'
 import type { Check, Part, PartKey, RowNumber } from './summary'
 import { ROW_NUMBERS } from './summary'
 import type { FlatYearView } from './view'
@@ -130,6 +132,7 @@ function CopyButton(props: { label: string; onCopy: () => void }) {
 /** One item to check, with its explanation and where to fix it. */
 function CheckItem(props: { check: Check; view: Ok }) {
   const { check, view } = props
+  const own = view.holder.kind === 'own'
   const propertyId = view.property.id
   const rentLink = (
     <TextLink
@@ -200,12 +203,16 @@ function CheckItem(props: { check: Check; view: Ok }) {
         }
       case 'share_changed':
         return {
-          title: m.flat_tax_check_share_title({
+          title: (own
+            ? m.flat_tax_check_share_title
+            : m.flat_tax_check_share_person_title)({
             date: formatDate(check.on),
             from: formatShare(check.from),
             to: formatShare(check.to),
           }),
-          text: m.flat_tax_check_share_text(),
+          text: own
+            ? m.flat_tax_check_share_text()
+            : m.flat_tax_check_share_person_text(),
         }
     }
   })()
@@ -368,6 +375,123 @@ function BackIcon() {
   )
 }
 
+function kicker(holder: Ok['holder'], year: string): string {
+  switch (holder.kind) {
+    case 'own':
+      return m.flat_tax_kicker({ year })
+    case 'whole':
+      return m.flat_tax_kicker_whole({ year })
+    case 'person':
+      return m.flat_tax_kicker_person({ year, name: holder.name })
+  }
+}
+
+function noShareText(holder: Ok['holder'], year: string): string {
+  switch (holder.kind) {
+    case 'own':
+      return m.flat_tax_no_share_text({ year })
+    case 'whole':
+      return m.flat_tax_no_share_whole_text({ year })
+    case 'person':
+      return m.flat_tax_no_share_person_text({ name: holder.name, year })
+  }
+}
+
+const OwnerLink = createLink(ButtonBase)
+
+/** The whole flat's owners, each opening their own form 7H page. */
+function OwnersCard(props: { view: Ok }) {
+  const { view } = props
+  return (
+    <Stack
+      component="section"
+      aria-labelledby="flat-tax-owners"
+      sx={{ ...card, px: 2, py: 0.75 }}
+    >
+      <Typography
+        id="flat-tax-owners"
+        component="h2"
+        sx={{ fontSize: 15, fontWeight: 900, my: 0.75 }}
+      >
+        {m.flat_tax_owners()}
+      </Typography>
+      <Stack component="ul" sx={{ m: 0, p: 0, listStyle: 'none' }}>
+        {view.owners.map((owner) => (
+          <li key={owner.userId}>
+            <OwnerLink
+              to="/year-summary/$propertyId"
+              params={{ propertyId: view.property.id }}
+              search={{
+                year: view.year,
+                person: owner.isYou ? undefined : owner.userId,
+              }}
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 1,
+                width: '100%',
+                minHeight: 56,
+                py: 0.75,
+                textAlign: 'left',
+                fontFamily: 'inherit',
+                borderTop: `1px solid ${colors.divider}`,
+              }}
+            >
+              <Stack sx={{ flex: 1, minWidth: 0 }}>
+                <Typography
+                  component="span"
+                  sx={{ fontSize: 14, fontWeight: 900 }}
+                >
+                  {owner.name}
+                </Typography>
+                <Typography
+                  component="span"
+                  sx={{
+                    fontSize: 12,
+                    fontWeight: 800,
+                    color: 'text.secondary',
+                  }}
+                >
+                  {m.year_summary_share_person({
+                    share: formatShare(owner.share),
+                  })}
+                </Typography>
+              </Stack>
+              <Typography
+                component="span"
+                sx={{ fontSize: 15, fontWeight: 900, whiteSpace: 'nowrap' }}
+              >
+                {formatMoney(owner.income)}
+              </Typography>
+              <Box sx={{ display: 'flex', color: 'text.secondary' }}>
+                <ChevronIcon />
+              </Box>
+            </OwnerLink>
+          </li>
+        ))}
+      </Stack>
+    </Stack>
+  )
+}
+
+function ChevronIcon() {
+  return (
+    <svg
+      width={20}
+      height={20}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M9 5 L16 12 L9 19" />
+    </svg>
+  )
+}
+
 const browserClipboard = (text: string) => navigator.clipboard.writeText(text)
 
 export function FlatTaxPage(props: Props) {
@@ -376,6 +500,9 @@ export function FlatTaxPage(props: Props) {
   const [notice, setNotice] = useState<string | undefined>()
   const year = String(view.year)
   const flat = view.flat
+  const { holder } = view
+  const person = personParam(holder)
+  const whole = holder.kind === 'whole'
 
   const copy = (value: string) => {
     // Outside a secure context navigator.clipboard is undefined and the
@@ -416,7 +543,7 @@ export function FlatTaxPage(props: Props) {
       >
         <IconLink
           to="/year-summary"
-          search={{ year: view.year }}
+          search={{ year: view.year, person }}
           aria-label={m.flat_tax_back()}
         >
           <BackIcon />
@@ -426,7 +553,7 @@ export function FlatTaxPage(props: Props) {
             component="span"
             sx={{ fontSize: 12, fontWeight: 800, color: 'text.secondary' }}
           >
-            {m.flat_tax_kicker({ year })}
+            {kicker(holder, year)}
           </Typography>
           <Typography
             variant="h3"
@@ -455,11 +582,41 @@ export function FlatTaxPage(props: Props) {
               {m.flat_tax_no_share_title({ year })}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {m.flat_tax_no_share_text({ year })}
+              {noShareText(holder, year)}
             </Typography>
           </Stack>
         ) : (
           <>
+            {holder.kind === 'own' ? null : (
+              <Stack
+                component="section"
+                role="note"
+                sx={{
+                  bgcolor: colors.lavenderTint,
+                  borderRadius: `${String(radii.tile)}px`,
+                  px: 1.75,
+                  py: 1.5,
+                  gap: 0.25,
+                }}
+              >
+                <Typography
+                  component="span"
+                  sx={{ fontSize: 13, fontWeight: 900 }}
+                >
+                  {holder.kind === 'whole'
+                    ? m.flat_tax_band_whole_title()
+                    : m.flat_tax_band_person_title({ name: holder.name })}
+                </Typography>
+                <Typography
+                  component="span"
+                  sx={{ fontSize: 13, fontWeight: 700, lineHeight: 1.35 }}
+                >
+                  {whole
+                    ? m.flat_tax_band_whole_text()
+                    : m.flat_tax_band_person_text()}
+                </Typography>
+              </Stack>
+            )}
             {flat.checks.length > 0 ? (
               <Box
                 component="section"
@@ -498,91 +655,95 @@ export function FlatTaxPage(props: Props) {
                 </Stack>
               </Box>
             ) : null}
-            <Stack
-              component="section"
-              aria-labelledby="flat-tax-details"
-              sx={{ ...card, pl: 2, pr: 1.5, py: 0.75 }}
-            >
-              <Typography
-                id="flat-tax-details"
-                component="h2"
-                sx={{ fontSize: 15, fontWeight: 900, my: 0.75 }}
+            {whole ? (
+              <OwnersCard view={view} />
+            ) : (
+              <Stack
+                component="section"
+                aria-labelledby="flat-tax-details"
+                sx={{ ...card, pl: 2, pr: 1.5, py: 0.75 }}
               >
-                {m.flat_tax_details()}
-              </Typography>
-              <DetailRow
-                label={m.flat_tax_housing_company_name()}
-                value={flat.details.name}
-                addTo={view.property.id}
-                onCopy={copy}
-              />
-              <DetailRow
-                label={m.flat_tax_business_id()}
-                value={flat.details.businessId}
-                addTo={view.property.id}
-                onCopy={copy}
-              />
-              <DetailRow
-                label={m.flat_tax_apartment_number()}
-                value={flat.details.apartmentNumber}
-                addTo={view.property.id}
-                onCopy={copy}
-              />
-              <DetailRow
-                label={m.flat_tax_tenant()}
-                value={tenant ?? m.flat_tax_tenant_none({ year })}
-                plain={tenant === null}
-                onCopy={copy}
-              />
-              <DetailRow
-                label={m.flat_tax_identity_code()}
-                value={m.flat_tax_identity_code_text()}
-                plain
-                onCopy={copy}
-              />
-              {period === null ? null : (
+                <Typography
+                  id="flat-tax-details"
+                  component="h2"
+                  sx={{ fontSize: 15, fontWeight: 900, my: 0.75 }}
+                >
+                  {m.flat_tax_details()}
+                </Typography>
                 <DetailRow
-                  label={m.flat_tax_period()}
-                  value={period}
+                  label={m.flat_tax_housing_company_name()}
+                  value={flat.details.name}
+                  addTo={view.property.id}
                   onCopy={copy}
                 />
-              )}
-              <Stack
-                direction="row"
-                sx={{
-                  alignItems: 'center',
-                  gap: 1,
-                  minHeight: 52,
-                  py: 0.5,
-                  borderTop: `1px solid ${colors.divider}`,
-                }}
-              >
-                <Stack sx={{ flex: 1 }}>
-                  <Typography
-                    component="span"
-                    sx={{
-                      fontSize: 12,
-                      fontWeight: 800,
-                      color: 'text.secondary',
-                    }}
-                  >
-                    {m.flat_tax_share()}
-                  </Typography>
-                  <Typography
-                    component="span"
-                    sx={{ fontSize: 15, fontWeight: 900 }}
-                  >
-                    {formatShare(flat.details.share)}
-                  </Typography>
-                </Stack>
-                <CopyButton
-                  label={m.flat_tax_copy({ label: m.flat_tax_share() })}
-                  onCopy={() => {
-                    copy(shareForCopy(flat.details.share))
-                  }}
+                <DetailRow
+                  label={m.flat_tax_business_id()}
+                  value={flat.details.businessId}
+                  addTo={view.property.id}
+                  onCopy={copy}
                 />
+                <DetailRow
+                  label={m.flat_tax_apartment_number()}
+                  value={flat.details.apartmentNumber}
+                  addTo={view.property.id}
+                  onCopy={copy}
+                />
+                <DetailRow
+                  label={m.flat_tax_tenant()}
+                  value={tenant ?? m.flat_tax_tenant_none({ year })}
+                  plain={tenant === null}
+                  onCopy={copy}
+                />
+                <DetailRow
+                  label={m.flat_tax_identity_code()}
+                  value={m.flat_tax_identity_code_text()}
+                  plain
+                  onCopy={copy}
+                />
+                {period === null ? null : (
+                  <DetailRow
+                    label={m.flat_tax_period()}
+                    value={period}
+                    onCopy={copy}
+                  />
+                )}
+                <Stack
+                  direction="row"
+                  sx={{
+                    alignItems: 'center',
+                    gap: 1,
+                    minHeight: 52,
+                    py: 0.5,
+                    borderTop: `1px solid ${colors.divider}`,
+                  }}
+                >
+                  <Stack sx={{ flex: 1 }}>
+                    <Typography
+                      component="span"
+                      sx={{
+                        fontSize: 12,
+                        fontWeight: 800,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      {m.flat_tax_share()}
+                    </Typography>
+                    <Typography
+                      component="span"
+                      sx={{ fontSize: 15, fontWeight: 900 }}
+                    >
+                      {formatShare(flat.details.share)}
+                    </Typography>
+                  </Stack>
+                  <CopyButton
+                    label={m.flat_tax_copy({ label: m.flat_tax_share() })}
+                    onCopy={() => {
+                      copy(shareForCopy(flat.details.share))
+                    }}
+                  />
+                </Stack>
               </Stack>
-            </Stack>
+            )}
             <Stack
               component="section"
               aria-labelledby="flat-tax-rows"
@@ -696,12 +857,14 @@ export function FlatTaxPage(props: Props) {
                     >
                       {formatMoney(row.cents)}
                     </Typography>
-                    <CopyButton
-                      label={m.flat_tax_copy_row({ row: number })}
-                      onCopy={() => {
-                        copy(amountForCopy(row.cents))
-                      }}
-                    />
+                    {whole ? null : (
+                      <CopyButton
+                        label={m.flat_tax_copy_row({ row: number })}
+                        onCopy={() => {
+                          copy(amountForCopy(row.cents))
+                        }}
+                      />
+                    )}
                   </Stack>
                 )
               })}

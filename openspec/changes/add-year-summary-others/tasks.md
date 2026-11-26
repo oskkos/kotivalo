@@ -53,18 +53,18 @@
 
 ## 4. The form 7H page for another owner and the whole flat
 
-- [ ] 4.1 `FlatTaxPage.tsx`:
+- [x] 4.1 `FlatTaxPage.tsx`:
   - for another owner: the kicker with the name, the band, copy buttons kept
   - for the whole flat: the kicker, the note, the *Omistajat* card with links to each owner's page, rows without copy buttons, and no details card
   - Back with `person`
 - [x] 4.2 The route `year-summary/$propertyId.tsx`: `person` in `validateSearch` and `loaderDeps`.
-- [ ] 4.3 Messages in fi, sv and en for the kickers, the bands and the *Omistajat* card.
-- [ ] 4.4 Component tests in `FlatTaxPage.test.tsx`: "A co-owner's form 7H page", "Opening an owner from the whole flat", and no copy button and no details card on the whole flat.
-- [ ] 4.5 Playwright in `e2e/year-summary.spec.ts`:
+- [x] 4.3 Messages in fi, sv and en for the kickers, the bands and the *Omistajat* card.
+- [x] 4.4 Component tests in `FlatTaxPage.test.tsx`: "A co-owner's form 7H page", "Opening an owner from the whole flat", and no copy button and no details card on the whole flat.
+- [x] 4.5 Playwright in `e2e/year-summary.spec.ts`:
   - "The whole flat's page": the owners, the rows and no copy button
   - "The choice follows the year and the flat": the URLs, and Back to the same person
   - "The form 7H page of a flat" for another owner, with copy buttons
-- [ ] 4.6 CLAUDE.md "Current state": the year summary for other owners and whole flats (`Holder`, `person`, `HolderChoice`).
+- [x] 4.6 CLAUDE.md "Current state": the year summary for other owners and whole flats (`Holder`, `person`, `HolderChoice`).
 
 ## 5. Verification, review and archive
 

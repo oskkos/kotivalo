@@ -16,10 +16,12 @@ vi.mock('@tanstack/react-router', () => ({
       children: ReactNode
       to: string
       params?: { propertyId: string }
+      search?: { person?: string }
       'aria-label'?: string
     }) => (
       <a
         href={props.to.replace('$propertyId', props.params?.propertyId ?? '')}
+        data-person={props.search?.person}
         aria-label={props['aria-label']}
       >
         {props.children}
@@ -351,5 +353,99 @@ describe('Copying form 7H values', () => {
       'Copying failed. Type the figure in by hand.',
     )
     expect(clientLog.warn).toHaveBeenCalledWith('year_summary.copy_failed')
+  })
+})
+
+const MIKKO = {
+  kind: 'person',
+  userId: 'mikko',
+  name: 'Mikko Virtanen',
+} as const
+
+describe("Another owner's figures", () => {
+  test("A co-owner's form 7H page", () => {
+    render(
+      <FlatTaxPage
+        view={{
+          ...view(
+            flat({
+              checks: [
+                { kind: 'share_changed', on: '2025-03-01', from: 0, to: 5000 },
+              ],
+            }),
+          ),
+          holder: MIKKO,
+        }}
+      />,
+    )
+    expect(screen.getByText('Form 7H · 2025 · Mikko Virtanen')).toBeVisible()
+    expect(screen.getByText('Share: Mikko Virtanen')).toBeVisible()
+    expect(screen.getByText(/may have other rental flats/)).toBeVisible()
+    expect(screen.getByText(/The share changed on .*: 0% → 50%/)).toBeVisible()
+    expect(screen.queryByText(/Your share changed/)).toBeNull()
+    expect(screen.getByRole('button', { name: 'Copy row 2.1' })).toBeVisible()
+    expect(screen.getByRole('region', { name: 'Flat details' })).toBeVisible()
+    expect(
+      screen.getByRole('link', { name: 'Back to the year summary' }),
+    ).toHaveAttribute('data-person', 'mikko')
+  })
+
+  test('says a person had no share in the flat that year', () => {
+    render(<FlatTaxPage view={{ ...view(null), holder: MIKKO }} />)
+    expect(
+      screen.getByText(
+        'Mikko Virtanen had no ownership share in this flat in 2025, so there are no figures for form 7H.',
+      ),
+    ).toBeVisible()
+  })
+})
+
+describe("The whole flat's page", () => {
+  const wholeView = (): Extract<FlatYearView, { ok: true }> => ({
+    ...view(flat({ details: { ...flat().details, share: 10000 } })),
+    holder: { kind: 'whole' },
+    owners: [
+      {
+        userId: 'annika',
+        name: 'Annika',
+        share: 5000,
+        income: 244750,
+        isYou: true,
+      },
+      {
+        userId: 'mikko',
+        name: 'Mikko Virtanen',
+        share: 5000,
+        income: 244750,
+        isYou: false,
+      },
+    ],
+  })
+
+  test('shows the owners and the rows with no copy button and no details', () => {
+    render(<FlatTaxPage view={wholeView()} />)
+    expect(screen.getByText('The whole flat, for checking')).toBeVisible()
+    expect(screen.getByText(/not reported as such/)).toBeVisible()
+    const owners = screen.getByRole('region', { name: 'Owners' })
+    expect(within(owners).getByText('Annika')).toBeVisible()
+    expect(within(owners).getByText('Mikko Virtanen')).toBeVisible()
+    expect(within(owners).getAllByText('Share 50%')).toHaveLength(2)
+    expect(within(rowOf('2.1')).getByText('€4,895.00')).toBeVisible()
+    expect(screen.queryByRole('button', { name: /^Copy/ })).toBeNull()
+    expect(screen.queryByRole('region', { name: 'Flat details' })).toBeNull()
+  })
+
+  test('Opening an owner from the whole flat', () => {
+    render(<FlatTaxPage view={wholeView()} />)
+    const owners = screen.getByRole('region', { name: 'Owners' })
+    const links = within(owners).getAllByRole('link')
+    // The user's own page has no person; another owner's has their id.
+    expect(links.map((link) => link.getAttribute('data-person'))).toEqual([
+      null,
+      'mikko',
+    ])
+    expect(
+      screen.getByRole('link', { name: 'Back to the year summary' }),
+    ).toHaveAttribute('data-person', 'whole')
   })
 })
