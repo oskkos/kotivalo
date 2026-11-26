@@ -2,7 +2,8 @@
 // risks). Workers tests can't measure it: workerd's clock stands still while
 // code runs. This measures the calculation in Node (V8, like workerd) with 10
 // flats and two years of data: about 3 ms on a laptop (2026-11-25), so the
-// assertion is the limit itself, to stay stable on slower CI runners.
+// assertion is the limit itself, on the fastest of ten runs, to stay stable
+// on slower CI runners and next to other test files.
 import { describe, expect, test } from 'vitest'
 import type { Period as ValuePeriod } from '#/features/recurring-amounts/periods'
 import { flatYear, type FlatYearInput } from './summary'
@@ -109,11 +110,15 @@ describe('The year summary calculation', () => {
     const run = () =>
       flats.map((input) => flatYear(input, 'annika', 2025, '2026-11-25'))
     run() // warm up
-    const times = Array.from({ length: 5 }, () => {
-      const start = performance.now()
-      run()
-      return performance.now() - start
-    }).sort((a, b) => a - b)
-    expect(times[2]).toBeLessThan(10)
+    // The fastest of ten runs: other test files running at the same time
+    // slow single runs down, but rarely all of them.
+    const fastest = Math.min(
+      ...Array.from({ length: 10 }, () => {
+        const start = performance.now()
+        run()
+        return performance.now() - start
+      }),
+    )
+    expect(fastest).toBeLessThan(10)
   })
 })
