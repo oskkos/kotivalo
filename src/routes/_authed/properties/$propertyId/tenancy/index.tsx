@@ -155,6 +155,28 @@ function TenancyRoute() {
               : m.deposit_card_add()}
           </ButtonLink>
         )}
+        leaseLink={(lease, row) => (
+          <TextLink
+            to="/properties/$propertyId/documents/$documentId"
+            params={{ propertyId, documentId: lease.id }}
+            underline="none"
+            color="inherit"
+            sx={{ display: 'block' }}
+          >
+            {row}
+          </TextLink>
+        )}
+        leaseAdd={(tenancy) => (
+          <ButtonLink
+            to="/properties/$propertyId/documents/new"
+            params={{ propertyId }}
+            search={{ kind: 'lease', tenancyId: tenancy.id }}
+            variant="outlined"
+            sx={{ alignSelf: 'flex-start', minHeight: 44, px: 2 }}
+          >
+            {m.lease_card_add()}
+          </ButtonLink>
+        )}
         onChangeOccupants={setChangingOccupants}
         onUndoOccupants={setUndoingOccupants}
         currentActions={(tenancy) => {

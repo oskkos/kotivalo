@@ -9,6 +9,7 @@ import Link from '@mui/material/Link'
 import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import type { ReactNode } from 'react'
+import type { DocumentRow } from '#/features/documents/document.repository.server'
 import type { Period } from '#/features/recurring-amounts/periods'
 import { formatDate, formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
@@ -16,6 +17,7 @@ import { colors, radii } from '#/theme/tokens'
 import { contractLabel, datesLabel, endingLabel, statusLabel } from './labels'
 import { DepositCard } from './DepositCard'
 import { FeesCard } from './FeesCard'
+import { LeaseCard } from './LeaseCard'
 import type { FeeOfTenancy } from './fees'
 import { OccupantsCard } from './OccupantsCard'
 import { RentCard } from './RentCard'
@@ -33,6 +35,8 @@ export interface TenancyPageView {
   occupants: Partial<Record<string, readonly Period<number>[]>>
   /** Each tenancy's tenant fees. */
   fees: Partial<Record<string, readonly FeeOfTenancy[]>>
+  /** The leases naming the current tenancy, newest first. */
+  leases?: readonly DocumentRow[]
 }
 
 interface Props {
@@ -57,6 +61,10 @@ interface Props {
   feeChange?: (tenancy: Tenancy, fee: FeeOfTenancy) => ReactNode
   /** Owners only: the link to the correction form that sets the deposit. */
   depositChange?: (tenancy: Tenancy) => ReactNode
+  /** Wraps a lease's row in a link to its details page. */
+  leaseLink?: (lease: DocumentRow, row: ReactNode) => ReactNode
+  /** Owners only: the link that adds a lease to the current tenancy. */
+  leaseAdd?: (tenancy: Tenancy) => ReactNode
   /** Owners only: opening the dialog that changes the occupants. */
   onChangeOccupants?: (tenancy: Tenancy) => void
   /** Owners only: undoing the latest occupants change. */
@@ -413,6 +421,13 @@ export function TenancyPage(props: Props) {
           <DepositCard
             deposit={current.deposit}
             action={owner ? props.depositChange?.(current) : undefined}
+          />
+        ) : null}
+        {current ? (
+          <LeaseCard
+            leases={view.leases ?? []}
+            link={props.leaseLink ?? ((_lease, row) => row)}
+            add={owner ? props.leaseAdd?.(current) : undefined}
           />
         ) : null}
         {others.length > 0 ? (
