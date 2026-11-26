@@ -254,7 +254,8 @@ describe('Choosing whose figures', () => {
     )
   })
 
-  test('says a person had no share that year and keeps the selector', () => {
+  test('says a person had no share that year and keeps the selector', async () => {
+    // As the server lists a chosen person without a share in the year.
     renderPage(
       view({
         holder: MIKKO,
@@ -270,6 +271,16 @@ describe('Choosing whose figures', () => {
         'Mikko Virtanen had no ownership share in any of the flats you see in 2025.',
       ),
     ).toBeVisible()
+    await userEvent.click(screen.getByRole('button', { name: /Whose figures/ }))
+    expect(
+      within(screen.getByRole('dialog')).getByRole('radio', {
+        name: /Mikko Virtanen/,
+      }),
+    ).toBeChecked()
+  })
+
+  test('keeps the selector for the whole flats without other owners', () => {
+    renderPage(view({ holder: { kind: 'whole' }, people: [] }))
     expect(screen.getByRole('button', { name: /Whose figures/ })).toBeVisible()
   })
 })

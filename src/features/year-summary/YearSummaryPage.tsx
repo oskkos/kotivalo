@@ -364,7 +364,7 @@ export function YearSummaryPage(props: Props) {
         component="main"
         sx={{ flex: 1, gap: 1.5, px: 2.5, pt: 0.75, pb: 2 }}
       >
-        {view.people.length > 0 ? (
+        {view.people.length > 0 || view.holder.kind !== 'own' ? (
           <HolderChoice
             holder={view.holder}
             people={view.people}
