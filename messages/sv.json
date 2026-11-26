@@ -300,6 +300,7 @@
   "documents_type_pdf": "PDF",
   "documents_usage": "Använt lagringsutrymme {used} / {limit}",
   "email_action_fallback": "Om knappen inte fungerar, kopiera den här adressen till din webbläsare:",
+  "email_support": "Frågor? Skriv till oss: {address}",
   "error_reference": "Felkod: {reference}",
   "flat_details_all": "Alla",
   "flat_details_charges": "Vederlag per månad",

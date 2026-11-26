@@ -300,6 +300,7 @@
   "documents_type_pdf": "PDF",
   "documents_usage": "Storage used {used} of {limit}",
   "email_action_fallback": "If the button doesn't work, copy this address into your browser:",
+  "email_support": "Questions? Write to us: {address}",
   "error_reference": "Error reference: {reference}",
   "flat_details_all": "All",
   "flat_details_charges": "Charges by month",
