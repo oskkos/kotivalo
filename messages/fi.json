@@ -1256,6 +1256,21 @@
   ],
   "year_summary_empty_text": "Yhteenveto lasketaan asunnoista, joissa sinulla oli omistusosuus.",
   "year_summary_empty_title": "Ei omistusosuutta vuonna {year}",
+  "year_summary_holder_flats": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} asunto",
+        "countPlural=other": "{count} asuntoa"
+      }
+    }
+  ],
+  "year_summary_holder_label": "Kenen luvut",
+  "year_summary_holder_own": "Oma osuutesi",
+  "year_summary_holder_sheet_close": "Sulje",
+  "year_summary_holder_sheet_title": "Kenen luvut näytetään?",
+  "year_summary_holder_whole": "Koko asunnot (100 %)",
   "year_summary_income": "Vuokratulot (2.1)",
   "year_summary_intro": "Lomake 7H täytetään asunnoittain. Avaa asunto ja kopioi luvut OmaVeroon.",
   "year_summary_intro_title": [
@@ -1282,7 +1297,44 @@
       }
     }
   ],
+  "year_summary_owner_share": "{name} {share}",
   "year_summary_page_title": "Vuosiyhteenveto – Kotivalo",
+  "year_summary_person_band_text": "Mukana ovat vain asunnot, jotka näet. Hänellä voi olla muitakin vuokra-asuntoja, jotka kuuluvat hänen veroilmoitukseensa.",
+  "year_summary_person_band_title": "Vain yhteiset asunnot",
+  "year_summary_person_empty_text": "{name} ei omistanut osuutta yhdessäkään asunnossa, jonka näet, vuonna {year}.",
+  "year_summary_person_intro": "Luvut on laskettu hänen osuudellaan samoin kuin omasi. Avaa asunto ja kopioi luvut OmaVeroon.",
+  "year_summary_person_not_included": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Ei mukana: {flats}, koska {name} ei omistanut siinä osuutta vuonna {year}.",
+        "countPlural=other": "Ei mukana: {flats}, koska {name} ei omistanut niissä osuutta vuonna {year}."
+      }
+    }
+  ],
+  "year_summary_person_title": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Osuus: {name} · {count} asunto",
+        "countPlural=other": "Osuus: {name} · {count} asuntoa"
+      }
+    }
+  ],
   "year_summary_previous_year": "Edellinen vuosi",
-  "year_summary_share": "Osuutesi {share}"
+  "year_summary_share": "Osuutesi {share}",
+  "year_summary_share_person": "Osuus {share}",
+  "year_summary_whole_intro": "Luvut on laskettu koko asunnoille tarkistamista varten. Niitä ei ilmoiteta sellaisenaan: jokainen omistaja ilmoittaa oman osuutensa lomakkeella 7H.",
+  "year_summary_whole_title": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Koko asunnot · {count} asunto",
+        "countPlural=other": "Koko asunnot · {count} asuntoa"
+      }
+    }
+  ]
 }

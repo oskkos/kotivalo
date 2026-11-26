@@ -21,12 +21,16 @@ import {
 import { m } from '#/paraglide/messages.js'
 import { getLocale } from '#/paraglide/runtime.js'
 import { colors, radii } from '#/theme/tokens'
+import { HolderChoice } from './HolderChoice'
+import { personParam } from './holder'
 import type { Check } from './summary'
 import type { FlatCard, YearSummaryView } from './view'
 
 interface Props {
   view: YearSummaryView
   onYear: (year: number) => void
+  /** Chooses whose figures to show; undefined is the own share. */
+  onPerson: (person: string | undefined) => void
   bottomNav: React.ReactNode
 }
 
@@ -166,14 +170,35 @@ function Figure(props: { label: string; amount: number }) {
 
 const CardLink = createLink(ButtonBase)
 
-function Card(props: { card: FlatCard; year: number }) {
+/** The share line of a card: the holder's, or each owner's on a whole flat. */
+function shareLine(card: FlatCard, holder: YearSummaryView['holder']): string {
+  if (holder.kind === 'whole') {
+    return card.owners
+      .map((owner) =>
+        m.year_summary_owner_share({
+          name: owner.name,
+          share: formatShare(owner.share),
+        }),
+      )
+      .join(' · ')
+  }
+  return holder.kind === 'own'
+    ? m.year_summary_share({ share: formatShare(card.share) })
+    : m.year_summary_share_person({ share: formatShare(card.share) })
+}
+
+function Card(props: {
+  card: FlatCard
+  year: number
+  holder: YearSummaryView['holder']
+}) {
   const { card } = props
   const missing = card.housingCompanyName === null && card.businessId === null
   return (
     <CardLink
       to="/year-summary/$propertyId"
       params={{ propertyId: card.propertyId }}
-      search={{ year: props.year }}
+      search={{ year: props.year, person: personParam(props.holder) }}
       sx={{
         display: 'flex',
         flexDirection: 'column',
@@ -208,7 +233,7 @@ function Card(props: { card: FlatCard; year: number }) {
             component="span"
             sx={{ fontSize: 12, fontWeight: 800, color: 'text.secondary' }}
           >
-            {m.year_summary_share({ share: formatShare(card.share) })}
+            {shareLine(card, props.holder)}
           </Typography>
         </Stack>
         <Box sx={{ color: 'text.secondary', display: 'flex', pt: 0.25 }}>
@@ -241,6 +266,34 @@ function Card(props: { card: FlatCard; year: number }) {
       ) : null}
     </CardLink>
   )
+}
+
+function introTitle(holder: YearSummaryView['holder'], count: number): string {
+  switch (holder.kind) {
+    case 'own':
+      return m.year_summary_intro_title({ count })
+    case 'whole':
+      return m.year_summary_whole_title({ count })
+    case 'person':
+      return m.year_summary_person_title({ count, name: holder.name })
+  }
+}
+
+function notIncludedText(
+  holder: YearSummaryView['holder'],
+  notIncluded: YearSummaryView['notIncluded'],
+  year: string,
+): string {
+  const flats = formatList(notIncluded.map((f) => f.streetAddress))
+  const count = notIncluded.length
+  return holder.kind === 'person'
+    ? m.year_summary_person_not_included({
+        count,
+        flats,
+        name: holder.name,
+        year,
+      })
+    : m.year_summary_not_included({ count, flats, year })
 }
 
 export function YearSummaryPage(props: Props) {
@@ -311,6 +364,14 @@ export function YearSummaryPage(props: Props) {
         component="main"
         sx={{ flex: 1, gap: 1.5, px: 2.5, pt: 0.75, pb: 2 }}
       >
+        {view.people.length > 0 ? (
+          <HolderChoice
+            holder={view.holder}
+            people={view.people}
+            counts={view.counts}
+            onChoose={props.onPerson}
+          />
+        ) : null}
         {flats.length === 0 ? (
           <Stack
             component="section"
@@ -335,8 +396,13 @@ export function YearSummaryPage(props: Props) {
               {m.year_summary_empty_title({ year })}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {m.year_summary_empty_text()}
-              {notIncluded.length > 0
+              {view.holder.kind === 'person'
+                ? m.year_summary_person_empty_text({
+                    name: view.holder.name,
+                    year,
+                  })
+                : m.year_summary_empty_text()}
+              {view.holder.kind === 'own' && notIncluded.length > 0
                 ? ` ${m.year_summary_empty_seen({ count: notIncluded.length, year })}`
                 : null}
             </Typography>
@@ -362,22 +428,57 @@ export function YearSummaryPage(props: Props) {
                   color: colors.onPlumMuted,
                 }}
               >
-                {m.year_summary_intro_title({ count: flats.length })}
+                {introTitle(view.holder, flats.length)}
               </Typography>
               <Typography
                 component="span"
                 sx={{ fontSize: 15, fontWeight: 800, lineHeight: 1.35 }}
               >
-                {m.year_summary_intro()}
+                {view.holder.kind === 'whole'
+                  ? m.year_summary_whole_intro()
+                  : view.holder.kind === 'person'
+                    ? m.year_summary_person_intro()
+                    : m.year_summary_intro()}
               </Typography>
             </Stack>
+            {view.holder.kind === 'person' ? (
+              <Stack
+                component="section"
+                role="note"
+                sx={{
+                  bgcolor: colors.lavenderTint,
+                  borderRadius: `${String(radii.tile)}px`,
+                  px: 1.75,
+                  py: 1.5,
+                  gap: 0.25,
+                }}
+              >
+                <Typography
+                  component="span"
+                  sx={{ fontSize: 13, fontWeight: 900 }}
+                >
+                  {m.year_summary_person_band_title()}
+                </Typography>
+                <Typography
+                  component="span"
+                  sx={{ fontSize: 13, fontWeight: 700, lineHeight: 1.35 }}
+                >
+                  {m.year_summary_person_band_text()}
+                </Typography>
+              </Stack>
+            ) : null}
             <Stack
               component="section"
               aria-label={m.properties_title()}
               sx={{ gap: 1.25 }}
             >
               {flats.map((card) => (
-                <Card key={card.propertyId} card={card} year={view.year} />
+                <Card
+                  key={card.propertyId}
+                  card={card}
+                  year={view.year}
+                  holder={view.holder}
+                />
               ))}
             </Stack>
             <Stack
@@ -417,13 +518,7 @@ export function YearSummaryPage(props: Props) {
               >
                 {notIncluded.length > 0 ? (
                   <Typography component="p" sx={{ font: 'inherit' }}>
-                    {m.year_summary_not_included({
-                      count: notIncluded.length,
-                      flats: formatList(
-                        notIncluded.map((f) => f.streetAddress),
-                      ),
-                      year,
-                    })}
+                    {notIncludedText(view.holder, notIncluded, year)}
                   </Typography>
                 ) : null}
                 <Typography component="p" sx={{ font: 'inherit' }}>

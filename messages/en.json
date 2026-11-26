@@ -1256,6 +1256,21 @@
   ],
   "year_summary_empty_text": "The summary is calculated for flats in which you had an ownership share.",
   "year_summary_empty_title": "No ownership share in {year}",
+  "year_summary_holder_flats": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} flat",
+        "countPlural=other": "{count} flats"
+      }
+    }
+  ],
+  "year_summary_holder_label": "Whose figures",
+  "year_summary_holder_own": "Your own share",
+  "year_summary_holder_sheet_close": "Close",
+  "year_summary_holder_sheet_title": "Whose figures to show?",
+  "year_summary_holder_whole": "Whole flats (100%)",
   "year_summary_income": "Rental income (2.1)",
   "year_summary_intro": "Form 7H is filled in flat by flat. Open a flat and copy the figures into MyTax.",
   "year_summary_intro_title": [
@@ -1282,7 +1297,44 @@
       }
     }
   ],
+  "year_summary_owner_share": "{name} {share}",
   "year_summary_page_title": "Year summary – Kotivalo",
+  "year_summary_person_band_text": "Only the flats you can see are counted. They may have other rental flats to report.",
+  "year_summary_person_band_title": "Shared flats only",
+  "year_summary_person_empty_text": "{name} had no ownership share in any of the flats you see in {year}.",
+  "year_summary_person_intro": "The figures are calculated on their share, the same way as your own. Open a flat and copy the figures into MyTax.",
+  "year_summary_person_not_included": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Not included: {flats}, because {name} had no ownership share in it in {year}.",
+        "countPlural=other": "Not included: {flats}, because {name} had no ownership share in them in {year}."
+      }
+    }
+  ],
+  "year_summary_person_title": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Share: {name} · {count} flat",
+        "countPlural=other": "Share: {name} · {count} flats"
+      }
+    }
+  ],
   "year_summary_previous_year": "Previous year",
-  "year_summary_share": "Your share {share}"
+  "year_summary_share": "Your share {share}",
+  "year_summary_share_person": "Share {share}",
+  "year_summary_whole_intro": "The figures are calculated for the whole flats, for checking. They are not reported as such: each owner reports their own share on form 7H.",
+  "year_summary_whole_title": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Whole flats · {count} flat",
+        "countPlural=other": "Whole flats · {count} flats"
+      }
+    }
+  ]
 }

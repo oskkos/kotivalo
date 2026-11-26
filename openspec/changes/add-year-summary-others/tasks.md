@@ -35,17 +35,17 @@
 
 ## 3. The selector and the year summary page
 
-- [ ] 3.1 `HolderChoice.tsx`: the *Kenen luvut* button and the bottom sheet with a radio group (design.md, decision 7). Choosing navigates and closes the sheet, and *Oma osuutesi* removes `person`.
-- [ ] 3.2 `YearSummaryPage.tsx`:
+- [x] 3.1 `HolderChoice.tsx`: the *Kenen luvut* button and the bottom sheet with a radio group (design.md, decision 7). Choosing navigates and closes the sheet, and *Oma osuutesi* removes `person`.
+- [x] 3.2 `YearSummaryPage.tsx`:
   - the selector when `people` is not empty
   - the intro for another person, with the *Vain yhteiset asunnot* band and the person's "Not included" note
   - the intro for the whole flats, the owners on the cards and the "not reported as such" note
   - the empty state for a person without a share that year
   - `person` on the year buttons and the card links
-- [ ] 3.3 The route `year-summary/index.tsx`: `person` in `validateSearch` and `loaderDeps`.
-- [ ] 3.4 Messages in fi, sv and en for the selector, the sheet, the intros, the band, the notes and the empty state. Names go in the basic form only. Use the translate skill for the Swedish and English text, with the term-critic review if a term changes.
-- [ ] 3.5 Component tests in `YearSummaryPage.test.tsx` and `HolderChoice.test.tsx`: the sheet's options and the chosen one, the person view's band and notes, the whole flats' owners, no selector without `people`, and the person's empty state.
-- [ ] 3.6 Playwright in `e2e/year-summary.spec.ts`, with Annika and Jussi co-owning from `coOwned`:
+- [x] 3.3 The route `year-summary/index.tsx`: `person` in `validateSearch` and `loaderDeps`.
+- [x] 3.4 Messages in fi, sv and en for the selector, the sheet, the intros, the band, the notes and the empty state. Names go in the basic form only. Use the translate skill for the Swedish and English text, with the term-critic review if a term changes.
+- [x] 3.5 Component tests in `YearSummaryPage.test.tsx` and `HolderChoice.test.tsx`: the sheet's options and the chosen one, the person view's band and notes, the whole flats' owners, no selector without `people`, and the person's empty state.
+- [x] 3.6 Playwright in `e2e/year-summary.spec.ts`, with Annika and Jussi co-owning from `coOwned`:
   - "Choosing whose figures": the sheet, choosing Jussi, the URL, and the choice kept on the previous year
   - "Another owner's figures": Jussi's card and the band
   - "The whole flats": the owners on the card and the note
@@ -57,7 +57,7 @@
   - for another owner: the kicker with the name, the band, copy buttons kept
   - for the whole flat: the kicker, the note, the *Omistajat* card with links to each owner's page, rows without copy buttons, and no details card
   - Back with `person`
-- [ ] 4.2 The route `year-summary/$propertyId.tsx`: `person` in `validateSearch` and `loaderDeps`.
+- [x] 4.2 The route `year-summary/$propertyId.tsx`: `person` in `validateSearch` and `loaderDeps`.
 - [ ] 4.3 Messages in fi, sv and en for the kickers, the bands and the *Omistajat* card.
 - [ ] 4.4 Component tests in `FlatTaxPage.test.tsx`: "A co-owner's form 7H page", "Opening an owner from the whole flat", and no copy button and no details card on the whole flat.
 - [ ] 4.5 Playwright in `e2e/year-summary.spec.ts`:

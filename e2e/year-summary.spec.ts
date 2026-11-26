@@ -6,10 +6,12 @@ import {
   openRentMonth,
   recordPayment,
 } from './support/rent-payments'
-import { accepted } from './support/sharing'
+import { accepted, coOwned } from './support/sharing'
 import { signIn, uniqueEmail } from './support/sign-in'
 import { addTenant } from './support/tenancies'
 import {
+  chooseHolder,
+  holderButton,
   openFlatYear,
   openYearSummary,
   summaryCard,
@@ -68,6 +70,13 @@ test.describe('The year summary page', () => {
       jussi.getByRole('heading', { name: 'No ownership share in 2025' }),
     ).toBeVisible()
     await expect(summaryCard(jussi, kuusikuja.streetAddress)).toHaveCount(0)
+    // He still sees the owner's figures and the whole flats.
+    await holderButton(jussi).click()
+    const sheet = jussi.getByRole('dialog')
+    await expect(sheet.getByRole('radio', { name: /Annika/ })).toBeVisible()
+    await expect(
+      sheet.getByRole('radio', { name: /Whole flats/ }),
+    ).toBeVisible()
   })
 
   test('Moving to the previous year', async ({ page }) => {
@@ -203,5 +212,61 @@ test.describe('Copying form 7H values', () => {
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(
       '2400,00',
     )
+  })
+})
+
+test.describe('Choosing whose figures', () => {
+  test('Choosing whose figures', async ({ page, browser }) => {
+    await coOwned(page, browser)
+    await openYearSummary(page, 2026)
+    await expect(holderButton(page)).toContainText('Your own share')
+
+    await holderButton(page).click()
+    const sheet = page.getByRole('dialog')
+    await expect(
+      sheet.getByRole('radio', { name: /Your own share/ }),
+    ).toBeChecked()
+    await expect(
+      sheet.locator('label').filter({ hasText: 'Jussi' }),
+    ).toContainText('1 flat')
+    await sheet.getByRole('radio', { name: /Jussi/ }).click()
+    await expect(page).toHaveURL(/\/year-summary\?year=2026&person=[^&]+$/)
+    await expect(holderButton(page)).toContainText('Jussi')
+
+    await page.getByRole('button', { name: 'Previous year' }).click()
+    await expect(page).toHaveURL(/\/year-summary\?year=2025&person=[^&]+$/)
+    await expect(holderButton(page)).toContainText('Jussi')
+
+    await chooseHolder(page, /Your own share/)
+    await expect(page).toHaveURL('/year-summary?year=2025')
+  })
+})
+
+test.describe("Another owner's figures", () => {
+  test("Another owner's figures", async ({ page, browser }) => {
+    await coOwned(page, browser)
+    await openYearSummary(page, 2025)
+    await chooseHolder(page, /Jussi/)
+
+    await expect(page.getByText('Share: Jussi · 1 flat')).toBeVisible()
+    await expect(page.getByText('Shared flats only')).toBeVisible()
+    const card = summaryCard(page, kuusikuja.streetAddress)
+    await expect(card).toContainText('Share 50%')
+    await expect(card).toContainText('Share changed 01/03')
+  })
+})
+
+test.describe('The whole flats', () => {
+  test('The whole flats', async ({ page, browser }) => {
+    await coOwned(page, browser)
+    await openYearSummary(page, 2025)
+    await chooseHolder(page, /Whole flats/)
+
+    await expect(page).toHaveURL(/person=whole/)
+    await expect(page.getByText('Whole flats · 1 flat')).toBeVisible()
+    await expect(page.getByText(/are not reported as such/)).toBeVisible()
+    const card = summaryCard(page, kuusikuja.streetAddress)
+    await expect(card).toContainText('Annika 50% · Jussi 50%')
+    await expect(card).not.toContainText('Share changed')
   })
 })
