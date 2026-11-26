@@ -131,7 +131,7 @@ _Outcome:_ Finlex (481/1995 § 8) and the Tax Administration's guidance §2.1.3 
 
 ## 10. Verification and review
 
-- [ ] 10.1 `pnpm check:traceability`, then the full `pnpm test` and `pnpm test:e2e` once.
+- [x] 10.1 `pnpm check:traceability`, then the full `pnpm test` and `pnpm test:e2e` once.
 - [ ] 10.2 Run the `pr-review` skill on the PR, and fix its findings as `fix(...)` commits.
 
 ## 11. Archive
