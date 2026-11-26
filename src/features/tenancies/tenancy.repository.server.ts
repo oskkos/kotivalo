@@ -24,6 +24,7 @@ import {
 import type { BatchItem } from 'drizzle-orm/batch'
 import { alias } from 'drizzle-orm/sqlite-core'
 import { dayBefore, type IsoDate } from '#/lib/dates'
+import { inChunks } from '#/server/db/chunks'
 import {
   properties,
   propertyAccess,
@@ -584,11 +585,13 @@ export function tenancyRepository(db: Db) {
       if (tenancyIds.length === 0) {
         return {}
       }
-      const rows = await db
-        .select()
-        .from(tenancyRents)
-        .where(inArray(tenancyRents.tenancyId, tenancyIds))
-        .orderBy(asc(tenancyRents.validFrom))
+      const rows = await inChunks(tenancyIds, (chunk) =>
+        db
+          .select()
+          .from(tenancyRents)
+          .where(inArray(tenancyRents.tenancyId, chunk))
+          .orderBy(asc(tenancyRents.validFrom)),
+      )
       const rents: Partial<Record<string, Period<number>[]>> = {}
       for (const row of rows) {
         ;(rents[row.tenancyId] ??= []).push({
@@ -611,11 +614,13 @@ export function tenancyRepository(db: Db) {
       if (tenancyIds.length === 0) {
         return {}
       }
-      const rows = await db
-        .select()
-        .from(tenancyOccupants)
-        .where(inArray(tenancyOccupants.tenancyId, tenancyIds))
-        .orderBy(asc(tenancyOccupants.validFrom))
+      const rows = await inChunks(tenancyIds, (chunk) =>
+        db
+          .select()
+          .from(tenancyOccupants)
+          .where(inArray(tenancyOccupants.tenancyId, chunk))
+          .orderBy(asc(tenancyOccupants.validFrom)),
+      )
       const occupants: Partial<Record<string, Period<number>[]>> = {}
       for (const row of rows) {
         ;(occupants[row.tenancyId] ??= []).push({
@@ -638,23 +643,24 @@ export function tenancyRepository(db: Db) {
       if (tenancyIds.length === 0) {
         return {}
       }
-      const feeRows = await db
-        .select()
-        .from(tenantFees)
-        .where(inArray(tenantFees.tenancyId, tenancyIds))
+      const feeRows = await inChunks(tenancyIds, (chunk) =>
+        db
+          .select()
+          .from(tenantFees)
+          .where(inArray(tenantFees.tenancyId, chunk)),
+      )
       if (feeRows.length === 0) {
         return {}
       }
-      const amountRows = await db
-        .select()
-        .from(tenantFeeAmounts)
-        .where(
-          inArray(
-            tenantFeeAmounts.tenantFeeId,
-            feeRows.map((fee) => fee.id),
-          ),
-        )
-        .orderBy(asc(tenantFeeAmounts.validFrom))
+      const amountRows = await inChunks(
+        feeRows.map((fee) => fee.id),
+        (chunk) =>
+          db
+            .select()
+            .from(tenantFeeAmounts)
+            .where(inArray(tenantFeeAmounts.tenantFeeId, chunk))
+            .orderBy(asc(tenantFeeAmounts.validFrom)),
+      )
       const fees: Partial<Record<string, TenantFee[]>> = {}
       for (const row of feeRows) {
         ;(fees[row.tenancyId] ??= []).push({
