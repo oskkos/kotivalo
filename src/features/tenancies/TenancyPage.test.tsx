@@ -545,7 +545,7 @@ describe('The deposit return reminder', () => {
         /Aino Koski: the deposit of €1,780.00 is not returned/,
       ),
     ).toBeVisible()
-    expect(within(card).getByText(/by 14\/01\/2027/)).toBeVisible()
+    expect(within(card).getByText(/that is 14\/01\/2027/)).toBeVisible()
     expect(
       within(card).getByRole('link', { name: 'Record the return' }),
     ).toBeVisible()

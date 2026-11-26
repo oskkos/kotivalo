@@ -276,7 +276,7 @@ test.describe('The deposit return reminder', () => {
     await expect(reminder(page)).toContainText(
       'Aino Koski: the deposit of €1,780.00 is not returned',
     )
-    await expect(reminder(page)).toContainText('by 14/01/2026')
+    await expect(reminder(page)).toContainText('that is 14/01/2026')
     await expect(
       reminder(page).getByRole('link', { name: 'Record the return' }),
     ).toBeVisible()

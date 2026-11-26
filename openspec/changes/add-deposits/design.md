@@ -5,7 +5,7 @@ Tenancies, rent payments, documents and the year summary are built (#30, #33, #1
 The tax rules come from the Tax Administration's *Vuokratulojen verotus* (12.1.2026), §2.1.3 *Vuokravakuus*:
 - a deposit is not income when received;
 - the part used for unpaid rent, or for the last months' rent, is taxable rental income;
-- the part kept because the tenant caused damage is tax-free compensation (TVL 36 and 78 §), and repair costs are deductible "vain siltä osin kuin ne ylittävät vuokravakuuden". Example 1: a deposit of 500 € kept, materials 250 €, so nothing is deductible.
+- the part kept because the tenant caused damage is tax-free compensation (TVL 36 and 78 §), and repair costs are deductible "vain siltä osin kuin ne ylittävät vuokravakuuden". Example 1: a deposit of 500 € kept, materials 250 €, so nothing is deductible. (Checked against the ohje of 12.1.2026 during the review.)
 
 The ohje doesn't say what happens when the repair is paid in another year than the deposit is kept.
 
@@ -136,4 +136,5 @@ The previous version ignores them, so the deploy order (migrations first) is saf
 ## Open Questions
 
 - Whether the old § 8(2), which stays for contracts made before 1.10.2026, has the same three months' cap. I recall that it does, but the old text wasn't checked: Finlex's page shows only the current version. The answer changes only the warning's wording.
+- Whether the 14-day deadline of § 8(2) applies to contracts made before 1.10.2026, and whether it runs from the end of the contract or the handover: sources differ, and the law's text couldn't be read. The reminder words it as a usual deadline and tells the owner to check the contract.
 - How a damage compensation is matched to repairs paid in a different year. The ohje is silent. Until a source says otherwise, the app uses the year of the return.

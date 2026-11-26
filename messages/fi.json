@@ -224,7 +224,7 @@
   "deposit_card_title": "Vakuus",
   "deposit_form_return_open": "Vakuuden palautus",
   "deposit_pending_action": "Kirjaa palautus",
-  "deposit_pending_deadline": "Vakuus palautetaan tai sen pidättäminen ilmoitetaan kirjallisesti perusteineen ja arvioineen {date} mennessä, eli 14 päivän kuluessa vuokrasopimuksen päättymisestä (laki asuinhuoneiston vuokrauksesta, 8 §). Vinkit eivät ole oikeudellista neuvontaa.",
+  "deposit_pending_deadline": "Vakuus palautetaan tai sen pidättämisestä ilmoitetaan kirjallisesti perusteineen yleensä 14 päivän kuluessa vuokrasuhteen päättymisestä tai huoneiston luovutuksesta (laki asuinhuoneiston vuokrauksesta, 8 §). Viimeisestä vuokrapäivästä laskien se on {date}. Tarkista määräaika omasta sopimuksestasi. Vinkit eivät ole oikeudellista neuvontaa.",
   "deposit_pending_text": "{name}: vakuus {amount} on palauttamatta. Viimeinen vuokrapäivä oli {date}.",
   "deposit_pending_title": "Vakuus palauttamatta",
   "deposit_return_amount": "Palautetaan vuokralaiselle",
