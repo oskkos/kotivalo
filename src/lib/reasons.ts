@@ -70,6 +70,12 @@ export type FieldReason =
   | 'occupants_invalid'
   | 'deposit_amount_invalid'
   | 'deposit_below_kept'
+  | 'deposit_return_before_end'
+  | 'deposit_return_date_in_future'
+  | 'deposit_kept_exceeds_deposit'
+  | 'deposit_rent_exceeds_unpaid'
+  | 'deposit_kept_required'
+  | 'deposit_note_too_long'
   | 'description_required'
 
 /** Errors about the whole action, shown as an alert with a title. */
@@ -113,6 +119,9 @@ export type AlertReason =
   | 'usage_charge_not_found'
   | 'tenancy_has_changes_after_end'
   | 'tenancy_has_deposit_return'
+  | 'deposit_not_set'
+  | 'deposit_return_exists'
+  | 'rent_payment_from_deposit'
   | 'tenancy_start_after_change'
   | 'rent_payment_month_outside_tenancy'
   | 'rent_payment_not_found'
@@ -217,6 +226,20 @@ const texts: Record<Reason, () => ReasonText> = {
   document_unreadable: () => ({ text: m.reason_document_unreadable() }),
   deposit_amount_invalid: () => ({ text: m.reason_deposit_amount_invalid() }),
   deposit_below_kept: () => ({ text: m.reason_deposit_below_kept() }),
+  deposit_return_before_end: () => ({
+    text: m.reason_deposit_return_before_end(),
+  }),
+  deposit_return_date_in_future: () => ({
+    text: m.reason_deposit_return_date_in_future(),
+  }),
+  deposit_kept_exceeds_deposit: () => ({
+    text: m.reason_deposit_kept_exceeds_deposit(),
+  }),
+  deposit_rent_exceeds_unpaid: () => ({
+    text: m.reason_deposit_rent_exceeds_unpaid(),
+  }),
+  deposit_kept_required: () => ({ text: m.reason_deposit_kept_required() }),
+  deposit_note_too_long: () => ({ text: m.reason_deposit_note_too_long() }),
   tenant_name_required: () => ({ text: m.reason_tenant_name_required() }),
   tenant_name_too_long: () => ({ text: m.reason_tenant_name_too_long() }),
   tenant_phone_too_long: () => ({ text: m.reason_tenant_phone_too_long() }),
@@ -270,6 +293,18 @@ const texts: Record<Reason, () => ReasonText> = {
   email_failed: () => ({
     title: m.reason_email_failed_title(),
     text: m.reason_email_failed(),
+  }),
+  deposit_not_set: () => ({
+    title: m.reason_deposit_not_set_title(),
+    text: m.reason_deposit_not_set(),
+  }),
+  deposit_return_exists: () => ({
+    title: m.reason_deposit_return_exists_title(),
+    text: m.reason_deposit_return_exists(),
+  }),
+  rent_payment_from_deposit: () => ({
+    title: m.reason_rent_payment_from_deposit_title(),
+    text: m.reason_rent_payment_from_deposit(),
   }),
   tenancy_has_deposit_return: () => ({
     title: m.reason_tenancy_has_deposit_return_title(),

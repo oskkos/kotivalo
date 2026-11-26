@@ -10,6 +10,7 @@ import {
   exists,
   gte,
   inArray,
+  isNotNull,
   isNull,
   lte,
   or,
@@ -196,9 +197,28 @@ export function rentPaymentRepository(db: Db) {
       return inserted[0]?.id ?? null
     },
 
+    /** Whether the payment, one of the flat's, was kept from a deposit. */
+    async isFromDeposit(
+      propertyId: string,
+      paymentId: string,
+    ): Promise<boolean> {
+      const rows = await db
+        .select({ one: sql`1` })
+        .from(rentPayments)
+        .innerJoin(tenancies, eq(tenancies.id, rentPayments.tenancyId))
+        .where(
+          and(
+            eq(rentPayments.id, paymentId),
+            eq(tenancies.propertyId, propertyId),
+            isNotNull(rentPayments.depositReturnId),
+          ),
+        )
+      return rows.length > 0
+    },
+
     /**
      * Deletes a payment. False unless the actor owns the flat and the
-     * payment belongs to one of its tenancies.
+     * payment belongs to one of its tenancies and wasn't kept from a deposit.
      */
     async remove(
       actorId: string,
@@ -211,6 +231,7 @@ export function rentPaymentRepository(db: Db) {
           .where(
             and(
               eq(rentPayments.id, paymentId),
+              isNull(rentPayments.depositReturnId),
               exists(
                 db
                   .select({ one: sql`1` })
