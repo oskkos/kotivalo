@@ -578,7 +578,6 @@ describe('The year the summary opens on', () => {
     await addAccess(flat, 'stranger')
     const view = await loadYearSummary(deps('stranger', db, spring))
     expect(view.years).toEqual([2022, 2023, 2024, 2025, 2026])
-    expect(view.holderHasYears).toBe(false)
     expect(view.holder).toEqual({ kind: 'own' })
     expect(view.year).toBe(2025)
   })

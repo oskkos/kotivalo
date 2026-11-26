@@ -45,8 +45,6 @@ export interface YearSummaryView {
   people: { userId: string; name: string; flats: number }[]
   /** The flats in the own summary and in the whole flats. */
   counts: { own: number; whole: number }
-  /** False when the holder has no years of their own and the whole flats' are used. */
-  holderHasYears: boolean
   /** Today in Finland. */
   today: IsoDate
   year: number

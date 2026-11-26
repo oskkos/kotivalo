@@ -163,12 +163,11 @@ function yearsOf(
   periods: readonly Period[],
   holder: Holder,
   day: IsoDate,
-): { years: number[]; own: boolean } {
+): number[] {
   const years = summaryYears(periods, holder, day)
-  if (years.length > 0) {
-    return { years, own: true }
-  }
-  return { years: summaryYears(periods, { kind: 'whole' }, day), own: false }
+  return years.length > 0
+    ? years
+    : summaryYears(periods, { kind: 'whole' }, day)
 }
 
 /** The holder as the view names them. */
@@ -229,11 +228,10 @@ export async function loadYearSummary(
   const flats = await userFlats(deps)
   let years: number[] = []
   let holder = { kind: 'owner', userId: deps.userId } as Holder
-  let holderHasYears = true
   const loaded = await loadInputs(deps, flats, (ownership) => {
     const periods = periodsOf(ownership)
     holder = holderOf(deps, periods, person)
-    ;({ years, own: holderHasYears } = yearsOf(periods, holder, day))
+    years = yearsOf(periods, holder, day)
     return year === undefined ? openingYear(years, day) : clampYear(years, year)
   })
   const cards: FlatCard[] = []
@@ -300,7 +298,6 @@ export async function loadYearSummary(
     holder: holderView(deps, holder, loaded.names),
     people,
     counts: { own: count(me), whole: count({ kind: 'whole' }) },
-    holderHasYears,
     flats: cards,
     notIncluded,
   }
@@ -340,7 +337,7 @@ export async function loadFlatYear(
   }
   const loaded = await loadInputs(deps, [flat], (ownership) => {
     const periods = periodsOf(ownership)
-    return year ?? openingYear(yearsOf(periods, holder, day).years, day)
+    return year ?? openingYear(yearsOf(periods, holder, day), day)
   })
   const [input] = loaded.inputs
   const { included, rows, outside, details, checks } = flatYear(
