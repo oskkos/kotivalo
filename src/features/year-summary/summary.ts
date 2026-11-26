@@ -277,14 +277,13 @@ export function flatYear(
     const first = `${month}-01`
     const charged = chargeMonth(input.charges, input.treatments, month)
     let monthCents = 0
+    let untreated = false
     for (const charge of charged?.charges ?? []) {
       monthCents += charge.cents
       if (charge.kind === 'maintenance_charge') {
         add('2.2', 'maintenance_charge', charge.cents, first)
       } else if (charged?.treatment === undefined) {
-        if (charge.cents > 0 && shareAt(first) > 0) {
-          treatmentNotSet.push(month)
-        }
+        untreated ||= charge.cents > 0
       } else if (charged.treatment === 'income_recognised') {
         add('2.3', 'financing_charge', charge.cents, first)
       } else {
@@ -294,6 +293,9 @@ export function flatYear(
           shareAt(first),
         )
       }
+    }
+    if (untreated && shareAt(first) > 0) {
+      treatmentNotSet.push(month)
     }
     const used = usageChargesOfMonth(input.usageCharges, occupied, month)
     for (const charge of used?.charges ?? []) {

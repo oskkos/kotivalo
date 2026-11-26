@@ -517,6 +517,24 @@ describe('Checks in the year summary', () => {
     expect(result.outside.capitalised).toBe(0)
   })
 
+  test('Two financing charges without a treatment count each month once', () => {
+    const data = input({
+      charges: {
+        maintenance: [],
+        financing: [
+          { id: 'f1', name: null, periods: [amount(6050, '2025-01-01')] },
+          {
+            id: 'f2',
+            name: 'Putkiremontti',
+            periods: [amount(6050, '2025-01-01')],
+          },
+        ],
+      },
+    })
+    const check = year(data).checks.find((c) => c.kind === 'treatment_not_set')
+    expect(check && 'months' in check ? check.months : []).toHaveLength(12)
+  })
+
   test('A share change', () => {
     const data = input({
       ownership: ownership(
