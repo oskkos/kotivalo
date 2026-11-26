@@ -14,10 +14,10 @@ vi.mock('@tanstack/react-router', () => ({
       children: ReactNode
       to: string
       params: { propertyId: string }
-      search: { year: number }
+      search: { year: number; person?: string }
     }) => (
       <a
-        href={`${props.to.replace('$propertyId', props.params.propertyId)}?year=${String(props.search.year)}`}
+        href={`${props.to.replace('$propertyId', props.params.propertyId)}?year=${String(props.search.year)}${props.search.person ? `&person=${props.search.person}` : ''}`}
       >
         {props.children}
       </a>
@@ -49,10 +49,23 @@ const view = (over: Partial<YearSummaryView> = {}): YearSummaryView => ({
   ...over,
 })
 
-function renderPage(v: YearSummaryView, onYear = vi.fn()) {
-  render(<YearSummaryPage view={v} onYear={onYear} bottomNav={null} />)
+function renderPage(v: YearSummaryView, onYear = vi.fn(), onPerson = vi.fn()) {
+  render(
+    <YearSummaryPage
+      view={v}
+      onYear={onYear}
+      onPerson={onPerson}
+      bottomNav={null}
+    />,
+  )
   return onYear
 }
+
+const MIKKO = {
+  kind: 'person',
+  userId: 'mikko',
+  name: 'Mikko Virtanen',
+} as const
 
 describe('The year summary page', () => {
   test('shows a card per flat in address order with its figures', () => {
@@ -182,5 +195,81 @@ describe('The year summary page', () => {
     renderPage(view({ year: 2026 }))
     expect(screen.getByText('January–November')).toBeVisible()
     expect(screen.getByRole('button', { name: 'Next year' })).toBeDisabled()
+  })
+})
+
+describe('Choosing whose figures', () => {
+  test('shows no selector without other owners', () => {
+    renderPage(view())
+    expect(
+      screen.queryByRole('button', { name: /Whose figures/ }),
+    ).not.toBeInTheDocument()
+  })
+
+  test("shows another owner's cards with the share, the band and the note", () => {
+    renderPage(
+      view({
+        holder: MIKKO,
+        people: [{ userId: 'mikko', name: 'Mikko Virtanen', flats: 1 }],
+        notIncluded: [{ propertyId: 'k', streetAddress: 'Koivupolku 7 A 4' }],
+      }),
+    )
+    expect(screen.getByText('Share: Mikko Virtanen · 1 flat')).toBeVisible()
+    expect(screen.getByText('Shared flats only')).toBeVisible()
+    expect(screen.getByText(/may have other rental flats/)).toBeVisible()
+    expect(screen.getByText('Share 50%')).toBeVisible()
+    expect(
+      screen.getByText(
+        'Not included: Koivupolku 7 A 4, because Mikko Virtanen had no ownership share in it in 2025.',
+      ),
+    ).toBeVisible()
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'href',
+      '/year-summary/kuusikuja?year=2025&person=mikko',
+    )
+  })
+
+  test("shows the whole flats' owners on the cards and the note", () => {
+    renderPage(
+      view({
+        holder: { kind: 'whole' },
+        people: [{ userId: 'mikko', name: 'Mikko Virtanen', flats: 1 }],
+        flats: [
+          card({
+            share: 10000,
+            owners: [
+              { name: 'Annika', share: 5000, isYou: true },
+              { name: 'Mikko Virtanen', share: 5000, isYou: false },
+            ],
+          }),
+        ],
+      }),
+    )
+    expect(screen.getByText('Whole flats · 1 flat')).toBeVisible()
+    expect(screen.getByText(/are not reported as such/)).toBeVisible()
+    expect(screen.getByText('Annika 50% · Mikko Virtanen 50%')).toBeVisible()
+    expect(screen.getByRole('link')).toHaveAttribute(
+      'href',
+      '/year-summary/kuusikuja?year=2025&person=whole',
+    )
+  })
+
+  test('says a person had no share that year and keeps the selector', () => {
+    renderPage(
+      view({
+        holder: MIKKO,
+        people: [{ userId: 'mikko', name: 'Mikko Virtanen', flats: 0 }],
+        flats: [],
+      }),
+    )
+    expect(
+      screen.getByRole('heading', { name: 'No ownership share in 2025' }),
+    ).toBeVisible()
+    expect(
+      screen.getByText(
+        'Mikko Virtanen had no ownership share in any of the flats you see in 2025.',
+      ),
+    ).toBeVisible()
+    expect(screen.getByRole('button', { name: /Whose figures/ })).toBeVisible()
   })
 })

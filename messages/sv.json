@@ -1256,6 +1256,21 @@
   ],
   "year_summary_empty_text": "Sammandraget räknas för bostäder där du hade en ägarandel.",
   "year_summary_empty_title": "Ingen ägarandel år {year}",
+  "year_summary_holder_flats": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} bostad",
+        "countPlural=other": "{count} bostäder"
+      }
+    }
+  ],
+  "year_summary_holder_label": "Vems siffror",
+  "year_summary_holder_own": "Din egen andel",
+  "year_summary_holder_sheet_close": "Stäng",
+  "year_summary_holder_sheet_title": "Vems siffror ska visas?",
+  "year_summary_holder_whole": "Hela bostäderna (100 %)",
   "year_summary_income": "Hyresinkomster (2.1)",
   "year_summary_intro": "Blankett 7H fylls i bostad för bostad. Öppna en bostad och kopiera siffrorna till MinSkatt.",
   "year_summary_intro_title": [
@@ -1282,7 +1297,44 @@
       }
     }
   ],
+  "year_summary_owner_share": "{name} {share}",
   "year_summary_page_title": "Årssammandrag – Kotivalo",
+  "year_summary_person_band_text": "Endast bostäder som du ser ingår. Personen kan ha andra hyresbostäder som ska med i deklarationen.",
+  "year_summary_person_band_title": "Bara gemensamma bostäder",
+  "year_summary_person_empty_text": "{name} hade ingen ägarandel i någon av de bostäder du ser år {year}.",
+  "year_summary_person_intro": "Siffrorna är räknade på personens andel på samma sätt som dina egna. Öppna en bostad och kopiera siffrorna till MinSkatt.",
+  "year_summary_person_not_included": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Inte med: {flats}, eftersom {name} inte hade någon ägarandel i den år {year}.",
+        "countPlural=other": "Inte med: {flats}, eftersom {name} inte hade någon ägarandel i dem år {year}."
+      }
+    }
+  ],
+  "year_summary_person_title": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Andel: {name} · {count} bostad",
+        "countPlural=other": "Andel: {name} · {count} bostäder"
+      }
+    }
+  ],
   "year_summary_previous_year": "Föregående år",
-  "year_summary_share": "Din andel {share}"
+  "year_summary_share": "Din andel {share}",
+  "year_summary_share_person": "Andel {share}",
+  "year_summary_whole_intro": "Siffrorna är räknade för hela bostäderna för kontrollens skull. De deklareras inte som sådana: varje ägare deklarerar sin egen andel på blankett 7H.",
+  "year_summary_whole_title": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "Hela bostäderna · {count} bostad",
+        "countPlural=other": "Hela bostäderna · {count} bostäder"
+      }
+    }
+  ]
 }
