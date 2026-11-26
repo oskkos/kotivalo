@@ -23,7 +23,10 @@ const db = createDb(env.DB)
 // 25 November 2026 at noon in Finland.
 const now = new Date(Date.UTC(2026, 10, 25, 10, 0, 0))
 
-function deps(userId = 'annika', database = db): YearSummaryDeps {
+// 15 March 2026 at noon in Finland, the scenarios' spring day.
+const spring = new Date(Date.UTC(2026, 2, 15, 10, 0, 0))
+
+function deps(userId = 'annika', database = db, today = now): YearSummaryDeps {
   return {
     userId,
     properties: propertyRepository(database),
@@ -34,7 +37,7 @@ function deps(userId = 'annika', database = db): YearSummaryDeps {
     transactions: transactionRepository(database),
     amounts: recurringAmountRepository(database),
     usageCharges: usageChargeRepository(database),
-    now: () => now,
+    now: () => today,
   }
 }
 
@@ -546,23 +549,38 @@ describe('The whole flats', () => {
 
 describe('The year the summary opens on', () => {
   test('The years of another owner', async () => {
-    await coOwn('Koivupolku 7 A 4', 'mikko', '2026-03-01')
-    expect((await loadYearSummary(deps(), undefined, 'mikko')).years).toEqual([
-      2026,
+    // Annika's flat since 2022-06-12, Mikko's 50 % of it from 2025-03-01.
+    const flat = await seedFlat('annika', 'Koivupolku 7 A 4', '2022-06-12')
+    await addAccess(flat, 'mikko')
+    await ownershipRepository(db).change({
+      propertyId: flat,
+      actorId: 'annika',
+      currentStart: '2022-06-12',
+      from: '2025-03-01',
+      reason: 'sale',
+      split: [
+        { userId: 'annika', share: 5000 },
+        { userId: 'mikko', share: 5000 },
+      ],
+      removeAccess: [],
+    })
+    const at = deps('annika', db, spring)
+    expect((await loadYearSummary(at, undefined, 'mikko')).years).toEqual([
+      2025, 2026,
     ])
-    expect((await loadYearSummary(deps(), undefined, 'whole')).years).toEqual([
-      2024, 2025, 2026,
+    expect((await loadYearSummary(at, undefined, 'whole')).years).toEqual([
+      2022, 2023, 2024, 2025, 2026,
     ])
   })
 
   test('A member without a share moves between years', async () => {
     const flat = await seedFlat('annika', 'Koivupolku 7 A 4', '2022-06-12')
     await addAccess(flat, 'stranger')
-    const view = await loadYearSummary(deps('stranger'))
+    const view = await loadYearSummary(deps('stranger', db, spring))
     expect(view.years).toEqual([2022, 2023, 2024, 2025, 2026])
     expect(view.holderHasYears).toBe(false)
     expect(view.holder).toEqual({ kind: 'own' })
-    expect(view.year).toBe(2026)
+    expect(view.year).toBe(2025)
   })
 })
 
