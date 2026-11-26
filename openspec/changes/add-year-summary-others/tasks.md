@@ -10,15 +10,15 @@
 
 ## 2. Names, the person parameter and the server functions
 
-- [ ] 2.1 `ownershipRepository(db).namesFor(propertyIds)` (design.md, decision 4), with a Workers test that includes a person who no longer has access.
-- [ ] 2.2 `schemas.ts`: `person`, a user id of 1–64 characters or `whole`, optional, for both server function inputs. A URL schema drops anything else. Unit tests.
-- [ ] 2.3 `view.ts` and `year-summary.server.ts` (design.md, decisions 3, 5 and 6):
+- [x] 2.1 `ownershipRepository(db).namesFor(propertyIds)` (design.md, decision 4), with a Workers test that includes a person who no longer has access.
+- [x] 2.2 `schemas.ts`: `person`, a user id of 1–64 characters or `whole`, optional, for both server function inputs. A URL schema drops anything else. Unit tests.
+- [x] 2.3 `view.ts` and `year-summary.server.ts` (design.md, decisions 3, 5 and 6):
   - `loadYearSummary(deps, year?, person?)` with `holder`, `people` and the whole flats' `owners` on the cards
   - `loadFlatYear(deps, propertyId, year?, person?)` with the holder and the whole flat's `owners`, with each owner's row 2.1
   - the years by holder, the whole flats' years for a member without a share, and an unknown person falling back to the own share
   - `namesFor` added to `loadInputs`' first batch
-- [ ] 2.4 `functions.ts`: pass `person` through.
-- [ ] 2.5 Workers tests in `year-summary.server.test.ts`:
+- [x] 2.4 `functions.ts`: pass `person` through.
+- [x] 2.5 Workers tests in `year-summary.server.test.ts`:
   - "The sheet lists the year's owners"
   - "No selector for a sole owner" (empty `people`)
   - "A person without a share that year"

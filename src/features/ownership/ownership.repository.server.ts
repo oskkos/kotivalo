@@ -149,6 +149,23 @@ export function ownershipRepository(db: Db) {
       )
     },
 
+    /**
+     * The names of everyone in the ownership periods of the flats, also people
+     * who no longer have access, by user id. No access check: the caller
+     * passes the ids of flats the user can see.
+     */
+    async namesFor(propertyIds: string[]): Promise<Record<string, string>> {
+      if (propertyIds.length === 0) {
+        return {}
+      }
+      const rows = await db
+        .selectDistinct({ userId: ownershipPeriods.userId, name: user.name })
+        .from(ownershipPeriods)
+        .innerJoin(user, eq(user.id, ownershipPeriods.userId))
+        .where(inArray(ownershipPeriods.propertyId, propertyIds))
+      return Object.fromEntries(rows.map((r) => [r.userId, r.name]))
+    },
+
     /** Current shares of every flat the user has access to. */
     currentForUser(userId: string): Promise<CurrentShare[]> {
       return db

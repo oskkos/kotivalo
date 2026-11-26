@@ -32,6 +32,7 @@ const card = (over: Partial<FlatCard> = {}): FlatCard => ({
   income: 489500,
   costs: 225500,
   checks: [],
+  owners: [],
   ...over,
 })
 
@@ -39,6 +40,10 @@ const view = (over: Partial<YearSummaryView> = {}): YearSummaryView => ({
   today: '2026-11-25',
   year: 2025,
   years: [2024, 2025, 2026],
+  holder: { kind: 'own' },
+  people: [],
+  counts: { own: 1, whole: 1 },
+  holderHasYears: true,
   flats: [card()],
   notIncluded: [],
   ...over,

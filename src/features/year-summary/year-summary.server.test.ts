@@ -145,8 +145,17 @@ beforeEach(async () => {
     'properties',
     'user',
   )
-  for (const id of ['annika', 'jussi', 'stranger', 'solo', 'trio']) {
+  for (const id of ['annika', 'jussi', 'mikko', 'stranger', 'solo', 'trio']) {
     await addTestUser(id)
+  }
+  for (const [id, name] of [
+    ['annika', 'Annika'],
+    ['jussi', 'Jussi Laine'],
+    ['mikko', 'Mikko Virtanen'],
+  ]) {
+    await env.DB.prepare('UPDATE user SET name = ? WHERE id = ?')
+      .bind(name, id)
+      .run()
   }
   // Kuusikuja: Annika and Jussi 50 % each from 1 May 2024.
   kuusikuja = await seedFlat('annika', 'Kuusikuja 3 B 12', '2024-05-01')
@@ -205,7 +214,8 @@ describe('The year summary page', () => {
     await addAccess(flat, 'stranger')
     const view = await loadYearSummary(deps('stranger'))
     expect(view.flats).toEqual([])
-    expect(view.years).toEqual([])
+    // A member without a share moves between the years of the whole flats.
+    expect(view.years).toEqual([2025, 2026])
     expect(view.notIncluded.map((f) => f.propertyId)).toEqual([flat])
   })
 
@@ -226,10 +236,10 @@ describe('The year summary page', () => {
     expect((await loadYearSummary(deps(), 2040)).year).toBe(2026)
   })
 
-  test('A card leaves out other owners and payment rows', async () => {
+  test('A card leaves out payment rows and tenants', async () => {
     const view = await loadYearSummary(deps(), 2025)
-    expect(JSON.stringify(view)).not.toContain('jussi')
     expect(JSON.stringify(view)).not.toContain('paidOn')
+    expect(JSON.stringify(view)).not.toContain('Aino')
   })
 })
 
@@ -349,5 +359,216 @@ describe('Rent kept from the deposit', () => {
     expect(flat.ok && flat.flat?.rows['2.1'].cents).toBe(119000)
     const next = await loadFlatYear(deps(), rantatie, 2026)
     expect(next.ok && next.flat?.rows['2.1'].cents).toBe(0)
+  })
+})
+
+/** Annika and `other` 50 % each of a new flat of Annika, from `from`. */
+async function coOwn(
+  address: string,
+  other: string,
+  from: string,
+  to?: string,
+) {
+  const id = await seedFlat('annika', address)
+  await addAccess(id, other)
+  await ownershipRepository(db).change({
+    propertyId: id,
+    actorId: 'annika',
+    currentStart: '2025-01-01',
+    from,
+    reason: 'sale',
+    split: [
+      { userId: 'annika', share: 5000 },
+      { userId: other, share: 5000 },
+    ],
+    removeAccess: [],
+  })
+  if (to !== undefined) {
+    await ownershipRepository(db).change({
+      propertyId: id,
+      actorId: 'annika',
+      currentStart: from,
+      from: to,
+      reason: 'sale',
+      split: [{ userId: 'annika', share: 10000 }],
+      removeAccess: [other],
+    })
+  }
+  return id
+}
+
+describe('Choosing whose figures', () => {
+  test("The sheet lists the year's owners", async () => {
+    const koivupolku = await coOwn(
+      'Koivupolku 7 A 4',
+      'mikko',
+      '2025-01-01',
+      '2025-07-01',
+    )
+    const view = await loadYearSummary(deps(), 2025)
+    expect(view.holder).toEqual({ kind: 'own' })
+    expect(view.people).toEqual([
+      { userId: 'jussi', name: 'Jussi Laine', flats: 1 },
+      { userId: 'mikko', name: 'Mikko Virtanen', flats: 1 },
+    ])
+    expect(view.counts).toEqual({ own: 3, whole: 3 })
+    expect(view.flats.map((f) => f.propertyId)).toContain(koivupolku)
+  })
+
+  test('No selector for a sole owner', async () => {
+    await seedFlat('solo', 'Kuusikuja 1')
+    const view = await loadYearSummary(deps('solo'), 2025)
+    expect(view.people).toEqual([])
+    expect(view.counts).toEqual({ own: 1, whole: 1 })
+  })
+
+  test('A person without a share that year', async () => {
+    await coOwn('Koivupolku 7 A 4', 'mikko', '2025-01-01', '2025-07-01')
+    // Mikko's share ended on 2025-06-30: 2026 is the year after it.
+    const view = await loadYearSummary(deps(), 2026, 'mikko')
+    expect(view.holder).toEqual({
+      kind: 'person',
+      userId: 'mikko',
+      name: 'Mikko Virtanen',
+    })
+    expect(view.year).toBe(2026)
+    expect(view.flats).toEqual([])
+  })
+
+  test('An unknown person in the URL', async () => {
+    const own = await loadYearSummary(deps(), 2025)
+    const view = await loadYearSummary(deps(), 2025, 'someone-else')
+    expect(view).toEqual(own)
+    // A person who owns none of the user's flats stays unknown.
+    await seedFlat('mikko', 'Pyynikintie 5 A 3')
+    expect(await loadYearSummary(deps(), 2025, 'mikko')).toEqual(own)
+  })
+})
+
+describe("Another owner's figures", () => {
+  test("A co-owner's cards", async () => {
+    const view = await loadYearSummary(deps(), 2025, 'jussi')
+    expect(view.holder).toMatchObject({ kind: 'person', name: 'Jussi Laine' })
+    expect(view.flats).toHaveLength(1)
+    expect(view.flats[0]).toMatchObject({
+      propertyId: kuusikuja,
+      share: 5000,
+      income: 44500,
+      costs: 132000,
+    })
+    expect(view.notIncluded).toEqual([
+      { propertyId: rantatie, streetAddress: 'Rantatie 15 C 21' },
+    ])
+  })
+
+  test("A member sees an owner's figures", async () => {
+    const view = await loadYearSummary(deps('stranger'), 2025, 'annika')
+    expect(view.flats).toEqual([])
+    await addAccess(kuusikuja, 'stranger')
+    const seen = await loadYearSummary(deps('stranger'), 2025, 'annika')
+    expect(seen.holder).toMatchObject({ kind: 'person', name: 'Annika' })
+    expect(seen.flats.map((f) => f.propertyId)).toEqual([kuusikuja])
+    expect(seen.flats[0]).toMatchObject({ share: 5000, income: 44500 })
+  })
+
+  test("A flat the user can't see is not counted", async () => {
+    await coOwn('Koivupolku 7 A 4', 'mikko', '2025-03-01')
+    const pyynikintie = await seedFlat('mikko', 'Pyynikintie 5 A 3')
+    const view = await loadYearSummary(deps(), 2025, 'mikko')
+    expect(JSON.stringify(view)).not.toContain(pyynikintie)
+    expect(JSON.stringify(view)).not.toContain('Pyynikintie')
+    expect(view.flats.map((f) => f.streetAddress)).toEqual(['Koivupolku 7 A 4'])
+  })
+
+  test("A co-owner's form 7H page", async () => {
+    const view = await loadFlatYear(deps(), kuusikuja, 2025, 'jussi')
+    expect(view).toMatchObject({
+      ok: true,
+      holder: { kind: 'person', name: 'Jussi Laine' },
+      owners: [],
+      flat: { details: { share: 5000 }, rows: { '2.1': { cents: 44500 } } },
+    })
+  })
+})
+
+describe('The whole flats', () => {
+  test('The whole flats include a flat without the own share', async () => {
+    const hallilantie = await seedFlat('jussi', 'Hallilantie 12 B 8')
+    await addAccess(hallilantie, 'annika')
+    const view = await loadYearSummary(deps(), 2025, 'whole')
+    expect(view.holder).toEqual({ kind: 'whole' })
+    expect(view.flats.map((f) => f.propertyId).sort()).toEqual(
+      [hallilantie, kuusikuja, rantatie].sort(),
+    )
+    const card = view.flats.find((f) => f.propertyId === kuusikuja)
+    expect(card).toMatchObject({ share: 10000, income: 89000 })
+    expect(card?.owners).toEqual([
+      { name: 'Annika', share: 5000, isYou: true },
+      { name: 'Jussi Laine', share: 5000, isYou: false },
+    ])
+    expect(view.notIncluded).toEqual([])
+  })
+
+  test('An owner change in the middle of the year', async () => {
+    await coOwn('Koivupolku 7 A 4', 'jussi', '2025-01-01', '2025-07-01')
+    const view = await loadYearSummary(deps(), 2025, 'whole')
+    const card = view.flats.find((f) => f.streetAddress === 'Koivupolku 7 A 4')
+    expect(card?.owners).toEqual([
+      { name: 'Annika', share: 10000, isYou: true },
+      { name: 'Jussi Laine', share: 5000, isYou: false },
+    ])
+    expect(card?.checks.some((c) => c.kind === 'share_changed')).toBe(false)
+  })
+})
+
+describe('The year the summary opens on', () => {
+  test('The years of another owner', async () => {
+    await coOwn('Koivupolku 7 A 4', 'mikko', '2026-03-01')
+    expect((await loadYearSummary(deps(), undefined, 'mikko')).years).toEqual([
+      2026,
+    ])
+    expect((await loadYearSummary(deps(), undefined, 'whole')).years).toEqual([
+      2024, 2025, 2026,
+    ])
+  })
+
+  test('A member without a share moves between years', async () => {
+    const flat = await seedFlat('annika', 'Koivupolku 7 A 4', '2022-06-12')
+    await addAccess(flat, 'stranger')
+    const view = await loadYearSummary(deps('stranger'))
+    expect(view.years).toEqual([2022, 2023, 2024, 2025, 2026])
+    expect(view.holderHasYears).toBe(false)
+    expect(view.holder).toEqual({ kind: 'own' })
+    expect(view.year).toBe(2026)
+  })
+})
+
+describe("The whole flat's page", () => {
+  test("The whole flat's rows and owners", async () => {
+    const view = await loadFlatYear(deps(), kuusikuja, 2025, 'whole')
+    expect(view).toMatchObject({
+      ok: true,
+      holder: { kind: 'whole' },
+      flat: { rows: { '2.1': { cents: 89000 } } },
+    })
+    if (!view.ok) {
+      return
+    }
+    expect(view.owners).toEqual([
+      {
+        userId: 'annika',
+        name: 'Annika',
+        share: 5000,
+        income: 44500,
+        isYou: true,
+      },
+      {
+        userId: 'jussi',
+        name: 'Jussi Laine',
+        share: 5000,
+        income: 44500,
+        isYou: false,
+      },
+    ])
   })
 })

@@ -77,6 +77,8 @@ const view = (
     postcode: '33100',
     city: 'Tampere',
   },
+  holder: { kind: 'own' },
+  owners: [],
   flat: f,
 })
 
