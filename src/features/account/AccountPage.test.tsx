@@ -152,3 +152,23 @@ describe('Changing the display name', () => {
     expect(screen.getByText('Annika')).toBeVisible()
   })
 })
+
+describe('Help and support on the account page', () => {
+  test('The account page shows Help and support', () => {
+    setup()
+
+    const card = screen.getByRole('region', { name: 'Help and support' })
+    expect(
+      within(card).getByRole('link', { name: 'support@kotivalo.app' }),
+    ).toHaveAttribute('href', 'mailto:support@kotivalo.app')
+    // Between the language choice and Sign out.
+    const language = screen.getByRole('group', { name: 'Language' })
+    const signOut = screen.getByRole('button', { name: 'Sign out' })
+    expect(
+      language.compareDocumentPosition(card) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+    expect(
+      card.compareDocumentPosition(signOut) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy()
+  })
+})

@@ -6,6 +6,7 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { useId, useState, type ReactNode } from 'react'
 import { ReasonAlert } from '#/components/ReasonAlert'
+import { SupportLink } from '#/components/SupportLink'
 import { clientLog } from '#/lib/client-log'
 import { failureReason } from '#/lib/network-error'
 import type { AlertReason } from '#/lib/reasons'
@@ -126,6 +127,33 @@ function LanguageChoice({
   )
 }
 
+function SupportCard() {
+  const headingId = useId()
+  return (
+    <Stack
+      component="section"
+      aria-labelledby={headingId}
+      sx={{
+        gap: 0.5,
+        bgcolor: 'background.paper',
+        border: `1px solid ${colors.cardBorder}`,
+        borderRadius: `${String(radii.card)}px`,
+        p: 2,
+      }}
+    >
+      <Typography id={headingId} variant="h3" component="h2">
+        {m.account_support_title()}
+      </Typography>
+      <Typography variant="body2" color="text.secondary">
+        {m.account_support_text()}
+      </Typography>
+      <Typography sx={{ overflowWrap: 'anywhere' }}>
+        <SupportLink />
+      </Typography>
+    </Stack>
+  )
+}
+
 export function AccountPage(props: Props) {
   const [naming, setNaming] = useState(false)
 
@@ -194,6 +222,7 @@ export function AccountPage(props: Props) {
           current={props.locale}
           onChanged={props.onLanguageChanged}
         />
+        <SupportCard />
         <Button
           variant="text"
           onClick={props.onSignOut}

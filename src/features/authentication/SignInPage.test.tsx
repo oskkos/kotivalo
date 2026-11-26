@@ -262,3 +262,23 @@ describe('A language chosen on the sign-in page', () => {
     expect(requestCode.mock.calls[0]?.[0].data.locale).toBeUndefined()
   })
 })
+
+describe('Help when the sign-in code does not arrive', () => {
+  test('The code step shows the support address', async () => {
+    const { user } = setup()
+    await toCodeStep(user)
+
+    expect(
+      screen.getByText('Not there either? Write to us:', { exact: false }),
+    ).toBeVisible()
+    expect(
+      screen.getByRole('link', { name: 'support@kotivalo.app' }),
+    ).toHaveAttribute('href', 'mailto:support@kotivalo.app')
+  })
+
+  test('The email step does not show it', () => {
+    setup()
+
+    expect(screen.queryByText('support@kotivalo.app')).toBeNull()
+  })
+})

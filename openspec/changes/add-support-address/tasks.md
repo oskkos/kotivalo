@@ -16,18 +16,18 @@
 
 ## 2. The support address on the sign-in code step and the account page
 
-- [ ] 2.1 `components/SupportLink.tsx`: a MUI `Link` to `mailto:` with the address as its text, from `supportAddress(getLocale())` (design.md, decision 2). Component test.
-- [ ] 2.2 `CodeStep.tsx`: under the spam hint, `sign_in_support` followed by `SupportLink`. The email step shows nothing (design.md, decision 3).
-- [ ] 2.3 `AccountPage.tsx`: the *Ohje ja tuki* card between the language choice and Sign out, labelled by its heading, with `account_support_title`, `account_support_text` and `SupportLink` (design.md, decision 4).
-- [ ] 2.4 Messages `sign_in_support`, `account_support_title` and `account_support_text` in fi, sv and en.
-- [ ] 2.5 Component tests:
+- [x] 2.1 `components/SupportLink.tsx`: a MUI `Link` to `mailto:` with the address as its text, from `supportAddress(getLocale())` (design.md, decision 2). Component test.
+- [x] 2.2 `CodeStep.tsx`: under the spam hint, `sign_in_support` followed by `SupportLink`. The email step shows nothing (design.md, decision 3).
+- [x] 2.3 `AccountPage.tsx`: the *Ohje ja tuki* card between the language choice and Sign out, labelled by its heading, with `account_support_title`, `account_support_text` and `SupportLink` (design.md, decision 4).
+- [x] 2.4 Messages `sign_in_support`, `account_support_title` and `account_support_text` in fi, sv and en.
+- [x] 2.5 Component tests:
   - in `CodeStep` or the sign-in page tests: "The code step shows the support address" and "The email step does not show it"
   - in `AccountPage.test.tsx`: "The account page shows Help and support"
-- [ ] 2.6 Playwright, in `e2e/support.spec.ts`:
+- [x] 2.6 Playwright, in `e2e/support.spec.ts`:
   - "Help when the sign-in code does not arrive": the code step shows the link
   - "Help and support on the account page": the card with the link above Sign out
   - "The support address follows the language", with "Finnish shows tuki@" and, after switching the account to Swedish, "Swedish and English show support@"
-- [ ] 2.7 CLAUDE.md "Current state": the support address (`lib/support.ts`, `SupportLink`, the email footer).
+- [x] 2.7 CLAUDE.md "Current state": the support address (`lib/support.ts`, `SupportLink`, the email footer).
 
 ## 3. Verification, review and archive
 
