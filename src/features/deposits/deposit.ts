@@ -162,7 +162,7 @@ export function depositOverLimit(
 export interface DepositTenancy {
   id: string
   validTo: IsoDate | null
-  deposit: number | null
+  deposit?: number | null
 }
 
 /**
@@ -177,10 +177,47 @@ export function pendingReturns<T extends DepositTenancy>(
 ): T[] {
   return tenancies.filter(
     (tenancy) =>
-      tenancy.deposit !== null &&
-      tenancy.deposit > 0 &&
+      (tenancy.deposit ?? 0) > 0 &&
       !returned.has(tenancy.id) &&
       tenancy.validTo !== null &&
       tenancy.validTo <= today,
   )
+}
+
+export type DepositStatus =
+  | { kind: 'none' }
+  /** A deposit, and the tenancy's last rent day hasn't come. */
+  | { kind: 'held'; amount: number }
+  | { kind: 'pending'; amount: number }
+  | {
+      kind: 'returned'
+      on: IsoDate
+      /** Cents paid back. */
+      returned: number
+      /** Cents kept, both reasons. */
+      kept: number
+    }
+
+/** A tenancy's deposit status on `today`. */
+export function depositStatus(
+  tenancy: DepositTenancy,
+  depositReturn:
+    { returnedOn: IsoDate; rentKept: number; damageKept: number } | undefined,
+  today: IsoDate,
+): DepositStatus {
+  const deposit = tenancy.deposit ?? 0
+  if (deposit <= 0) {
+    return { kind: 'none' }
+  }
+  if (depositReturn) {
+    return {
+      kind: 'returned',
+      on: depositReturn.returnedOn,
+      returned: amountReturned(deposit, depositReturn),
+      kept: depositReturn.rentKept + depositReturn.damageKept,
+    }
+  }
+  return tenancy.validTo !== null && tenancy.validTo <= today
+    ? { kind: 'pending', amount: deposit }
+    : { kind: 'held', amount: deposit }
 }

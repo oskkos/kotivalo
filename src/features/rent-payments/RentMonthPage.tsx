@@ -352,8 +352,16 @@ export function RentMonthPage(props: Props) {
                         name: payment.recordedBy,
                       })}
                     </Typography>
+                    {payment.depositReturnId === null ? null : (
+                      <Typography
+                        variant="body2"
+                        sx={{ fontWeight: 900, color: 'primary.main' }}
+                      >
+                        {m.rent_month_from_deposit()}
+                      </Typography>
+                    )}
                   </Stack>
-                  {owner ? (
+                  {owner && payment.depositReturnId === null ? (
                     <IconButton
                       aria-label={m.rent_month_delete_label({
                         amount: formatMoney(payment.amount),

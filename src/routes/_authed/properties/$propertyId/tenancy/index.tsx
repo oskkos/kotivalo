@@ -155,6 +155,16 @@ function TenancyRoute() {
               : m.deposit_card_add()}
           </ButtonLink>
         )}
+        returnAction={(tenancy) => (
+          <ButtonLink
+            to="/properties/$propertyId/tenancy/$tenancyId/deposit"
+            params={{ propertyId, tenancyId: tenancy.id }}
+            variant="outlined"
+            sx={{ alignSelf: 'flex-start', minHeight: 44, px: 2 }}
+          >
+            {m.deposit_pending_action()}
+          </ButtonLink>
+        )}
         leaseLink={(lease, row) => (
           <TextLink
             to="/properties/$propertyId/documents/$documentId"

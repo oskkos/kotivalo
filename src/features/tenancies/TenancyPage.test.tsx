@@ -401,6 +401,41 @@ describe('The deposit on the tenancy page', () => {
     expect(within(card).getByText('€1,780.00')).toBeVisible()
     expect(within(card).queryByRole('link')).toBeNull()
   })
+  test("An ended tenancy's deposit status", () => {
+    const ended: Tenancy = {
+      ...aino,
+      validTo: '2026-12-31',
+      noticeGivenBy: 'tenant',
+      noticeDate: '2026-11-22',
+      deposit: 178000,
+    }
+    const mikko: Tenancy = {
+      ...aino,
+      id: 't2',
+      tenantName: 'Mikko Lehtinen',
+      validFrom: '2027-01-05',
+    }
+    render(
+      <TenancyPage
+        view={{
+          role: 'owner',
+          today: '2027-01-10',
+          tenancies: [mikko, ended],
+          rents: {},
+          occupants: {},
+          fees: {},
+          depositReturns: {
+            t1: { returnedOn: '2027-01-15', rentKept: 0, damageKept: 0 },
+          },
+        }}
+        address="Kuusikuja 3 B 12"
+        onBack={vi.fn()}
+      />,
+    )
+    expect(
+      screen.getByText('Deposit returned 15/01/2027: €1,780.00'),
+    ).toBeVisible()
+  })
 })
 
 describe('The lease on the tenancy page', () => {
@@ -468,5 +503,110 @@ describe('The lease on the tenancy page', () => {
     const card = screen.getByRole('region', { name: 'Lease' })
     expect(within(card).getByText('Vuokrasopimus Aino K.')).toBeVisible()
     expect(screen.queryByRole('link', { name: 'Add the lease' })).toBeNull()
+  })
+})
+
+describe('The deposit return reminder', () => {
+  const ended: Tenancy = {
+    ...aino,
+    validTo: '2026-12-31',
+    noticeGivenBy: 'tenant',
+    noticeDate: '2026-11-22',
+    deposit: 178000,
+  }
+
+  function reminder(
+    view: Partial<TenancyPageView>,
+    role: 'owner' | 'member' = 'owner',
+  ) {
+    render(
+      <TenancyPage
+        view={{
+          role,
+          today: '2027-01-10',
+          tenancies: [ended],
+          rents: {},
+          occupants: {},
+          fees: {},
+          ...view,
+        }}
+        address="Kuusikuja 3 B 12"
+        onBack={vi.fn()}
+        returnAction={() => <a href="/deposit">Record the return</a>}
+      />,
+    )
+  }
+
+  test('The reminder after the last rent day', () => {
+    reminder({})
+    const card = screen.getByRole('region', { name: 'Deposit not returned' })
+    expect(
+      within(card).getByText(
+        /Aino Koski: the deposit of €1,780.00 is not returned/,
+      ),
+    ).toBeVisible()
+    expect(within(card).getByText(/by 14\/01\/2027/)).toBeVisible()
+    expect(
+      within(card).getByRole('link', { name: 'Record the return' }),
+    ).toBeVisible()
+  })
+
+  test('No reminder before the last rent day', () => {
+    reminder({ today: '2026-12-30' })
+    expect(
+      screen.queryByRole('region', { name: 'Deposit not returned' }),
+    ).toBeNull()
+  })
+
+  test('The reminder stays while a new tenant lives in the flat', () => {
+    const mikko: Tenancy = {
+      ...aino,
+      id: 't2',
+      tenantName: 'Mikko Lehtinen',
+      validFrom: '2027-01-05',
+    }
+    reminder({ today: '2027-01-20', tenancies: [mikko, ended] })
+    expect(
+      screen.getByRole('heading', { name: 'Mikko Lehtinen' }),
+    ).toBeVisible()
+    expect(
+      screen.getByRole('region', { name: 'Deposit not returned' }),
+    ).toBeVisible()
+  })
+
+  test('A tenancy without a deposit has no reminder', () => {
+    reminder({ tenancies: [{ ...ended, deposit: null }] })
+    expect(
+      screen.queryByRole('region', { name: 'Deposit not returned' }),
+    ).toBeNull()
+  })
+
+  test('a recorded return takes the reminder away and shows in the list', () => {
+    const mikko: Tenancy = {
+      ...aino,
+      id: 't2',
+      tenantName: 'Mikko Lehtinen',
+      validFrom: '2027-01-05',
+    }
+    reminder({
+      tenancies: [mikko, ended],
+      depositReturns: {
+        t1: { returnedOn: '2027-01-15', rentKept: 30000, damageKept: 20000 },
+      },
+    })
+    expect(
+      screen.queryByRole('region', { name: 'Deposit not returned' }),
+    ).toBeNull()
+    expect(
+      screen.getByText('Deposit returned 15/01/2027: €1,280.00, €500.00 kept'),
+    ).toBeVisible()
+  })
+
+  test('a member sees the reminder without the button', () => {
+    reminder({}, 'member')
+    expect(
+      screen.getByRole('region', { name: 'Deposit not returned' }),
+    ).toBeVisible()
+    expect(screen.queryByRole('link', { name: 'Record the return' })).toBeNull()
   })
 })

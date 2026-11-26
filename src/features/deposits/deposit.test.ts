@@ -5,6 +5,7 @@ import {
   amountReturned,
   checkReturn,
   depositOverLimit,
+  depositStatus,
   missingRent,
   pendingReturns,
   returnDeadline,
@@ -211,5 +212,35 @@ describe('The deposit return reminder', () => {
     expect(pendingReturns(list, new Set(['a']), '2027-01-10')).toEqual([
       list[1],
     ])
+  })
+})
+
+describe('The deposit status of a tenancy', () => {
+  const held = { id: 'a', validTo: '2026-12-31', deposit: 178000 }
+
+  test('no deposit, held, pending and returned', () => {
+    expect(
+      depositStatus({ ...held, deposit: null }, undefined, '2027-01-10'),
+    ).toEqual({ kind: 'none' })
+    expect(depositStatus(held, undefined, '2026-12-30')).toEqual({
+      kind: 'held',
+      amount: 178000,
+    })
+    expect(depositStatus(held, undefined, '2027-01-10')).toEqual({
+      kind: 'pending',
+      amount: 178000,
+    })
+    expect(
+      depositStatus(
+        held,
+        { returnedOn: '2027-01-15', rentKept: 30000, damageKept: 20000 },
+        '2027-01-20',
+      ),
+    ).toEqual({
+      kind: 'returned',
+      on: '2027-01-15',
+      returned: 128000,
+      kept: 50000,
+    })
   })
 })

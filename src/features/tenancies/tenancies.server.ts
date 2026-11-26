@@ -3,7 +3,10 @@
 // tenancies). The rules are checked here first for the reason, and each
 // write checks the owner role and the overlap again in its statement. The
 // tenant's details are never logged.
-import type { DepositReturnRepository } from '#/features/deposits/deposit-return.repository.server'
+import type {
+  DepositReturn,
+  DepositReturnRepository,
+} from '#/features/deposits/deposit-return.repository.server'
 import type {
   DocumentRepository,
   DocumentRow,
@@ -172,6 +175,8 @@ export async function getTenancies(
       fees: Partial<Record<string, TenantFee[]>>
       /** The leases naming the current tenancy, newest first. */
       leases: DocumentRow[]
+      /** Each tenancy's deposit return, if recorded. */
+      depositReturns: Partial<Record<string, DepositReturn>>
     } & TenancyView)
   | typeof notFound
 > {
@@ -180,8 +185,16 @@ export async function getTenancies(
     return notFound
   }
   const current = currentTenancy(view.tenancies, view.today)
-  const leases = current ? await deps.documents.leasesOfTenancy(current.id) : []
-  return { ok: true, ...view, leases }
+  const [leases, returns] = await Promise.all([
+    current ? deps.documents.leasesOfTenancy(current.id) : [],
+    deps.depositReturns.forTenancies(view.tenancies.map((t) => t.id)),
+  ])
+  return {
+    ok: true,
+    ...view,
+    leases,
+    depositReturns: Object.fromEntries(returns.map((r) => [r.tenancyId, r])),
+  }
 }
 
 /** What the new tenant form needs: the rent periods and the limits. */
@@ -238,6 +251,8 @@ export async function getTenancy(
       fees: TenantFee[]
       /** The flat's other tenancies, for the form's checks. */
       others: Tenancy[]
+      /** The tenancy's deposit return, if recorded. */
+      depositReturn: DepositReturn | undefined
       ownershipStart: IsoDate
     }
   | typeof notFound
@@ -256,10 +271,11 @@ export async function getTenancy(
   if (!tenancy) {
     return tenancyNotFound
   }
-  const [rents, occupants, fees] = await Promise.all([
+  const [rents, occupants, fees, depositReturn] = await Promise.all([
     deps.tenancies.rentsFor([tenancyId]),
     deps.tenancies.occupantsFor([tenancyId]),
     deps.tenancies.feesFor([tenancyId]),
+    deps.depositReturns.forTenancy(tenancyId),
   ])
   return {
     ok: true,
@@ -267,6 +283,7 @@ export async function getTenancy(
     property,
     today: today(deps),
     tenancy,
+    depositReturn,
     rents: rents[tenancyId] ?? [],
     occupants: occupants[tenancyId] ?? [],
     fees: fees[tenancyId] ?? [],
