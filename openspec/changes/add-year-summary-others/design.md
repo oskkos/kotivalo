@@ -66,6 +66,7 @@ The access check stays the same: the flats are the user's own, active and archiv
 - Everyone with a share above 0 on a day of the year up to today is a choice, except the user.
 - A `person` id that is in none of the user's flats' periods in any year falls back to the own share.
 - An id in them, but not in the chosen year, gives the empty state "no share in the flats you see in <year>".
+- A flat's form 7H page decides the same way from all the user's flats, so an owner of another of them gets this flat's no-share state. When `person` is another user's id, it reads all the flats' ownership periods and names (two more queries, in parallel).
 
 So a person's figures can't be asked for beyond the user's own flats, and a guessed id shows nothing. A 0 % member sees owners' figures because they have access to the flat (decision of #122). Nothing about a person is read outside the flats the user can see.
 
@@ -78,8 +79,7 @@ So a person's figures can't be asked for beyond the user's own flats, and a gues
 `view.ts`:
 - `YearSummaryView` gains:
   - `holder`: `'own' | 'whole' | { userId, name }`
-  - `people`: the menu, `{ userId, name, flats }[]` sorted by name, plus the own and whole counts
-  - `holderHasYears`
+  - `people`: the menu, `{ userId, name, flats }[]` sorted by name, plus the own and whole counts. A chosen person without a share in the year is in it with 0 flats, so the choice stays marked.
 - `FlatCard` gains `owners`, `{ name, share, isYou }[]` for the whole flats. Its `share` is the holder's share: the person's, or 10000.
 - `FlatYearView` gains:
   - the holder
@@ -96,7 +96,7 @@ The view now carries co-owners' ids and names. Everyone with access to the flat 
 
 ### 7. The UI
 
-- **Selector:** `HolderChoice.tsx` in the feature folder: a full-width button with the label *Kenen luvut* and the current choice, opening a MUI `Drawer` (bottom) with a radio group. Choosing navigates with the new `person` and closes the sheet. It is rendered only when `people` is not empty.
+- **Selector:** `HolderChoice.tsx` in the feature folder: a full-width button with the label *Kenen luvut* and the current choice, opening a MUI `Drawer` (bottom) with a radio group. Choosing navigates with the new `person` and closes the sheet. It is rendered when `people` is not empty or another person or the whole flats are chosen, so the user can return to the own share.
 - **Another owner:** `YearSummaryPage` shows the intro card with the person's name and a warning band (*Vain yhteiset asunnot*).
 - **Whole flats:** the intro says the figures are for checking. Each card shows its owners instead of *Osuutesi*.
 - **`FlatTaxPage`, another owner:** the kicker names the person and a band says whose share it is. Copy buttons stay.
