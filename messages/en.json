@@ -224,7 +224,7 @@
   "deposit_card_title": "Deposit",
   "deposit_form_return_open": "Deposit return",
   "deposit_pending_action": "Record the return",
-  "deposit_pending_deadline": "The deposit is returned, or its keeping notified in writing with the grounds and an estimate, by {date}: within 14 days of the end of the contract (Act on Residential Leases, section 8). The hints are not legal advice.",
+  "deposit_pending_deadline": "The deposit is usually returned, or its keeping notified in writing with the grounds, within 14 days of the end of the tenancy or the handover of the flat (Act on Residential Leases, section 8). Counted from the last rent day, that is {date}. Check the deadline in your own contract. The hints are not legal advice.",
   "deposit_pending_text": "{name}: the deposit of {amount} is not returned. The last rent day was {date}.",
   "deposit_pending_title": "Deposit not returned",
   "deposit_return_amount": "Returned to the tenant",

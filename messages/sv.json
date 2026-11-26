@@ -224,7 +224,7 @@
   "deposit_card_title": "Hyresgaranti",
   "deposit_form_return_open": "Återbetalning av hyresgaranti",
   "deposit_pending_action": "Registrera återbetalning",
-  "deposit_pending_deadline": "Hyresgarantin ska återbetalas, eller så ska innehållandet av den meddelas skriftligen med grunder och en uppskattning, senast {date}, alltså inom 14 dagar från att hyresavtalet upphörde (lagen om hyra av bostadslägenhet, 8 §). Tipsen är inte juridisk rådgivning.",
+  "deposit_pending_deadline": "Hyresgarantin återbetalas, eller så meddelas innehållandet skriftligen med grunder, i regel inom 14 dagar från att hyresförhållandet upphörde eller lägenheten överläts (lagen om hyra av bostadslägenhet, 8 §). Räknat från sista hyresdagen är det {date}. Kontrollera tidsfristen i ditt eget avtal. Tipsen är inte juridisk rådgivning.",
   "deposit_pending_text": "{name}: hyresgarantin {amount} är inte återbetald. Sista hyresdagen var {date}.",
   "deposit_pending_title": "Hyresgarantin inte återbetald",
   "deposit_return_amount": "Återbetalas till hyresgästen",
