@@ -241,7 +241,7 @@ class Painter {
       }
       this.style(8, 'bold', MUTED)
       const cells = block.header.map((text, c) =>
-        this.cell(text, block.columns[c], false),
+        this.cell(text, block.columns[c], 'header'),
       )
       this.y += 10
       block.columns.forEach((column, c) => {
@@ -252,7 +252,7 @@ class Painter {
     header()
     for (const row of block.rows) {
       const cells = row.map((text, c) =>
-        this.cell(text, block.columns[c], block.columns[c]?.stacked === true),
+        this.cell(text, block.columns[c], cellKind(block.columns[c])),
       )
       const height = Math.max(...cells.map((lines) => lines.length)) * 12 + 10
       if (this.ensure(height + 4, page)) {
@@ -266,44 +266,65 @@ class Painter {
           column,
           xs[c] ?? 0,
           this.y + 14,
-          column.stacked === true ? 'stacked' : 'plain',
+          cellKind(column),
         )
       })
       this.y += height
     }
   }
 
-  /** A cell's wrapped lines, the stacked ones' first line marked. */
+  /**
+   * A cell's wrapped lines, each measured in the style it is drawn in and
+   * with the part of the text (between line breaks) it comes from.
+   */
   private cell(
     text: string,
     column: PdfColumn | undefined,
-    stacked: boolean,
-  ): string[] {
+    kind: CellKind,
+  ): CellLine[] {
     const width = (column?.width ?? 0.2) * WIDTH - 8
-    this.style(stacked ? 8.5 : 10, 'normal', TEXT)
-    return text.split('\n').flatMap((part) => this.lines(part, width))
+    return text.split('\n').flatMap((part, p) => {
+      this.cellStyle(kind, p)
+      return this.lines(part, width).map((line) => ({ text: line, part: p }))
+    })
+  }
+
+  /** The header small and muted, a stacked cell's first part bold and the
+   * rest small and muted, a plain cell bold. */
+  private cellStyle(kind: CellKind, part: number) {
+    if (kind === 'header') {
+      this.style(8, 'bold', MUTED)
+    } else if (kind === 'stacked' && part > 0) {
+      this.style(8.5, 'normal', MUTED)
+    } else {
+      this.style(10, 'bold', TEXT)
+    }
   }
 
   private drawCell(
-    lines: string[],
+    lines: CellLine[],
     column: PdfColumn,
     x: number,
     y: number,
-    kind: 'header' | 'stacked' | 'plain',
+    kind: CellKind,
   ) {
     const at = column.align === 'right' ? x + column.width * WIDTH - 8 : x
     lines.forEach((line, i) => {
-      if (kind === 'header') {
-        this.style(8, 'bold', MUTED)
-      } else if (kind === 'stacked' && i > 0) {
-        this.style(8.5, 'normal', MUTED)
-      } else {
-        this.style(10, 'bold', TEXT)
-      }
-      this.pdf.text(line, at, y + i * 12, { align: column.align })
+      this.cellStyle(kind, line.part)
+      this.pdf.text(line.text, at, y + i * 12, { align: column.align })
     })
   }
 }
+
+type CellKind = 'header' | 'stacked' | 'plain'
+
+interface CellLine {
+  text: string
+  part: number
+}
+
+const cellKind = (column: PdfColumn | undefined): CellKind =>
+  column?.stacked === true ? 'stacked' : 'plain'
 
 function columnStarts(columns: PdfColumn[]): number[] {
   let x = MARGIN
