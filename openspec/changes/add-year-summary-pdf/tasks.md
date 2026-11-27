@@ -69,6 +69,6 @@
 
 ## 6. Verification, review and archive
 
-- [ ] 6.1 The full `pnpm test`, `pnpm test:e2e` and `pnpm check:traceability`.
-- [ ] 6.2 The `pr-review` skill, and its findings handled.
+- [x] 6.1 The full `pnpm test`, `pnpm test:e2e` and `pnpm check:traceability`.
+- [x] 6.2 The `pr-review` skill, and its findings handled.
 - [ ] 6.3 `openspec archive add-year-summary-pdf` as the PR's last commit.
