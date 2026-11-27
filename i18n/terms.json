@@ -1979,12 +1979,18 @@
     "sv": {
       "term": "årssammandrag",
       "match": ["årssammandrag\\p{L}*"],
-      "status": "proposed"
+      "status": "proposed",
+      "except": {
+        "pdf_file_stem": "A file name: lower case with no ring, as the slug rule writes it (kotivalo-arssammandrag)."
+      }
     },
     "en": {
       "term": "year summary",
       "match": ["year summar(y|ies)"],
-      "status": "proposed"
+      "status": "proposed",
+      "except": {
+        "pdf_file_stem": "A file name: words joined by a hyphen (kotivalo-year-summary)."
+      }
     }
   }
 }
