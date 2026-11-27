@@ -5,6 +5,8 @@ import { describe, expect, test, vi } from 'vitest'
 import type { FlatCard, YearSummaryView } from './view'
 import { YearSummaryPage } from './YearSummaryPage'
 
+vi.mock('./functions', () => ({ getYearSummaryPdf: vi.fn() }))
+
 // jsdom's browser language is English. Links render as plain anchors with
 // the address the router would build; the router isn't under test here.
 vi.mock('@tanstack/react-router', () => ({
@@ -281,5 +283,17 @@ describe('Choosing whose figures', () => {
   test('keeps the selector for the whole flats without other owners', () => {
     renderPage(view({ holder: { kind: 'whole' }, people: [] }))
     expect(screen.getByRole('button', { name: /Whose figures/ })).toBeVisible()
+  })
+})
+
+describe('Downloading the year summary as a PDF', () => {
+  test('The button is under the intro card when there are flats', () => {
+    renderPage(view())
+    expect(screen.getByRole('button', { name: 'Download PDF' })).toBeVisible()
+  })
+
+  test('No PDF without flats in the summary', () => {
+    renderPage(view({ flats: [], counts: { own: 0, whole: 1 } }))
+    expect(screen.queryByRole('button', { name: 'Download PDF' })).toBeNull()
   })
 })

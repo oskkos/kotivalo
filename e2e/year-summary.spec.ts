@@ -391,3 +391,51 @@ test.describe("The whole flat's page", () => {
     await expect(holderButton(page)).toContainText('Jussi')
   })
 })
+
+test.describe('Downloading the year summary as a PDF', () => {
+  test("Downloading the own share's PDF", async ({ page }) => {
+    await signIn(page, uniqueEmail('pdf'), 'Annika')
+    await addFlat(page, { ...kuusikuja, ownedSince: '01/01/2024' })
+    await openYearSummary(page, 2025)
+
+    const download = page.waitForEvent('download')
+    await page.getByRole('button', { name: 'Download PDF' }).click()
+    const file = await download
+    expect(file.suggestedFilename()).toBe('kotivalo-year-summary-2025.pdf')
+    const stream = await file.createReadStream()
+    const chunks: Buffer[] = []
+    for await (const chunk of stream) {
+      chunks.push(chunk as Buffer)
+    }
+    expect(Buffer.concat(chunks).subarray(0, 4).toString()).toBe('%PDF')
+    await expect(
+      page.getByText('Downloaded: kotivalo-year-summary-2025.pdf'),
+    ).toBeVisible()
+    await expect(
+      page.getByRole('button', { name: 'Download PDF' }),
+    ).toBeEnabled()
+  })
+
+  test('The PDF follows the chosen holder', async ({ page, browser }) => {
+    await coOwned(page, browser)
+    await openYearSummary(page, 2025)
+    await chooseHolder(page, /Jussi/)
+
+    const download = page.waitForEvent('download')
+    await page.getByRole('button', { name: 'Download PDF' }).click()
+    expect((await download).suggestedFilename()).toBe(
+      'kotivalo-year-summary-2025-jussi.pdf',
+    )
+  })
+
+  test('No PDF without flats in the summary', async ({ page, browser }) => {
+    const { jussi } = await accepted(page, browser)
+    await openYearSummary(jussi, 2025)
+    await expect(
+      jussi.getByRole('heading', { name: 'No ownership share in 2025' }),
+    ).toBeVisible()
+    await expect(
+      jussi.getByRole('button', { name: 'Download PDF' }),
+    ).toHaveCount(0)
+  })
+})

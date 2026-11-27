@@ -23,6 +23,7 @@ import { getLocale } from '#/paraglide/runtime.js'
 import { colors, radii } from '#/theme/tokens'
 import { HolderChoice } from './HolderChoice'
 import { personParam } from './holder'
+import { PdfButton } from './PdfButton'
 import type { Check } from './summary'
 import type { FlatCard, YearSummaryView } from './view'
 
@@ -441,6 +442,7 @@ export function YearSummaryPage(props: Props) {
                     : m.year_summary_intro()}
               </Typography>
             </Stack>
+            <PdfButton year={view.year} person={personParam(view.holder)} />
             {view.holder.kind === 'person' ? (
               <Stack
                 component="section"

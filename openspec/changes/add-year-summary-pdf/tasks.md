@@ -54,18 +54,18 @@
 
 ## 5. The button on the year summary page
 
-- [ ] 5.1 `PdfButton.tsx`: *Lataa PDF* under the intro card when the year has flats in the summary. On click it calls `getYearSummaryPdf`, loads `pdf-render` with a dynamic import, downloads the `Blob` with the file name, and shows the busy state, the notice and the failure (design.md, decision 7). On failure, log `year_summary.pdf_failed` with `clientLog` and no figures or names.
-- [ ] 5.2 `YearSummaryPage.tsx` and the route `year-summary/index.tsx`: pass `year` and `person` to the button.
-- [ ] 5.3 Component tests in `PdfButton.test.tsx` and `YearSummaryPage.test.tsx`:
+- [x] 5.1 `PdfButton.tsx`: *Lataa PDF* under the intro card when the year has flats in the summary. On click it calls `getYearSummaryPdf`, loads `pdf-render` with a dynamic import, downloads the `Blob` with the file name, and shows the busy state, the notice and the failure (design.md, decision 7). On failure, log `year_summary.pdf_failed` with `clientLog` and no figures or names.
+- [x] 5.2 `YearSummaryPage.tsx`: the button gets `year` and `person` from the view (the route needs no change).
+- [x] 5.3 Component tests in `PdfButton.test.tsx` and `YearSummaryPage.test.tsx`:
   - the button only with flats in the summary
   - the busy state
   - the notice with the file name
   - "Building the PDF fails", with its log line
-- [ ] 5.4 Playwright in `e2e/year-summary.spec.ts`, describe "Downloading the year summary as a PDF":
+- [x] 5.4 Playwright in `e2e/year-summary.spec.ts`, describe "Downloading the year summary as a PDF":
   - "Downloading the own share's PDF": the download's file name and that it starts with `%PDF`
   - "The PDF follows the chosen holder", with Jussi from `coOwned`: the file name
   - "No PDF without flats in the summary"
-- [ ] 5.5 CLAUDE.md "Current state": the year summary PDF (`getYearSummaryPdf`, `pdf-document.ts`, `pdf-render.ts`, jsPDF loaded on demand, `pdfText`).
+- [x] 5.5 CLAUDE.md "Current state": the year summary PDF (`getYearSummaryPdf`, `pdf-document.ts`, `pdf-render.ts`, jsPDF loaded on demand, `pdfText`).
 
 ## 6. Verification, review and archive
 
