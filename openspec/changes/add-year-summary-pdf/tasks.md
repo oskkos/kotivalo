@@ -40,14 +40,14 @@
 
 ## 4. The renderer
 
-- [ ] 4.1 Add `jspdf`. First, a Vitest test that writes `€ – · ä ö å Ä Ö Å` in the standard Helvetica and reads them back from the PDF (design.md, decision 1). If they don't survive, stop and raise switching to `@cantoo/pdf-lib` with the user.
-- [ ] 4.2 `pdf-render.ts`, the only file that imports `jspdf`:
+- [x] 4.1 Add `jspdf`. First, a Vitest test that writes `€ – · ä ö å Ä Ö Å` in the standard Helvetica and reads them back from the PDF (design.md, decision 1). If they don't survive, stop and raise switching to `@cantoo/pdf-lib` with the user.
+- [x] 4.2 `pdf-render.ts`, the only file that imports `jspdf`:
   - draws the document model on A4 with `pdfText` applied to every string
   - wraps text to its column
   - continues an overflowing flat on a new page with the address repeated, and measures first so the cover's page numbers follow
   - embeds the logo from `/email/logo.png`, or goes without it if the fetch fails
   - returns a `Blob`
-- [ ] 4.3 Unit tests in `pdf-render.test.ts`:
+- [x] 4.3 Unit tests in `pdf-render.test.ts`:
   - the output starts with `%PDF`
   - a flat with many parts and checks continues on a second page, and the cover's page number for the next flat follows
   - the PDF is made without the logo when the fetch fails

@@ -3,6 +3,8 @@ allowBuilds:
   workerd: true
   # Hooks are installed by our own "prepare" script instead.
   lefthook: false
+  # jsPDF's optional dependency; its install script only prints a banner.
+  core-js: false
 overrides:
   # drizzle-kit loads its config through @esbuild-kit, which pins esbuild
   # 0.18 (GHSA-67mh-4wv8-2f99, in esbuild's dev server). Drop this when
