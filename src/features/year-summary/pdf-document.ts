@@ -112,16 +112,17 @@ function companyLine(card: FlatCard): string {
   return m.year_summary_company_missing()
 }
 
-/** `50 % – 100 %` when the share changed in the year. */
+/** Every share of the year with a dash, e.g. `50 % – 100 % – 50 %`. */
 function shareText(card: FlatCard): string {
   const changes = card.checks.filter(
     (check): check is Extract<Check, { kind: 'share_changed' }> =>
       check.kind === 'share_changed',
   )
   const first = changes.at(0)
-  const last = changes.at(-1)
-  return first && last
-    ? `${formatShare(first.from)} – ${formatShare(last.to)}`
+  return first
+    ? [first.from, ...changes.map((change) => change.to)]
+        .map((share) => formatShare(share))
+        .join(' – ')
     : formatShare(card.share)
 }
 
