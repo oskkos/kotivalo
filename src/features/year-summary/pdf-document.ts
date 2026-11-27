@@ -167,7 +167,7 @@ function cover(
                   share: formatShare(owner.share),
                 }),
               )
-              .join('\n')
+              .join(' · ')
           : shareText(card),
         formatMoney(card.income),
         formatMoney(card.costs),

@@ -432,7 +432,7 @@ describe("The whole flats' PDF", () => {
     const table = find(whole.pages[0].blocks, 'table')
     expect(table?.header?.[1]).toBe('Omistajat')
     expect(plain(table?.rows[0]?.[1] ?? '')).toBe(
-      'Annika Kotivalo 50 %\nMikko Virtanen 50 %',
+      'Annika Kotivalo 50 % · Mikko Virtanen 50 %',
     )
   })
 
