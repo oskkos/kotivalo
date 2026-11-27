@@ -487,6 +487,35 @@
   "ownership_undo": "Undo change",
   "ownership_undo_text": "The ownership goes back to {split} from {date}. If the change removed someone's access, it isn't restored.",
   "ownership_undo_title": "Undo the ownership change from {date}?",
+  "pdf_busy": "Creating the PDF…",
+  "pdf_button": "Download PDF",
+  "pdf_check_share_person_title": "The share changed on {date}: {from} – {to}",
+  "pdf_check_share_title": "Your share changed on {date}: {from} – {to}",
+  "pdf_checks": [
+    {
+      "declarations": ["input count", "local countPlural = count: plural"],
+      "selectors": ["countPlural"],
+      "match": {
+        "countPlural=one": "{count} to check",
+        "countPlural=other": "{count} to check"
+      }
+    }
+  ],
+  "pdf_column_flat": "Flat",
+  "pdf_column_page": "Page",
+  "pdf_column_share": "Share",
+  "pdf_cover_note": "Income is counted by payment date and charges by month, each at the ownership share on that day. The summary is not a tax return: the figures are checked and reported on MyTax.",
+  "pdf_failed": "The PDF could not be made.",
+  "pdf_file_stem": "kotivalo-year-summary",
+  "pdf_file_whole": "whole-flats",
+  "pdf_footer": "Kotivalo · Year summary {year} · {holder} · Page {page}/{pages}",
+  "pdf_holder_own": "Your own share · {name}",
+  "pdf_made": "Created {date}",
+  "pdf_notice": "Downloaded: {file}",
+  "pdf_period": "Period",
+  "pdf_subtitle": "Form 7H",
+  "pdf_tenants": "Tenants",
+  "pdf_title": "Year summary {year}",
   "properties_archived": "Archived flats ({count})",
   "properties_count": [
     {

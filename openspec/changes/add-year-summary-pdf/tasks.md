@@ -24,9 +24,9 @@
 
 ## 3. The PDF's document model and messages
 
-- [ ] 3.1 `pdf-document.ts`: `pdfDocument(view, now, firstPages?)` turns a `YearSummaryPdfView` into pages of blocks: the cover, a page per flat, the whole flats' band and owners, and the footers (design.md, decision 4). It is pure, and its texts come from messages and the app's formatters.
-- [ ] 3.2 Messages in fi, sv and en for the cover, the flat pages, the band, the share change with a dash, the footer, the file name parts, the button, the busy state, the notice and the failure. Write the Finnish first; use the translate skill for Swedish and English, with the term-critic review if a term changes.
-- [ ] 3.3 Unit tests in `pdf-document.test.ts`:
+- [x] 3.1 `pdf-document.ts`: `pdfDocument(view, now, firstPages?)` turns a `YearSummaryPdfView` into pages of blocks: the cover, a page per flat, the whole flats' band and owners, and the footers (design.md, decision 4). It is pure, and its texts come from messages and the app's formatters.
+- [x] 3.2 Messages in fi, sv and en for the cover, the flat pages, the band, the share change with a dash, the footer, the file name parts, the button, the busy state, the notice and the failure. Write the Finnish first; use the translate skill for Swedish and English, with the term-critic review if a term changes.
+- [x] 3.3 Unit tests in `pdf-document.test.ts`:
   - "The cover page of the own share"
   - "A share change on the cover"
   - "Flats not included on the cover"
@@ -35,8 +35,8 @@
   - "The whole flat's page"
   - another owner's cover with their name
   - Swedish text in the Swedish locale
-- [ ] 3.4 `pdf-file-name.ts`: `pdfFileName(holder, year)` with the stem and the whole flats' part from messages and a slug of another owner's name (design.md, decision 8). Unit tests for all three holders and a name that leaves no slug.
-- [ ] 3.5 "The PDF's messages need no replacement": every message the PDF uses, rendered in fi, sv and en with sample values, passes `pdfText` unchanged.
+- [x] 3.4 `pdf-file-name.ts`: `pdfFileName(holder, year)` with the stem and the whole flats' part from messages and a slug of another owner's name (design.md, decision 8). Unit tests for all three holders and a name that leaves no slug.
+- [x] 3.5 "The PDF's messages need no replacement": every message the PDF uses, rendered in fi, sv and en with sample values, passes `pdfText` unchanged.
 
 ## 4. The renderer
 

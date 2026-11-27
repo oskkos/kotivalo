@@ -13,24 +13,20 @@ import Stack from '@mui/material/Stack'
 import Typography from '@mui/material/Typography'
 import { createLink } from '@tanstack/react-router'
 import { useState } from 'react'
-import { kindLabel } from '#/features/recurring-amounts/labels'
-import { categoryLabel, summaryRowLabel } from '#/features/transactions/labels'
-import { chargeKindLabel } from '#/lib/charge-labels'
 import { clientLog } from '#/lib/client-log'
 import {
   formatDate,
   formatDayMonth,
-  formatList,
   formatMoney,
-  formatMonth,
   formatShare,
 } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
-import type { ChargeKind } from '#/server/db/schema'
 import { colors, radii } from '#/theme/tokens'
 import { amountForCopy, shareForCopy } from './copy'
+import { checkText } from './check-text'
 import { personParam } from './holder'
-import type { Check, Part, PartKey, RowNumber } from './summary'
+import { partsText, rowLabel } from './row-text'
+import type { Check } from './summary'
 import { ROW_NUMBERS } from './summary'
 import type { FlatYearView } from './view'
 
@@ -51,46 +47,6 @@ const card = {
   border: `1px solid ${colors.cardBorder}`,
   borderRadius: `${String(radii.card)}px`,
 } as const
-
-const rowLabel: Record<RowNumber, () => string> = {
-  '2.1': () => summaryRowLabel.gross_rent(),
-  '2.2': () => summaryRowLabel.maintenance_and_water(),
-  '2.3': () => m.flat_tax_row_capital_charges(),
-  '2.4': () => summaryRowLabel.annual_repairs(),
-  '2.5': () => summaryRowLabel.other_costs(),
-}
-
-const usagePart = (kind: ChargeKind) => () =>
-  m.flat_tax_part_usage({ kind: chargeKindLabel[kind]() })
-
-/** Each part's name: usage charges are told apart from entries. */
-const partLabel: Record<PartKey, () => string> = {
-  rent_payments: () => m.rent_payments_title(),
-  ...categoryLabel,
-  maintenance_charge: kindLabel.maintenance_charge,
-  financing_charge: kindLabel.financing_charge,
-  deposit_damage: () => m.flat_tax_part_deposit_damage(),
-  water: usagePart('water'),
-  parking: usagePart('parking'),
-  sauna: usagePart('sauna'),
-  other: usagePart('other'),
-}
-
-const partsText = (parts: readonly Part[]) =>
-  parts
-    .map((part) =>
-      m.flat_tax_part({
-        label: partLabel[part.key](),
-        amount: formatMoney(part.cents),
-      }),
-    )
-    // The app's separator for amounts on one line, as on the charges page.
-    .join(' · ')
-
-const monthName = (month: string) => {
-  const [year, number] = month.split('-').map(Number) as [number, number]
-  return formatMonth(year, number)
-}
 
 function CopyIcon() {
   return (
@@ -144,78 +100,19 @@ function CheckItem(props: { check: Check; view: Ok }) {
       {m.flat_tax_check_open_rent()}
     </TextLink>
   )
-  const content = ((): {
-    title: string
-    text: string
-    link?: React.ReactNode
-  } => {
-    switch (check.kind) {
-      case 'unpaid':
-        return {
-          title: m.flat_tax_check_unpaid_title({
-            months: formatList(check.months.map(monthName)),
-          }),
-          text: m.flat_tax_check_unpaid_text(),
-          link: rentLink,
-        }
-      case 'partly_paid':
-        return {
-          title: m.flat_tax_check_partly_paid_title({
-            months: formatList(
-              check.months.map((row) =>
-                m.flat_tax_check_partly_paid_month({
-                  month: monthName(row.month),
-                  amount: formatMoney(row.missing),
-                }),
-              ),
-            ),
-          }),
-          text: m.flat_tax_check_partly_paid_text(),
-          link: rentLink,
-        }
-      case 'vacant':
-        return {
-          title: m.flat_tax_check_vacant_title({
-            months: formatList(check.months.map(monthName)),
-          }),
-          text: m.flat_tax_check_vacant_text(),
-        }
-      case 'details_missing':
-        return {
-          title: m.flat_tax_check_details_missing_title(),
-          text: m.flat_tax_check_details_missing_text(),
-        }
-      case 'treatment_not_set':
-        return {
-          title: m.flat_tax_check_treatment_title({
-            count: check.months.length,
-          }),
-          text: m.flat_tax_check_treatment_text(),
-          link: (
-            <TextLink
-              to="/properties/$propertyId/amounts"
-              params={{ propertyId }}
-              sx={{ fontSize: 13, fontWeight: 900 }}
-            >
-              {m.flat_tax_check_open_amounts()}
-            </TextLink>
-          ),
-        }
-      case 'share_changed':
-        return {
-          title: (own
-            ? m.flat_tax_check_share_title
-            : m.flat_tax_check_share_person_title)({
-            date: formatDate(check.on),
-            from: formatShare(check.from),
-            to: formatShare(check.to),
-          }),
-          text: own
-            ? m.flat_tax_check_share_text()
-            : m.flat_tax_check_share_person_text(),
-        }
-    }
-  })()
+  const link =
+    check.kind === 'unpaid' || check.kind === 'partly_paid' ? (
+      rentLink
+    ) : check.kind === 'treatment_not_set' ? (
+      <TextLink
+        to="/properties/$propertyId/amounts"
+        params={{ propertyId }}
+        sx={{ fontSize: 13, fontWeight: 900 }}
+      >
+        {m.flat_tax_check_open_amounts()}
+      </TextLink>
+    ) : undefined
+  const content = { ...checkText(check, { own }), link }
   return (
     <Stack component="li" direction="row" sx={{ gap: 1.25 }}>
       <Box sx={{ display: 'flex', pt: 0.125 }}>
