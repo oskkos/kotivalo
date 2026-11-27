@@ -1,7 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, test, vi } from 'vitest'
-import { clientLog } from '#/lib/client-log'
+import { flushClientLog } from '#/lib/client-log'
 import { PdfButton } from './PdfButton'
 import type { YearSummaryPdfView } from './view'
 
@@ -23,6 +23,7 @@ const pdfView = (
 
 afterEach(() => {
   vi.restoreAllMocks()
+  vi.unstubAllGlobals()
 })
 
 describe('Downloading the year summary as a PDF', () => {
@@ -98,10 +99,31 @@ describe('Downloading the year summary as a PDF', () => {
   })
 
   test('Building the PDF fails', async () => {
-    const log = vi.spyOn(clientLog, 'error').mockImplementation(() => undefined)
+    // The real logger, so the level it sends is checked.
+    const fetchMock = vi.fn(() =>
+      Promise.resolve(new Response(null, { status: 204 })),
+    )
+    vi.stubGlobal('fetch', fetchMock)
+    const sentLevels = () => {
+      flushClientLog()
+      return fetchMock.mock.calls.flatMap(
+        (call) =>
+          (
+            JSON.parse(
+              (call as unknown as [string, RequestInit])[1].body as string,
+            ) as { events: { level: string; fields?: object }[] }
+          ).events,
+      )
+    }
+    // What Chromium throws when the library's file can't be fetched.
     const build = vi
       .fn()
-      .mockRejectedValueOnce(new Error('chunk failed'))
+      .mockRejectedValueOnce(
+        new TypeError(
+          'Failed to fetch dynamically imported module: https://kotivalo.app/assets/pdf-render-abc123.js',
+        ),
+      )
+      .mockRejectedValueOnce(new Error('jsPDF failed'))
       .mockResolvedValue(new Blob())
     const save = vi.fn()
     render(
@@ -115,12 +137,20 @@ describe('Downloading the year summary as a PDF', () => {
     )
     await userEvent.click(screen.getByRole('button', { name: 'Download PDF' }))
     expect(await screen.findByText('The PDF could not be made.')).toBeVisible()
+    expect(
+      screen.getByText('Check your network connection and try again.'),
+    ).toBeVisible()
     expect(save).not.toHaveBeenCalled()
-    expect(log).toHaveBeenCalledWith(
-      'year_summary.pdf_failed',
-      {},
-      expect.any(Error),
-    )
+    expect(sentLevels()).toMatchObject([
+      { level: 'warn', fields: { network: true } },
+    ])
+
+    // Any other failure is unexpected and logged as an error.
+    fetchMock.mockClear()
+    await userEvent.click(screen.getByRole('button', { name: 'Download PDF' }))
+    expect(await screen.findByText('Try again in a moment.')).toBeVisible()
+    expect(sentLevels()).toMatchObject([{ level: 'error' }])
+
     // The button works again.
     await userEvent.click(screen.getByRole('button', { name: 'Download PDF' }))
     await waitFor(() => {
