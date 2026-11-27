@@ -148,6 +148,11 @@ export interface FlatDetails extends HousingCompany {
   tenant: { kind: 'one'; name: string } | { kind: 'several' } | { kind: 'none' }
   /** Null without a tenancy in the year. */
   period: { from: IsoDate; to: IsoDate } | null
+  /**
+   * Every tenancy of the year in start order, each clipped to the year and to
+   * today. Used by the PDF; `tenant` and `period` are what the screen shows.
+   */
+  tenancies: { name: string; from: IsoDate; to: IsoDate }[]
   /** Basis points at the end of the user's period in the year. */
   share: number
 }
@@ -441,6 +446,7 @@ function flatDetails(
   const ran = tenanciesInYear(input.tenancies, year, today)
   const first = `${String(year)}-01-01`
   const end = `${String(year)}-12-31`
+  const last = lastDayCounted(year, today)
   const only = ran.length === 1 ? ran[0] : undefined
   return {
     ...input.housingCompany,
@@ -457,6 +463,13 @@ function flatDetails(
       : ran.length > 1
         ? { from: first, to: end }
         : null,
+    tenancies: [...ran]
+      .sort((a, b) => a.validFrom.localeCompare(b.validFrom))
+      .map((t) => ({
+        name: t.tenantName,
+        from: t.validFrom > first ? t.validFrom : first,
+        to: t.validTo !== null && t.validTo < last ? t.validTo : last,
+      })),
     share: shareAtEnd(input.ownership, holder, year, today),
   }
 }

@@ -61,6 +61,7 @@ const flat = (over: Partial<Flat> = {}): Flat => ({
     apartmentNumber: 'B 12',
     tenant: { kind: 'one', name: 'Aino Koski' },
     period: { from: '2025-01-01', to: '2025-09-30' },
+    tenancies: [{ name: 'Aino Koski', from: '2025-01-01', to: '2025-09-30' }],
     share: 5000,
   },
   checks: [],
