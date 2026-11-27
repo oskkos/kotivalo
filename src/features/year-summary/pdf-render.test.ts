@@ -130,6 +130,31 @@ describe('Rendering the PDF', () => {
     expect(blob.size).toBeGreaterThan(1000)
   })
 
+  test('A cell is wrapped in the font it is drawn in', async () => {
+    // The cover's flat column, 40 % of the page's text width, less padding.
+    const width = 0.4 * (595.28 - 80) - 8
+    const address = 'Pohjoinen Rautatiekatu 21 A 12, 00100 Helsinki'
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' })
+    doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8.5)
+    // It fits in the small regular font but not in the bold one it is drawn in.
+    expect(doc.getTextWidth(address)).toBeLessThan(width)
+    doc.setFont('helvetica', 'bold')
+    doc.setFontSize(10)
+    expect(doc.getTextWidth(address)).toBeGreaterThan(width)
+    const [first] = doc.splitTextToSize(address, width) as string[]
+
+    const long = view(false)
+    long.flats[0] = { ...long.flats[0], streetAddress: address }
+    const text = await readable(
+      await renderYearSummaryPdf(long, now, {
+        loadLogo: noLogo,
+        compress: false,
+      }),
+    )
+    expect(text).toContain(`(${first}) Tj`)
+  })
+
   test('Text outside the font is replaced', async () => {
     const odd = view(false)
     odd.flats[0] = {
