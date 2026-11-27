@@ -507,6 +507,40 @@ describe('Flat details for form 7H', () => {
     })
   })
 
+  test('Every tenancy of the year', () => {
+    const data = input({
+      tenancies: [
+        tenancy({
+          id: 'b',
+          tenantName: 'Pekka Laine',
+          validFrom: '2025-10-01',
+        }),
+        tenancy({
+          id: 'a',
+          tenantName: 'Aino Koski',
+          validFrom: '2024-03-15',
+          validTo: '2025-08-31',
+        }),
+      ],
+    })
+    expect(year(data).details.tenancies).toEqual([
+      { name: 'Aino Koski', from: '2025-01-01', to: '2025-08-31' },
+      { name: 'Pekka Laine', from: '2025-10-01', to: '2025-12-31' },
+    ])
+  })
+
+  test('A tenancy starting after today is not listed', () => {
+    const data = input({
+      tenancies: [
+        tenancy({ id: 'a', tenantName: 'Aino Koski', validFrom: '2026-01-01' }),
+        tenancy({ id: 'b', validFrom: '2026-12-01' }),
+      ],
+    })
+    expect(year(data, 2026, '2026-11-27').details.tenancies).toEqual([
+      { name: 'Aino Koski', from: '2026-01-01', to: '2026-11-27' },
+    ])
+  })
+
   test('The share at the end of the year', () => {
     const data = input({
       ownership: ownership(

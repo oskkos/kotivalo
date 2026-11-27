@@ -1,11 +1,11 @@
 ## 1. The year's tenancies and the PDF's text
 
-- [ ] 1.1 `summary.ts`: `FlatDetails.tenancies`, `{ name, from, to }[]`, from `tenanciesInYear` in start order, each clipped to the year and to today (design.md, decision 3). `tenant` and `period` stay as they are.
-- [ ] 1.2 Unit tests in `summary.test.ts`:
+- [x] 1.1 `summary.ts`: `FlatDetails.tenancies`, `{ name, from, to }[]`, from `tenanciesInYear` in start order, each clipped to the year and to today (design.md, decision 3). `tenant` and `period` stay as they are.
+- [x] 1.2 Unit tests in `summary.test.ts`:
   - "Every tenancy of the year"
   - "A tenancy starting after today is not listed"
   - the existing "Flat details for form 7H" tests unchanged
-- [ ] 1.3 `pdf-text.ts`: `pdfText(s)` keeps the WinAnsi characters and replaces the rest: `→` with `–`, a letter with a diacritic with its base letter, anything else with `?` (design.md, decision 5). Unit tests for "Names outside the font" and "Finnish and Swedish letters are kept".
+- [x] 1.3 `pdf-text.ts`: `pdfText(s)` keeps the WinAnsi characters and replaces the rest: `→` with `–`, a letter with a diacritic with its base letter, anything else with `?` (design.md, decision 5). Unit tests for "Names outside the font" and "Finnish and Swedish letters are kept".
 
 ## 2. The PDF's view from the server
 
