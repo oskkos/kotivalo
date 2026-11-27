@@ -17,9 +17,9 @@ export function slug(text: string): string {
 
 /** `kotivalo-vuosiyhteenveto-2025.pdf`, with the holder after the year. */
 export function pdfFileName(holder: HolderView, year: number): string {
-  const parts = [m.pdf_file_stem(), String(year)]
+  const parts = [slug(m.pdf_file_stem()), String(year)]
   if (holder.kind === 'whole') {
-    parts.push(m.pdf_file_whole())
+    parts.push(slug(m.pdf_file_whole()))
   } else if (holder.kind === 'person') {
     parts.push(slug(holder.name))
   }

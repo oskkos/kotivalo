@@ -496,7 +496,7 @@
       "declarations": ["input count", "local countPlural = count: plural"],
       "selectors": ["countPlural"],
       "match": {
-        "countPlural=one": "{count} tarkistettavaa",
+        "countPlural=one": "{count} tarkistettava",
         "countPlural=other": "{count} tarkistettavaa"
       }
     }
@@ -504,10 +504,10 @@
   "pdf_column_flat": "Asunto",
   "pdf_column_page": "Sivu",
   "pdf_column_share": "Osuus",
-  "pdf_cover_note": "Tulot on laskettu maksupäivän mukaan ja vastikkeet kuukausittain, kukin sen päivän omistusosuudella. Yhteenveto ei ole veroilmoitus: luvut tarkistetaan ja ilmoitetaan OmaVerossa.",
+  "pdf_cover_note": "Vuokranmaksut on laskettu maksupäivän, muut kirjaukset kirjauksen päivän ja vastikkeet kuukauden mukaan, kukin sen päivän omistusosuudella. Yhteenveto ei ole veroilmoitus: luvut tarkistetaan ja ilmoitetaan OmaVerossa.",
   "pdf_failed": "PDF:n tekeminen ei onnistunut.",
-  "pdf_file_stem": "kotivalo-vuosiyhteenveto",
-  "pdf_file_whole": "koko-asunnot",
+  "pdf_file_stem": "Kotivalo vuosiyhteenveto",
+  "pdf_file_whole": "koko asunnot",
   "pdf_footer": "Kotivalo · Vuosiyhteenveto {year} · {holder} · Sivu {page}/{pages}",
   "pdf_holder_own": "Oma osuutesi · {name}",
   "pdf_made": "Tehty {date}",
