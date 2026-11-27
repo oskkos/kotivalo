@@ -84,3 +84,30 @@ export type FlatYearView =
       flat: Omit<FlatYear, 'propertyId' | 'included'> | null
     }
   | { ok: false; reason: 'property_not_found' }
+
+/** A flat's page in the PDF: the address and the flat's year as the form 7H page has it. */
+export interface PdfFlat
+  extends FlatAddressFields, Omit<FlatYear, 'propertyId' | 'included'> {
+  propertyId: string
+  /** The whole flat's owners, empty for one owner. */
+  owners: FlatOwner[]
+}
+
+type FlatAddressFields = Pick<
+  FlatAddress,
+  'streetAddress' | 'postcode' | 'city'
+>
+
+/** What the year summary PDF shows, computed once for the holder and year. */
+export interface YearSummaryPdfView {
+  holder: HolderView
+  /** The holder's name; empty for the whole flats. */
+  holderName: string
+  today: IsoDate
+  year: number
+  /** The flats in the summary, unsorted. */
+  cards: FlatCard[]
+  notIncluded: { propertyId: string; streetAddress: string }[]
+  /** One per card, in the cards' order. */
+  flats: PdfFlat[]
+}

@@ -15,6 +15,7 @@ import { flatYearInput, yearSummaryInput } from './schemas'
 import {
   loadFlatYear,
   loadYearSummary,
+  loadYearSummaryPdf,
   type YearSummaryDeps,
 } from './year-summary.server'
 
@@ -58,4 +59,10 @@ export const getFlatYear = createServerFn({ method: 'GET' })
       data.year,
       data.person,
     ),
+  )
+
+export const getYearSummaryPdf = createServerFn({ method: 'GET' })
+  .validator(yearSummaryInput)
+  .handler(async ({ data }) =>
+    loadYearSummaryPdf(await yearSummaryDeps(), data.year, data.person),
   )
