@@ -233,7 +233,7 @@ describe("The PDF's cover page", () => {
     )
     const table = find(doc.pages[0].blocks, 'table')
     expect(plain(table?.rows[0]?.[1] ?? '')).toBe('50 % – 100 %')
-    expect(table?.rows[0]?.[0]).toContain('1 tarkistettavaa')
+    expect(table?.rows[0]?.[0]).toContain('1 tarkistettava')
     // The flat's page words the change with a dash, never the arrow.
     const notes = find(doc.pages[1].blocks, 'notes')
     expect(plain(notes?.items[0]?.title ?? '')).toBe(
