@@ -24,6 +24,7 @@ import {
   ownersInYear,
   shareAtEnd,
   summaryYears,
+  type FlatYear,
   type FlatYearInput,
   type Holder,
 } from './summary'
@@ -33,6 +34,8 @@ import type {
   FlatOwner,
   FlatYearView,
   HolderView,
+  PdfFlat,
+  YearSummaryPdfView,
   YearSummaryView,
 } from './view'
 
@@ -224,6 +227,15 @@ export async function loadYearSummary(
   year?: number,
   person?: string,
 ): Promise<YearSummaryView> {
+  return (await summarise(deps, year, person)).view
+}
+
+/** The year summary with the flat years it was computed from. */
+async function summarise(
+  deps: YearSummaryDeps,
+  year: number | undefined,
+  person: string | undefined,
+) {
   const day = today(deps)
   const flats = await userFlats(deps)
   let years: number[] = []
@@ -235,6 +247,7 @@ export async function loadYearSummary(
     return year === undefined ? openingYear(years, day) : clampYear(years, year)
   })
   const cards: FlatCard[] = []
+  const results = new Map<string, FlatYear>()
   const notIncluded: YearSummaryView['notIncluded'] = []
   for (const [i, input] of loaded.inputs.entries()) {
     const flat = flats[i]
@@ -248,6 +261,7 @@ export async function loadYearSummary(
       }
       continue
     }
+    results.set(flat.id, result)
     const { '2.1': income, ...costRows } = result.rows
     cards.push({
       propertyId: flat.id,
@@ -291,7 +305,7 @@ export async function loadYearSummary(
     }))
     .sort((a, b) => a.name.localeCompare(b.name))
 
-  return {
+  const view: YearSummaryView = {
     today: day,
     year: loaded.year,
     years,
@@ -300,6 +314,83 @@ export async function loadYearSummary(
     counts: { own: count(me), whole: count({ kind: 'whole' }) },
     flats: cards,
     notIncluded,
+  }
+  return { view, holder, flats, loaded, results, day }
+}
+
+/** The owners of a whole flat with their row 2.1, you first. */
+function flatOwners(
+  deps: YearSummaryDeps,
+  input: FlatYearInput,
+  names: Record<string, string>,
+  year: number,
+  day: IsoDate,
+): FlatOwner[] {
+  return ownersInYear(input.ownership, year, day)
+    .map((userId) => {
+      const own = flatYear(input, { kind: 'owner', userId }, year, day)
+      return {
+        userId,
+        name: names[userId] ?? '',
+        share: own.details.share,
+        income: own.rows['2.1'].cents,
+        isYou: isYou(deps, userId),
+      }
+    })
+    .sort(
+      (a, b) =>
+        Number(b.isYou) - Number(a.isYou) || a.name.localeCompare(b.name),
+    )
+}
+
+/**
+ * Everything the year summary PDF shows, for the same holder and year as the
+ * page: the cards and each flat's full year, computed once.
+ * Both lists are unsorted, one flat per card in the same order: the document
+ * sorts them by address in the user's language. The PDF is built in the browser.
+ */
+export async function loadYearSummaryPdf(
+  deps: YearSummaryDeps,
+  year?: number,
+  person?: string,
+): Promise<YearSummaryPdfView> {
+  const { view, holder, flats, loaded, results, day } = await summarise(
+    deps,
+    year,
+    person,
+  )
+  const byId = new Map(flats.map((flat, i) => [flat.id, i]))
+  const pdfFlats = view.flats.map((card): PdfFlat => {
+    const flat = flats[byId.get(card.propertyId) ?? 0]
+    const input = loaded.inputs[byId.get(card.propertyId) ?? 0]
+    const result = results.get(card.propertyId)
+    if (!result) {
+      throw new Error('A card without its flat year')
+    }
+    return {
+      propertyId: flat.id,
+      streetAddress: flat.streetAddress,
+      postcode: flat.postcode,
+      city: flat.city,
+      owners:
+        holder.kind === 'whole'
+          ? flatOwners(deps, input, loaded.names, loaded.year, day)
+          : [],
+      rows: result.rows,
+      outside: result.outside,
+      details: result.details,
+      checks: result.checks,
+    }
+  })
+  return {
+    holder: view.holder,
+    holderName:
+      holder.kind === 'whole' ? '' : (loaded.names[holder.userId] ?? ''),
+    today: view.today,
+    year: view.year,
+    cards: view.flats,
+    notIncluded: view.notIncluded,
+    flats: pdfFlats,
   }
 }
 
@@ -346,28 +437,9 @@ export async function loadFlatYear(
     loaded.year,
     day,
   )
-  const owners: FlatOwner[] =
+  const owners =
     holder.kind === 'whole' && included
-      ? ownersInYear(input.ownership, loaded.year, day)
-          .map((userId) => {
-            const own = flatYear(
-              input,
-              { kind: 'owner', userId },
-              loaded.year,
-              day,
-            )
-            return {
-              userId,
-              name: loaded.names[userId] ?? '',
-              share: own.details.share,
-              income: own.rows['2.1'].cents,
-              isYou: isYou(deps, userId),
-            }
-          })
-          .sort(
-            (a, b) =>
-              Number(b.isYou) - Number(a.isYou) || a.name.localeCompare(b.name),
-          )
+      ? flatOwners(deps, input, loaded.names, loaded.year, day)
       : []
   return {
     ok: true,

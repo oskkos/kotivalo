@@ -56,7 +56,7 @@ Verification first, in the renderer's group: check that jsPDF's standard Helveti
 - returns `YearSummaryPdfView`:
   - the `YearSummaryView` fields: holder, year, today, cards, not included
   - the holder's name, from `namesFor`: the user's own name for the own share
-  - `flats`: for each card, in address order, the flat's address, postcode and city, and its `Omit<FlatYear, 'propertyId' | 'included'>`
+  - `flats`: one per card, in the cards' order (unsorted: the document sorts by address in the user's language, which the server doesn't know), with the flat's address, postcode and city, and its `Omit<FlatYear, 'propertyId' | 'included'>`
   - for the whole flats, `owners` per flat, built as in `loadFlatYear`
 
 `loadYearSummary` and `loadYearSummaryPdf` share a helper, so the cards are computed once. The PDF view adds the full flat years it already computed.

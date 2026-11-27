@@ -16,6 +16,7 @@ import { addTestUser, emptyTables } from '#/test/users.server'
 import {
   loadFlatYear,
   loadYearSummary,
+  loadYearSummaryPdf,
   type YearSummaryDeps,
 } from './year-summary.server'
 
@@ -610,5 +611,73 @@ describe("The whole flat's page", () => {
         isYou: false,
       },
     ])
+  })
+})
+
+describe('The PDF view', () => {
+  test('The PDF view has the figures of the page', async () => {
+    for (const person of [undefined, 'jussi', 'whole']) {
+      const page = await loadYearSummary(deps(), 2025, person)
+      const pdf = await loadYearSummaryPdf(deps(), 2025, person)
+      expect(pdf.cards).toEqual(page.flats)
+      expect(pdf.notIncluded).toEqual(page.notIncluded)
+      expect(pdf.holder).toEqual(page.holder)
+      expect(pdf.flats.map((f) => f.propertyId)).toEqual(
+        pdf.cards.map((c) => c.propertyId),
+      )
+      for (const flat of pdf.flats) {
+        const year = await loadFlatYear(deps(), flat.propertyId, 2025, person)
+        if (!year.ok || !year.flat) {
+          throw new Error('The flat year is missing')
+        }
+        expect(flat).toMatchObject({
+          streetAddress: year.property.streetAddress,
+          postcode: year.property.postcode,
+          city: year.property.city,
+          owners: year.owners,
+          ...year.flat,
+        })
+      }
+    }
+  })
+
+  test("The own share's name, another owner's name and the year", async () => {
+    const own = await loadYearSummaryPdf(deps(), 2025)
+    expect(own).toMatchObject({ holder: { kind: 'own' }, holderName: 'Annika' })
+    const other = await loadYearSummaryPdf(deps(), 2025, 'jussi')
+    expect(other).toMatchObject({
+      holder: { kind: 'person', userId: 'jussi' },
+      holderName: 'Jussi Laine',
+    })
+    const whole = await loadYearSummaryPdf(deps(), 2025, 'whole')
+    expect(whole).toMatchObject({ holder: { kind: 'whole' }, holderName: '' })
+    expect(whole.flats[0]?.owners.length).toBeGreaterThan(0)
+    expect((await loadYearSummaryPdf(deps(), 1999)).year).toBe(2024)
+    expect((await loadYearSummaryPdf(deps(), 2100)).year).toBe(2026)
+  })
+
+  test("No flat the user can't see", async () => {
+    const view = await loadYearSummaryPdf(deps('stranger'), 2025)
+    expect(view.flats).toEqual([])
+    expect(view.cards).toEqual([])
+    const jussi = await loadYearSummaryPdf(deps('stranger'), 2025, 'jussi')
+    expect(jussi.flats).toEqual([])
+  })
+
+  test('The PDF view keeps the fixed number of queries', async () => {
+    await seedFlat('solo', 'Kuusikuja 1')
+    for (const address of ['Kuusikuja 2', 'Kuusikuja 4', 'Kuusikuja 6']) {
+      await seedFlat('trio', address)
+    }
+    const one = countingDb()
+    const three = countingDb()
+    const page = countingDb()
+    await loadYearSummary(deps('trio', page.db), 2025)
+    const soloView = await loadYearSummaryPdf(deps('solo', one.db), 2025)
+    const trioView = await loadYearSummaryPdf(deps('trio', three.db), 2025)
+    expect(soloView.flats).toHaveLength(1)
+    expect(trioView.flats).toHaveLength(3)
+    expect(three.counter.queries).toBe(one.counter.queries)
+    expect(three.counter.queries).toBe(page.counter.queries)
   })
 })

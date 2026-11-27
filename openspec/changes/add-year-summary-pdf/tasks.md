@@ -9,18 +9,18 @@
 
 ## 2. The PDF's view from the server
 
-- [ ] 2.1 `view.ts`: `YearSummaryPdfView` (design.md, decision 2).
-- [ ] 2.2 `year-summary.server.ts`:
+- [x] 2.1 `view.ts`: `YearSummaryPdfView` (design.md, decision 2).
+- [x] 2.2 `year-summary.server.ts`:
   - `loadYearSummaryPdf(deps, year?, person?)`, sharing the card computation with `loadYearSummary`
-  - each card's flat in address order with its address, postcode, city and full flat year
+  - each card's flat (unsorted; the document sorts by address) with its address, postcode, city and full flat year
   - the holder's name from `namesFor`, the user's own for the own share
   - the whole flats' owners per flat
-- [ ] 2.3 `functions.ts`: `getYearSummaryPdf({ year?, person? })` with the `yearSummaryInput` schema; the route mock in `src/router.test.ts` if a route reaches it.
-- [ ] 2.4 Workers tests in `year-summary.server.test.ts`:
+- [x] 2.3 `functions.ts`: `getYearSummaryPdf({ year?, person? })` with the `yearSummaryInput` schema; the route mock in `src/router.test.ts` if a route reaches it.
+- [x] 2.4 Workers tests in `year-summary.server.test.ts`:
   - the PDF view's cards and each flat's rows equal `loadYearSummary` and `loadFlatYear` for the own share, another owner and the whole flats
   - the own share's name, another owner's name, the year clamped as on the page
   - no flat the user can't see
-- [ ] 2.5 `list-reads.server.test.ts`: the PDF view keeps the year summary's fixed number of queries.
+- [x] 2.5 `year-summary.server.test.ts`, beside the page's query count test: the PDF view keeps the year summary's fixed number of queries.
 
 ## 3. The PDF's document model and messages
 
