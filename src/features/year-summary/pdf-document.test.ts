@@ -241,6 +241,22 @@ describe("The PDF's cover page", () => {
     )
   })
 
+  test('A share that changed more than once', () => {
+    const changes: Check[] = [
+      { kind: 'share_changed', on: '2025-04-01', from: 5000, to: 10000 },
+      { kind: 'share_changed', on: '2025-09-01', from: 10000, to: 5000 },
+    ]
+    const doc = pdfDocument(
+      view({
+        cards: [card({ checks: changes })],
+        flats: [flat({ checks: changes })],
+      }),
+      now,
+    )
+    const table = find(doc.pages[0].blocks, 'table')
+    expect(plain(table?.rows[0]?.[1] ?? '')).toBe('50 % – 100 % – 50 %')
+  })
+
   test('Flats not included on the cover', () => {
     const doc = pdfDocument(
       view({

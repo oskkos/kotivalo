@@ -28,7 +28,7 @@ The PDF's first page SHALL show:
 - the Kotivalo logo and the day the PDF was made
 - the heading "Vuosiyhteenveto <year>", form 7H, and whose figures they are: the own share with the user's name, another owner with their name, or the whole flats at 100 %
 - the period the figures cover: 1 January to 31 December, or to today in the current year
-- a table with a row per flat in the summary, in address order: the address, the housing company's name or that it is missing, the number of checks when there are any, the holder's share (both shares with a dash when it changed during the year, e.g. `50 % – 100 %`), row 2.1, rows 2.2–2.5 summed, and the page number of the flat's page
+- a table with a row per flat in the summary, in address order: the address, the housing company's name or that it is missing, the number of checks when there are any, the holder's share (every share of the year with a dash when it changed, e.g. `50 % – 100 %` or `50 % – 100 % – 50 %`), row 2.1, rows 2.2–2.5 summed, and the page number of the flat's page
 - the "Not included" note of the year summary page, when it names flats, and what the figures leave out ("The year summary page")
 - how the figures are dated (rent payments by payment date, other entries by their date and charges by month, each at the share on that day), and that the summary is not a tax return: the figures are checked and reported on MyTax
 
