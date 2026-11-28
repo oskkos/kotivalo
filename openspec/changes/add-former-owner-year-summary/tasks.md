@@ -11,8 +11,8 @@
 
 ## 2. Clipping tenancies to the holder's days
 
-- [ ] 2.1 `summary.ts`: `flatYear(…, { ownDaysOnly })`, with the holder's spans in the year and `flatDetails` clipping `tenant`, `period` and `tenancies` to them (design.md, decision 3). Without the option nothing changes.
-- [ ] 2.2 Unit tests in `summary.test.ts`, describe "Tenants in a former owner's period":
+- [x] 2.1 `summary.ts`: `flatYear(…, { ownDaysOnly })`, with the holder's spans in the year and `flatDetails` clipping `tenant`, `period` and `tenancies` to them (design.md, decision 3). Without the option nothing changes.
+- [x] 2.2 Unit tests in `summary.test.ts`, describe "Tenants in a former owner's period":
   - "Only the former owner's tenants"
   - "A tenancy only after the sale"
   - "A former owner who kept access sees the whole year" (no option: unchanged)
