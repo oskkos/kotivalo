@@ -1,13 +1,19 @@
-import { expect, test, type Page } from '@playwright/test'
+import { expect, test, type Browser, type Page } from '@playwright/test'
 import { openAmounts, setAmount } from './support/amounts'
-import { addFlat, flatId, housingCompany, kuusikuja } from './support/flats'
+import {
+  addFlat,
+  card,
+  flatId,
+  housingCompany,
+  kuusikuja,
+} from './support/flats'
 import {
   currentTenancyId,
   openRentMonth,
   recordPayment,
 } from './support/rent-payments'
 import { accepted, coOwned, openSharing } from './support/sharing'
-import { signIn, uniqueEmail } from './support/sign-in'
+import { signIn, uniqueEmail, waitForHydration } from './support/sign-in'
 import { addTenant } from './support/tenancies'
 import {
   chooseHolder,
@@ -437,5 +443,58 @@ test.describe('Downloading the year summary as a PDF', () => {
     await expect(
       jussi.getByRole('button', { name: 'Download PDF' }),
     ).toHaveCount(0)
+  })
+})
+
+test.describe("A former owner's year summary", () => {
+  /** Jussi's share ends on 31 December 2025 and his access is removed. */
+  async function sold(page: Page, browser: Browser) {
+    const { id, jussi } = await coOwned(page, browser)
+    await openSharing(page, id)
+    await page.getByRole('button', { name: 'Change ownership' }).click()
+    await page.getByRole('textbox', { name: 'Share (%), You' }).fill('100')
+    await page.getByRole('textbox', { name: 'Share (%), Jussi' }).fill('0')
+    await page.getByRole('textbox', { name: 'From' }).fill('01/01/2026')
+    await page
+      .getByRole('checkbox', { name: 'Remove Jussi from the flat' })
+      .check()
+    await page.getByRole('button', { name: 'Save ownership change' }).click()
+    await expect(page.getByText('You 100%').first()).toBeVisible()
+    return { id, jussi }
+  }
+
+  test('A former owner sees their period', async ({ page, browser }) => {
+    const { jussi } = await sold(page, browser)
+    await openYearSummary(jussi, 2025)
+    await expect(summaryCard(jussi, kuusikuja.streetAddress)).toContainText(
+      'Your share 50%',
+    )
+
+    await jussi.goto('/')
+    await waitForHydration(jussi)
+    await expect(card(jussi, kuusikuja.streetAddress)).toHaveCount(0)
+  })
+
+  test('No flat pages for a former owner', async ({ page, browser }) => {
+    const { id, jussi } = await sold(page, browser)
+    await jussi.goto(`/properties/${id}`)
+    await expect(
+      jussi.getByRole('heading', { name: 'Flat not found' }),
+    ).toBeVisible()
+  })
+
+  test("A former owner's read-only form 7H page", async ({ page, browser }) => {
+    const { id, jussi } = await sold(page, browser)
+    await openFlatYear(jussi, id, 2025)
+    await expect(jussi.getByRole('note')).toContainText(
+      'You no longer own the flat',
+    )
+    await expect(
+      jussi.getByRole('heading', { level: 1, name: kuusikuja.streetAddress }),
+    ).toBeVisible()
+    await expect(jussi.getByRole('link', { name: /^Add/ })).toHaveCount(0)
+    await expect(
+      jussi.getByRole('button', { name: 'Copy: Ownership share' }),
+    ).toBeVisible()
   })
 })

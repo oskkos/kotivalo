@@ -38,12 +38,12 @@
 - [x] 4.1 `FlatTaxPage.tsx`: with `view.former`, the note band, no links in the checks and no Add buttons, copy buttons kept (design.md, decision 4).
 - [x] 4.2 Messages in fi, sv and en: the former owner's note (title and text), and the second half of `ownership_remove_access_hint`. Finnish first. Use the translate skill for Swedish and English, and add the term *entinen omistaja* if the messages use it, with the term-critic review.
 - [x] 4.3 Component tests in `FlatTaxPage.test.tsx`: "A former owner's read-only form 7H page" (the note, missing Business ID without Add, the unpaid check without a link, the copy buttons).
-- [ ] 4.4 Playwright in `e2e/year-summary.spec.ts`, describe "A former owner's year summary", using `coOwned` and an ownership change that removes Jussi's access:
+- [x] 4.4 Playwright in `e2e/year-summary.spec.ts`, describe "A former owner's year summary", using `coOwned` and an ownership change that removes Jussi's access:
   - "A former owner sees their period": his current year's summary has the card, his flats list doesn't have the flat
   - "No flat pages for a former owner": its details page shows not found
   - "A former owner's read-only form 7H page": the note
-- [ ] 4.5 Update the tests that assert the old remove-access hint, if any, and the ownership and sharing scenario tests named in the deltas: "Removing access from a person who no longer owns a share" (Workers: the flat stays in his year summary).
-- [ ] 4.6 CLAUDE.md "Current state": a former owner's year summary (`listFormerlyOwnedForUser`, `ownDaysOnly`, `former` on the form 7H page).
+- [x] 4.5 Update the tests that assert the old remove-access hint, if any, and the ownership and sharing scenario tests named in the deltas: "Removing access from a person who no longer owns a share" (Workers: the flat stays in his year summary).
+- [x] 4.6 CLAUDE.md "Current state": a former owner's year summary (`listFormerlyOwnedForUser`, `ownDaysOnly`, `former` on the form 7H page).
 
 ## 5. Verification, review and archive
 

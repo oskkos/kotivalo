@@ -236,6 +236,12 @@ describe("Changing a flat's ownership", () => {
     const { periods, names } = await view('annika')
     expect(periods[1]?.shares).toContainEqual({ userId: 'jussi', share: 5000 })
     expect(names.jussi).toBe('Jussi')
+    // The flat stays in his year summary for the days he owned a share.
+    expect(
+      (await propertyRepository(db).listFormerlyOwnedForUser('jussi')).map(
+        (property) => property.id,
+      ),
+    ).toEqual([flat])
   })
 
   test("A member can't change ownership", async () => {
