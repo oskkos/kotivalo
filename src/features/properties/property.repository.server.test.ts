@@ -30,6 +30,32 @@ beforeEach(async () => {
   await addTestUser('bertta')
 })
 
+async function setHistory(
+  propertyId: string,
+  periods: { userId: string; share: number; from: string; to: string | null }[],
+) {
+  await env.DB.prepare('DELETE FROM ownership_periods WHERE property_id = ?')
+    .bind(propertyId)
+    .run()
+  for (const [index, period] of periods.entries()) {
+    await env.DB.prepare(
+      `INSERT INTO ownership_periods
+         (id, property_id, user_id, share, valid_from, valid_to, reason)
+       VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    )
+      .bind(
+        `period-${String(index)}`,
+        propertyId,
+        period.userId,
+        period.share,
+        period.from,
+        period.to,
+        null,
+      )
+      .run()
+  }
+}
+
 describe('propertyRepository', () => {
   test('create gives the creator owner access and no one else', async () => {
     const flat = await repository.create('anna', kuusikuja, now, '2022-06-12')
@@ -555,5 +581,89 @@ describe('propertyRepository', () => {
     expect(results).toEqual([
       { housing_company_name: null, business_id: null, apartment_number: null },
     ])
+  })
+
+  describe('a former owner', () => {
+    async function sharedFlat() {
+      const flat = await repository.create('anna', kuusikuja, now, '2022-06-12')
+      await env.DB.prepare(
+        `INSERT INTO property_access (property_id, user_id, role, created_at)
+         VALUES (?, 'bertta', 'member', 0)`,
+      )
+        .bind(flat.id)
+        .run()
+      await setHistory(flat.id, [
+        { userId: 'anna', share: 5000, from: '2022-06-12', to: '2025-06-30' },
+        { userId: 'bertta', share: 5000, from: '2022-06-12', to: '2025-06-30' },
+        { userId: 'anna', share: 10000, from: '2025-07-01', to: null },
+      ])
+      return flat
+    }
+
+    test('is listed when access was removed in an ownership change', async () => {
+      const flat = await sharedFlat()
+      await env.DB.prepare(
+        "DELETE FROM property_access WHERE user_id = 'bertta'",
+      ).run()
+
+      expect(await repository.listFormerlyOwnedForUser('bertta')).toEqual([
+        flat,
+      ])
+    })
+
+    test('is listed once when the share had several periods', async () => {
+      const flat = await sharedFlat()
+      await setHistory(flat.id, [
+        { userId: 'anna', share: 5000, from: '2022-06-12', to: '2024-12-31' },
+        { userId: 'bertta', share: 5000, from: '2022-06-12', to: '2024-12-31' },
+        { userId: 'anna', share: 7000, from: '2025-01-01', to: '2025-06-30' },
+        { userId: 'bertta', share: 3000, from: '2025-01-01', to: '2025-06-30' },
+        { userId: 'anna', share: 10000, from: '2025-07-01', to: null },
+      ])
+      await env.DB.prepare(
+        "DELETE FROM property_access WHERE user_id = 'bertta'",
+      ).run()
+
+      expect(await repository.listFormerlyOwnedForUser('bertta')).toEqual([
+        flat,
+      ])
+    })
+
+    test('is listed for a member who left after their share ended', async () => {
+      const flat = await sharedFlat()
+      // Leaving a flat deletes the member's access row and nothing else.
+      await env.DB.prepare(
+        "DELETE FROM property_access WHERE user_id = 'bertta'",
+      ).run()
+
+      expect(await repository.listFormerlyOwnedForUser('bertta')).toEqual([
+        flat,
+      ])
+      expect(await repository.listForUser('bertta')).toEqual([])
+    })
+
+    test('is not listed with only a 0 % share', async () => {
+      const flat = await repository.create('anna', kuusikuja, now, '2022-06-12')
+      await setHistory(flat.id, [
+        { userId: 'anna', share: 10000, from: '2022-06-12', to: null },
+        { userId: 'bertta', share: 0, from: '2022-06-12', to: null },
+      ])
+
+      expect(await repository.listFormerlyOwnedForUser('bertta')).toEqual([])
+    })
+
+    test('is not listed while the user still has access', async () => {
+      await sharedFlat()
+
+      expect(await repository.listFormerlyOwnedForUser('bertta')).toEqual([])
+      expect(await repository.listFormerlyOwnedForUser('anna')).toEqual([])
+    })
+
+    test("is not listed for another user's flat", async () => {
+      await sharedFlat()
+      await addTestUser('cecilia')
+
+      expect(await repository.listFormerlyOwnedForUser('cecilia')).toEqual([])
+    })
   })
 })

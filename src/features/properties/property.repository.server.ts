@@ -202,6 +202,40 @@ export function propertyRepository(db: Db) {
       return listWhere(userId, isNull(propertyAccess.archivedAt))
     },
 
+    /**
+     * The flats the user has no access to but had a share above 0 in on some
+     * day (openspec: year-summary, "A former owner's year summary"). Only the
+     * year summary reads these; every other access check stays on the access
+     * row. Unsorted.
+     */
+    async listFormerlyOwnedForUser(userId: string): Promise<Property[]> {
+      const rows = await db
+        .selectDistinct(columns)
+        .from(properties)
+        .innerJoin(
+          ownershipPeriods,
+          and(
+            eq(ownershipPeriods.propertyId, properties.id),
+            eq(ownershipPeriods.userId, userId),
+            gt(ownershipPeriods.share, 0),
+          ),
+        )
+        .where(
+          notExists(
+            db
+              .select({ one: propertyAccess.userId })
+              .from(propertyAccess)
+              .where(
+                and(
+                  eq(propertyAccess.propertyId, properties.id),
+                  eq(propertyAccess.userId, userId),
+                ),
+              ),
+          ),
+        )
+      return rows.map(toProperty)
+    },
+
     /** The flats the user has archived, with when. Unsorted. */
     async listArchivedForUser(userId: string): Promise<UserProperty[]> {
       const rows = await db

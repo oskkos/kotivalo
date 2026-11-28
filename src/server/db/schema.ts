@@ -214,6 +214,7 @@ export const ownershipPeriods = sqliteTable(
   },
   (t) => [
     index('ownership_periods_property_idx').on(t.propertyId, t.validFrom),
+    index('ownership_periods_user_idx').on(t.userId),
   ],
 )
 

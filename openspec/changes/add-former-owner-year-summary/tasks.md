@@ -1,8 +1,8 @@
 ## 1. Finding a user's former flats
 
-- [ ] 1.1 `schema.ts`: index `ownership_periods_user_idx` on `ownership_periods.user_id`; `pnpm db:generate` and commit the migration (only `CREATE INDEX`).
-- [ ] 1.2 `property.repository.server.ts`: `listFormerlyOwnedForUser(userId)`, the flats where the user has no access row and a period with a share above 0, distinct (design.md, decision 1).
-- [ ] 1.3 Workers tests in `property.repository.server.test.ts`:
+- [x] 1.1 `schema.ts`: index `ownership_periods_user_idx` on `ownership_periods.user_id`; `pnpm db:generate` and commit the migration (only `CREATE INDEX`).
+- [x] 1.2 `property.repository.server.ts`: `listFormerlyOwnedForUser(userId)`, the flats where the user has no access row and a period with a share above 0, distinct (design.md, decision 1).
+- [x] 1.3 Workers tests in `property.repository.server.test.ts`:
   - access removed in an ownership change
   - a member who leaves after their share ended
   - a member with only a 0 % share is not listed
