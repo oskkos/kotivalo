@@ -15,6 +15,7 @@ const requirement = (
   capability: 'property',
   name,
   scenarios,
+  block: `### Requirement: ${name}`,
   ...(noPlaywrightReason === undefined ? {} : { noPlaywrightReason }),
 })
 

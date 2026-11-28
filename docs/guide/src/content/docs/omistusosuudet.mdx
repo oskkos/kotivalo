@@ -1,0 +1,71 @@
+---
+title: Omistusosuudet
+description: Omistajien osuudet, niiden muuttaminen ja peruminen.
+sidebar:
+  order: 5
+requirements:
+  - spec: ownership
+    name: 'Ownership is recorded as periods'
+    hash: dc6282c06b9d
+  - spec: ownership
+    name: 'The first ownership period'
+    hash: f74de189048e
+  - spec: ownership
+    name: "Changing a flat's ownership"
+    hash: adb02cdcce88
+  - spec: ownership
+    name: 'Roles follow the current shares'
+    hash: f39bdfcf5bd5
+  - spec: ownership
+    name: 'Undoing the latest ownership change'
+    hash: 6e08d820d3fe
+  - spec: ownership
+    name: 'Correcting the first ownership date'
+    hash: bb90e65d0329
+  - spec: ownership
+    name: "Showing a flat's ownership history"
+    hash: 7ae8f0b45c47
+---
+
+import Ui from '../../components/Ui.astro'
+import Shot from '../../components/Shot.astro'
+
+Asunnon omistus kirjataan jaksoina: kunkin jakson alusta lähtien omistajilla on tietyt prosenttiosuudet. Kun osuudet muuttuvat, esimerkiksi kaupan, lahjan tai perinnön vuoksi, Kotivalo tallentaa uuden jakson eikä ylikirjoita vanhaa. Vuosiyhteenveto jakaa tulot ja menot jaksojen osuuksien mukaan, joten muutos kesken vuoden lasketaan oikein.
+
+## Ensimmäinen omistusjakso
+
+Kun lisäät asunnon, sinä omistat sen 100 % lomakkeeseen antamastasi päivästä (<Ui key="property_owned_since" />). Päivä on oletuksena tämä päivä, eikä se voi olla tulevaisuudessa.
+
+## Omistushistoria
+
+Jokainen asunnon käyttäjä näkee Omistus ja jakaminen -sivulla nykyiset omistajat osuuksineen ja alkupäivineen sekä kaikki jaksot uusimmasta alkaen: alkupäivän, jaon ja syyn.
+
+<Shot id="ownership-history" alt="Nykyiset omistajat ja omistushistoria" />
+
+## Muuta omistusta
+
+Omistaja voi kirjata uuden omistusjaon.
+
+1. Valitse <Ui key="ownership_change" />.
+2. Anna jokaiselle asunnon käyttäjälle osuus prosentteina (enintään kaksi desimaalia). Osuuksien summan on oltava tasan 100 %, ja ainakin yhden osuuden yli 0 %. Pikavalinnat <Ui key="ownership_preset_equal" /> ja <Ui key="ownership_preset_all_to_me" /> täyttävät yleisimmät jaot.
+3. Valitse päivä kohdassa <Ui key="ownership_from" />. Päivän on oltava nykyisen jakson alkupäivä tai sen jälkeen, eikä tulevaisuudessa.
+4. Valitse <Ui key="ownership_reason" />: kauppa, lahja, perintö, ositus / ero tai muu.
+5. Valitse <Ui key="ownership_save" />.
+
+<Shot id="ownership-form" alt="Uuden omistusjaon lomake" />
+
+Yli 0 %:n osuus tekee käyttäjästä omistajan, ja 0 % tekee jäsenen. Roolit seuraavat siis aina nykyisiä osuuksia. Jokainen omistaja voi kutsua, perua kutsuja, poistaa jäseniä ja muuttaa omistusta.
+
+Jos antamasi päivä on nykyisen jakson alkupäivä, muutos korjaa sen jakson jaon ja syyn eikä aloita uutta jaksoa. Näin yhdessä ostettu asunto kirjataan ostopäivästä alkaen ilman yhden päivän jaksoa, jossa omistaa vain yksi.
+
+Jos jonkun osuus muuttuu 0 %:ksi, voit halutessasi poistaa hänen pääsynsä samalla. Ilman valintaa hän jää jäseneksi ja näkee asunnon edelleen. Pääsyn poistanut näkee asunnon silti vuosiyhteenvedossaan niiltä päiviltä, joilta hänellä oli osuus.
+
+## Muutoksen peruminen
+
+Omistaja voi perua viimeisimmän omistusmuutoksen, kun asunnolla on useampi kuin yksi jakso: valitse historiassa uusimman jakson kohdalta <Ui key="ownership_undo" />. Uusin jakso poistuu, edellinen tulee taas nykyiseksi ja roolit palaavat sen osuuksien mukaan. Muutoksen yhteydessä poistettu pääsy ei palaa, vaan sitä varten tarvitaan uusi kutsu.
+
+## Ensimmäisen päivän korjaus
+
+Jos asunnon omistuksen alkupäivä on väärin, valitse ensimmäisen jakson kohdalta <Ui key="ownership_correct" />. Uusi päivä ei voi olla tulevaisuudessa, eikä se voi olla toisen jakson alkupäivän jälkeen.
+
+<Shot id="ownership-correct-date" alt="Omistuksen alkupäivän korjaus" />

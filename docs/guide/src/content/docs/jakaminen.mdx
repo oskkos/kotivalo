@@ -1,0 +1,85 @@
+---
+title: Asunnon jakaminen
+description: Kutsu toinen käyttäjä asuntoon, hyväksy kutsu ja hallitse pääsyä.
+sidebar:
+  order: 4
+requirements:
+  - spec: sharing
+    name: 'Inviting a user to a flat'
+    hash: 44e009617fe4
+  - spec: sharing
+    name: 'Accepting a flat invitation'
+    hash: 08b2e3aa1197
+  - spec: sharing
+    name: 'Declining a flat invitation'
+    hash: 2f43050f95fa
+  - spec: sharing
+    name: 'Cancelling a flat invitation'
+    hash: f0c402972596
+  - spec: sharing
+    name: 'Listing who has access to a flat'
+    hash: 913f2243edc9
+  - spec: sharing
+    name: 'Removing access to a flat'
+    hash: bde372cfb115
+  - spec: sharing
+    name: 'Leaving a shared flat'
+    hash: e9113a2212e3
+  - spec: sharing
+    name: 'Limiting invitations'
+    hash: c0410ee3c40d
+---
+
+import Ui from '../../components/Ui.astro'
+import Shot from '../../components/Shot.astro'
+
+Asunnon voi jakaa toisen ihmisen kanssa, esimerkiksi puolison tai kanssaomistajan. Jakaminen tapahtuu asunto kerrallaan: kutsuttu näkee vain sen asunnon, johon hänet on kutsuttu.
+
+## Kutsu käyttäjä asuntoon
+
+Vain asunnon omistaja voi kutsua.
+
+1. Avaa asunnon tiedot ja valitse omistajat-rivi tai valikosta <Ui key="ownership_title" />.
+2. Kirjoita kutsuttavan sähköpostiosoite kohtaan <Ui key="sharing_invite_title" /> ja valitse <Ui key="sharing_invite_send" />.
+
+<Shot id="sharing-page" alt="Omistus ja jakaminen -sivu ja kutsulomake" />
+
+Kutsu lähtee sähköpostina vastaanottajan kielellä: tilin tallennetulla kielellä tai, jos osoitteella ei ole tiliä, sinun kielelläsi. Viesti kertoo, kuka kutsui, ja pyytää kirjautumaan Kotivaloon kutsutulla osoitteella. Viestistä ei voi päätellä, onko osoitteella jo tili. Isot ja pienet kirjaimet osoitteessa eivät ratkaise.
+
+Kutsua ei voi lähettää osoitteelle, jolla on jo pääsy asuntoon tai odottava kutsu. Jos sähköpostin lähetys epäonnistuu, kutsua ei tallenneta ja näet syyn.
+
+Asunnolla voi olla enintään 10 odottavaa kutsua, ja käyttäjä voi lähettää enintään 20 kutsua vuorokaudessa. Rajat suojaavat sähköpostien lähetysmäärää. Rajan ylittävä kutsu hylätään ilmoituksella, eikä sähköpostia lähetetä.
+
+Odottavat kutsut näkyvät sivulla otsikon <Ui key="sharing_pending" /> alla. Kutsun voi perua painikkeella <Ui key="sharing_cancel_invitation" />, jolloin kutsuttu ei enää näe sitä eikä voi hyväksyä sitä.
+
+<Shot id="invitation-sent" alt="Odottava kutsu Omistus ja jakaminen -sivulla" />
+
+## Hyväksy tai hylkää kutsu
+
+Kutsuttu kirjautuu Kotivaloon kutsutulla sähköpostiosoitteella. Odottavat kutsut näkyvät asuntolistan alussa kutsujan nimen sekä asunnon osoitteen ja kaupungin kanssa.
+
+<Shot id="invitation-card" alt="Kutsu asuntolistan alussa" />
+
+- <Ui key="invitation_accept" /> antaa pääsyn asuntoon jäsenenä ja poistaa
+  kutsun. Kutsu on voimassa 30 päivää. Jos sinulla on jo pääsy 100 asuntoon,
+  hyväksyminen estetään.
+- <Ui key="invitation_decline" /> poistaa kutsun, eikä asunto tule listaasi.
+
+<Shot id="flat-shared" alt="Hyväksytty asunto asuntolistalla" />
+
+Hyväksytyn asunnon kortissa lukee, että se on jaettu sinulle.
+
+## Kuka näkee asunnon
+
+Jokainen, jolla on pääsy asuntoon, voi avata sen Omistus ja jakaminen -sivun. Sivulla näkyvät käyttäjät nimineen (itse "Sinä") ja rooleineen sekä odottavat kutsut. Omistaja on se, jolla on nykyinen omistusosuus yli 0 %. Kaikki muut ovat jäseniä. Omistusosuuksista kerrotaan sivulla [Omistusosuudet](/omistusosuudet/).
+
+<Shot
+  id="sharing-members"
+  alt="Omistus ja jakaminen -sivu, jolla on omistaja ja jäsen"
+/>
+
+## Pääsyn poistaminen ja asunnosta poistuminen
+
+- **Omistaja voi poistaa jäsenen pääsyn** painikkeella <Ui key="sharing_remove" /> jäsenen rivillä. Asunto häviää poistetun listalta, ja se käyttäytyy hänelle kuin sitä ei olisi. Jos hänellä on joskus ollut asunnossa yli 0 %:n osuus, asunto säilyy hänen vuosiyhteenvedossaan omalta omistusjaksoltaan.
+- **Jäsen voi poistua asunnosta** painikkeella <Ui key="sharing_leave" />. Hänen listaltaan asunto häviää samalla tavalla.
+- **Omistajan pääsyä ei voi poistaa**, eikä omistaja voi poistua. Omistajan osuus pitää ensin siirtää muille omistusmuutoksella.

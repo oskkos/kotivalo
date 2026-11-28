@@ -1,5 +1,13 @@
 {
-  "include": ["src", "e2e", "scripts", "project.inlang/*.ts", "*.ts"],
+  "include": [
+    "src",
+    "e2e",
+    "scripts",
+    "docs/guide/lib",
+    "docs/guide/capture",
+    "project.inlang/*.ts",
+    "*.ts"
+  ],
   "compilerOptions": {
     "target": "ES2022",
     "jsx": "react-jsx",

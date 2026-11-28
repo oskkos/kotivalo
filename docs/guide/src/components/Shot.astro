@@ -1,0 +1,49 @@
+---
+// A screenshot of the app, saved by the capture scripts for the page's
+// language. A missing one is a placeholder, or an error in a strict build.
+import { Image } from 'astro:assets'
+import { shotFor } from '../../lib/shots'
+
+interface Props {
+  id: string
+  alt?: string
+}
+
+const files = import.meta.glob<{ default: ImageMetadata }>(
+  '../assets/shots/**/*.png',
+  { eager: true },
+)
+const images = Object.fromEntries(
+  Object.entries(files).map(([path, module]) => [path, module.default]),
+)
+const { id, alt = '' } = Astro.props
+// A page missing in the visitor's language shows the Finnish one (Starlight's
+// fallback), with the Finnish screenshots and names.
+const language = Astro.locals.starlightRoute.isFallback
+  ? 'fi'
+  : (Astro.currentLocale ?? 'fi')
+const shot = shotFor(images, id, language, import.meta.env.GUIDE_STRICT === '1')
+---
+
+{
+  shot.kind === 'image' ? (
+    <Image src={shot.src} alt={alt} width={390} format="webp" class="shot" />
+  ) : (
+    <p class="shot-missing">Kuvakaappaus puuttuu: {shot.id}</p>
+  )
+}
+
+<style>
+  .shot {
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 1.5rem;
+    height: auto;
+    max-width: 100%;
+  }
+  .shot-missing {
+    border: 2px dashed var(--sl-color-gray-4);
+    border-radius: 1rem;
+    padding: 2rem 1rem;
+    text-align: center;
+  }
+</style>

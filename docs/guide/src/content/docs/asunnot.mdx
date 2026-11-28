@@ -1,0 +1,157 @@
+---
+title: Asunnot
+description: Asunnon lisääminen, tiedot, arkistointi ja poistaminen.
+sidebar:
+  order: 3
+requirements:
+  - spec: properties
+    name: 'Adding a flat'
+    hash: 806c2b5860d8
+  - spec: properties
+    name: 'Editing a flat'
+    hash: 07f81f56f3f8
+  - spec: properties
+    name: 'Listing flats'
+    hash: fdcf542c19b8
+  - spec: properties
+    name: 'First run without flats'
+    hash: 1deee72e88df
+  - spec: properties
+    name: 'Flats are shown only to users with access'
+    hash: c18d79b70752
+  - spec: properties
+    name: 'The flat details page'
+    hash: 0113fcc2944d
+  - spec: properties
+    name: 'Archiving a flat'
+    hash: 0ce3e11c37e9
+  - spec: properties
+    name: 'Archived flats on the flats list'
+    hash: aafdbfa85203
+  - spec: properties
+    name: 'Restoring an archived flat'
+    hash: 385a789ab36c
+  - spec: properties
+    name: 'Deleting a flat'
+    hash: 74524c9a6938
+  - spec: properties
+    name: 'Confirming the deletion of a flat'
+    hash: 3f3fda80c799
+  - spec: properties
+    name: 'Housing company details of a flat'
+    hash: 67e6172df6f8
+  - spec: properties
+    name: 'Limiting the number of flats'
+    hash: 81e2753da8ce
+---
+
+import Ui from '../../components/Ui.astro'
+import Shot from '../../components/Shot.astro'
+
+Asunnot ovat Kotivalon perusta: jokaiselle asunnolle kirjataan vuokralaiset, vastikkeet, tulot ja menot. Tällä sivulla lisäät asunnon, katsot sen tiedot, muokkaat niitä ja tarvittaessa arkistoit tai poistat asunnon.
+
+## Asuntolista
+
+Alapalkin kohta <Ui key="properties_title" /> avaa asuntolistan. Lista näyttää kaikki asunnot, joihin sinulla on pääsy ja joita et ole arkistoinut, katuosoitteen mukaan aakkosjärjestyksessä. Listan alussa on tämän kuun vuokrayhteenveto ja asuntojen määrä.
+
+Jokaisessa kortissa näkyvät katuosoite, kaupunki, huoneluku ja pinta-ala, nykyiset omistajat osuuksineen (sinä itse nimellä "Sinä") sekä vuokrasuhteen tila: vuokrattu vuokralaisen nimellä, irtisanottu viimeisine vuokrapäivineen tai tyhjillään. Kortissa on myös tämän kuun vuokran tila. Jos asunto on jaettu sinulle, kortissa lukee sen. Kortti avaa asunnon tiedot.
+
+<Shot id="flat-list" alt="Asuntolista kahdella asunnolla" />
+
+Näet vain asunnot, jotka olet itse lisännyt tai joiden kutsun olet hyväksynyt. Odottava kutsu ei vielä anna pääsyä. Toisen käyttäjän asunto ei näy listassa, eikä sitä voi avata.
+
+Jos sinulla ei ole yhtään asuntoa tai kaikki on arkistoitu, lista kertoo lyhyesti, mitä Kotivalo tekee, ja tarjoaa toiminnon <Ui key="property_add" />. Odottavat kutsut näkyvät sen yläpuolella.
+
+## Lisää asunto
+
+1. Valitse asuntolistalta <Ui key="property_add" />.
+2. Täytä asunnon tiedot: <Ui key="property_street_address" />, <Ui key="property_postcode" /> (viisi numeroa), <Ui key="property_city" />, <Ui key="property_room_count" /> (yksiö, kaksio, kolmio tai 4h+) ja <Ui key="property_floor_area" /> (1–10 000 m², enintään yksi desimaali, pilkulla tai pisteellä).
+3. Kenttä <Ui key="property_owned_since" /> kertoo päivän, jolloin asunto tuli omistukseesi. Oletuksena se on tämä päivä. Omistat asunnon aluksi 100 %.
+4. Täytä halutessasi taloyhtiön tiedot (alla).
+5. Valitse <Ui key="property_save" />.
+
+<Shot id="flat-form-empty" alt="Tyhjä uuden asunnon lomake" />
+
+<Shot
+  id="flat-form-filled"
+  alt="Täytetty uuden asunnon lomake taloyhtiön tietoineen"
+/>
+
+Kaikki muut kentät paitsi taloyhtiön tiedot ovat pakollisia. Yksi käyttäjä voi lisätä enintään 100 asuntoa, mutta Kotivalo on tehty yhdestä kymmeneen asunnolle.
+
+### Taloyhtiön tiedot
+
+Lomakkeen osiossa <Ui key="property_section_housing_company" /> voit antaa taloyhtiön nimen, Y-tunnuksen ja huoneiston numeron. Veroilmoitus kysyy ne, ja ne löytyvät isännöitsijältä. Kaikki kolme ovat vapaaehtoisia, ja tyhjäksi jätetty kenttä jää tallentamatta.
+
+Y-tunnuksen muoto on seitsemän numeroa, yhdysmerkki ja tarkistenumero, esimerkiksi 1234567-1. Kotivalo tarkistaa tarkistenumeron, joten kirjoitusvirhe huomataan heti. Kentissä olevat ylimääräiset välilyönnit poistetaan.
+
+## Asunnon tiedot
+
+Asunnon tiedot -sivu on asunnon pääsivu. Pääset sinne valitsemalla asunnon kortin asuntolistalta. Sivulla näet:
+
+- asunnon osoitteen, huoneluvun, pinta-alan ja taloyhtiön tiedot sekä omistajat osuuksineen
+- tämän kuun vuokran ja sen tilan. Omistaja voi merkitä vuokran maksetuksi suoraan tästä
+- varoituksen, jos aiempia kuukausia on jäänyt kokonaan maksamatta
+- vuokrasuhteen kortin, joka avaa vuokrasuhteen sivun
+- vastikkeet, käyttömaksut, viimeisimmät kirjaukset ja dokumentit, joista jokaisella on oma sivunsa
+
+<Shot id="flat-details" alt="Asunnon tiedot -sivu" />
+
+Jos asunnossa ei ole vuokralaista, vuokrakortin tilalla on tieto, että asunto on tyhjillään, ja omistajalla toiminto vuokralaisen lisäämiseen. Jos vuokrasuhde alkaa vasta myöhemmin, kortti kertoo, ettei tässä kuussa ole vuokraa, ja alkamispäivän.
+
+Muut toiminnot ovat sivun yläreunan valikossa <Ui key="flat_details_menu" />.
+
+<Shot id="flat-menu" alt="Asunnon tietojen valikko" />
+
+Kaikki asunnon käyttäjät voivat avata sivun ja nähdä tiedot. Omistajalla on lisäksi toimintoja, joita jäsenellä (käyttäjällä, jolla ei ole omistusosuutta) ei ole: vuokran kirjaaminen maksetuksi, vuokrasuhteen päättäminen, vuokralaisen lisääminen, dokumentin lisääminen ja asunnon poistaminen.
+
+## Asunnon muokkaaminen
+
+Valitse sivun yläreunasta kynäkuvake tai valikosta muokkaus. Lomake aukeaa asunnon nykyisillä tiedoilla, ja siihen pätevät samat tarkistukset kuin lisäämiseen. Tallennuksen jälkeen palaat asunnon tietoihin. Lomakkeen sulkeminen palauttaa samaan paikkaan.
+
+<Shot id="flat-edit" alt="Asunnon muokkauslomake" />
+
+## Asunnon arkistointi
+
+Arkistointi piilottaa asunnon vain sinulta. Asunto, sen tiedot, kenenkään pääsy tai rooli eivät muutu, eikä muiden asuntolista muutu. Arkistoitu asunto ei näy listassasi, tämän kuun vuokrayhteenvedossa eikä uuden kirjauksen asuntovalinnassa. Sen voi silti avata, ja se lasketaan edelleen asuntojesi määrään.
+
+1. Avaa asunnon tiedot ja valikko <Ui key="flat_details_menu" />.
+2. Valitse <Ui key="property_archive" />.
+3. Vahvista valitsemalla <Ui key="property_archive_confirm" />. Vahvistusikkuna kertoo, että tiedot säilyvät ja asunnon voi palauttaa.
+
+<Shot id="archive-dialog" alt="Arkistoinnin vahvistus" />
+
+Arkistoinnin jälkeen palaat asuntolistalle, ja ilmoitus kertoo, mikä asunto arkistoitiin. Arkistoidun asunnon sivun yläreunassa on kehys, joka kertoo arkistointipäivän.
+
+<Shot id="archived-band" alt="Arkistoidun asunnon kehys sivun yläreunassa" />
+
+### Arkistoidut asunnot
+
+Jos olet arkistoinut asuntoja, listan lopussa on osio **Arkistoidut asunnot**, joka on aluksi suljettu. Kun avaat sen, näet arkistoidut asunnot osoitteineen ja arkistointipäivineen. Kortti avaa asunnon tiedot.
+
+<Shot
+  id="archived-section"
+  alt="Asuntolistan avattu arkistoitujen asuntojen osio"
+/>
+
+### Palautus
+
+Valitse arkistoidun asunnon kehyksestä tai valikosta <Ui key="property_restore" />. Vahvistusta ei kysytä. Asunto palaa listaan, vuokrayhteenvetoon ja kirjauksen asuntovalintaan.
+
+## Asunnon poistaminen
+
+Poistaminen on lopullista. Omistaja voi poistaa asunnon valikon kohdasta <Ui key="property_delete" />, mutta vain jos hän omistaa sen nyt kokonaan eikä kenelläkään muulla ole koskaan ollut asunnossa yli 0 %:n osuutta. Muuten poisto estetään: muut omistajat tarvitsevat asunnon tiedot omiin veroihinsa, joten ikkuna kertoo muut omistajat ja tarjoaa arkistointia. Jäsen ei voi poistaa asuntoa.
+
+- **Asunto ilman tietoja** (ei vuokrasuhteita, vastikkeita, käyttömaksuja, kirjauksia eikä dokumentteja): ikkuna nimeää asunnon ja kertoo, ettei poistoa voi perua. Vahvista valitsemalla <Ui key="property_delete_confirm" />.
+- **Asunto, jolla on tietoja:** ikkuna ehdottaa arkistointia, luettelee, mitä poistetaan (vuokrasuhteet, vuokranmaksut, kirjaukset, kuitit ja dokumentit), ja nimeää jäsenet, jotka menettävät pääsynsä. Vahvista kirjoittamalla asunnon katuosoite kenttään. Kirjainkoolla ja ylimääräisillä välilyönneillä ei ole väliä. Painike <Ui key="property_delete_permanently" /> aktivoituu vasta, kun teksti täsmää.
+
+<Shot
+  id="delete-dialog"
+  alt="Asunnon poiston vahvistus asunnolle ilman tietoja"
+/>
+
+Poisto poistaa asunnon ja kaiken siihen kirjatun, myös kuittitiedostot, kaikilta käyttäjiltä. Sen jälkeen asunto käyttäytyy kaikille kuin sitä ei olisi ollutkaan, ja palaat asuntolistalle ilmoituksen kanssa.
+
+<Shot id="flat-deleted" alt="Asuntolista poiston jälkeen" />
+
+Jos et ole varma, arkistoi asunto: se ei vie mitään pois.

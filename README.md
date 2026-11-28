@@ -28,6 +28,19 @@ Emails are not sent locally: they are printed in the dev server's log, so a sign
 
 Commit messages follow [Conventional Commits](https://www.conventionalcommits.org), checked by commitlint in a `commit-msg` hook and in CI.
 
+## User guide
+
+The guide for landlords is in `docs/guide/` (Finnish, [Starlight](https://starlight.astro.build)), published at https://ohje.kotivalo.app. It is a script: MDX pages and Playwright capture scripts, and the screenshots are taken from the real app in CI, never committed.
+
+```sh
+pnpm guide:capture   # builds the app and takes the screenshots (first run: pnpm exec playwright install chromium)
+pnpm guide:dev       # preview the site; a missing screenshot shows a placeholder
+pnpm guide:build     # GUIDE_STRICT=1 makes a missing screenshot an error, as in CI
+pnpm guide:check     # each page's requirement hashes against the specs
+```
+
+The `guide` workflow captures, builds and, after every push to `develop` that touches what the guide shows, deploys the site to its own Worker `kotivalo-guide`. Pages are written with the `generate-user-guides` skill.
+
 ## Production logs and errors
 
 The Worker writes structured JSON log lines (`src/server/log/log.ts`), and the browser's errors and logs reach the same logs (`POST /api/log`). Every line of a request carries `traceId`, `versionId`, `commit` and, once signed in, `userId`. Lines carry no email addresses or other personal data.
