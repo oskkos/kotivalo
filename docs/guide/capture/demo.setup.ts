@@ -3,8 +3,8 @@
 // filled in through the app's own forms with the e2e helpers (English, the
 // helpers' language) and then switched to Finnish. Their signed-in states are
 // saved for the capture scripts (design.md, decision 5).
-import { mkdirSync } from 'node:fs'
-import { expect, test, type Page } from '@playwright/test'
+import { existsSync, mkdirSync } from 'node:fs'
+import { expect, test, type Browser, type Page } from '@playwright/test'
 import { pdfFile, addDocument } from '../../../e2e/support/documents'
 import { addFlat, card, flatId } from '../../../e2e/support/flats'
 import {
@@ -53,9 +53,33 @@ async function switchToFinnish(page: Page): Promise<void> {
   ).toBeVisible()
 }
 
+/**
+ * Whether the saved states still sign in to a database that has the demo
+ * data (a local rerun). Codes are limited to 5 an hour per address, so a
+ * rerun reuses the sessions rather than signing in again.
+ */
+async function savedStatesWork(browser: Browser): Promise<boolean> {
+  if (!existsSync(ANNIKA) || !existsSync(JUSSI)) {
+    return false
+  }
+  const context = await browser.newContext({ storageState: ANNIKA })
+  const page = await context.newPage()
+  const baseURL = test.info().project.use.baseURL ?? ''
+  await page.goto(`${baseURL}/`)
+  await waitForHydration(page)
+  const works =
+    !page.url().includes('/sign-in') &&
+    (await card(page, koivukatu.streetAddress).count()) > 0
+  await context.close()
+  return works
+}
+
 test('The demo accounts and their data', async ({ page, browser }) => {
   test.setTimeout(600_000)
   mkdirSync(AUTH_DIR, { recursive: true })
+  if (await savedStatesWork(browser)) {
+    return
+  }
 
   // Both accounts are signed in first. A rerun on a local database that has
   // the demo data signs in to the same accounts and adds nothing.

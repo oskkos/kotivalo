@@ -7,7 +7,15 @@ import { test, type Page } from '@playwright/test'
 import { waitForHydration } from '../../../e2e/support/sign-in'
 import { SHOTS_DIR } from './paths.ts'
 
-export async function shot(page: Page, id: string): Promise<void> {
+/**
+ * `fullPage` captures the whole scrollable page at the phone's width, for a
+ * page taller than the screen.
+ */
+export async function shot(
+  page: Page,
+  id: string,
+  options: { fullPage?: boolean } = {},
+): Promise<void> {
   const language = test.info().project.name
   await waitForHydration(page)
   await page.waitForLoadState('networkidle')
@@ -15,6 +23,7 @@ export async function shot(page: Page, id: string): Promise<void> {
   mkdirSync(dir, { recursive: true })
   await page.screenshot({
     path: join(dir, `${id}.png`),
+    fullPage: options.fullPage ?? false,
     animations: 'disabled',
     caret: 'hide',
   })

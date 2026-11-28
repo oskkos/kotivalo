@@ -3,7 +3,7 @@
 import { readdirSync, readFileSync, rmSync } from 'node:fs'
 import { join } from 'node:path'
 import { duplicateShotIds } from '../lib/shots.ts'
-import { AUTH_DIR, SHOTS_DIR } from './paths.ts'
+import { SHOTS_DIR } from './paths.ts'
 
 export default function globalSetup(): void {
   const dir = import.meta.dirname
@@ -24,5 +24,4 @@ export default function globalSetup(): void {
     )
   }
   rmSync(SHOTS_DIR, { recursive: true, force: true })
-  rmSync(AUTH_DIR, { recursive: true, force: true })
 }

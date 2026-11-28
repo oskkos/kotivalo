@@ -69,5 +69,8 @@ export function newAddress(name: string): string {
   return `${name}.${Date.now().toString(36)}@example.com`
 }
 
-export const ANNIKA_EMAIL = 'annika.kotivalo@example.com'
-export const JUSSI_EMAIL = 'jussi.laine@example.com'
+// GUIDE_DEMO_TAG gives a local rerun fresh accounts when the codes' hourly
+// limit for these addresses is used up (CI starts from an empty database).
+const TAG = process.env.GUIDE_DEMO_TAG ?? ''
+export const ANNIKA_EMAIL = `annika.kotivalo${TAG}@example.com`
+export const JUSSI_EMAIL = `jussi.laine${TAG}@example.com`

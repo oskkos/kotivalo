@@ -41,10 +41,10 @@
 
 ## 5. Guide pages: flats, sharing, ownership
 
-- [ ] 5.1 `asunnot.mdx` with `capture/asunnot.capture.ts`: adding and editing a flat, the housing company, the details page, archiving and deleting.
-- [ ] 5.2 `jakaminen.mdx` with its capture script: inviting, accepting, and what a co-owner sees.
-- [ ] 5.3 `omistusosuudet.mdx` with its capture script: shares, changing, undoing and correcting.
-- [ ] 5.4 `pnpm guide:check` lists these pages' requirements as current. The capture and the strict build pass locally.
+- [x] 5.1 `asunnot.mdx` with `capture/asunnot.capture.ts`: adding and editing a flat, the housing company, the details page, archiving and deleting.
+- [x] 5.2 `jakaminen.mdx` with its capture script: inviting, accepting, and what a co-owner sees.
+- [x] 5.3 `omistusosuudet.mdx` with its capture script: shares, changing, undoing and correcting.
+- [x] 5.4 `pnpm guide:check` lists these pages' requirements as current. The capture and the strict build pass locally.
 
 ## 6. Guide pages: charges, entries, documents
 
