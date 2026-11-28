@@ -309,7 +309,7 @@ describe('Loading the year summary', () => {
     expect(trioView.flats).toHaveLength(3)
     expect(three.counter.queries).toBe(one.counter.queries)
     expect(one.counter.queries).toBeGreaterThan(5)
-    expect(one.counter.queries).toBeLessThanOrEqual(16)
+    expect(one.counter.queries).toBeLessThanOrEqual(17)
   })
 
   test('more tenancies and fees than D1 binds in one query still load', async () => {
@@ -679,5 +679,157 @@ describe('The PDF view', () => {
     expect(trioView.flats).toHaveLength(3)
     expect(three.counter.queries).toBe(one.counter.queries)
     expect(three.counter.queries).toBe(page.counter.queries)
+  })
+})
+
+describe("A former owner's year summary", () => {
+  /** Annika records herself at 100 % from 1 July 2025; Jussi's access goes. */
+  async function jussiSells(removeAccess: string[] = ['jussi']) {
+    await ownershipRepository(db).change({
+      propertyId: kuusikuja,
+      actorId: 'annika',
+      currentStart: '2024-05-01',
+      from: '2025-07-01',
+      reason: 'sale',
+      split: [
+        { userId: 'annika', share: 10000 },
+        { userId: 'jussi', share: 0 },
+      ],
+      removeAccess,
+    })
+  }
+
+  test('A former owner sees their period', async () => {
+    await jussiSells()
+    const view = await loadYearSummary(deps('jussi'), 2025)
+    expect(view.flats).toHaveLength(1)
+    expect(view.flats[0]).toMatchObject({
+      propertyId: kuusikuja,
+      share: 5000,
+      income: 44500,
+      // 6 × (200,00 + 20,00) € at 50 %.
+      costs: 66000,
+    })
+    expect(view.counts.own).toBe(1)
+    expect(await propertyRepository(db).listForUser('jussi')).toEqual([])
+    const page = await loadFlatYear(deps('jussi'), kuusikuja, 2025)
+    expect(page).toMatchObject({
+      ok: true,
+      former: true,
+      owners: [],
+      holder: { kind: 'own' },
+      flat: { details: { share: 5000 } },
+    })
+    // Only the tenant of the own period, on the page and in the PDF.
+    const pdf = await loadYearSummaryPdf(deps('jussi'), 2025)
+    expect(pdf.flats[0]?.details.tenancies).toEqual([
+      { name: 'Aino Koski', from: '2025-03-15', to: '2025-06-30' },
+    ])
+    expect(pdf.flats[0]?.details.period).toEqual({
+      from: '2025-03-15',
+      to: '2025-06-30',
+    })
+  })
+
+  test('Only the own share of a former flat', async () => {
+    await jussiSells()
+    const whole = await loadYearSummary(deps('jussi'), 2025, 'whole')
+    expect(whole.flats).toEqual([])
+    expect(whole.counts.whole).toBe(0)
+    const sheet = await loadYearSummary(deps('jussi'), 2025, 'annika')
+    // A person he can't see falls back to his own share; the former flat
+    // never makes Annika a known person.
+    expect(sheet.holder).toEqual({ kind: 'own' })
+    expect(sheet.people).toEqual([])
+    const page = await loadFlatYear(deps('jussi'), kuusikuja, 2025, 'annika')
+    expect(page).toMatchObject({
+      ok: true,
+      former: true,
+      holder: { kind: 'own' },
+      flat: { details: { share: 5000 } },
+    })
+    const wholePage = await loadFlatYear(
+      deps('jussi'),
+      kuusikuja,
+      2025,
+      'whole',
+    )
+    expect(wholePage).toMatchObject({ holder: { kind: 'own' }, owners: [] })
+    const pdf = await loadYearSummaryPdf(deps('jussi'), 2025, 'whole')
+    expect(pdf.flats).toEqual([])
+  })
+
+  test("The years after a former owner's period", async () => {
+    await jussiSells()
+    await seedFlat('jussi', 'Hallilantie 12 B 8', '2025-01-01')
+    const view = await loadYearSummary(deps('jussi'), 2026)
+    expect(view.year).toBe(2026)
+    expect(view.flats.map((card) => card.streetAddress)).toEqual([
+      'Hallilantie 12 B 8',
+    ])
+    expect(view.notIncluded).toEqual([])
+    expect(view.counts.own).toBe(1)
+  })
+
+  test('A member who leaves after their share ended', async () => {
+    await jussiSells([])
+    expect(
+      (await loadYearSummary(deps('jussi'), 2025)).flats.map(
+        (card) => card.propertyId,
+      ),
+    ).toEqual([kuusikuja])
+    await env.DB.prepare(
+      "DELETE FROM property_access WHERE user_id = 'jussi'",
+    ).run()
+    const view = await loadYearSummary(deps('jussi'), 2025)
+    expect(view.flats.map((card) => card.propertyId)).toEqual([kuusikuja])
+    expect(view.notIncluded).toEqual([])
+  })
+
+  test('A member keeps the whole year of the tenants', async () => {
+    await jussiSells([])
+    const page = await loadFlatYear(deps('jussi'), kuusikuja, 2025)
+    expect(page).toMatchObject({ ok: true, former: false })
+    const pdf = await loadYearSummaryPdf(deps('jussi'), 2025)
+    expect(pdf.flats[0]?.details.tenancies).toEqual([
+      { name: 'Aino Koski', from: '2025-03-15', to: '2025-12-31' },
+    ])
+  })
+
+  test('A user who never had a share still gets not found', async () => {
+    await jussiSells()
+    expect(await loadFlatYear(deps('mikko'), kuusikuja, 2025)).toEqual({
+      ok: false,
+      reason: 'property_not_found',
+    })
+    await addAccess(kuusikuja, 'mikko')
+    await env.DB.prepare(
+      "DELETE FROM property_access WHERE user_id = 'mikko'",
+    ).run()
+    expect(await loadFlatYear(deps('mikko'), kuusikuja, 2025)).toEqual({
+      ok: false,
+      reason: 'property_not_found',
+    })
+    expect((await loadYearSummary(deps('mikko'), 2025)).flats).toEqual([])
+  })
+
+  test('The query count stays fixed with a former flat', async () => {
+    await jussiSells()
+    await seedFlat('solo', 'Kuusikuja 1')
+    for (const address of ['Kuusikuja 2', 'Kuusikuja 4']) {
+      await seedFlat('jussi', address)
+    }
+    const one = countingDb()
+    const three = countingDb()
+    expect(
+      (await loadYearSummary(deps('solo', one.db), 2025)).flats,
+    ).toHaveLength(1)
+    expect(
+      (await loadYearSummary(deps('jussi', three.db), 2025)).flats,
+    ).toHaveLength(3)
+    expect(three.counter.queries).toBe(one.counter.queries)
+    const pdf = countingDb()
+    await loadYearSummaryPdf(deps('jussi', pdf.db), 2025)
+    expect(pdf.counter.queries).toBe(one.counter.queries)
   })
 })

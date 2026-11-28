@@ -80,6 +80,8 @@ export type FlatYearView =
       holder: HolderView
       /** The whole flat's owners, empty for one owner. */
       owners: FlatOwner[]
+      /** The user no longer has access: the page is read-only, own share only. */
+      former: boolean
       /** Null when the holder had no share in the flat in the year. */
       flat: Omit<FlatYear, 'propertyId' | 'included'> | null
     }
