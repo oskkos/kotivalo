@@ -275,9 +275,7 @@ describe("The PDF's cover page", () => {
     expect(doc.pages.map((page) => page.id)).not.toContain('halli')
     expect(doc.pages).toHaveLength(3)
   })
-})
 
-describe('The capital income tax estimate', () => {
   const earning = (over: Partial<YearSummaryPdfView> = {}) =>
     view({ cards: [card({ income: 871100, costs: 450300 })], ...over })
 
@@ -437,9 +435,7 @@ describe("A flat's page in the PDF", () => {
     const outside = find(rich.blocks, 'table', 'Ei lomakkeelle 7H')
     expect(outside?.rows).toHaveLength(3)
   })
-})
 
-describe('Rental income after costs', () => {
   test("The rental income after costs on a flat's page", () => {
     const rows = {
       ...flat().rows,
