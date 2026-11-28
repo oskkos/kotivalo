@@ -1,0 +1,17 @@
+// The user guide's Worker (openspec/changes/add-user-guide, design.md,
+// decision 7): static files only, served from Cloudflare's assets, so it runs
+// no script and its requests are free. `wrangler deploy` is run from the
+// `guide` workflow after `pnpm guide:build`.
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "kotivalo-guide",
+  "compatibility_date": "2026-11-13",
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "404-page",
+  },
+  // Wrangler creates the custom domain on the first deploy when the zone is
+  // in the same account and the API token may edit Workers routes.
+  "routes": [{ "pattern": "ohje.kotivalo.app", "custom_domain": true }],
+  "observability": { "enabled": false },
+}

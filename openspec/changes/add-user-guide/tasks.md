@@ -31,10 +31,10 @@
 
 ## 4. CI, deploy and the skill
 
-- [ ] 4.1 `docs/guide/wrangler.jsonc` (`kotivalo-guide`, static assets, the `ohje.kotivalo.app` custom domain) and `public/_headers` (decision 7).
-- [ ] 4.2 `.github/workflows/guide.yml` (decision 8): the path filter, the capture, `astro check`, the strict build, the artifact on PRs, and the deploy on `develop`. Actions pinned to commit SHAs.
-- [ ] 4.3 `.claude/skills/generate-user-guides/SKILL.md` and a page template, adapted from Saldo's (decision 10).
-- [ ] 4.4 Docs:
+- [x] 4.1 `docs/guide/wrangler.jsonc` (`kotivalo-guide`, static assets, the `ohje.kotivalo.app` custom domain) and `public/_headers` (decision 7).
+- [x] 4.2 `.github/workflows/guide.yml` (decision 8): the path filter, the capture, `astro check`, the strict build, the artifact on PRs, and the deploy on `develop`. Actions pinned to commit SHAs.
+- [x] 4.3 `.claude/skills/generate-user-guides/SKILL.md` and a page template, adapted from Saldo's (decision 10).
+- [x] 4.4 Docs:
   - **README:** the guide, how to preview it locally, its deploy
   - **CLAUDE.md:** the commands `guide:dev`, `guide:build`, `guide:capture`, `guide:check` and `guide:hash`; the structure of `docs/guide/`; and in "Specs and tests", that a user-facing change updates its guide pages
   - **`openspec/config.yaml`:** the same rule in `tasks`
