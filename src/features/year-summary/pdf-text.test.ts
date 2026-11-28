@@ -14,6 +14,7 @@ describe("Text the PDF font can't show", () => {
 
   test('The arrow becomes a dash', () => {
     expect(pdfText('50 % → 100 %')).toBe('50 % – 100 %')
+    expect(pdfText('\u22121 240,00 €')).toBe('-1 240,00 €')
   })
 
   test('Anything else becomes a question mark', () => {

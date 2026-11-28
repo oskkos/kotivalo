@@ -28,6 +28,10 @@ function replacement(char: string): string {
   if (char === '→') {
     return '–'
   }
+  // The minus sign of a negative amount, e.g. a loss in Finnish.
+  if (char === '\u2212') {
+    return '-'
+  }
   const mapped = BASE_LETTERS.get(char)
   if (mapped !== undefined) {
     return mapped
@@ -38,7 +42,7 @@ function replacement(char: string): string {
 
 /**
  * Text as the PDF's standard font can show it: characters it has are kept, the
- * arrow becomes a dash, a letter with a mark outside the font loses the mark,
+ * arrow becomes a dash, the minus sign a hyphen, a letter with a mark outside the font loses the mark,
  * and anything else becomes a question mark.
  */
 export function pdfText(text: string): string {

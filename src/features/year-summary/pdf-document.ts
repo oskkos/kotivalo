@@ -7,6 +7,7 @@ import {
   formatDate,
   formatDay,
   formatDayMonth,
+  formatEuros,
   formatList,
   formatMoney,
   formatShare,
@@ -14,7 +15,19 @@ import {
 import { m } from '#/paraglide/messages.js'
 import { getLocale } from '#/paraglide/runtime.js'
 import { checkText } from './check-text'
-import { partsText, rowLabel } from './row-text'
+import {
+  CAPITAL_INCOME_LIMIT_CENTS,
+  UPPER_RATE_BASIS_POINTS,
+  flatRentalIncomeAfterCosts,
+  yearEstimate,
+} from './estimate'
+import { labelWithOriginal } from './original-text'
+import {
+  estimateTitleOriginal,
+  outsideTitleOriginal,
+  partsText,
+  rowOriginal,
+} from './row-text'
 import { ROW_NUMBERS, type Check } from './summary'
 import type { FlatCard, HolderView, PdfFlat, YearSummaryPdfView } from './view'
 
@@ -140,6 +153,42 @@ function notIncludedText(view: YearSummaryPdfView): string {
     : m.year_summary_not_included({ count, flats, year })
 }
 
+/** The cover's box: the rental income after costs, and the estimate or the loss. */
+function estimateBlocks(view: YearSummaryPdfView): PdfBlock[] {
+  const estimate = yearEstimate(view.cards, view.holder)
+  const rows: { label: string; value: string }[] = [
+    { label: m.flat_tax_net(), value: formatMoney(estimate.net) },
+  ]
+  if (estimate.kind === 'own') {
+    rows.push({
+      label: labelWithOriginal(estimateTitleOriginal()),
+      value: m.year_summary_estimate_tax_amount({
+        amount: formatEuros(estimate.tax ?? 0),
+      }),
+    })
+  }
+  const blocks: PdfBlock[] = [
+    { kind: 'pairs', title: m.year_summary_estimate_title(), rows },
+  ]
+  if (estimate.kind === 'own') {
+    blocks.push({
+      kind: 'paragraph',
+      text: m.pdf_estimate_note({
+        limit: formatEuros(CAPITAL_INCOME_LIMIT_CENTS),
+        upperRate: formatShare(UPPER_RATE_BASIS_POINTS),
+      }),
+      muted: true,
+    })
+  } else if (estimate.kind === 'loss') {
+    blocks.push({
+      kind: 'paragraph',
+      text: m.year_summary_estimate_loss_text(),
+      muted: true,
+    })
+  }
+  return blocks
+}
+
 function cover(
   view: YearSummaryPdfView,
   now: Date,
@@ -203,6 +252,7 @@ function cover(
       rows,
     },
   ]
+  blocks.push(...estimateBlocks(view))
   if (view.notIncluded.length > 0) {
     blocks.push({ kind: 'paragraph', text: notIncludedText(view) })
   }
@@ -272,7 +322,7 @@ function flatPage(view: YearSummaryPdfView, flat: PdfFlat): PdfPage {
           value: missing(details.apartmentNumber),
         },
         {
-          label: m.flat_tax_identity_code(),
+          label: labelWithOriginal(outsideTitleOriginal.identity_code()),
           value: m.flat_tax_identity_code_text(),
         },
         { label: m.flat_tax_share(), value: formatShare(details.share) },
@@ -308,30 +358,40 @@ function flatPage(view: YearSummaryPdfView, flat: PdfFlat): PdfPage {
     rows: ROW_NUMBERS.map((number) => {
       const row = flat.rows[number]
       const lines = [
-        rowLabel[number](),
+        labelWithOriginal(rowOriginal(number)),
         row.parts.length > 0 ? partsText(row.parts) : m.flat_tax_no_parts(),
       ]
       if (number === '2.3' && row.cents > 0) {
         lines.push(m.flat_tax_case_law())
       }
       return [number, lines.join('\n'), formatMoney(row.cents)]
-    }),
+    }).concat(
+      whole
+        ? []
+        : [
+            [
+              '',
+              `${m.flat_tax_net()}\n${m.flat_tax_net_note()}`,
+              formatMoney(flatRentalIncomeAfterCosts(flat.rows)),
+            ],
+          ],
+    ),
   })
 
   const outside = [
     [
       flat.outside.capitalised,
-      m.flat_tax_outside_capitalised(),
+      labelWithOriginal(outsideTitleOriginal.capitalised()),
       m.flat_tax_outside_capitalised_text(),
     ],
     [
       flat.outside.improvements,
-      m.flat_tax_outside_improvements(),
+      labelWithOriginal(outsideTitleOriginal.improvements()),
       m.flat_tax_outside_improvements_text(),
     ],
     [
       flat.outside.depositDamage,
-      m.flat_tax_outside_deposit_damage(),
+      labelWithOriginal(outsideTitleOriginal.deposit_damage()),
       m.flat_tax_outside_deposit_damage_text(),
     ],
   ].filter(([cents]) => Number(cents) > 0)

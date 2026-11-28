@@ -509,6 +509,7 @@
   "pdf_column_page": "Page",
   "pdf_column_share": "Share",
   "pdf_cover_note": "Rent payments are counted by payment date, other entries by their date and charges by month, each at the ownership share on that day. The summary is not a tax return: the figures are checked and reported on MyTax.",
+  "pdf_estimate_note": "The estimate covers only these flats: loan interest and other capital income are not included. Capital income above {limit} is taxed at {upperRate}.",
   "pdf_failed": "The PDF could not be made.",
   "pdf_file_stem": "Kotivalo year summary",
   "pdf_file_whole": "whole flats",
