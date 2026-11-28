@@ -51,18 +51,18 @@
 
 ## 4. The PDF: the estimate on the cover, the line on a flat's page, the originals
 
-- [ ] 4.1 `pdf-document.ts`:
+- [x] 4.1 `pdf-document.ts`:
   - the cover's box under the table, with the rental income after costs for every holder, and the estimate or the loss with the short note for the own share
   - each flat's page: the line after row 2.5
   - the originals in the row names, parts and Not on form 7H titles, as one string
-- [ ] 4.2 Messages for the cover's box and its short note (translate skill).
-- [ ] 4.3 Vitest in `pdf-document.test.ts`:
+- [x] 4.2 Messages for the cover's box and its short note (translate skill).
+- [x] 4.3 Vitest in `pdf-document.test.ts`:
   - "The estimate on the own share's cover"
   - "No estimate on another owner's cover"
   - "The rental income after costs on a flat's page"
   - "Originals in the PDF"
   - the existing cover and flat page tests kept passing
-- [ ] 4.4 Check that `pdf-render.ts` lays out the longer row names (wrapping tests in `pdf-render.test.ts`, if a row name now wraps).
+- [x] 4.4 Check that `pdf-render.ts` lays out the longer row names (wrapping tests in `pdf-render.test.ts`, if a row name now wraps).
 
 ## 5. Verification, review and archive
 

@@ -509,6 +509,7 @@
   "pdf_column_page": "Sida",
   "pdf_column_share": "Andel",
   "pdf_cover_note": "Hyresbetalningarna räknas enligt betalningsdagen, övriga registreringar enligt sitt datum och vederlagen per månad, alla med ägarandelen den dagen. Sammandraget är ingen skattedeklaration: siffrorna kontrolleras och deklareras i MinSkatt.",
+  "pdf_estimate_note": "Uppskattningen gäller bara de här bostäderna: räntor på lån och andra kapitalinkomster ingår inte. Kapitalinkomst över {limit} beskattas med {upperRate}.",
   "pdf_failed": "Det gick inte att skapa PDF-filen.",
   "pdf_file_stem": "Kotivalo årssammandrag",
   "pdf_file_whole": "hela bostäderna",

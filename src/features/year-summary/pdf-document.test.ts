@@ -277,6 +277,50 @@ describe("The PDF's cover page", () => {
   })
 })
 
+describe('The capital income tax estimate', () => {
+  const earning = (over: Partial<YearSummaryPdfView> = {}) =>
+    view({ cards: [card({ income: 871100, costs: 450300 })], ...over })
+
+  test("The estimate on the own share's cover", () => {
+    const [cover] = pdfDocument(earning(), now).pages
+    const box = find(cover.blocks, 'pairs', 'Vuokratulot kulujen jälkeen')
+    expect(box?.rows.map((r) => plain(r.value))).toEqual([
+      '4 208,00 €',
+      'n. 1 262 €',
+    ])
+    expect(
+      cover.blocks.some(
+        (block) =>
+          block.kind === 'paragraph' &&
+          plain(block.text).includes('Yli 30 000 €'),
+      ),
+    ).toBe(true)
+  })
+
+  test("No estimate on another owner's cover", () => {
+    const [cover] = pdfDocument(
+      earning({
+        holder: { kind: 'person', userId: 'mikko', name: 'Mikko Virtanen' },
+        holderName: 'Mikko Virtanen',
+      }),
+      now,
+    ).pages
+    const box = find(cover.blocks, 'pairs', 'Vuokratulot kulujen jälkeen')
+    expect(box?.rows.map((r) => plain(r.value))).toEqual(['4 208,00 €'])
+    expect(JSON.stringify(cover.blocks)).not.toContain('n. ')
+  })
+
+  test('A loss on the cover has no tax', () => {
+    const [cover] = pdfDocument(
+      view({ cards: [card({ income: 178000, costs: 302000 })] }),
+      now,
+    ).pages
+    const box = find(cover.blocks, 'pairs', 'Vuokratulot kulujen jälkeen')
+    expect(box?.rows).toHaveLength(1)
+    expect(pdfText(plain(box?.rows[0]?.value ?? ''))).toBe('-1 240,00 €')
+  })
+})
+
 describe("A flat's page in the PDF", () => {
   const unpaid: Check = { kind: 'unpaid', months: ['2025-12'] }
   const doc = pdfDocument(
@@ -392,6 +436,41 @@ describe("A flat's page in the PDF", () => {
     expect(rows?.rows[2]?.[1].split('\n')).toHaveLength(3)
     const outside = find(rich.blocks, 'table', 'Ei lomakkeelle 7H')
     expect(outside?.rows).toHaveLength(3)
+  })
+})
+
+describe('Rental income after costs', () => {
+  test("The rental income after costs on a flat's page", () => {
+    const rows = {
+      ...flat().rows,
+      '2.2': row([{ key: 'maintenance_charge', cents: 141900 }]),
+      '2.5': row([{ key: 'insurance', cents: 83600 }]),
+    }
+    const doc = pdfDocument(view({ flats: [flat({ rows })] }), now)
+    const table = find(doc.pages[1].blocks, 'table', 'Vuokratulot ja kulut')
+    expect(table?.rows.at(-1)?.map(plain)).toEqual([
+      '',
+      'Vuokratulot kulujen jälkeen\nEi lomakkeelle 7H',
+      '2 640,00 €',
+    ])
+  })
+})
+
+describe('Finnish originals of tax terms', () => {
+  test('Originals in the PDF', () => {
+    overwriteGetLocale(() => 'en')
+    const doc = pdfDocument(view(), now)
+    const table = find(doc.pages[1].blocks, 'table', 'Rental income and costs')
+    expect(table?.rows[0]?.[1]).toMatch(
+      /^Gross rental income \(bruttovuokratulot\)\n/,
+    )
+    expect(table?.rows[0]?.[1]).toContain('Rent payments')
+  })
+
+  test('No originals in Finnish', () => {
+    const doc = pdfDocument(view(), now)
+    const table = find(doc.pages[1].blocks, 'table', 'Vuokratulot ja kulut')
+    expect(table?.rows[1]?.[1]).toMatch(/^Hoitovastikkeet ja vesimaksut\n/)
   })
 })
 

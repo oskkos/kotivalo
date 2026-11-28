@@ -509,6 +509,7 @@
   "pdf_column_page": "Sivu",
   "pdf_column_share": "Osuus",
   "pdf_cover_note": "Vuokranmaksut on laskettu maksupäivän, muut kirjaukset kirjauksen päivän ja vastikkeet kuukauden mukaan, kukin sen päivän omistusosuudella. Yhteenveto ei ole veroilmoitus: luvut tarkistetaan ja ilmoitetaan OmaVerossa.",
+  "pdf_estimate_note": "Arvio koskee vain näitä asuntoja: lainan korkoja ja muita pääomatuloja ei ole mukana. Yli {limit} pääomatulosta vero on {upperRate}.",
   "pdf_failed": "PDF:n tekeminen ei onnistunut.",
   "pdf_file_stem": "Kotivalo vuosiyhteenveto",
   "pdf_file_whole": "koko asunnot",

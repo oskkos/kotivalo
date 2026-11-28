@@ -1,8 +1,13 @@
 import { jsPDF } from 'jspdf'
-import { describe, expect, test } from 'vitest'
+import { afterEach, describe, expect, test } from 'vitest'
+import { overwriteGetLocale } from '#/paraglide/runtime.js'
 import { renderYearSummaryPdf } from './pdf-render'
 import type { Check, Part } from './summary'
 import type { FlatCard, PdfFlat, YearSummaryPdfView } from './view'
+
+afterEach(() => {
+  overwriteGetLocale(() => 'fi')
+})
 
 const now = new Date(Date.UTC(2026, 10, 27, 10, 0, 0))
 
@@ -168,5 +173,20 @@ describe('Rendering the PDF', () => {
       }),
     )
     expect(text).toContain('(Lukasz – Wisniewski) Tj')
+  })
+
+  test('A row name with its Finnish original is wrapped, not cut off', async () => {
+    overwriteGetLocale(() => 'en')
+    const text = await readable(
+      await renderYearSummaryPdf(view(false), now, {
+        loadLogo: noLogo,
+        compress: false,
+      }),
+    )
+    expect(text).toContain('(Gross rental income \\(bruttovuokratulot\\)) Tj')
+    // Row 2.3's name is longer than the column and goes on a second line.
+    expect(text).toContain(
+      'company \\(yhtiön tulouttamat pääomavastikkeet\\)) Tj',
+    )
   })
 })
