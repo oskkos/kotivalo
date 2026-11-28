@@ -82,6 +82,7 @@ const view = (
   },
   holder: { kind: 'own' },
   owners: [],
+  former: false,
   flat: f,
 })
 

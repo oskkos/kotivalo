@@ -21,13 +21,13 @@
 
 ## 3. The year summary for a former owner
 
-- [ ] 3.1 `year-summary.server.ts` (design.md, decision 2):
+- [x] 3.1 `year-summary.server.ts` (design.md, decision 2):
   - `userFlats` with the former flats
   - holder and years from the accessible flats, with the own share's years from all flats
   - former flats only in the own share's cards, never in "Not included", people or `counts.whole`
   - `flatYear` with `ownDaysOnly` for former flats
-- [ ] 3.2 `loadFlatYear`: a former flat opens for the own share whatever `person` says, with no owners and `former: true`. `view.ts`: `former` on `FlatYearView`.
-- [ ] 3.3 Workers tests in `year-summary.server.test.ts`:
+- [x] 3.2 `loadFlatYear`: a former flat opens for the own share whatever `person` says, with no owners and `former: true`. `view.ts`: `former` on `FlatYearView`.
+- [x] 3.3 Workers tests in `year-summary.server.test.ts`:
   - describe "A former owner's year summary": "A former owner sees their period", "Only the own share of a former flat", "The years after a former owner's period" and "A member who leaves after their share ended"
   - the PDF view's tenancies clipped for a former owner
   - a stranger with no share still gets not found
