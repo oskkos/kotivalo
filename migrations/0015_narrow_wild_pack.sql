@@ -1,0 +1,1 @@
+CREATE INDEX `ownership_periods_user_idx` ON `ownership_periods` (`user_id`);
