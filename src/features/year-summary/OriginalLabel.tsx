@@ -9,9 +9,12 @@ export function OriginalLabel(props: { label: WithOriginal }) {
     <>
       {text}
       {original === null ? null : (
-        <span
-          style={{ fontWeight: 700, opacity: 0.8 }}
-        >{` (${original})`}</span>
+        <>
+          {' '}
+          <span
+            style={{ fontWeight: 700, opacity: 0.8 }}
+          >{`(${original})`}</span>
+        </>
       )}
     </>
   )

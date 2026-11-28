@@ -377,6 +377,8 @@
   "flat_tax_kicker_person": "Lomake 7H · {year} · {name}",
   "flat_tax_kicker_whole": "Lomake 7H · {year} · koko asunto (100 %)",
   "flat_tax_missing": "Puuttuu",
+  "flat_tax_net": "Vuokratulot kulujen jälkeen",
+  "flat_tax_net_note": "Ei lomakkeelle 7H",
   "flat_tax_no_parts": "Ei kirjauksia",
   "flat_tax_no_share_person_text": "{name} ei omistanut osuutta tästä asunnosta vuonna {year}, joten lomakkeelle 7H ei ole lukuja.",
   "flat_tax_no_share_text": "Sinulla ei ollut omistusosuutta tässä asunnossa vuonna {year}, joten lomakkeelle 7H ei ole lukuja.",

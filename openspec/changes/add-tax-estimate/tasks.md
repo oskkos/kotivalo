@@ -39,15 +39,15 @@
 
 ## 3. The form 7H page: rental income after costs and Finnish originals
 
-- [ ] 3.1 `FlatTaxPage.tsx`:
+- [x] 3.1 `FlatTaxPage.tsx`:
   - the rental income after costs line after row 2.5, with no copy button, for the own share and another owner
   - the originals after the row names, the parts that are tax terms, the Not on form 7H titles and the identity code label
-- [ ] 3.2 Messages: the line's label and "not on form 7H" note, in fi, sv and en (translate skill).
-- [ ] 3.3 Component tests in `FlatTaxPage.test.tsx`:
+- [x] 3.2 Messages: the line's label and "not on form 7H" note, in fi, sv and en (translate skill).
+- [x] 3.3 Component tests in `FlatTaxPage.test.tsx`:
   - "The rental income after costs of a flat"
   - describe "Finnish originals of tax terms": "A row name in Swedish", "No originals in Finnish" and "A title with a bracket"; render in Swedish or Finnish with Paraglide's locale
   - copy buttons unchanged
-- [ ] 3.4 Playwright in `e2e/year-summary.spec.ts`: describe "Finnish originals of tax terms", "A row name in English". Update the existing form 7H tests whose row-name assertions now see the original.
+- [x] 3.4 Playwright in `e2e/year-summary.spec.ts`: describe "Finnish originals of tax terms", "A row name in English". Update the existing form 7H tests whose row-name assertions now see the original.
 
 ## 4. The PDF: the estimate on the cover, the line on a flat's page, the originals
 

@@ -1,6 +1,7 @@
 // The rental income after costs and the capital income tax estimate
 // (openspec: year-summary, "The capital income tax estimate"): pure, from the
 // year summary's cards, so the page and the PDF show the same figures.
+import type { Row, RowNumber } from './summary'
 import type { FlatCard, HolderView } from './view'
 
 /** The fixed rate: 30 % up to 30 000 € of capital income, 34 % above (#19). */
@@ -49,4 +50,17 @@ export function yearEstimate(
     return { income, costs, net, tax: null, kind: 'loss' }
   }
   return { income, costs, net, tax: capitalIncomeTax(net), kind: 'own' }
+}
+
+/** A flat's rental income after costs: row 2.1 minus rows 2.2–2.5, cents. */
+export function flatRentalIncomeAfterCosts(
+  rows: Readonly<Record<RowNumber, Pick<Row, 'cents'>>>,
+) {
+  return (
+    rows['2.1'].cents -
+    rows['2.2'].cents -
+    rows['2.3'].cents -
+    rows['2.4'].cents -
+    rows['2.5'].cents
+  )
 }
