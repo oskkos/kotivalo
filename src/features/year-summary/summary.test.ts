@@ -784,3 +784,108 @@ describe('The years of another owner', () => {
     ])
   })
 })
+
+describe("Tenants in a former owner's period", () => {
+  const own = (data: FlatYearInput, y = 2025) =>
+    flatYear(data, ANNIKA, y, TODAY, { ownDaysOnly: true })
+  const soldMidYear = ownership(
+    [5000, '2024-01-01', '2025-06-30'],
+    [0, '2025-07-01', null],
+  )
+  const aino = tenancy({
+    id: 'a',
+    tenantName: 'Aino Koski',
+    validFrom: '2024-03-15',
+    validTo: '2025-08-31',
+  })
+  const pekka = tenancy({
+    id: 'b',
+    tenantName: 'Pekka Laine',
+    validFrom: '2025-10-01',
+  })
+
+  test("Only the former owner's tenants", () => {
+    const data = input({ ownership: soldMidYear, tenancies: [aino, pekka] })
+    expect(own(data).details).toMatchObject({
+      tenant: { kind: 'one', name: 'Aino Koski' },
+      period: { from: '2025-01-01', to: '2025-06-30' },
+      tenancies: [{ name: 'Aino Koski', from: '2025-01-01', to: '2025-06-30' }],
+    })
+  })
+
+  test('A tenancy only after the sale', () => {
+    const data = input({ ownership: soldMidYear, tenancies: [pekka] })
+    expect(own(data).details).toMatchObject({
+      tenant: { kind: 'none' },
+      period: null,
+      tenancies: [],
+    })
+  })
+
+  test('A former owner who kept access sees the whole year', () => {
+    const data = input({ ownership: soldMidYear, tenancies: [aino, pekka] })
+    expect(year(data).details).toMatchObject({
+      tenant: { kind: 'several' },
+      period: { from: '2025-01-01', to: '2025-12-31' },
+    })
+    expect(year(data).details.tenancies).toEqual([
+      { name: 'Aino Koski', from: '2025-01-01', to: '2025-08-31' },
+      { name: 'Pekka Laine', from: '2025-10-01', to: '2025-12-31' },
+    ])
+  })
+
+  test('Several tenants within the own days', () => {
+    const data = input({
+      ownership: soldMidYear,
+      tenancies: [
+        tenancy({ id: 'a', tenantName: 'Aino Koski', validTo: '2025-03-31' }),
+        tenancy({
+          id: 'b',
+          tenantName: 'Pekka Laine',
+          validFrom: '2025-04-15',
+        }),
+      ],
+    })
+    expect(own(data).details).toMatchObject({
+      tenant: { kind: 'several' },
+      period: { from: '2025-01-01', to: '2025-06-30' },
+      tenancies: [
+        { name: 'Aino Koski', from: '2025-01-01', to: '2025-03-31' },
+        { name: 'Pekka Laine', from: '2025-04-15', to: '2025-06-30' },
+      ],
+    })
+  })
+
+  test('A share ended and started again in the year', () => {
+    const data = input({
+      ownership: ownership(
+        [5000, '2024-01-01', '2025-03-31'],
+        [0, '2025-04-01', '2025-08-31'],
+        [5000, '2025-09-01', '2025-11-30'],
+        [0, '2025-12-01', null],
+      ),
+      tenancies: [tenancy({ id: 'a', validFrom: '2024-03-15', validTo: null })],
+    })
+    const details = own(data).details
+    expect(details.tenant).toEqual({ kind: 'one', name: 'Aino Koski' })
+    expect(details.period).toEqual({ from: '2025-01-01', to: '2025-11-30' })
+    expect(details.tenancies).toEqual([
+      { name: 'Aino Koski', from: '2025-01-01', to: '2025-03-31' },
+      { name: 'Aino Koski', from: '2025-09-01', to: '2025-11-30' },
+    ])
+  })
+
+  test('Periods that follow each other are one run', () => {
+    const data = input({
+      ownership: ownership(
+        [5000, '2024-01-01', '2025-03-31'],
+        [3000, '2025-04-01', '2025-06-30'],
+        [0, '2025-07-01', null],
+      ),
+      tenancies: [tenancy({ id: 'a', validFrom: '2024-03-15' })],
+    })
+    expect(own(data).details.tenancies).toEqual([
+      { name: 'Aino Koski', from: '2025-01-01', to: '2025-06-30' },
+    ])
+  })
+})

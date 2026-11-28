@@ -27,7 +27,7 @@ import {
   type UsageChargePeriods,
 } from '#/features/usage-charges/months'
 import { USAGE_CHARGE_ROWS } from '#/features/usage-charges/rows'
-import type { IsoDate } from '#/lib/dates'
+import { addDays, type IsoDate } from '#/lib/dates'
 import type {
   ChargeKind,
   FinancingTreatment,
@@ -264,12 +264,22 @@ const rowOf = (parts: Part[]): Row => ({
   cents: parts.reduce((sum, part) => sum + part.cents, 0),
 })
 
+export interface FlatYearOptions {
+  /**
+   * Show only the tenancies of the days the holder had a share above 0, for a
+   * former owner (openspec: year-summary, "Tenants in a former owner's
+   * period"). Without it the flat details cover the whole year.
+   */
+  ownDaysOnly?: boolean
+}
+
 /** The flat's year for the user, on `today` (in Finland). */
 export function flatYear(
   input: FlatYearInput,
   holder: Holder,
   year: number,
   today: IsoDate,
+  options: FlatYearOptions = {},
 ): FlatYear {
   const { ownership } = input
   const shareAt = (date: IsoDate) => shareOn(ownership, holder, date)
@@ -368,7 +378,13 @@ export function flatYear(
       improvements: outside.improvements.cents('improvement'),
       depositDamage: damage.surplus,
     },
-    details: flatDetails(input, holder, year, today),
+    details: flatDetails(
+      input,
+      holder,
+      year,
+      today,
+      options.ownDaysOnly === true,
+    ),
     checks: [
       ...paymentChecks(input, holder, months, today),
       ...(vacant.length > 0
@@ -437,16 +453,88 @@ function tenanciesInYear(
   )
 }
 
+/**
+ * The runs of days of the year counted on which the holder had a share above
+ * 0, in date order. Periods that follow each other are one run.
+ */
+function holderSpans(
+  ownership: readonly Period[],
+  holder: Holder,
+  year: number,
+  today: IsoDate,
+): { from: IsoDate; to: IsoDate }[] {
+  const first = `${String(year)}-01-01`
+  const last = lastDayCounted(year, today)
+  const spans: { from: IsoDate; to: IsoDate }[] = []
+  const owned = ownership
+    .filter((period) => holderShare(period, holder) > 0)
+    .sort((a, b) => a.validFrom.localeCompare(b.validFrom))
+  for (const period of owned) {
+    const from = period.validFrom > first ? period.validFrom : first
+    const to =
+      period.validTo !== null && period.validTo < last ? period.validTo : last
+    if (from > to) {
+      continue
+    }
+    const previous = spans.at(-1)
+    if (previous !== undefined && addDays(previous.to, 1) >= from) {
+      if (to > previous.to) {
+        previous.to = to
+      }
+    } else {
+      spans.push({ from, to })
+    }
+  }
+  return spans
+}
+
 function flatDetails(
   input: FlatYearInput,
   holder: Holder,
   year: number,
   today: IsoDate,
+  ownDaysOnly: boolean,
 ): FlatDetails {
   const ran = tenanciesInYear(input.tenancies, year, today)
   const first = `${String(year)}-01-01`
   const end = `${String(year)}-12-31`
   const last = lastDayCounted(year, today)
+  const share = shareAtEnd(input.ownership, holder, year, today)
+  if (ownDaysOnly) {
+    const spans = holderSpans(input.ownership, holder, year, today)
+    const pieces = ran
+      .flatMap((t) =>
+        spans.flatMap((span) => {
+          const from = t.validFrom > span.from ? t.validFrom : span.from
+          const to =
+            t.validTo !== null && t.validTo < span.to ? t.validTo : span.to
+          return from <= to ? [{ id: t.id, name: t.tenantName, from, to }] : []
+        }),
+      )
+      .sort((a, b) => a.from.localeCompare(b.from))
+    const tenants = new Set(pieces.map((piece) => piece.id))
+    const only = tenants.size === 1 ? pieces[0] : undefined
+    return {
+      ...input.housingCompany,
+      tenant: only
+        ? { kind: 'one', name: only.name }
+        : tenants.size > 1
+          ? { kind: 'several' }
+          : { kind: 'none' },
+      period:
+        pieces.length > 0
+          ? {
+              from: pieces[0]?.from ?? first,
+              to: pieces.reduce(
+                (latest, p) => (p.to > latest ? p.to : latest),
+                first,
+              ),
+            }
+          : null,
+      tenancies: pieces.map(({ name, from, to }) => ({ name, from, to })),
+      share,
+    }
+  }
   const only = ran.length === 1 ? ran[0] : undefined
   return {
     ...input.housingCompany,
@@ -470,7 +558,7 @@ function flatDetails(
         from: t.validFrom > first ? t.validFrom : first,
         to: t.validTo !== null && t.validTo < last ? t.validTo : last,
       })),
-    share: shareAtEnd(input.ownership, holder, year, today),
+    share,
   }
 }
 
