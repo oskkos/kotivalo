@@ -24,10 +24,10 @@
 
 ## 3. Capture and demo data
 
-- [ ] 3.1 `docs/guide/playwright.config.ts`: the root `webServer`, 390 × 844, project `fi` with `locale: 'fi-FI'`, the global setup with the duplicate check, and the shots folder emptied and gitignored.
-- [ ] 3.2 `capture/shot.ts`: `shot(page, id)` (decision 6).
-- [ ] 3.3 `capture/demo.setup.ts`: Annika Kotivalo and Jussi Laine through the test inbox, with the data of decision 4, built with the e2e helpers and dates relative to today. Their `storageState` is saved. Fictional names, addresses and Business ID.
-- [ ] 3.4 Root script `guide:capture`. The first capture script and page: `aloitus.mdx` and `capture/aloitus.capture.ts` (sign-in, name, language, account, help and support). `pnpm guide:capture` and `GUIDE_STRICT=1 pnpm guide:build` pass locally.
+- [x] 3.1 `docs/guide/playwright.config.ts`: the root `webServer`, 390 × 844, project `fi` with `locale: 'fi-FI'`, the global setup with the duplicate check, and the shots folder emptied and gitignored.
+- [x] 3.2 `capture/shot.ts`: `shot(page, id)` (decision 6).
+- [x] 3.3 `capture/demo.setup.ts`: Annika Kotivalo and Jussi Laine through the test inbox, with the data of decision 4, built with the e2e helpers and dates relative to today. Their `storageState` is saved. Fictional names, addresses and Business ID.
+- [x] 3.4 Root script `guide:capture`. The first capture script and page: `aloitus.mdx` and `capture/aloitus.capture.ts` (sign-in, name, language, account, help and support). `pnpm guide:capture` and `GUIDE_STRICT=1 pnpm guide:build` pass locally.
 
 ## 4. CI, deploy and the skill
 

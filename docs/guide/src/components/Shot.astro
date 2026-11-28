@@ -17,7 +17,11 @@ const images = Object.fromEntries(
   Object.entries(files).map(([path, module]) => [path, module.default]),
 )
 const { id, alt = '' } = Astro.props
-const language = Astro.currentLocale ?? 'fi'
+// A page missing in the visitor's language shows the Finnish one (Starlight's
+// fallback), with the Finnish screenshots and names.
+const language = Astro.locals.starlightRoute.isFallback
+  ? 'fi'
+  : (Astro.currentLocale ?? 'fi')
 const shot = shotFor(images, id, language, import.meta.env.GUIDE_STRICT === '1')
 ---
 

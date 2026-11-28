@@ -21,6 +21,7 @@
     "check:traceability": "node scripts/check-traceability.ts",
     "guide:dev": "pnpm --filter kotivalo-guide dev",
     "guide:build": "pnpm --filter kotivalo-guide build",
+    "guide:capture": "playwright test --config docs/guide/playwright.config.ts",
     "guide:check": "node scripts/check-guide.ts",
     "guide:hash": "node scripts/guide-hash.ts",
     "terms:report": "node scripts/terms-report.ts",

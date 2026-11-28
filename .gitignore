@@ -25,3 +25,4 @@ dist
 /docs/guide/dist/
 /docs/guide/.astro/
 /docs/guide/src/assets/shots/
+/docs/guide/.auth/

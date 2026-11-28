@@ -10,7 +10,11 @@ interface Props {
 }
 
 const messages: Record<string, Messages> = { fi }
-const language = Astro.currentLocale ?? 'fi'
+// A page missing in the visitor's language shows the Finnish one (Starlight's
+// fallback), with the Finnish screenshots and names.
+const language = Astro.locals.starlightRoute.isFallback
+  ? 'fi'
+  : (Astro.currentLocale ?? 'fi')
 // Pages in another language use their own messages once they exist.
 const text = uiText(messages[language] ?? fi, Astro.props.key)
 ---

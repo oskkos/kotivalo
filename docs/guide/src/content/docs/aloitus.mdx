@@ -1,0 +1,122 @@
+---
+title: Aloitus
+description: Kirjautuminen, nimi, kieli ja tili.
+sidebar:
+  order: 2
+requirements:
+  - spec: authentication
+    name: 'Sign in with an emailed code'
+    hash: 4b54db2ccb01
+  - spec: authentication
+    name: 'Rejecting wrong and expired codes'
+    hash: eaa010fa3521
+  - spec: authentication
+    name: 'Requesting a new code'
+    hash: 8b13777d58d0
+  - spec: authentication
+    name: 'Choosing the language before sign-in'
+    hash: 0fd5a2839cc6
+  - spec: authentication
+    name: 'Pages for signed-in users only'
+    hash: 11abf0e54bf7
+  - spec: authentication
+    name: 'Signing out'
+    hash: a4113d307a1e
+  - spec: authentication
+    name: 'Staying signed in'
+    hash: b607fc5d86e7
+  - spec: authentication
+    name: "The user's language is stored on the account"
+    hash: 55dbd0a97ed4
+  - spec: authentication
+    name: 'Asking for a display name'
+    hash: 68f3f0e0f6ab
+  - spec: account
+    name: 'The account page'
+    hash: 1ad9ae84662a
+  - spec: account
+    name: 'Changing the display name'
+    hash: 96a2cfd8abc3
+  - spec: account
+    name: 'Choosing the language on the account page'
+    hash: 5dba2248bb23
+  - spec: support
+    name: 'The support address follows the language'
+    hash: 19e325f4fe45
+  - spec: support
+    name: 'Help when the sign-in code does not arrive'
+    hash: 2163131a3ec1
+  - spec: support
+    name: 'Help and support on the account page'
+    hash: 05d3081057a6
+  - spec: support
+    name: 'The support address in every email'
+    hash: 10dcb418d268
+---
+
+import Ui from '../../components/Ui.astro'
+import Shot from '../../components/Shot.astro'
+
+Kotivaloon kirjaudutaan sähköpostiin lähetettävällä koodilla. Salasanaa ei tarvita, eikä erillistä rekisteröitymistä: ensimmäinen kirjautuminen luo tilin.
+
+## Kirjaudu sisään
+
+1. Avaa Kotivalo. Jos et ole kirjautunut, näet kirjautumissivun.
+2. Kirjoita sähköpostiosoitteesi kenttään <Ui key="sign_in_email_label" /> ja valitse <Ui key="sign_in_send_code" />. Osoitteen isot ja pienet kirjaimet eivät ratkaise: sama osoite on aina sama tili.
+3. Avaa sähköpostiisi tullut viesti ja kirjoita siinä oleva 6-numeroinen koodi kenttään <Ui key="sign_in_code_label" />.
+
+<Shot
+  id="sign-in-email"
+  alt="Kirjautumissivu, jossa sähköpostiosoitteen kenttä"
+/>
+
+<Shot id="sign-in-code" alt="Koodin syöttö -vaihe" />
+
+Koodi on voimassa 10 minuuttia ja toimii vain yhden kirjautumisen. Jos kirjoitat väärän koodin, saat siitä ilmoituksen ja voit yrittää uudelleen. Viiden väärän yrityksen jälkeen koodi lakkaa toimimasta, ja sinun täytyy pyytää uusi.
+
+### Uusi koodi
+
+Valitse <Ui key="sign_in_resend" />, jos koodi ei tullut tai se vanheni. Uuden koodin voi pyytää 30 sekunnin kuluttua edellisestä, ja painike näyttää jäljellä olevan ajan. Kun koodi on vanhentunut tai yritykset on käytetty, painike on käytössä heti. Uusi koodi korvaa edellisen. Voit myös vaihtaa osoitteen valitsemalla <Ui key="sign_in_change_email" />.
+
+Jos koodi ei tule, tarkista roskaposti. Koodisivulla on myös tukiosoite, johon voit kirjoittaa. Tukiosoite on suomeksi tuki@kotivalo.app sekä ruotsiksi ja englanniksi support@kotivalo.app. Se näkyy aina sähköpostiosoitteena, jonka voi kopioida, ja jokaisen Kotivalon lähettämän sähköpostin lopussa.
+
+## Kerro nimesi
+
+Kun kirjaudut ensimmäisen kerran, Kotivalo kysyy, millä nimellä sinut näytetään. Nimi näkyy niille, joiden kanssa jaat asuntoja, joten etunimi riittää. Nimessä saa olla 1–50 merkkiä, eikä siinä saa olla merkkejä @, /, :, < tai >.
+
+<Shot
+  id="welcome-name"
+  alt="Nimen kysyminen ensimmäisen kirjautumisen jälkeen"
+/>
+
+Nimeä kysytään vain kerran. Ennen kuin se on annettu, jokainen sivu ohjaa takaisin nimen kysymiseen.
+
+Sen jälkeen näet asuntolistan, joka on uudella tilillä tyhjä. Siihen lisätään ensimmäinen asunto sivulla [Asunnot](/asunnot/).
+
+<Shot id="flats-empty" alt="Tyhjä asuntolista uudella tilillä" />
+
+## Kieli
+
+Kirjautumissivulla voit valita suomen, ruotsin tai englannin. Valinta vaihtaa sivun kielen heti, ja uusi tili saa samalla kielen. Tilin kieli tallentuu tilille, joten se seuraa sinua toiselle laitteelle ja koodin sähköpostiin.
+
+Kun olet kirjautunut, kielen voi vaihtaa tilisivulta. Valinta tallentuu heti, ja sivu latautuu uudelleen valitulla kielellä. Jos valitset kielen, joka on jo käytössä, mikään ei muutu.
+
+## Tili
+
+Tilisivu avautuu alapalkin kohdasta <Ui key="account_title" />. Se näyttää nimesi, sähköpostiosoitteesi, kielen valinnan, osion <Ui key="account_support_title" /> ja painikkeen <Ui key="sign_out" />.
+
+<Shot id="account" alt="Tilisivu" />
+
+### Nimen vaihtaminen
+
+Valitse <Ui key="account_change_name" />, kirjoita uusi nimi ja valitse <Ui key="account_save" />. Nimeen pätevät samat säännöt kuin ensimmäisellä kerralla. Jos nimi ei kelpaa, syyn näet kentän alla eikä nimeä tallenneta. Valinta <Ui key="account_cancel" /> jättää vanhan nimen.
+
+<Shot id="account-change-name" alt="Nimen vaihtaminen ikkunassa" />
+
+### Ohje ja tuki
+
+Osiosta <Ui key="account_support_title" /> löydät tukiosoitteen. Kysy tai kerro ongelmasta sähköpostilla.
+
+### Kirjaudu ulos
+
+Valitse tilisivulla <Ui key="sign_out" />. Uloskirjautuminen päättää istunnon myös palvelimella, joten vanha istuntoevästekään ei enää toimi. Ilman uloskirjautumista pysyt kirjautuneena 30 päivää viimeisestä käyttökerrasta: kun käytät sovellusta, aika alkaa alusta.
