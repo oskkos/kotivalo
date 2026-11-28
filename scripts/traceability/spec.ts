@@ -6,6 +6,11 @@ export interface Requirement {
   capability: string
   name: string
   scenarios: string[]
+  /**
+   * The requirement's text: its heading line through its last scenario,
+   * as written. Code fences are blanked, as everywhere in the parser.
+   */
+  block: string
   /** Set when the requirement records why it has no Playwright test. */
   noPlaywrightReason?: string
 }
@@ -34,16 +39,31 @@ function proseLines(markdown: string): string[] {
 function parseRequirements(lines: string[], capability: string): Requirement[] {
   const requirements: Requirement[] = []
   let current: Requirement | undefined
+  let block: string[] = []
+  const close = () => {
+    if (current) {
+      current.block = block.join('\n').trim()
+    }
+  }
   for (const line of lines) {
     const requirement = REQUIREMENT.exec(line)
     if (requirement) {
-      current = { capability, name: requirement[1], scenarios: [] }
+      close()
+      current = { capability, name: requirement[1], scenarios: [], block: '' }
+      block = [line]
       requirements.push(current)
       continue
     }
     if (!current) {
       continue
     }
+    if (SECTION.test(line)) {
+      // A new ## section ends the requirement.
+      close()
+      current = undefined
+      continue
+    }
+    block.push(line)
     const scenario = SCENARIO.exec(line)
     if (scenario) {
       current.scenarios.push(scenario[1])
@@ -54,6 +74,7 @@ function parseRequirements(lines: string[], capability: string): Requirement[] {
       current.noPlaywrightReason = reason[1]
     }
   }
+  close()
   return requirements
 }
 

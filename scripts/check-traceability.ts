@@ -11,13 +11,7 @@
 //
 // Usage: pnpm check:traceability
 import { execFileSync } from 'node:child_process'
-import {
-  existsSync,
-  mkdtempSync,
-  readFileSync,
-  readdirSync,
-  rmSync,
-} from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, rmSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join, relative } from 'node:path'
 import { allTasksDone } from './traceability/changes.ts'
@@ -27,65 +21,10 @@ import {
   pendingProblems,
   type TestCase,
 } from './traceability/check.ts'
-import {
-  applyDelta,
-  parseDelta,
-  parseSpec,
-  type Requirement,
-} from './traceability/spec.ts'
+import { activeChanges, readSpecs, withChanges } from './traceability/files.ts'
 
 const ROOT = join(import.meta.dirname, '..')
-const SPECS = join(ROOT, 'openspec/specs')
 const CHANGES = join(ROOT, 'openspec/changes')
-
-function capabilities(dir: string): string[] {
-  if (!existsSync(dir)) {
-    return []
-  }
-  return readdirSync(dir, { withFileTypes: true })
-    .filter((d) => d.isDirectory() && existsSync(join(dir, d.name, 'spec.md')))
-    .map((d) => d.name)
-    .sort()
-}
-
-function readSpecs(): Map<string, Requirement[]> {
-  const byCapability = new Map<string, Requirement[]>()
-  for (const capability of capabilities(SPECS)) {
-    const markdown = readFileSync(join(SPECS, capability, 'spec.md'), 'utf8')
-    byCapability.set(capability, parseSpec(markdown, capability))
-  }
-  return byCapability
-}
-
-/** Active (not archived) changes, by name. */
-function activeChanges(): string[] {
-  return existsSync(CHANGES)
-    ? readdirSync(CHANGES, { withFileTypes: true })
-        .filter((d) => d.isDirectory() && d.name !== 'archive')
-        .map((d) => d.name)
-        .sort()
-    : []
-}
-
-/** Main specs with the deltas of the active changes applied. */
-function withChanges(
-  main: Map<string, Requirement[]>,
-  changes: string[],
-): Requirement[] {
-  const byCapability = new Map(main)
-  for (const change of changes) {
-    const dir = join(CHANGES, change, 'specs')
-    for (const capability of capabilities(dir)) {
-      const markdown = readFileSync(join(dir, capability, 'spec.md'), 'utf8')
-      const delta = parseDelta(markdown, capability)
-      byCapability.set(
-        capability,
-        applyDelta(byCapability.get(capability) ?? [], delta),
-      )
-    }
-  }
-  return [...byCapability.values()].flat()
-}
 
 /** Changes whose tasks are all checked: they should have been archived. */
 function unarchivedDoneChanges(changes: string[]): string[] {

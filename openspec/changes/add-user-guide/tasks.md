@@ -1,9 +1,9 @@
 ## 1. The drift check
 
-- [ ] 1.1 `scripts/traceability/spec.ts`: keep each requirement's block text (heading through its last scenario). Extend `spec.test.ts`; the traceability tests keep passing.
-- [ ] 1.2 `scripts/guide/hash.ts`: `requirementHash(block)` (design.md, decision 2). `pnpm guide:hash [spec]` prints the hashes.
-- [ ] 1.3 `scripts/guide/check.ts`: the pure checks over parsed input, with a thin shell reading `openspec/`, the pages' frontmatter (`yaml`, a new root dev dependency) and `docs/guide/not-in-guide.json`. `pnpm guide:check` and `--json`. Not in CI yet.
-- [ ] 1.4 Vitest in `scripts/guide/check.test.ts`:
+- [x] 1.1 `scripts/traceability/spec.ts`: keep each requirement's block text (heading through its last scenario). Extend `spec.test.ts`; the traceability tests keep passing.
+- [x] 1.2 `scripts/guide/hash.ts`: `requirementHash(block)` (design.md, decision 2). `pnpm guide:hash [spec]` prints the hashes.
+- [x] 1.3 `scripts/guide/check.ts`: the pure checks over parsed input, with a thin shell reading `openspec/`, the pages' frontmatter (`yaml`, a new root dev dependency) and `docs/guide/not-in-guide.json`. `pnpm guide:check` and `--json`. Not in CI yet.
+- [x] 1.4 Vitest in `scripts/guide/check.test.ts`:
   - describe "Guide pages cite their requirements": "A page with current hashes", "A changed requirement", "Whitespace alone is not a change", "A renamed requirement", "A hash from an active change"
   - describe "User-facing requirements covered by the guide": "An uncovered requirement", "A requirement left out with a reason", "A left-out requirement without a reason", "A left-out requirement that no longer exists", "Cited and left out", "A requirement added by an active change"
   - a `<Shot id>` with no `shot()` in the capture scripts is reported
