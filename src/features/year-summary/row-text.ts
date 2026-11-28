@@ -5,7 +5,11 @@ import { categoryLabel, summaryRowLabel } from '#/features/transactions/labels'
 import { chargeKindLabel } from '#/lib/charge-labels'
 import { formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
-import { withOriginal, type WithOriginal } from './original-text'
+import {
+  labelWithOriginal,
+  withOriginal,
+  type WithOriginal,
+} from './original-text'
 import type { ChargeKind } from '#/server/db/schema'
 import type { Part, PartKey, RowNumber } from './summary'
 
@@ -37,7 +41,7 @@ export const partsText = (parts: readonly Part[]) =>
   parts
     .map((part) =>
       m.flat_tax_part({
-        label: partLabel[part.key](),
+        label: labelWithOriginal(partOriginal(part.key)),
         amount: formatMoney(part.cents),
       }),
     )

@@ -377,6 +377,8 @@
   "flat_tax_kicker_person": "Form 7H · {year} · {name}",
   "flat_tax_kicker_whole": "Form 7H · {year} · whole flat (100%)",
   "flat_tax_missing": "Missing",
+  "flat_tax_net": "Rental income after costs",
+  "flat_tax_net_note": "Not on form 7H",
   "flat_tax_no_parts": "No entries",
   "flat_tax_no_share_person_text": "{name} had no ownership share in this flat in {year}, so there are no figures for form 7H.",
   "flat_tax_no_share_text": "You had no ownership share in this flat in {year}, so there are no figures for form 7H.",

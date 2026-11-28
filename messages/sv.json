@@ -377,6 +377,8 @@
   "flat_tax_kicker_person": "Blankett 7H · {year} · {name}",
   "flat_tax_kicker_whole": "Blankett 7H · {year} · hela bostaden (100 %)",
   "flat_tax_missing": "Saknas",
+  "flat_tax_net": "Hyresinkomster efter kostnader",
+  "flat_tax_net_note": "Inte på blankett 7H",
   "flat_tax_no_parts": "Inga registreringar",
   "flat_tax_no_share_person_text": "{name} ägde ingen andel i den här bostaden år {year}, så det finns inga siffror för blankett 7H.",
   "flat_tax_no_share_text": "Du hade ingen ägarandel i den här bostaden år {year}, så det finns inga siffror för blankett 7H.",

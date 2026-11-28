@@ -25,7 +25,10 @@ import { colors, radii } from '#/theme/tokens'
 import { amountForCopy, shareForCopy } from './copy'
 import { checkText } from './check-text'
 import { personParam } from './holder'
-import { partsText, rowLabel } from './row-text'
+import { flatRentalIncomeAfterCosts } from './estimate'
+import { OriginalLabel } from './OriginalLabel'
+import type { WithOriginal } from './original-text'
+import { outsideTitleOriginal, partsText, rowOriginal } from './row-text'
 import type { Check } from './summary'
 import { ROW_NUMBERS } from './summary'
 import type { FlatYearView } from './view'
@@ -152,6 +155,8 @@ function DetailRow(props: {
   value: string | null
   /** Shown as plain text, without a copy button. */
   plain?: boolean
+  /** The Finnish original of the label, shown after it. */
+  original?: string | null
   /** Where a missing value is added. */
   addTo?: string
   onCopy: (value: string) => void
@@ -174,6 +179,7 @@ function DetailRow(props: {
           sx={{ fontSize: 12, fontWeight: 800, color: 'text.secondary' }}
         >
           {label}
+          {props.original ? ` (${props.original})` : null}
         </Typography>
         {value === null ? (
           <Typography
@@ -224,7 +230,11 @@ function DetailRow(props: {
   )
 }
 
-function OutsideRow(props: { label: string; text: string; amount: number }) {
+function OutsideRow(props: {
+  label: WithOriginal
+  text: string
+  amount: number
+}) {
   return (
     <Stack
       direction="row"
@@ -239,7 +249,7 @@ function OutsideRow(props: { label: string; text: string; amount: number }) {
     >
       <Stack>
         <Typography component="span" sx={{ fontSize: 14, fontWeight: 800 }}>
-          {props.label}
+          <OriginalLabel label={props.label} />
         </Typography>
         <Typography
           component="span"
@@ -401,6 +411,7 @@ export function FlatTaxPage(props: Props) {
   const { holder } = view
   const person = personParam(holder)
   const whole = holder.kind === 'whole'
+  const identityCode = outsideTitleOriginal.identity_code()
 
   const copy = (value: string) => {
     // Outside a secure context navigator.clipboard is undefined and the
@@ -624,7 +635,8 @@ export function FlatTaxPage(props: Props) {
                   onCopy={copy}
                 />
                 <DetailRow
-                  label={m.flat_tax_identity_code()}
+                  label={identityCode.text}
+                  original={identityCode.original}
                   value={m.flat_tax_identity_code_text()}
                   plain
                   onCopy={copy}
@@ -743,7 +755,7 @@ export function FlatTaxPage(props: Props) {
                         component="h3"
                         sx={{ fontSize: 14, fontWeight: 800, lineHeight: 1.25 }}
                       >
-                        {rowLabel[number]()}
+                        <OriginalLabel label={rowOriginal(number)} />
                       </Typography>
                       <Typography
                         component="span"
@@ -797,6 +809,44 @@ export function FlatTaxPage(props: Props) {
                   </Stack>
                 )
               })}
+              {whole ? null : (
+                <Stack
+                  direction="row"
+                  data-row="net"
+                  sx={{
+                    alignItems: 'center',
+                    gap: 1,
+                    minHeight: 56,
+                    py: 0.75,
+                    borderTop: `2px solid ${colors.divider}`,
+                  }}
+                >
+                  <Stack sx={{ flex: 1, minWidth: 0, gap: 0.125 }}>
+                    <Typography
+                      component="h3"
+                      sx={{ fontSize: 14, fontWeight: 800, lineHeight: 1.25 }}
+                    >
+                      {m.flat_tax_net()}
+                    </Typography>
+                    <Typography
+                      component="span"
+                      sx={{
+                        fontSize: 12,
+                        fontWeight: 700,
+                        color: 'text.secondary',
+                      }}
+                    >
+                      {m.flat_tax_net_note()}
+                    </Typography>
+                  </Stack>
+                  <Typography
+                    component="span"
+                    sx={{ fontSize: 15, fontWeight: 900, whiteSpace: 'nowrap' }}
+                  >
+                    {formatMoney(flatRentalIncomeAfterCosts(flat.rows))}
+                  </Typography>
+                </Stack>
+              )}
             </Stack>
             {flat.outside.capitalised > 0 ||
             flat.outside.improvements > 0 ||
@@ -815,21 +865,21 @@ export function FlatTaxPage(props: Props) {
                 </Typography>
                 {flat.outside.capitalised > 0 ? (
                   <OutsideRow
-                    label={m.flat_tax_outside_capitalised()}
+                    label={outsideTitleOriginal.capitalised()}
                     text={m.flat_tax_outside_capitalised_text()}
                     amount={flat.outside.capitalised}
                   />
                 ) : null}
                 {flat.outside.improvements > 0 ? (
                   <OutsideRow
-                    label={m.flat_tax_outside_improvements()}
+                    label={outsideTitleOriginal.improvements()}
                     text={m.flat_tax_outside_improvements_text()}
                     amount={flat.outside.improvements}
                   />
                 ) : null}
                 {flat.outside.depositDamage > 0 ? (
                   <OutsideRow
-                    label={m.flat_tax_outside_deposit_damage()}
+                    label={outsideTitleOriginal.deposit_damage()}
                     text={m.flat_tax_outside_deposit_damage_text()}
                     amount={flat.outside.depositDamage}
                   />

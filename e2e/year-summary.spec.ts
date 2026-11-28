@@ -141,7 +141,7 @@ test.describe('The form 7H page of a flat', () => {
     ).toBeVisible()
     await expect(page.locator('[data-row="2.1"]')).toContainText('€890.00')
     await expect(page.locator('[data-row="2.2"]')).toContainText(
-      'Maintenance charge €2,400.00',
+      'Maintenance charge (hoitovastike) €2,400.00',
     )
     await expect(
       page.getByRole('heading', { name: 'Not on form 7H' }),
@@ -520,6 +520,16 @@ test.describe('Rental income after costs', () => {
     await expect(box).toContainText('Costs (2.2–2.5)€2,400.00')
     await expect(box).toContainText('Result€2,600.00')
   })
+
+  test('The rental income after costs of a flat', async ({ page }) => {
+    const id = await ownedIn2025(page)
+    await openFlatYear(page, id, 2025)
+    const line = page.locator('[data-row="net"]')
+    await expect(line).toContainText('Rental income after costs')
+    await expect(line).toContainText('Not on form 7H')
+    await expect(line).toContainText('-€2,400.00')
+    await expect(line.getByRole('button')).toHaveCount(0)
+  })
 })
 
 test.describe('The capital income tax estimate', () => {
@@ -540,5 +550,20 @@ test.describe('A rental loss in the estimate', () => {
     await expect(box).toContainText('Result-€2,400.00')
     await expect(box).toContainText('A loss for the year')
     await expect(box).not.toContainText('approx.')
+  })
+})
+
+test.describe('Finnish originals of tax terms', () => {
+  test('A row name in English', async ({ page }) => {
+    const id = await ownedIn2025(page)
+    await openFlatYear(page, id, 2025)
+    await expect(
+      page.locator('[data-row="2.1"]').getByRole('heading', {
+        name: 'Gross rental income (bruttovuokratulot)',
+      }),
+    ).toBeVisible()
+    await expect(page.locator('[data-row="2.2"]')).toContainText(
+      'Maintenance charges and water charges (hoitovastikkeet ja vesimaksut)',
+    )
   })
 })

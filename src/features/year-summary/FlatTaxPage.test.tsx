@@ -1,8 +1,9 @@
 import { render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactNode } from 'react'
-import { describe, expect, test, vi } from 'vitest'
+import { afterEach, describe, expect, test, vi } from 'vitest'
 import { clientLog } from '#/lib/client-log'
+import { overwriteGetLocale, type Locale } from '#/paraglide/runtime.js'
 import { FlatTaxPage } from './FlatTaxPage'
 import type { FlatYear, Row } from './summary'
 import type { FlatYearView } from './view'
@@ -102,12 +103,16 @@ describe('The form 7H page of a flat', () => {
       screen.getByRole('heading', { level: 1, name: 'Kuusikuja 3 B 12' }),
     ).toBeVisible()
     const first = within(rowOf('2.1'))
-    expect(first.getByText('Gross rental income')).toBeVisible()
+    expect(
+      first.getByRole('heading', {
+        name: 'Gross rental income (bruttovuokratulot)',
+      }),
+    ).toBeVisible()
     expect(first.getByText('Rent payments €4,895.00')).toBeVisible()
     expect(first.getByText('€4,895.00')).toBeVisible()
     expect(
       within(rowOf('2.2')).getByText(
-        'Maintenance charge €1,177.00 · Water charge (usage charge) €242.00',
+        'Maintenance charge (hoitovastike) €1,177.00 · Water charge (usage charge) €242.00',
       ),
     ).toBeVisible()
     expect(
@@ -502,5 +507,95 @@ describe("A former owner's read-only form 7H page", () => {
     expect(
       screen.getByRole('link', { name: 'Open rent payments' }),
     ).toBeVisible()
+  })
+})
+
+const inLocale = (locale: Locale) => {
+  overwriteGetLocale(() => locale)
+}
+
+describe('Rental income after costs', () => {
+  test('The rental income after costs of a flat', () => {
+    render(<FlatTaxPage view={view()} />)
+    const line = within(
+      screen.getByRole('heading', { name: 'Rental income after costs' })
+        .parentElement?.parentElement ?? document.body,
+    )
+    expect(line.getByText('Rental income after costs')).toBeVisible()
+    expect(line.getByText('Not on form 7H')).toBeVisible()
+    expect(line.getByText('€2,640.00')).toBeVisible()
+    expect(line.queryByRole('button')).toBeNull()
+  })
+
+  test('has no line on the whole flat page', () => {
+    render(
+      <FlatTaxPage
+        view={{ ...view(), holder: { kind: 'whole' }, owners: [] }}
+      />,
+    )
+    expect(document.querySelector('[data-row="net"]')).toBeNull()
+  })
+})
+
+describe('Finnish originals of tax terms', () => {
+  afterEach(() => {
+    inLocale('en')
+  })
+
+  test('A row name in Swedish', () => {
+    inLocale('sv')
+    render(<FlatTaxPage view={view()} />)
+    const second = within(rowOf('2.2'))
+    expect(
+      second.getByRole('heading', {
+        name: 'Skötselvederlag och vattenavgifter (hoitovastikkeet ja vesimaksut)',
+      }),
+    ).toBeVisible()
+    expect(second.getByText(/^Skötselvederlag \(hoitovastike\) /)).toBeVisible()
+  })
+
+  test('No originals in Finnish', () => {
+    inLocale('fi')
+    render(<FlatTaxPage view={view()} />)
+    expect(
+      within(rowOf('2.2')).getByRole('heading', {
+        name: 'Hoitovastikkeet ja vesimaksut',
+      }),
+    ).toBeVisible()
+    expect(screen.queryByText(/hoitovastikkeet ja vesimaksut\)/)).toBeNull()
+  })
+
+  test('A title with a bracket', () => {
+    render(
+      <FlatTaxPage
+        view={view(
+          flat({
+            outside: { capitalised: 36300, improvements: 0, depositDamage: 0 },
+          }),
+        )}
+      />,
+    )
+    expect(
+      screen.getByText(/Financing charges \(placed in reserve\)/),
+    ).toBeVisible()
+    expect(screen.getByText('(rahoitusvastikkeet, rahastoitu)')).toBeVisible()
+  })
+
+  test('the personal identity code label has its original', () => {
+    inLocale('sv')
+    render(<FlatTaxPage view={view()} />)
+    expect(
+      screen.getByText(
+        /Hyresgästens personbeteckning \(vuokralaisen henkilötunnus\)/,
+      ),
+    ).toBeVisible()
+  })
+
+  test('copy buttons keep the values of the rows', () => {
+    inLocale('sv')
+    render(<FlatTaxPage view={view()} />)
+    expect(
+      screen.getAllByRole('button', { name: /Kopiera/ }).length,
+    ).toBeGreaterThan(0)
   })
 })
