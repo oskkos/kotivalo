@@ -1,14 +1,14 @@
 ## 1. The estimate, whole euros and Finnish originals
 
-- [ ] 1.1 `src/lib/format.ts`: `formatEuros(cents)`, whole euros in the user's locale, refusing cents that aren't whole euros (design.md, decision 3). Unit tests in `format.test.ts` for fi, sv and en.
-- [ ] 1.2 `features/year-summary/estimate.ts`: `CAPITAL_INCOME_RATE` and `yearEstimate(cards, holder)` returning income, costs, net, tax and kind (design.md, decisions 1–2).
-- [ ] 1.3 Unit tests in `estimate.test.ts`:
+- [x] 1.1 `src/lib/format.ts`: `formatEuros(cents)`, whole euros in the user's locale, refusing cents that aren't whole euros (design.md, decision 3). Unit tests in `format.test.ts` for fi, sv and en.
+- [x] 1.2 `features/year-summary/estimate.ts`: `CAPITAL_INCOME_RATE` and `yearEstimate(cards, holder)` returning income, costs, net, tax and kind (design.md, decisions 1–2).
+- [x] 1.3 Unit tests in `estimate.test.ts`:
   - describe "Rental income after costs": "The rental income after costs of the year"
   - describe "The capital income tax estimate": "The estimate of the own share" and "The estimate is rounded to whole euros"
   - describe "A rental loss in the estimate": "A loss in the year" and "No income after costs"
   - no tax for `person` and `whole`
-- [ ] 1.4 `features/year-summary/original-text.ts`: `originalText(fi)` and `withOriginal(label, fi)` (design.md, decision 4). `row-text.ts`: `rowOriginal`, and `partOriginal` for maintenance charge, financing charge and annual repair.
-- [ ] 1.5 Unit tests in `original-text.test.ts`: lower-case first letter, inner bracket to comma, `null` in Finnish, and every row's original in Swedish and English.
+- [x] 1.4 `features/year-summary/original-text.ts`: `originalText(fi)` and `withOriginal(label, fi)` (design.md, decision 4). `row-text.ts`: `rowOriginal`, and `partOriginal` for maintenance charge, financing charge and annual repair.
+- [x] 1.5 Unit tests in `original-text.test.ts`: lower-case first letter, inner bracket to comma, `null` in Finnish, and every row's original in Swedish and English.
 
 ## 2. The rental income after costs card and the estimate on the year summary page
 

@@ -21,6 +21,22 @@ export function formatMoney(cents: number, locale: Locale = getLocale()) {
   }).format(cents / 100)
 }
 
+/**
+ * Whole euros from integer cents, e.g. 126200 → "1 262 €" in Finnish and
+ * "€1,262" in English. For figures that are rounded to whole euros already,
+ * such as an estimate: cents that aren't whole euros are refused.
+ */
+export function formatEuros(cents: number, locale: Locale = getLocale()) {
+  if (!Number.isSafeInteger(cents) || cents % 100 !== 0) {
+    throw new RangeError(`Expected whole euros in cents, got ${String(cents)}`)
+  }
+  return new Intl.NumberFormat(INTL_LOCALES[locale], {
+    style: 'currency',
+    currency: 'EUR',
+    maximumFractionDigits: 0,
+  }).format(cents / 100)
+}
+
 const ISO_DATE = /^(\d{4})-(\d{2})-(\d{2})$/
 
 /** A calendar date, e.g. "2026-03-05" → "5.3.2026" in Finnish. */
