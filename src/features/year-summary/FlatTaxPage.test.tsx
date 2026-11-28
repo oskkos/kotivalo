@@ -451,3 +451,56 @@ describe("The whole flat's page", () => {
     ).toHaveAttribute('data-person', 'whole')
   })
 })
+
+describe("A former owner's read-only form 7H page", () => {
+  const former = () => ({
+    ...view(
+      flat({
+        details: {
+          ...flat().details,
+          name: null,
+          businessId: null,
+          apartmentNumber: null,
+        },
+        checks: [{ kind: 'unpaid', months: ['2025-12'] }],
+      }),
+    ),
+    former: true,
+  })
+
+  test("A former owner's read-only form 7H page", async () => {
+    const writeClipboard = vi.fn(() => Promise.resolve())
+    render(<FlatTaxPage view={former()} writeClipboard={writeClipboard} />)
+    const note = screen.getByRole('note')
+    expect(within(note).getByText('Your ownership period')).toBeVisible()
+    expect(note).toHaveTextContent(/no longer own the flat/)
+    // The Business ID is shown as missing, without an Add button.
+    expect(screen.getAllByText('Missing').length).toBeGreaterThan(0)
+    expect(screen.queryByRole('link', { name: /^Add/ })).toBeNull()
+    // The unpaid rent check has no link to the rent payments.
+    expect(
+      screen.getByRole('heading', { name: 'Rent not recorded: December 2025' }),
+    ).toBeVisible()
+    expect(
+      screen.queryByRole('link', { name: 'Open rent payments' }),
+    ).toBeNull()
+    // Every value still has a copy button.
+    await userEvent.click(screen.getByRole('button', { name: 'Copy row 2.1' }))
+    expect(writeClipboard).toHaveBeenCalledWith('4895,00')
+  })
+
+  test('A member sees Add buttons and links', () => {
+    const member = view(
+      flat({
+        details: { ...flat().details, businessId: null },
+        checks: [{ kind: 'unpaid', months: ['2025-12'] }],
+      }),
+    )
+    render(<FlatTaxPage view={member} />)
+    expect(screen.queryByRole('note')).toBeNull()
+    expect(screen.getAllByRole('link', { name: /^Add/ }).length).toBe(1)
+    expect(
+      screen.getByRole('link', { name: 'Open rent payments' }),
+    ).toBeVisible()
+  })
+})
