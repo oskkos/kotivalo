@@ -479,7 +479,7 @@
   "ownership_reason_other": "Muu",
   "ownership_reason_sale": "Kauppa",
   "ownership_remove_access": "Poista {name} asunnosta",
-  "ownership_remove_access_hint": "Ilman valintaa hän jää jäseneksi ja näkee asunnon edelleen. Valinnan kanssa hän näkee vuosiyhteenvedossa vain oman omistusjaksonsa luvut.",
+  "ownership_remove_access_hint": "Ilman valintaa hän jää jäseneksi ja näkee asunnon edelleen. Jos valitset sen, hän näkee vuosiyhteenvedossa vain oman omistusjaksonsa luvut.",
   "ownership_save": "Tallenna omistusmuutos",
   "ownership_saving": "Tallennetaan…",
   "ownership_share_label": "Osuus (%), {name}",
