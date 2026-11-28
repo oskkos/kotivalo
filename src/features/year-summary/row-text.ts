@@ -5,6 +5,7 @@ import { categoryLabel, summaryRowLabel } from '#/features/transactions/labels'
 import { chargeKindLabel } from '#/lib/charge-labels'
 import { formatMoney } from '#/lib/format'
 import { m } from '#/paraglide/messages.js'
+import { withOriginal, type WithOriginal } from './original-text'
 import type { ChargeKind } from '#/server/db/schema'
 import type { Part, PartKey, RowNumber } from './summary'
 
@@ -42,3 +43,54 @@ export const partsText = (parts: readonly Part[]) =>
     )
     // The app's separator for amounts on one line, as on the charges page.
     .join(' · ')
+
+const fi = { locale: 'fi' } as const
+
+/** The Finnish text of each row's name, for its original. */
+const rowFinnish: Record<RowNumber, () => string> = {
+  '2.1': () => m.transactions_row_gross_rent({}, fi),
+  '2.2': () => m.transactions_row_maintenance_and_water({}, fi),
+  '2.3': () => m.flat_tax_row_capital_charges({}, fi),
+  '2.4': () => m.transactions_row_annual_repairs({}, fi),
+  '2.5': () => m.transactions_row_other_costs({}, fi),
+}
+
+/** A row's name with its Finnish original (none in Finnish). */
+export const rowOriginal = (row: RowNumber): WithOriginal =>
+  withOriginal(rowLabel[row](), rowFinnish[row])
+
+/** The parts that are tax terms; other parts get no original. */
+const partFinnish: Partial<Record<PartKey, () => string>> = {
+  maintenance_charge: () => m.amounts_maintenance_charge({}, fi),
+  financing_charge: () => m.amounts_financing_charge({}, fi),
+  annual_repair: () => m.transactions_category_annual_repair({}, fi),
+}
+
+/** A part's name with its original, when the part is a tax term. */
+export const partOriginal = (key: PartKey): WithOriginal => {
+  const finnish = partFinnish[key]
+  const text = partLabel[key]()
+  return finnish === undefined
+    ? { text, original: null }
+    : withOriginal(text, finnish)
+}
+
+/** The titles of the Not on form 7H card and the identity code label. */
+export const outsideTitleOriginal = {
+  capitalised: () =>
+    withOriginal(m.flat_tax_outside_capitalised(), () =>
+      m.flat_tax_outside_capitalised({}, fi),
+    ),
+  deposit_damage: () =>
+    withOriginal(m.flat_tax_outside_deposit_damage(), () =>
+      m.flat_tax_outside_deposit_damage({}, fi),
+    ),
+  improvements: () =>
+    withOriginal(m.flat_tax_outside_improvements(), () =>
+      m.flat_tax_outside_improvements({}, fi),
+    ),
+  identity_code: () =>
+    withOriginal(m.flat_tax_identity_code(), () =>
+      m.flat_tax_identity_code({}, fi),
+    ),
+} satisfies Record<string, () => WithOriginal>

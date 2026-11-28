@@ -7,6 +7,7 @@ import {
   formatDate,
   formatDay,
   formatDayMonth,
+  formatEuros,
   formatFileSize,
   formatMoney,
   formatMoneyChange,
@@ -28,6 +29,22 @@ describe('formatMoney', () => {
 
   test('rejects amounts that are not integer cents', () => {
     expect(() => formatMoney(12.5, 'fi')).toThrow(RangeError)
+  })
+})
+
+describe('formatEuros', () => {
+  test.each([
+    ['fi', 126200, '1\u00a0262\u00a0€'],
+    ['sv', 126200, '1\u00a0262\u00a0€'],
+    ['en', 126200, '€1,262'],
+    ['fi', 0, '0\u00a0€'],
+    ['fi', -124000, '\u22121\u00a0240\u00a0€'],
+  ] as const)('%s: %i cents is %s', (locale, cents, expected) => {
+    expect(formatEuros(cents, locale)).toBe(expected)
+  })
+
+  test.each([12550, 0.5])('rejects %s cents, not whole euros', (cents) => {
+    expect(() => formatEuros(cents, 'fi')).toThrow(RangeError)
   })
 })
 
