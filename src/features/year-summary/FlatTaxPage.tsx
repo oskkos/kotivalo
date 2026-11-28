@@ -100,18 +100,19 @@ function CheckItem(props: { check: Check; view: Ok }) {
       {m.flat_tax_check_open_rent()}
     </TextLink>
   )
-  const link =
-    check.kind === 'unpaid' || check.kind === 'partly_paid' ? (
-      rentLink
-    ) : check.kind === 'treatment_not_set' ? (
-      <TextLink
-        to="/properties/$propertyId/amounts"
-        params={{ propertyId }}
-        sx={{ fontSize: 13, fontWeight: 900 }}
-      >
-        {m.flat_tax_check_open_amounts()}
-      </TextLink>
-    ) : undefined
+  // A former owner has no flat pages to go to (openspec: year-summary).
+  const link = view.former ? undefined : check.kind === 'unpaid' ||
+    check.kind === 'partly_paid' ? (
+    rentLink
+  ) : check.kind === 'treatment_not_set' ? (
+    <TextLink
+      to="/properties/$propertyId/amounts"
+      params={{ propertyId }}
+      sx={{ fontSize: 13, fontWeight: 900 }}
+    >
+      {m.flat_tax_check_open_amounts()}
+    </TextLink>
+  ) : undefined
   const content = { ...checkText(check, { own }), link }
   return (
     <Stack component="li" direction="row" sx={{ gap: 1.25 }}>
@@ -484,6 +485,32 @@ export function FlatTaxPage(props: Props) {
           </Stack>
         ) : (
           <>
+            {view.former ? (
+              <Stack
+                component="section"
+                role="note"
+                sx={{
+                  bgcolor: colors.lavenderTint,
+                  borderRadius: `${String(radii.tile)}px`,
+                  px: 1.75,
+                  py: 1.5,
+                  gap: 0.25,
+                }}
+              >
+                <Typography
+                  component="span"
+                  sx={{ fontSize: 13, fontWeight: 900 }}
+                >
+                  {m.flat_tax_band_former_title()}
+                </Typography>
+                <Typography
+                  component="span"
+                  sx={{ fontSize: 13, fontWeight: 700, lineHeight: 1.35 }}
+                >
+                  {m.flat_tax_band_former_text()}
+                </Typography>
+              </Stack>
+            ) : null}
             {holder.kind === 'own' ? null : (
               <Stack
                 component="section"
@@ -575,19 +602,19 @@ export function FlatTaxPage(props: Props) {
                 <DetailRow
                   label={m.flat_tax_housing_company_name()}
                   value={flat.details.name}
-                  addTo={view.property.id}
+                  addTo={view.former ? undefined : view.property.id}
                   onCopy={copy}
                 />
                 <DetailRow
                   label={m.flat_tax_business_id()}
                   value={flat.details.businessId}
-                  addTo={view.property.id}
+                  addTo={view.former ? undefined : view.property.id}
                   onCopy={copy}
                 />
                 <DetailRow
                   label={m.flat_tax_apartment_number()}
                   value={flat.details.apartmentNumber}
-                  addTo={view.property.id}
+                  addTo={view.former ? undefined : view.property.id}
                   onCopy={copy}
                 />
                 <DetailRow
