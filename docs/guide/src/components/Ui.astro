@@ -1,0 +1,24 @@
+---
+// The app's own name for a button, field, heading or menu, from the
+// messages in the page's language. The build fails for an unknown key or a
+// message that is not one fixed text.
+import fi from '../../../../messages/fi.json'
+import { uiText, type Messages } from '../../lib/ui-text'
+
+interface Props {
+  key: string
+}
+
+const messages: Record<string, Messages> = { fi }
+const language = Astro.currentLocale ?? 'fi'
+// Pages in another language use their own messages once they exist.
+const text = uiText(messages[language] ?? fi, Astro.props.key)
+---
+
+<span class="ui">{text}</span>
+
+<style>
+  .ui {
+    font-weight: 800;
+  }
+</style>

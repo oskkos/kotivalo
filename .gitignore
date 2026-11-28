@@ -20,3 +20,8 @@ dist
 # Paraglide (generated from messages/ and project.inlang/)
 /src/paraglide/
 /project.inlang/cache/
+
+# The user guide (docs/guide)
+/docs/guide/dist/
+/docs/guide/.astro/
+/docs/guide/src/assets/shots/

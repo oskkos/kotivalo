@@ -1,3 +1,7 @@
+packages:
+  - .
+  - docs/guide
+
 allowBuilds:
   esbuild: true
   workerd: true

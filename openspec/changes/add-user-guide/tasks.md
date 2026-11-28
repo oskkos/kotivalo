@@ -10,17 +10,17 @@
 
 ## 2. The Starlight site
 
-- [ ] 2.1 `pnpm-workspace.yaml`: the `docs/guide` package. `docs/guide/package.json` with `astro`, `@astrojs/starlight`, `sharp` and `@fontsource-variable/nunito`. Root scripts `guide:dev` and `guide:build`. ESLint and `tsc` scopes as in design.md, decision 1.
-- [ ] 2.2 `astro.config.mjs`:
+- [x] 2.1 `pnpm-workspace.yaml`: the `docs/guide` package. `docs/guide/package.json` with `astro`, `@astrojs/starlight`, `sharp` and `@fontsource-variable/nunito`. Root scripts `guide:dev` and `guide:build`. ESLint and `tsc` scopes as in design.md, decision 1.
+- [x] 2.2 `astro.config.mjs`:
   - Starlight with Finnish as the root locale and `sv` and `en` ready
   - Pagefind, the logo and the site's title
   - the content schema with `requirements` (decision 2)
-- [ ] 2.3 `docs/guide/lib/ui-text.ts` (`uiText`) and `lib/shots.ts` (`shotFor`, the id scan, the duplicate check). `Ui.astro` and `Shot.astro` (decision 7).
-- [ ] 2.4 `src/styles/theme.css` from the tokens. A unit test that compares it with `src/theme/tokens.ts`.
-- [ ] 2.5 Vitest in `docs/guide/lib/*.test.ts` (the `unit` project's include gains them):
+- [x] 2.3 `docs/guide/lib/ui-text.ts` (`uiText`) and `lib/shots.ts` (`shotFor`, the id scan, the duplicate check). `Ui.astro` and `Shot.astro` (decision 7).
+- [x] 2.4 `src/styles/theme.css` from the tokens. A unit test that compares it with `src/theme/tokens.ts`.
+- [x] 2.5 Vitest in `docs/guide/lib/*.test.ts` (the `unit` project's include gains them):
   - describe "UI names in the guide come from the messages": "A button name in Finnish", "An unknown key", "A message with a variable"
   - describe "Screenshots in the guide": "A captured screenshot", "A missing screenshot in CI", "A missing screenshot locally", "The same id saved twice"
-- [ ] 2.6 A first `index.mdx` with its requirements, so the site builds. `pnpm guide:build` passes locally.
+- [x] 2.6 A first `index.mdx` with its requirements, so the site builds. `pnpm guide:build` passes locally.
 
 ## 3. Capture and demo data
 

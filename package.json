@@ -19,6 +19,8 @@
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "check:traceability": "node scripts/check-traceability.ts",
+    "guide:dev": "pnpm --filter kotivalo-guide dev",
+    "guide:build": "pnpm --filter kotivalo-guide build",
     "guide:check": "node scripts/check-guide.ts",
     "guide:hash": "node scripts/guide-hash.ts",
     "terms:report": "node scripts/terms-report.ts",
