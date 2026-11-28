@@ -297,3 +297,70 @@ describe('Downloading the year summary as a PDF', () => {
     expect(screen.queryByRole('button', { name: 'Download PDF' })).toBeNull()
   })
 })
+
+const estimateCard = () =>
+  screen.getByRole('region', { name: 'Rental income after costs' })
+
+describe('Rental income after costs', () => {
+  test('shows the cards summed with the rental income after costs', () => {
+    renderPage(
+      view({
+        flats: [
+          card(),
+          card({
+            propertyId: 'r',
+            streetAddress: 'Rantatie 15 C 21',
+            income: 381600,
+            costs: 224800,
+          }),
+        ],
+      }),
+    )
+    const box = within(estimateCard())
+    expect(box.getByText('€8,711.00')).toBeVisible()
+    expect(box.getByText('€4,503.00')).toBeVisible()
+    expect(box.getByText('€4,208.00')).toBeVisible()
+  })
+
+  test('No card without flats', () => {
+    renderPage(view({ flats: [] }))
+    expect(
+      screen.queryByRole('region', { name: 'Rental income after costs' }),
+    ).not.toBeInTheDocument()
+  })
+})
+
+describe('The capital income tax estimate', () => {
+  test('shows the estimate of the own share with its note', () => {
+    renderPage(view({ flats: [card({ income: 871100, costs: 450300 })] }))
+    const box = within(estimateCard())
+    expect(box.getByText('approx. €1,262')).toBeVisible()
+    expect(box.getByText(/loan interest/)).toBeVisible()
+    expect(box.getByText(/34%/)).toBeVisible()
+  })
+
+  test('No estimate for another owner', () => {
+    renderPage(view({ holder: MIKKO, people: [{ ...MIKKO, flats: 1 }] }))
+    const box = within(estimateCard())
+    expect(box.getByText('€2,640.00')).toBeVisible()
+    expect(box.queryByText(/approx\./)).not.toBeInTheDocument()
+    expect(box.getByText(/other capital income/)).toBeVisible()
+  })
+
+  test('No estimate for the whole flats', () => {
+    renderPage(view({ holder: { kind: 'whole' } }))
+    const box = within(estimateCard())
+    expect(box.queryByText(/approx\./)).not.toBeInTheDocument()
+    expect(box.getByText(/for each owner separately/)).toBeVisible()
+  })
+})
+
+describe('A rental loss in the estimate', () => {
+  test('A loss in the year', () => {
+    renderPage(view({ flats: [card({ income: 178000, costs: 302000 })] }))
+    const box = within(estimateCard())
+    expect(box.getByText('-€1,240.00')).toBeVisible()
+    expect(box.queryByText(/approx\./)).not.toBeInTheDocument()
+    expect(box.getByText(/deducted from other capital income/)).toBeVisible()
+  })
+})

@@ -1298,6 +1298,16 @@
   ],
   "year_summary_empty_text": "The summary is calculated for flats in which you had an ownership share.",
   "year_summary_empty_title": "No ownership share in {year}",
+  "year_summary_estimate_caveats": "The estimate is {rate} of the rental income after costs. It covers only the flats in Kotivalo: loan interest, other capital income and the costs of it are not included. Capital income above {limit} is taxed at {upperRate}. Estates are not supported yet. The Tax Administration computes the final tax.",
+  "year_summary_estimate_loss_text": "The loss is deducted from other capital income. A deficit can reduce the tax on earned income. The Tax Administration computes the deduction.",
+  "year_summary_estimate_loss_title": "A loss for the year",
+  "year_summary_estimate_net": "Result",
+  "year_summary_estimate_none_person": "No tax estimate is given: they may have other capital income.",
+  "year_summary_estimate_none_title": "No tax estimate",
+  "year_summary_estimate_none_whole": "No tax estimate is given for the whole flats: the capital income tax is counted for each owner separately.",
+  "year_summary_estimate_tax_amount": "approx. {amount}",
+  "year_summary_estimate_tax_label": "Estimated capital income tax",
+  "year_summary_estimate_title": "Rental income after costs",
   "year_summary_holder_flats": [
     {
       "declarations": ["input count", "local countPlural = count: plural"],

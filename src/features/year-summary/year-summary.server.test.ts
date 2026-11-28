@@ -19,6 +19,7 @@ import {
   loadYearSummaryPdf,
   type YearSummaryDeps,
 } from './year-summary.server'
+import { yearEstimate } from './estimate'
 
 const db = createDb(env.DB)
 // 25 November 2026 at noon in Finland.
@@ -831,5 +832,34 @@ describe("A former owner's year summary", () => {
     const pdf = countingDb()
     await loadYearSummaryPdf(deps('jussi', pdf.db), 2025)
     expect(pdf.counter.queries).toBe(one.counter.queries)
+  })
+})
+
+describe('The capital income tax estimate', () => {
+  test("A former owner's flat in the estimate", async () => {
+    // Jussi's 50 % of Kuusikuja ended on 30 June 2025; Hallilantie is his own.
+    await ownershipRepository(db).change({
+      propertyId: kuusikuja,
+      actorId: 'annika',
+      currentStart: '2024-05-01',
+      from: '2025-07-01',
+      reason: 'sale',
+      split: [
+        { userId: 'annika', share: 10000 },
+        { userId: 'jussi', share: 0 },
+      ],
+      removeAccess: ['jussi'],
+    })
+    const hallilantie = await seedFlat('jussi', 'Hallilantie 12 B 8')
+    const view = await loadYearSummary(deps('jussi'), 2025)
+    expect(view.flats.map((card) => card.propertyId).sort()).toEqual(
+      [kuusikuja, hallilantie].sort(),
+    )
+    const estimate = yearEstimate(view.flats, view.holder)
+    expect(estimate.income).toBe(
+      view.flats.reduce((sum, card) => sum + card.income, 0),
+    )
+    expect(estimate.net).toBe(estimate.income - estimate.costs)
+    expect(estimate.kind).toBe(estimate.net < 0 ? 'loss' : 'own')
   })
 })

@@ -498,3 +498,47 @@ test.describe("A former owner's year summary", () => {
     ).toBeVisible()
   })
 })
+
+/** The rental income after costs card of the year summary. */
+const estimateCard = (page: Page) =>
+  page.getByRole('region', { name: 'Rental income after costs' })
+
+/** A flat with the 200 € charge for 2025 and 5 000 € of rent paid in it. */
+async function earnedIn2025(page: Page) {
+  const id = await ownedIn2025(page, { tenantFrom: '01/02/2025' })
+  const tenancy = await currentTenancyId(page, id)
+  await openRentMonth(page, id, tenancy, '2025-02')
+  await recordPayment(page, { amount: '5000', paidOn: '03/02/2025' })
+}
+
+test.describe('Rental income after costs', () => {
+  test('The rental income after costs of the year', async ({ page }) => {
+    await earnedIn2025(page)
+    await openYearSummary(page, 2025)
+    const box = estimateCard(page)
+    await expect(box).toContainText('Rental income (2.1)€5,000.00')
+    await expect(box).toContainText('Costs (2.2–2.5)€2,400.00')
+    await expect(box).toContainText('Result€2,600.00')
+  })
+})
+
+test.describe('The capital income tax estimate', () => {
+  test('The estimate of the own share', async ({ page }) => {
+    await earnedIn2025(page)
+    await openYearSummary(page, 2025)
+    // 30 % of 2 600 €.
+    await expect(estimateCard(page)).toContainText('approx. €780')
+    await expect(estimateCard(page)).toContainText('Tax Administration')
+  })
+})
+
+test.describe('A rental loss in the estimate', () => {
+  test('A loss in the year', async ({ page }) => {
+    await ownedIn2025(page)
+    await openYearSummary(page, 2025)
+    const box = estimateCard(page)
+    await expect(box).toContainText('Result-€2,400.00')
+    await expect(box).toContainText('A loss for the year')
+    await expect(box).not.toContainText('approx.')
+  })
+})

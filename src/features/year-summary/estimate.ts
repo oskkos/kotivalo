@@ -3,8 +3,10 @@
 // year summary's cards, so the page and the PDF show the same figures.
 import type { FlatCard, HolderView } from './view'
 
-/** The capital income tax rate below 30 000 €: 30 % (a fixed rate, #19). */
-export const CAPITAL_INCOME_RATE = { numerator: 3, denominator: 10 } as const
+/** The fixed rate: 30 % up to 30 000 € of capital income, 34 % above (#19). */
+export const CAPITAL_INCOME_RATE_BASIS_POINTS = 3000
+export const UPPER_RATE_BASIS_POINTS = 3400
+export const CAPITAL_INCOME_LIMIT_CENTS = 3_000_000
 
 export type EstimateKind = 'own' | 'loss' | 'person' | 'whole'
 
@@ -25,10 +27,10 @@ export function capitalIncomeTax(net: number) {
   if (net <= 0) {
     return 0
   }
-  const { numerator, denominator } = CAPITAL_INCOME_RATE
-  // The rate of the net in whole euros (cents ÷ 100), rounded half up.
+  // The rate in basis points of the net in whole euros (cents ÷ 100, basis
+  // points ÷ 10 000), rounded half up.
   const euros = Math.floor(
-    (net * numerator + (denominator * 100) / 2) / (denominator * 100),
+    (net * CAPITAL_INCOME_RATE_BASIS_POINTS + 500_000) / 1_000_000,
   )
   return euros * 100
 }

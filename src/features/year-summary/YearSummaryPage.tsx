@@ -12,6 +12,7 @@ import { createLink } from '@tanstack/react-router'
 import { sortByStreetAddress } from '#/features/properties/property'
 import {
   formatDayMonth,
+  formatEuros,
   formatList,
   formatMoney,
   formatMonthName,
@@ -22,8 +23,17 @@ import { m } from '#/paraglide/messages.js'
 import { getLocale } from '#/paraglide/runtime.js'
 import { colors, radii } from '#/theme/tokens'
 import { HolderChoice } from './HolderChoice'
+import {
+  CAPITAL_INCOME_LIMIT_CENTS,
+  CAPITAL_INCOME_RATE_BASIS_POINTS,
+  UPPER_RATE_BASIS_POINTS,
+  yearEstimate,
+  type YearEstimate,
+} from './estimate'
 import { personParam } from './holder'
+import { OriginalLabel } from './OriginalLabel'
 import { PdfButton } from './PdfButton'
+import { estimateTitleOriginal } from './row-text'
 import type { Check } from './summary'
 import type { FlatCard, YearSummaryView } from './view'
 
@@ -165,6 +175,151 @@ function Figure(props: { label: string; amount: number }) {
       <Typography component="span" sx={{ fontSize: 16, fontWeight: 900 }}>
         {formatMoney(props.amount)}
       </Typography>
+    </Stack>
+  )
+}
+
+/** A line of the estimate card: a label and its amount. */
+function EstimateLine(props: {
+  label: string
+  cents: number
+  strong?: boolean
+}) {
+  return (
+    <Stack
+      direction="row"
+      sx={{ justifyContent: 'space-between', gap: 1, alignItems: 'baseline' }}
+    >
+      <Typography
+        component="span"
+        sx={{ fontSize: props.strong ? 14 : 13, fontWeight: 800 }}
+      >
+        {props.label}
+      </Typography>
+      <Typography
+        component="span"
+        sx={{ fontSize: props.strong ? 18 : 14, fontWeight: 900 }}
+      >
+        {formatMoney(props.cents)}
+      </Typography>
+    </Stack>
+  )
+}
+
+/** The box under the card's lines: the tax estimate, the loss or why none. */
+function EstimateBox(props: { estimate: YearEstimate }) {
+  const { estimate } = props
+  const note = (title: string, text: string) => (
+    <Stack
+      role="note"
+      sx={{
+        bgcolor: colors.lavenderTint,
+        borderRadius: `${String(radii.tile)}px`,
+        px: 1.75,
+        py: 1.5,
+        gap: 0.25,
+      }}
+    >
+      <Typography component="span" sx={{ fontSize: 13, fontWeight: 900 }}>
+        {title}
+      </Typography>
+      <Typography
+        component="span"
+        sx={{ fontSize: 13, fontWeight: 700, lineHeight: 1.35 }}
+      >
+        {text}
+      </Typography>
+    </Stack>
+  )
+  switch (estimate.kind) {
+    case 'loss':
+      return note(
+        m.year_summary_estimate_loss_title(),
+        m.year_summary_estimate_loss_text(),
+      )
+    case 'person':
+      return note(
+        m.year_summary_estimate_none_title(),
+        m.year_summary_estimate_none_person(),
+      )
+    case 'whole':
+      return note(
+        m.year_summary_estimate_none_title(),
+        m.year_summary_estimate_none_whole(),
+      )
+    case 'own':
+      return (
+        <Stack
+          sx={{
+            bgcolor: colors.yellowTint,
+            borderRadius: `${String(radii.tile)}px`,
+            px: 1.75,
+            py: 1.5,
+            gap: 0.5,
+          }}
+        >
+          <Typography component="span" sx={{ fontSize: 13, fontWeight: 900 }}>
+            <OriginalLabel label={estimateTitleOriginal()} />
+          </Typography>
+          <Typography component="span" sx={{ fontSize: 22, fontWeight: 900 }}>
+            {m.year_summary_estimate_tax_amount({
+              amount: formatEuros(estimate.tax ?? 0),
+            })}
+          </Typography>
+          <Typography
+            component="p"
+            sx={{ fontSize: 13, fontWeight: 700, lineHeight: 1.35 }}
+          >
+            {m.year_summary_estimate_caveats({
+              rate: formatShare(CAPITAL_INCOME_RATE_BASIS_POINTS),
+              limit: formatEuros(CAPITAL_INCOME_LIMIT_CENTS),
+              upperRate: formatShare(UPPER_RATE_BASIS_POINTS),
+            })}
+          </Typography>
+        </Stack>
+      )
+  }
+}
+
+/**
+ * The rental income after costs of the cards' flats, and the capital income
+ * tax estimate for the own share (openspec: year-summary).
+ */
+function EstimateCard(props: {
+  cards: FlatCard[]
+  holder: YearSummaryView['holder']
+}) {
+  const estimate = yearEstimate(props.cards, props.holder)
+  return (
+    <Stack
+      component="section"
+      aria-labelledby="estimate-title"
+      sx={{
+        bgcolor: 'background.paper',
+        border: `1px solid ${colors.cardBorder}`,
+        borderRadius: `${String(radii.card)}px`,
+        px: 2,
+        py: 1.75,
+        gap: 1.25,
+      }}
+    >
+      <Typography
+        id="estimate-title"
+        component="h2"
+        sx={{ fontSize: 16, fontWeight: 900 }}
+      >
+        {m.year_summary_estimate_title()}
+      </Typography>
+      <Stack sx={{ gap: 0.5 }}>
+        <EstimateLine label={m.year_summary_income()} cents={estimate.income} />
+        <EstimateLine label={m.year_summary_costs()} cents={estimate.costs} />
+        <EstimateLine
+          label={m.year_summary_estimate_net()}
+          cents={estimate.net}
+          strong
+        />
+      </Stack>
+      <EstimateBox estimate={estimate} />
     </Stack>
   )
 }
@@ -483,6 +638,7 @@ export function YearSummaryPage(props: Props) {
                 />
               ))}
             </Stack>
+            <EstimateCard cards={view.flats} holder={view.holder} />
             <Stack
               component="section"
               direction="row"

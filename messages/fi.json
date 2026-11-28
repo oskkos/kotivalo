@@ -1298,6 +1298,16 @@
   ],
   "year_summary_empty_text": "Yhteenveto lasketaan asunnoista, joissa sinulla oli omistusosuus.",
   "year_summary_empty_title": "Ei omistusosuutta vuonna {year}",
+  "year_summary_estimate_caveats": "Arvio on {rate} vuokratuloista kulujen jälkeen. Se koskee vain Kotivalon asuntoja: lainan korkoja, muita pääomatuloja ja niiden kuluja ei ole mukana. Yli {limit} pääomatulosta vero on {upperRate}. Kuolinpesiä ei vielä tueta. Lopullisen veron laskee Verohallinto.",
+  "year_summary_estimate_loss_text": "Tappio vähennetään muista pääomatuloista. Alijäämä voi vähentää ansiotuloista maksettavaa veroa. Verohallinto laskee vähennyksen.",
+  "year_summary_estimate_loss_title": "Tappio vuodelta",
+  "year_summary_estimate_net": "Tulos",
+  "year_summary_estimate_none_person": "Veroarviota ei lasketa: hänellä voi olla muitakin pääomatuloja.",
+  "year_summary_estimate_none_title": "Ei veroarviota",
+  "year_summary_estimate_none_whole": "Veroarviota ei lasketa koko asunnoille: pääomatulovero lasketaan kullekin omistajalle erikseen.",
+  "year_summary_estimate_tax_amount": "n. {amount}",
+  "year_summary_estimate_tax_label": "Pääomatuloveron arvio",
+  "year_summary_estimate_title": "Vuokratulot kulujen jälkeen",
   "year_summary_holder_flats": [
     {
       "declarations": ["input count", "local countPlural = count: plural"],

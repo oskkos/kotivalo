@@ -12,12 +12,12 @@
 
 ## 2. The rental income after costs card and the estimate on the year summary page
 
-- [ ] 2.1 `YearSummaryPage.tsx`: the card under the flat cards and above the "Not included" note (design.md, decision 5), from `yearEstimate(view.flats, view.holder)`:
+- [x] 2.1 `YearSummaryPage.tsx`: the card under the flat cards and above the "Not included" note (design.md, decision 5), from `yearEstimate(view.flats, view.holder)`:
   - for the own share: the tax box, or the loss box for a loss
   - for another owner or the whole flats: the note on why there is no estimate
   - the title with its Finnish original
   - no card without flat cards
-- [ ] 2.2 Messages, Finnish first:
+- [x] 2.2 Messages, Finnish first:
   - the card title and its three lines
   - the estimate label and "n. {amount}"
   - the caveat paragraph
@@ -25,17 +25,17 @@
   - the two no-estimate notes
 
   Swedish and English with the translate skill. Check the terms: `capital_income`, `estate` and `rental_income`. The skill decides whether *alijäämä* (deficit) needs a term; if the term bank changes, the term-critic reviews it.
-- [ ] 2.3 Component tests in `YearSummaryPage.test.tsx`:
+- [x] 2.3 Component tests in `YearSummaryPage.test.tsx`:
   - "No estimate for another owner"
   - "No estimate for the whole flats"
   - "No card without flats"
   - the loss box
-- [ ] 2.4 Workers test in `year-summary.server.test.ts`: "A former owner's flat in the estimate" (the cards of a former and an own flat feed `yearEstimate`).
-- [ ] 2.5 Playwright in `e2e/year-summary.spec.ts`:
+- [x] 2.4 Workers test in `year-summary.server.test.ts`: "A former owner's flat in the estimate" (the cards of a former and an own flat feed `yearEstimate`).
+- [x] 2.5 Playwright in `e2e/year-summary.spec.ts`:
   - describe "Rental income after costs": "The rental income after costs of the year" (a flat with rent and a maintenance charge)
   - describe "The capital income tax estimate": "The estimate of the own share"
   - describe "A rental loss in the estimate": "A loss in the year" (a maintenance charge with no rent)
-- [ ] 2.6 CONCEPT.md: §6's tax-rate question answered (a fixed 30 %, the bracket mentioned, no editable rate), and §4.5's line on the estimate. CLAUDE.md "Current state": the estimate card (`estimate.ts`, `formatEuros`).
+- [x] 2.6 CONCEPT.md: §6's tax-rate question answered (a fixed 30 %, the bracket mentioned, no editable rate), and §4.5's line on the estimate. CLAUDE.md "Current state": the estimate card (`estimate.ts`, `formatEuros`).
 
 ## 3. The form 7H page: rental income after costs and Finnish originals
 
