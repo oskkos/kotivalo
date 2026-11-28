@@ -147,7 +147,7 @@ Checked against the [7H instructions](https://www.vero.fi/en/About-us/contact-us
 - **Loans** belong to a flat and have one or more borrowers: an owner's own loan, or a joint loan such as one taken by the co-owners of a 50/50 flat. Each borrower has a debt share (basis points, a validity period), which is not assumed to equal their ownership share.
 - Each year's loan payment records **interest** and **principal** separately. Interest is deductible and goes into the year summary; principal is not deductible and stays out of the form 7H figures (cash flow and statistics only).
 - How a joint loan's interest is split between borrowers for tax is open (see §6).
-- The capital income tax estimate uses 30 % and is clearly labelled as an estimate.
+- The capital income tax estimate uses a fixed 30 % of the rental income after costs (row 2.1 minus rows 2.2–2.5; form 7H itself asks for no profit or loss, so it is never shown as a form 7H value) and is clearly labelled as an estimate. It is given for the own share only, on the year summary page and the PDF's cover. The 34 % above 30 000 € of capital income is mentioned, not modelled. A loss shows no tax, only a note on how it is deducted.
 
 ## 5. Technical choices
 
@@ -248,7 +248,7 @@ Requirements are written in **OpenSpec**: each capability (e.g. flats, tenancies
 - [x] ~~Form 7H asks for the housing company's name and Business ID and the apartment number, which flats don't store yet.~~ Flats store them (#118), and the form 7H page shows each, or Add when it is missing (#34).
 - [ ] An ownership share that changes during the year: the 7H instructions have one share field per flat, and the app's rule (the share on each payment date) is an inference.
 - [x] ~~Notice periods. In the sketch: tenant 1 month, landlord 3 months, or 6 months if the tenancy has lasted over a year.~~ Checked against the Act on Residential Leases, which changed on 1.10.2026: see §4.2 (#18). The End tenancy sketch's hint follows the old law and is updated with #30.
-- [ ] Capital income tax rate: 30 % applies only up to 30 000 € of capital income and 34 % above it. The flat 30 % in the year summary and the editable rate in Account understate the tax on larger income; decide whether to model the bracket.
+- [x] ~~Capital income tax rate: 30 % applies only up to 30 000 € of capital income and 34 % above it.~~ A fixed 30 %, with the 34 % bracket mentioned in the estimate's note and not modelled; no editable rate in Account (#19, #121). The app sees only rental income, so modelling the bracket would suggest a precision it doesn't have.
 - [ ] Taxation of an estate of a deceased person
 - [ ] Tax consequences of ownership changes (transfer tax, capital gains)
 

@@ -94,3 +94,9 @@ export const outsideTitleOriginal = {
       m.flat_tax_identity_code({}, fi),
     ),
 } satisfies Record<string, () => WithOriginal>
+
+/** The estimate's title, a tax term. */
+export const estimateTitleOriginal = (): WithOriginal =>
+  withOriginal(m.year_summary_estimate_tax_label(), () =>
+    m.year_summary_estimate_tax_label({}, fi),
+  )

@@ -1298,6 +1298,16 @@
   ],
   "year_summary_empty_text": "Sammandraget räknas för bostäder där du hade en ägarandel.",
   "year_summary_empty_title": "Ingen ägarandel år {year}",
+  "year_summary_estimate_caveats": "Uppskattningen är {rate} av hyresinkomsterna efter kostnader. Den gäller bara bostäderna i Kotivalo: räntor på lån, andra kapitalinkomster och kostnaderna för dem ingår inte. Kapitalinkomst över {limit} beskattas med {upperRate}. Dödsbon stöds inte ännu. Skatteförvaltningen räknar ut den slutliga skatten.",
+  "year_summary_estimate_loss_text": "Förlusten dras av från andra kapitalinkomster. Ett underskott kan minska skatten på förvärvsinkomster. Skatteförvaltningen räknar ut avdraget.",
+  "year_summary_estimate_loss_title": "Förlust för året",
+  "year_summary_estimate_net": "Resultat",
+  "year_summary_estimate_none_person": "Ingen skatteuppskattning görs: han eller hon kan ha andra kapitalinkomster.",
+  "year_summary_estimate_none_title": "Ingen skatteuppskattning",
+  "year_summary_estimate_none_whole": "Ingen skatteuppskattning görs för hela bostäderna: skatten på kapitalinkomst räknas ut för varje ägare separat.",
+  "year_summary_estimate_tax_amount": "ca {amount}",
+  "year_summary_estimate_tax_label": "Uppskattad skatt på kapitalinkomst",
+  "year_summary_estimate_title": "Hyresinkomster efter kostnader",
   "year_summary_holder_flats": [
     {
       "declarations": ["input count", "local countPlural = count: plural"],
